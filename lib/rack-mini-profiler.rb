@@ -1,0 +1,1 @@
+require File.expand_path('profiler/profiler', File.dirname(__FILE__), )
