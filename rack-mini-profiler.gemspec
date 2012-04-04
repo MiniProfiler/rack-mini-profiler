@@ -1,7 +1,7 @@
 require 'ruby-debug'
 Gem::Specification.new do |s|
 	s.name = "rack-mini-profiler"
-	s.version = "0.1"
+	s.version = "2.0.1a"
 	s.summary = "Profiles loading speed for html pages."
 	s.authors = ["Aleks Totic"]
 	s.date = "2012-04-02"

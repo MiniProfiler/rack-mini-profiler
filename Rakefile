@@ -29,9 +29,10 @@ task :copy_files do
 	File.open('lib/html/profile_handler.js', 'w') do |f|
 		puts 'extracting profile_handler.js from MiniProfilerHandler.cs'
 		text = IO.read('lib/html/MiniProfilerHandler.cs')
-		m = text.match /@"<script[^>]*>(.*)^<\/script>/m
+		m = text.match /@"<script[^>]*>(.*)^<\/script>/m # find the big script
+		script = m[1].gsub('""', '"')
 		f.write('<script type="text/javascript">')
-		f.write(m[1])
+		f.write(script)
 		f.write('</script>')
 	end
 end
