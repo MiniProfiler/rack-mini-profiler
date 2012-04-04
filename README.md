@@ -7,7 +7,7 @@ Middleware that displays speed badge for every html page.
 MiniProfiler keeps you aware of your site's performance as you are developing it.
 It does this by....
 
-env['x-rack-mini_profiler'] is the profiler 
+env['profiler.mini'] is the profiler 
 ## Using mini-profiler in your app
 
 Install/add to Gemfile
@@ -18,6 +18,7 @@ Add it to your middleware stack:
 
 Using Builder:
 
+	require 'rack-mini-profiler'
 	builder = Rack::Builder.new do
   	use Rack::MiniProfiler
 
@@ -26,7 +27,7 @@ Using Builder:
 
 Using Sinatra:
 
-	require 'rack-mini-profiler '
+	require 'rack-mini-profiler'
 	class MyApp < Sinatra::Base
 		use Rack::MiniProfiler
 	end
