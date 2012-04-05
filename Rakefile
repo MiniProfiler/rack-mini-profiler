@@ -36,3 +36,4 @@ task :copy_files do
 		f.write('</script>')
 	end
 end
+

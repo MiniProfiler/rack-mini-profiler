@@ -106,8 +106,8 @@ module Rack
 					"StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
 					"DurationMilliseconds" => duration_ms,
 					"FirstFetchDurationMilliseconds" => 0,
-					"Parameters" => null,
-					"ParentTimingId" => null,
+					"Parameters" => nil,
+					"ParentTimingId" => nil,
 					"IsDuplicate" => false
 				}
 			end
@@ -178,9 +178,10 @@ module Rack
 				@children_duration += request_timer['DurationMilliseconds']
 			end
 
-			def add_sql(query, elapsed_ms)
-				timer = SqlTimerStruct.new(query, elapsed_ms)
+			def add_sql(query, elapsed_ms, page)
+				timer = SqlTimerStruct.new(query, elapsed_ms, page)
 				timer['ParentTimingId'] = @attributes['Id']
+				@attributes['SqlTimings'].push(timer)
 				@attributes['HasSqlTimings'] = true
 				@attributes['SqlTimingsDurationMilliseconds'] += elapsed_ms
 			end
