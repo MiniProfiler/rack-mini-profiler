@@ -344,7 +344,7 @@ module Rack
 		# * you have disabled auto append behaviour throught :auto_inject => false flag
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
 		def get_profile_script
-			ids = [@page_struct["Id"]].to_s
+			ids = "[\"%s\"]" % @page_struct["Id"].to_s
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
 			position = 'left'
@@ -361,7 +361,7 @@ module Rack
 				script.gsub!(regex, eval(v.to_s).to_s)
 			end
 			# replace the '{{' and '}}''
-			script.gsub!(/{{/, '{').gsub!(/}}/, '}')
+			script.gsub!(/\{\{/, '{').gsub!(/\}\}/, '}')
 			@inject_js = false
 			script
 		end
