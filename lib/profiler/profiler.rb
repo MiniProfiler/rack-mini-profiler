@@ -1,20 +1,8 @@
 require 'benchmark'
 require 'json'
 require 'timeout'
-
+require 'thread'
 require "ruby-debug"
-
-# TODO list
-# DONE todo send all css files from StackExchange.Profiling.UI
-# DONE need the "should I profile" option
-# DONE Prefix needs to be configured
-# DONE set long expiration header on files you server
-# DONE at the end of the page, send a stub from MiniProfileHandler.cs
-# DONE Set X-MiniProfilerID header, cache the results
-# DONE Get json format from http://data.stackexchange.com/ last xhr request
-# DONE implement benchmark method
-# DONE override log_duration for sequel
-# DONE cache cleanup
 
 module Rack
 
@@ -250,11 +238,12 @@ module Rack
 			@app = app
 			@options[:base_url_path] += "/" unless @options[:base_url_path].end_with? "/"
 			@timer_struct_cache = {}
+			@timer_struct_lock = Mutex.new
 		end
 
 		def serve_results(env)
 			request = Rack::Request.new(env)
-			page_struct = @timer_struct_cache[request['id']]
+			page_struct = get_from_timer_cache(request['id'])
 			return [404, {} ["No such result #{request['id']}"]] unless page_struct
 			unless page_struct['HasUserViewed']
 				page_struct['ClientTimings'].init_from_form_data(env, page_struct)
@@ -275,15 +264,25 @@ module Rack
 		end
 
 		def add_to_timer_cache(page_struct)
-			@timer_struct_cache[page_struct['Id']] = page_struct
+			@timer_struct_lock.synchronize {
+				@timer_struct_cache[page_struct['Id']] = page_struct
+			}
+		end
+
+		def get_from_timer_cache(id)
+			@timer_struct_lock.synchronize {
+				@timer_struct_cache[id]
+			}
 		end
 
 		EXPIRE_TIMER_CACHE = 3600 * 24 # expire cache in seconds
 
 		def cleanup_cache
 			puts "Cleaning up cache"
-			expire_older_than = ((Time.now.to_f - MiniProfiler::EXPIRE_TIMER_CACHE) * 1000).to_i,
-			@timer_struct_cache.delete_if { |k, v| v['Root']['StartMilliseconds'] < expire_older_than }
+			expire_older_than = ((Time.now.to_f - MiniProfiler::EXPIRE_TIMER_CACHE) * 1000).to_i
+			@timer_struct_lock.synchronize {
+				@timer_struct_cache.delete_if { |k, v| v['Root']['StartMilliseconds'] < expire_older_than }
+			}
 		end
 
 		# clean up the cache every hour
@@ -304,36 +303,41 @@ module Rack
 			# handle all /mini-profiler requests here
  			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
- 			@inject_js = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
 
  			# profiling the request
 
- 			@page_struct = PageStruct.new(env)
- 			@current_timer = @page_struct["Root"]
+ 			env['profiler.mini.private'] = {}
+ 			env['profiler.mini.private']['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+ 			env['profiler.mini.private']['page_struct'] = PageStruct.new(env)
+ 			env['profiler.mini.private']['current_timer'] = env['profiler.mini.private']['page_struct']["Root"]
+ 			# hold our state in thread var, so we can access it from sql callbacks that do not have env
+ 			Thread.current['profiler.mini.private'] = env['profiler.mini.private']
+
 			tms = Benchmark.measure do
 				status, headers, body = @app.call(env)
 			end
-			@page_struct['Root'].record_benchmark tms
+			env['profiler.mini.private']['page_struct']['Root'].record_benchmark tms
 
 			# inject headers, script
 			if status == 200
-				add_to_timer_cache(@page_struct)
+				add_to_timer_cache(env['profiler.mini.private']['page_struct'])
 				# inject header
-				headers['X-MiniProfilerID'] = @page_struct["Id"] if headers.is_a? Hash
+				headers['X-MiniProfilerID'] = env['profiler.mini.private']['page_struct']["Id"] if headers.is_a? Hash
 				# inject script
-				if @inject_js \
+				if env['profiler.mini.private']['inject_js'] \
 					&& headers.has_key?('Content-Type') \
 					&& !headers['Content-Type'].match(/text\/html/).nil? then
 					if (body.respond_to? :push)
-						body.push(self.get_profile_script)
+						body.push(self.get_profile_script(env))
 					elsif (body.is_a? String)
-						body += self.get_profile_script
+						body += self.get_profile_script(env)
 					else
 						env['rack.logger'].error('could not attach mini-profiler to body, can only attach to Arrays and Strings')
 					end
 				end
 			end
-			@page_struct = @current_timer = nil
+			env['profiler.mini.private'] = nil
+			Thread.current['profiler.mini.private'] = nil
 			[status, headers, body]
 		end
 
@@ -343,8 +347,8 @@ module Rack
 		# Use it when:
 		# * you have disabled auto append behaviour throught :auto_inject => false flag
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
-		def get_profile_script
-			ids = "[\"%s\"]" % @page_struct["Id"].to_s
+		def get_profile_script(env)
+			ids = "[\"%s\"]" % env['profiler.mini.private']['page_struct']["Id"].to_s
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
 			position = 'left'
@@ -352,7 +356,7 @@ module Rack
 			showChildren = false
 			maxTracesToShow = 10
 			showControls = false
-			currentId = @page_struct["Id"]
+			currentId = env['profiler.mini.private']['page_struct']["Id"]
 			authorized = true
 			script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
 			# replace the variables
@@ -362,28 +366,31 @@ module Rack
 			end
 			# replace the '{{' and '}}''
 			script.gsub!(/\{\{/, '{').gsub!(/\}\}/, '}')
-			@inject_js = false
+			env['profiler.mini.private']['inject_js'] = false
 			script
 		end
 
 		# cancels automatic injection of profile script for the current page
-		def cancel_auto_inject
-			@inject_js = false
+		def cancel_auto_inject(env)
+			env['profiler.mini.private']['inject_js'] = false
 		end
 
 		# benchmarks given block
-		def benchmark(name, &b)
-			old_timer = @current_timer
-			@current_timer = RequestTimerStruct.new(name, @page_struct)
-			@current_timer['Name'] = name
+		def benchmark(env, name, &b)
+			old_timer = env['profiler.mini.private']['current_timer']
+			current = RequestTimerStruct.new(name, env['profiler.mini.private']['page_struct'])
+			env['profiler.mini.private']['current_timer'] = current
+			current['Name'] = name
 			tms = Benchmark.measure &b
-			@current_timer.record_benchmark tms
-			old_timer.add_child(@current_timer)
-			@current_timer = old_timer
+			current.record_benchmark tms
+			old_timer.add_child(current)
+			env['profiler.mini.private']['current_timer'] = old_timer
 		end
 
 		def record_sql(query, elapsed_ms)
-			@current_timer.add_sql(query, elapsed_ms, @page_struct) if @current_timer
+			current = Thread.current['profiler.mini.private']
+			debugger
+			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
 		end
 	end
 

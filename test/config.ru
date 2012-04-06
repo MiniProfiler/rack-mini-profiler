@@ -13,20 +13,20 @@ DB = Sequel.connect("mysql2://sveg:svegsveg@localhost/sveg_development",
 
 app = proc do |env|
 	sleep(0.1)
-	env['profiler.mini'].benchmark("sleep0.2") do
+	env['profiler.mini'].benchmark(env, "sleep0.2") do
 		sleep(0.2)
 	end
-	env['profiler.mini'].benchmark('sleep0.1') do
+	env['profiler.mini'].benchmark(env, 'sleep0.1') do
 		sleep(0.1)
-		env['profiler.mini'].benchmark('sleep0.01') do
+		env['profiler.mini'].benchmark(env, 'sleep0.01') do
 			sleep(0.01)
-			env['profiler.mini'].benchmark('sleep0.001') do
+			env['profiler.mini'].benchmark(env, 'sleep0.001') do
 				sleep(0.001)
 				DB.fetch('SHOW TABLES') do |row|
 					puts row
 				end
 			end
-			env['profiler.mini'].benchmark('litl sql') do
+			env['profiler.mini'].benchmark(env, 'litl sql') do
 				DB.fetch('select * from auth_logins') do |row|
 					puts row
 				end
