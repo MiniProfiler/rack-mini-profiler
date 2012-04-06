@@ -348,10 +348,10 @@ module Rack
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
 			position = 'left'
-			showTrivial = true
-			showChildren = true
-			maxTracesToShow = 15
-			showControls = true
+			showTrivial = false
+			showChildren = false
+			maxTracesToShow = 10
+			showControls = false
 			currentId = @page_struct["Id"]
 			authorized = true
 			script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))

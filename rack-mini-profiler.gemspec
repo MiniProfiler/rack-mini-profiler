@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
 	s.summary = "Profiles loading speed for html pages."
 	s.authors = ["Aleks Totic"]
 	s.date = "2012-04-02"
-	s.description = "Page loading speed displayed on every page. Optimize while you develop, speed is a feature."
+	s.description = "Page loading speed displayed on every page. Optimize while you develop, peformance is a feature."
 	s.email = "a@totic.org"
 	s.homepage = "https://github.com/atotic/MiniProfiler"
 	s.files = [
@@ -15,4 +15,8 @@ Gem::Specification.new do |s|
 		"README.md"
 	]
 	s.add_runtime_dependency 'rack', '>= 1.3' # for Rack::File.cache_control
+	s.add_runtime_dependency 'ruby-debug', '>= 0.10' 
+  if RUBY_VERSION < "1.9"
+    s.add_runtime_dependency 'json', '>= 1.6' 
+  end
 end
