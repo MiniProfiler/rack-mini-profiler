@@ -23,7 +23,7 @@ end
 
 desc "copy files from other parts of the tree"
 task :copy_files do
-	`[[ ! -d lib/html ]] && mkdir lib/html `
+	`rm -R --force lib/html ]] && mkdir lib/html `
 	`cp -v ../StackExchange.Profiling/UI/*.* lib/html 1>&2`
 	# extract relevant javascript
 	File.open('lib/html/profile_handler.js', 'w') do |f|
