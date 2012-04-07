@@ -31,7 +31,7 @@ module Rack
 			end
 
 			def to_json(*a)
-				@attributes.to_json(*a)
+        ::JSON.generate(@attributes, *a)
 			end
 
 			def init_from_form_data(env, page_struct)
@@ -101,7 +101,7 @@ module Rack
 			end
 
 			def to_json(*a)
-				@attributes.to_json(*a)
+        ::JSON.generate(@attributes, *a)
 			end
 
 			def []=(name, val)
@@ -155,7 +155,7 @@ module Rack
 			end
 
 			def to_json(*a)
-				@attributes.to_json(*a)
+        ::JSON.generate(@attributes, *a)
 			end
 
 			def add_child(request_timer)
@@ -217,9 +217,11 @@ module Rack
 			end
 
 			def to_json(*a)
-				@attributes.merge( {
+				attribs = @attributes.merge( {
 					"Started" => '/Date(%d)/' % @attributes['Started']
-					}).to_json(*a)
+					})
+        
+        ::JSON.generate(attribs, *a)
 			end
 		end
 
@@ -244,7 +246,7 @@ module Rack
 		def serve_results(env)
 			request = Rack::Request.new(env)
 			page_struct = get_from_timer_cache(request['id'])
-			return [404, {} ["No such result #{request['id']}"]] unless page_struct
+			return [404, {}, ["No such result #{request['id']}"]] unless page_struct
 			unless page_struct['HasUserViewed']
 				page_struct['ClientTimings'].init_from_form_data(env, page_struct)
 				page_struct["HasUserViewed"] = true
