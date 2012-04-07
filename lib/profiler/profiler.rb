@@ -305,9 +305,7 @@ module Rack
 			# handle all /mini-profiler requests here
  			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
-
  			# profiling the request
-
  			env['profiler.mini.private'] = {}
  			env['profiler.mini.private']['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
  			env['profiler.mini.private']['page_struct'] = PageStruct.new(env)
@@ -360,7 +358,8 @@ module Rack
 			showControls = false
 			currentId = env['profiler.mini.private']['page_struct']["Id"]
 			authorized = true
-			script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
+      # TODO : cache this snippet 
+      script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
 			# replace the variables
 			[:ids, :path, :version, :position, :showTrivial, :showChildren, :maxTracesToShow, :showControls, :currentId, :authorized].each do |v|
 				regex = Regexp.new("\\{#{v.to_s}\\}")
@@ -391,7 +390,6 @@ module Rack
 
 		def record_sql(query, elapsed_ms)
 			current = Thread.current['profiler.mini.private']
-			debugger
 			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
 		end
 	end
