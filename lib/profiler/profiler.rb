@@ -36,48 +36,28 @@ module Rack
 
 			def init_from_form_data(env, page_struct)
 				timings = []
-				baseTime = page_struct['Started']
-				formTime = env['rack.request.form_hash']['clientPerformance']['timing']
-				timings.push({ "Name" => "Domain Lookup", 
-					"Start" =>  formTime['domainLookupStart'].to_i - baseTime, 
-					"Duration" => formTime['domainLookupEnd'].to_i - formTime['domainLookupStart'].to_i
-				})
-				timings.push( { "Name" => "Connect", 
-					"Start" =>  formTime['connectStart'].to_i - baseTime, 
-					"Duration" => formTime['connectEnd'].to_i - formTime['connectStart'].to_i
-				})
-				timings.push({ "Name" => "Request Start", 
-					"Start" =>  formTime['requestStart'].to_i - baseTime, 
-					"Duration" => -1
-				})
-				timings.push( { "Name" => "Response", 
-					"Start" =>  formTime['responseStart'].to_i - baseTime, 
-					"Duration" => formTime['responseEnd'].to_i - formTime['responseStart'].to_i
-				})
-				timings.push( { "Name" => "Unload Event", 
-					"Start" =>  formTime['unloadEventStart'].to_i - baseTime, 
-					"Duration" => formTime['unloadEventEnd'].to_i - formTime['unloadEventStart'].to_i
-				})
-				timings.push( { "Name" => "Dom Loading", 
-					"Start" =>  formTime['domLoading'].to_i - baseTime, 
-					"Duration" => -1
-				})
-				timings.push( { "Name" => "Dom Content Loaded Event", 
-					"Start" =>  formTime['domContentLoadedEventStart'].to_i - baseTime, 
-					"Duration" => formTime['domContentLoadedEventEnd'].to_i - formTime['domContentLoadedEventStart'].to_i
-				})
-				timings.push( { "Name" => "Dom Interactive", 
-					"Start" =>  formTime['domInteractive'].to_i - baseTime, 
-					"Duration" => -1
-				})
-				timings.push( { "Name" => "Load Event", 
-					"Start" =>  formTime['loadEventStart'].to_i - baseTime, 
-					"Duration" => formTime['loadEventEnd'].to_i - formTime['loadEventStart'].to_i
-				})
-				timings.push( { "Name" => "Dom Complete", 
-					"Start" =>  formTime['domComplete'].to_i - baseTime, 
-					"Duration" => -1
-				})
+        clientTimes, clientPerf, baseTime = nil 
+        form = env['rack.request.form_hash']
+
+        clientPerf = form['clientPerformance'] if form 
+        clientTimes = clientPerf['timing'] if clientPerf 
+
+        baseTime = clientTimes['navigationStart'].to_i if clientTimes
+        return unless clientTimes && baseTime 
+
+        clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
+          start = clientTimes[k].to_i - baseTime 
+          finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
+          duration = 0 
+          duration = finish - start if finish > start 
+          name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
+          timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
+        end
+
+        clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
+          timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
+        end
+
 				@attributes.merge!({
 					"RedirectCount" => env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount'],
 					"Timings" => timings
