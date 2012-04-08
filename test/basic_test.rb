@@ -1,6 +1,7 @@
 # rake test:all TEST=test/basic.rb
 
 require 'test/unit'
+require 'active_record'
 require 'rack/test'
 
 require './lib/rack-mini-profiler'
