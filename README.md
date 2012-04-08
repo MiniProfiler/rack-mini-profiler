@@ -34,11 +34,13 @@ Using Sinatra:
 
 ## TODO: prior to release - pull requests welcome
 
-1. Stack Traces for SQL called
-2. Decide if we hook up SQL at the driver level (eg mysql gem) or library level (eg active record) - my personal perference is to do driver level hooks (Sam)
-3. We need to add automatic instrumentation for Rails (Controller times, Action times, Partial times, Layout times)
-4. We need to grab / display the parameters of SQL executed for parameterized SQL 
-5. We need to beef up the documentation 
-6. We need to auto-wire-up rails middleware 
-7. We need to review our API and ensure it is trivial
+- Stack Traces for SQL called
+- Decide if we hook up SQL at the driver level (eg mysql gem) or library level (eg active record) - my personal perference is to do driver level hooks (Sam)
+- Add automatic instrumentation for Rails (Controller times, Action times, Partial times, Layout times)
+- Grab / display the parameters of SQL executed for parameterized SQL 
+- Beef up the documentation 
+- Auto-wire-up rails middleware 
+- Review our API and ensure it is trivial
+- Refactor big file into an organised structure, clean up namespacing 
+- Add tests 
 
