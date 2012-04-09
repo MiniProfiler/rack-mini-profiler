@@ -306,14 +306,17 @@ module Rack
 				# inject script
 				if env['profiler.mini.private']['inject_js'] \
 					&& headers.has_key?('Content-Type') \
-					&& !headers['Content-Type'].match(/text\/html/).nil? then
-					if (body.respond_to? :push)
-						body.push(self.get_profile_script(env))
-					elsif (body.is_a? String)
-						body += self.get_profile_script(env)
-					else
-						log(env, :error, 'could not attach mini-profiler to body, can only attach to Arrays and Strings')
-					end
+					&& !headers['Content-Type'].match(/text\/html/).nil?
+
+          # ActionDispatch::Body has a body method that responds to the shift
+          # operator. Array and String both do too.
+          target_body = body.respond_to?(:body) ? body.body : body
+          if (target_body.respond_to? '<<')
+            target_body << self.get_profile_script(env)
+          else
+            env['rack.errors'].write("could not attach mini-profiler to body, can only attach to Arrays and Strings")
+          end
+
 				end
 			end
 			env['profiler.mini.private'] = nil
@@ -371,15 +374,6 @@ module Rack
 		def record_sql(query, elapsed_ms)
 			current = Thread.current['profiler.mini.private']
 			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
-		end
-
-		# Logs using rack.logger if available, otherwise rack.errors
-		def log(env, level, message)
-			if env['rack.logger']
- 	       env['rack.logger'].send(level, message)
- 	     else
- 	       env['rack.errors'].write(message)
- 	     end
 		end
 
 	end
