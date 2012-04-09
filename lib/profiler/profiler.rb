@@ -31,32 +31,32 @@ module Rack
 			end
 
 			def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, *a)
 			end
 
 			def init_from_form_data(env, page_struct)
 				timings = []
-        clientTimes, clientPerf, baseTime = nil 
-        form = env['rack.request.form_hash']
+				clientTimes, clientPerf, baseTime = nil 
+				form = env['rack.request.form_hash']
 
-        clientPerf = form['clientPerformance'] if form 
-        clientTimes = clientPerf['timing'] if clientPerf 
+				clientPerf = form['clientPerformance'] if form 
+				clientTimes = clientPerf['timing'] if clientPerf 
 
-        baseTime = clientTimes['navigationStart'].to_i if clientTimes
-        return unless clientTimes && baseTime 
+				baseTime = clientTimes['navigationStart'].to_i if clientTimes
+				return unless clientTimes && baseTime 
 
-        clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
-          start = clientTimes[k].to_i - baseTime 
-          finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
-          duration = 0 
-          duration = finish - start if finish > start 
-          name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
-          timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
-        end
+				clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
+					start = clientTimes[k].to_i - baseTime 
+					finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
+					duration = 0 
+					duration = finish - start if finish > start 
+					name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
+					timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
+				end
 
-        clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
-          timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
-        end
+				clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
+					timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
+				end
 
 				@attributes.merge!({
 					"RedirectCount" => env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount'],
@@ -81,7 +81,7 @@ module Rack
 			end
 
 			def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, *a)
 			end
 
 			def []=(name, val)
@@ -135,7 +135,7 @@ module Rack
 			end
 
 			def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, *a)
 			end
 
 			def add_child(request_timer)
@@ -157,7 +157,7 @@ module Rack
 			def record_benchmark(tms)
 				@attributes['DurationMilliseconds'] = (tms.real * 1000).to_i
 				@attributes['DurationWithoutChildrenMilliseconds'] = @attributes['DurationMilliseconds'] - @children_duration
- 			end			
+			end			
 		end
 
 		# MiniProfiles page, part of 
@@ -200,8 +200,30 @@ module Rack
 				attribs = @attributes.merge( {
 					"Started" => '/Date(%d)/' % @attributes['Started']
 					})
-        
-        ::JSON.generate(attribs, *a)
+				
+				::JSON.generate(attribs, *a)
+			end
+		end
+
+		# inserts additional text at the end of the body
+		class BodyAddProxy
+			def initialize(body, additional_text)
+				@body = body
+				@additional_text = additional_text
+			end
+
+			def respond_to?(*args)
+				super or @body.respond_to?(*args)
+			end
+
+			def method_missing(*args, &block)
+				@body.__send__(*args, &block)
+			end
+
+			def each(&block)
+				@body.each(&block)
+				yield @additional_text
+				self
 			end
 		end
 
@@ -283,15 +305,15 @@ module Rack
 			return @app.call(env) unless @options[:authorize_cb].call(env)
 
 			# handle all /mini-profiler requests here
- 			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
+			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
- 			# profiling the request
- 			env['profiler.mini.private'] = {}
- 			env['profiler.mini.private']['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
- 			env['profiler.mini.private']['page_struct'] = PageStruct.new(env)
- 			env['profiler.mini.private']['current_timer'] = env['profiler.mini.private']['page_struct']["Root"]
- 			# hold our state in thread var, so we can access it from sql callbacks that do not have env
- 			Thread.current['profiler.mini.private'] = env['profiler.mini.private']
+			# profiling the request
+			env['profiler.mini.private'] = {}
+			env['profiler.mini.private']['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+			env['profiler.mini.private']['page_struct'] = PageStruct.new(env)
+			env['profiler.mini.private']['current_timer'] = env['profiler.mini.private']['page_struct']["Root"]
+			# hold our state in thread var, so we can access it from sql callbacks that do not have env
+			Thread.current['profiler.mini.private'] = env['profiler.mini.private']
 
 			tms = Benchmark.measure do
 				status, headers, body = @app.call(env)
@@ -307,13 +329,7 @@ module Rack
 				if env['profiler.mini.private']['inject_js'] \
 					&& headers.has_key?('Content-Type') \
 					&& !headers['Content-Type'].match(/text\/html/).nil? then
-					if (body.respond_to? :push)
-						body.push(self.get_profile_script(env))
-					elsif (body.is_a? String)
-						body += self.get_profile_script(env)
-					else
-						env['rack.errors'].write('could not attach mini-profiler to body, can only attach to Arrays and Strings')
-					end
+					body = MiniProfiler::BodyAddProxy.new(body, self.get_profile_script(env))
 				end
 			end
 			env['profiler.mini.private'] = nil
@@ -338,8 +354,8 @@ module Rack
 			showControls = false
 			currentId = env['profiler.mini.private']['page_struct']["Id"]
 			authorized = true
-      # TODO : cache this snippet 
-      script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
+			# TODO : cache this snippet 
+			script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
 			# replace the variables
 			[:ids, :path, :version, :position, :showTrivial, :showChildren, :maxTracesToShow, :showControls, :currentId, :authorized].each do |v|
 				regex = Regexp.new("\\{#{v.to_s}\\}")
