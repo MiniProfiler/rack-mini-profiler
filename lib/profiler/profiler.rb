@@ -1,8 +1,7 @@
-require 'benchmark'
 require 'json'
 require 'timeout'
 require 'thread'
-require "ruby-debug"
+require 'ruby-debug'
 
 module Rack
 
@@ -70,7 +69,7 @@ module Rack
 				@attributes = {
 					"ExecuteType" => 3, # TODO
 					"FormattedCommandString" => query,
-					"StackTraceSnippet" => "No Stack Yet", # TODO
+					"StackTraceSnippet" => Kernel.caller.join("\n"), # TODO
 					"StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
 					"DurationMilliseconds" => duration_ms,
 					"FirstFetchDurationMilliseconds" => 0,
@@ -154,9 +153,10 @@ module Rack
 				@attributes['SqlTimingsDurationMilliseconds'] += elapsed_ms
 			end
 
-			def record_benchmark(tms)
-				@attributes['DurationMilliseconds'] = (tms.real * 1000).to_i
-				@attributes['DurationWithoutChildrenMilliseconds'] = @attributes['DurationMilliseconds'] - @children_duration
+			def record_time(milliseconds)
+        puts "record time was called #{milliseconds}"
+				@attributes['DurationMilliseconds'] = milliseconds
+				@attributes['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
  			end			
 		end
 
@@ -180,9 +180,9 @@ module Rack
 					"DurationMillisecondsInSql" => 0,
 					"HasSqlTimings" => true,
 					"HasDuplicateSqlTimings" => false,
-					"ExecutedReaders" => 3,
+					"ExecutedReaders" => 0,
 					"ExecutedScalars" => 0,
-					"ExecutedNonQueries" => 1
+					"ExecutedNonQueries" => 0
 				}
 				name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
 				@attributes['Root'] = RequestTimerStruct.createRoot(name, self)
@@ -198,7 +198,8 @@ module Rack
 
 			def to_json(*a)
 				attribs = @attributes.merge( {
-					"Started" => '/Date(%d)/' % @attributes['Started']
+					"Started" => '/Date(%d)/' % @attributes['Started'], 
+          "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds']
 					})
         
         ::JSON.generate(attribs, *a)
@@ -275,6 +276,20 @@ module Rack
 			end
 		end
 
+    def self.current
+      Thread.current['profiler.mini.private']
+    end
+
+    def current
+      MiniProfiler.current
+    end
+    
+    def self.current=(c)
+      # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
+ 			Thread.current['profiler.mini.private'] = c
+    end
+    
+
 		def call(env)
 			status = headers = body = nil
 			env['profiler.mini'] = self
@@ -286,25 +301,22 @@ module Rack
  			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
  			# profiling the request
- 			env['profiler.mini.private'] = {}
- 			env['profiler.mini.private']['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
- 			env['profiler.mini.private']['page_struct'] = PageStruct.new(env)
- 			env['profiler.mini.private']['current_timer'] = env['profiler.mini.private']['page_struct']["Root"]
- 			# hold our state in thread var, so we can access it from sql callbacks that do not have env
- 			Thread.current['profiler.mini.private'] = env['profiler.mini.private']
+ 			MiniProfiler.current = {}
+ 			current['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+ 			current['page_struct'] = PageStruct.new(env)
+ 			current['current_timer'] = current['page_struct']["Root"]
 
-			tms = Benchmark.measure do
-				status, headers, body = @app.call(env)
-			end
-			env['profiler.mini.private']['page_struct']['Root'].record_benchmark tms
+      start = Time.now 
+			status, headers, body = @app.call(env)
+			current['page_struct']['Root'].record_time((Time.now - start) * 1000)
 
 			# inject headers, script
 			if status == 200
-				add_to_timer_cache(env['profiler.mini.private']['page_struct'])
+				add_to_timer_cache(current['page_struct'])
 				# inject header
-				headers['X-MiniProfilerID'] = env['profiler.mini.private']['page_struct']["Id"] if headers.is_a? Hash
+				headers['X-MiniProfilerID'] = current['page_struct']["Id"] if headers.is_a? Hash
 				# inject script
-				if env['profiler.mini.private']['inject_js'] \
+				if current['inject_js'] \
 					&& headers.has_key?('Content-Type') \
 					&& !headers['Content-Type'].match(/text\/html/).nil? then
 					if (body.respond_to? :push)
@@ -316,8 +328,7 @@ module Rack
 					end
 				end
 			end
-			env['profiler.mini.private'] = nil
-			Thread.current['profiler.mini.private'] = nil
+			current = nil
 			[status, headers, body]
 		end
 
@@ -328,7 +339,7 @@ module Rack
 		# * you have disabled auto append behaviour throught :auto_inject => false flag
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
 		def get_profile_script(env)
-			ids = "[\"%s\"]" % env['profiler.mini.private']['page_struct']["Id"].to_s
+			ids = "[\"%s\"]" % current['page_struct']["Id"].to_s
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
 			position = 'left'
@@ -336,7 +347,7 @@ module Rack
 			showChildren = false
 			maxTracesToShow = 10
 			showControls = false
-			currentId = env['profiler.mini.private']['page_struct']["Id"]
+			currentId = current['page_struct']["Id"]
 			authorized = true
       # TODO : cache this snippet 
       script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
@@ -347,29 +358,45 @@ module Rack
 			end
 			# replace the '{{' and '}}''
 			script.gsub!(/\{\{/, '{').gsub!(/\}\}/, '}')
-			env['profiler.mini.private']['inject_js'] = false
+			current['inject_js'] = false
 			script
 		end
 
 		# cancels automatic injection of profile script for the current page
 		def cancel_auto_inject(env)
-			env['profiler.mini.private']['inject_js'] = false
+		  current['inject_js'] = false
 		end
 
-		# benchmarks given block
-		def benchmark(env, name, &b)
-			old_timer = env['profiler.mini.private']['current_timer']
-			current = RequestTimerStruct.new(name, env['profiler.mini.private']['page_struct'])
-			env['profiler.mini.private']['current_timer'] = current
-			current['Name'] = name
-			tms = Benchmark.measure &b
-			current.record_benchmark tms
-			old_timer.add_child(current)
-			env['profiler.mini.private']['current_timer'] = old_timer
+		# perform a profiling step on given block
+		def self.step(name)
+			old_timer = current['current_timer']
+			new_step = RequestTimerStruct.new(name, current['page_struct'])
+			current['current_timer'] = new_step
+			new_step['Name'] = name
+      start = Time.now
+      yield if block_given?
+      new_step.record_time((Time.now - start)*1000)
+			old_timer.add_child(new_step)
+			current['current_timer'] = old_timer
 		end
+
+    def self.profile_method(klass, method, &b)
+      default_name = klass.to_s + " " + method.to_s
+      with_profiling = (method.to_s + "_with_mini_profiler").intern
+      without_profiling = (method.to_s + "_without_mini_profiler").intern
+      
+      klass.send :alias_method, without_profiling, method
+      klass.send :define_method, with_profiling do |*args|
+        name = default_name 
+        name = yield *args if block_given?
+        ::Rack::MiniProfiler.step name do 
+          self.send without_profiling, *args
+        end
+      end
+      klass.send :alias_method, method, with_profiling
+    end
 
 		def record_sql(query, elapsed_ms)
-			current = Thread.current['profiler.mini.private']
 			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
 		end
 	end
