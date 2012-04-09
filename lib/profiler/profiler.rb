@@ -320,6 +320,7 @@ module Rack
 			end
 			env['profiler.mini.private']['page_struct']['Root'].record_benchmark tms
 
+			debugger
 			# inject headers, script
 			if status == 200
 				add_to_timer_cache(env['profiler.mini.private']['page_struct'])
@@ -388,6 +389,7 @@ module Rack
 			current = Thread.current['profiler.mini.private']
 			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
 		end
+
 	end
 
 end
