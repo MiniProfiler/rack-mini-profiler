@@ -312,7 +312,7 @@ module Rack
 					elsif (body.is_a? String)
 						body += self.get_profile_script(env)
 					else
-						env['rack.logger'].error('could not attach mini-profiler to body, can only attach to Arrays and Strings')
+						env['rack.errors'].write('could not attach mini-profiler to body, can only attach to Arrays and Strings')
 					end
 				end
 			end
