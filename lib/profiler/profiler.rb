@@ -312,7 +312,7 @@ module Rack
 					elsif (body.is_a? String)
 						body += self.get_profile_script(env)
 					else
-						env['rack.logger'].error('could not attach mini-profiler to body, can only attach to Arrays and Strings')
+						log(env, :error, 'could not attach mini-profiler to body, can only attach to Arrays and Strings')
 					end
 				end
 			end
@@ -372,6 +372,16 @@ module Rack
 			current = Thread.current['profiler.mini.private']
 			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
 		end
+
+		# Logs using rack.logger if available, otherwise rack.errors
+		def log(env, level, message)
+			if env['rack.logger']
+ 	       env['rack.logger'].send(level, message)
+ 	     else
+ 	       env['rack.errors'].write(message)
+ 	     end
+		end
+
 	end
 
 end
