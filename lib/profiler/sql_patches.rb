@@ -51,14 +51,15 @@ module Rack
     end
   end
 
-  if defined?(::Rails) && ::Rails::VERSION::MAJOR.to_i == 3
+  if defined?(::Rails)
+    if ::Rails::VERSION::MAJOR.to_i == 3
     # in theory this is the right thing to do for rails 3 ... but it seems to work anyway
     #Rails.configuration.after_initialize do
         insert_instrumentation
     #end
-  else
+    else
       insert_instrumentation
+    end
   end
-
 end
 

@@ -30,32 +30,32 @@ module Rack
 			end
 
 			def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, *a)
 			end
 
 			def init_from_form_data(env, page_struct)
 				timings = []
-        clientTimes, clientPerf, baseTime = nil 
-        form = env['rack.request.form_hash']
+				clientTimes, clientPerf, baseTime = nil 
+				form = env['rack.request.form_hash']
 
-        clientPerf = form['clientPerformance'] if form 
-        clientTimes = clientPerf['timing'] if clientPerf 
+				clientPerf = form['clientPerformance'] if form 
+				clientTimes = clientPerf['timing'] if clientPerf 
 
-        baseTime = clientTimes['navigationStart'].to_i if clientTimes
-        return unless clientTimes && baseTime 
+				baseTime = clientTimes['navigationStart'].to_i if clientTimes
+				return unless clientTimes && baseTime 
 
-        clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
-          start = clientTimes[k].to_i - baseTime 
-          finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
-          duration = 0 
-          duration = finish - start if finish > start 
-          name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
-          timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
-        end
+				clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
+					start = clientTimes[k].to_i - baseTime 
+					finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
+					duration = 0 
+					duration = finish - start if finish > start 
+					name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
+					timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
+				end
 
-        clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
-          timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
-        end
+				clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
+					timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
+				end
 
 				@attributes.merge!({
 					"RedirectCount" => env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount'],
@@ -80,7 +80,7 @@ module Rack
 			end
 
 			def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, *a)
 			end
 
 			def []=(name, val)
@@ -134,7 +134,7 @@ module Rack
 			end
 
 			def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, *a)
 			end
 
 			def add_child(request_timer)
@@ -154,7 +154,6 @@ module Rack
 			end
 
 			def record_time(milliseconds)
-        puts "record time was called #{milliseconds}"
 				@attributes['DurationMilliseconds'] = milliseconds
 				@attributes['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
  			end			
@@ -201,8 +200,30 @@ module Rack
 					"Started" => '/Date(%d)/' % @attributes['Started'], 
           "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds']
 					})
-        
-        ::JSON.generate(attribs, *a)
+				
+				::JSON.generate(attribs, *a)
+			end
+		end
+
+		# inserts additional text at the end of the body
+		class BodyAddProxy
+			def initialize(body, additional_text)
+				@body = body
+				@additional_text = additional_text
+			end
+
+			def respond_to?(*args)
+				super or @body.respond_to?(*args)
+			end
+
+			def method_missing(*args, &block)
+				@body.__send__(*args, &block)
+			end
+
+			def each(&block)
+				@body.each(&block)
+				yield @additional_text
+				self
 			end
 		end
 
@@ -280,31 +301,33 @@ module Rack
       Thread.current['profiler.mini.private']
     end
 
-    def current
-      MiniProfiler.current
-    end
-    
     def self.current=(c)
       # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
  			Thread.current['profiler.mini.private'] = c
     end
-    
+   
+    def current
+      MiniProfiler.current
+    end
+
+    def current=(c)
+      MiniProfiler.current=c
+    end
 
 		def call(env)
 			status = headers = body = nil
-			env['profiler.mini'] = self
 
 			# only profile if authorized
 			return @app.call(env) unless @options[:authorize_cb].call(env)
 
 			# handle all /mini-profiler requests here
- 			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
+			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
- 			# profiling the request
- 			MiniProfiler.current = {}
- 			current['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
- 			current['page_struct'] = PageStruct.new(env)
- 			current['current_timer'] = current['page_struct']["Root"]
+			# profiling the request
+			self.current = {}
+			current['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+			current['page_struct'] = PageStruct.new(env)
+			current['current_timer'] = current['page_struct']['Root']
 
       start = Time.now 
 			status, headers, body = @app.call(env)
@@ -319,13 +342,7 @@ module Rack
 				if current['inject_js'] \
 					&& headers.has_key?('Content-Type') \
 					&& !headers['Content-Type'].match(/text\/html/).nil? then
-					if (body.respond_to? :push)
-						body.push(self.get_profile_script(env))
-					elsif (body.is_a? String)
-						body += self.get_profile_script(env)
-					else
-						env['rack.logger'].error('could not attach mini-profiler to body, can only attach to Arrays and Strings')
-					end
+					body = MiniProfiler::BodyAddProxy.new(body, self.get_profile_script(env))
 				end
 			end
 			current = nil
@@ -339,7 +356,7 @@ module Rack
 		# * you have disabled auto append behaviour throught :auto_inject => false flag
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
 		def get_profile_script(env)
-			ids = "[\"%s\"]" % current['page_struct']["Id"].to_s
+			ids = "[\"%s\"]" % current['page_struct']['Id'].to_s
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
 			position = 'left'
@@ -349,8 +366,8 @@ module Rack
 			showControls = false
 			currentId = current['page_struct']["Id"]
 			authorized = true
-      # TODO : cache this snippet 
-      script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
+			# TODO : cache this snippet 
+			script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
 			# replace the variables
 			[:ids, :path, :version, :position, :showTrivial, :showChildren, :maxTracesToShow, :showControls, :currentId, :authorized].each do |v|
 				regex = Regexp.new("\\{#{v.to_s}\\}")
@@ -369,28 +386,32 @@ module Rack
 
 		# perform a profiling step on given block
 		def self.step(name)
-			old_timer = current['current_timer']
-			new_step = RequestTimerStruct.new(name, current['page_struct'])
-			current['current_timer'] = new_step
-			new_step['Name'] = name
-      start = Time.now
-      yield if block_given?
-      new_step.record_time((Time.now - start)*1000)
-			old_timer.add_child(new_step)
-			current['current_timer'] = old_timer
+      if current
+        old_timer = current['current_timer']
+        new_step = RequestTimerStruct.new(name, current['page_struct'])
+        current['current_timer'] = new_step
+        new_step['Name'] = name
+        start = Time.now
+        yield if block_given?
+        new_step.record_time((Time.now - start)*1000)
+        old_timer.add_child(new_step)
+        current['current_timer'] = old_timer
+      else
+        yield if block_given?
+      end
 		end
 
-    def self.profile_method(klass, method, &b)
+    def self.profile_method(klass, method)
       default_name = klass.to_s + " " + method.to_s
       with_profiling = (method.to_s + "_with_mini_profiler").intern
       without_profiling = (method.to_s + "_without_mini_profiler").intern
       
       klass.send :alias_method, without_profiling, method
-      klass.send :define_method, with_profiling do |*args|
+      klass.send :define_method, with_profiling do |*args, &orig|
         name = default_name 
         name = yield *args if block_given?
         ::Rack::MiniProfiler.step name do 
-          self.send without_profiling, *args
+          self.send without_profiling, *args, &orig
         end
       end
       klass.send :alias_method, method, with_profiling
@@ -399,6 +420,7 @@ module Rack
 		def record_sql(query, elapsed_ms)
 			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
 		end
+
 	end
 
 end

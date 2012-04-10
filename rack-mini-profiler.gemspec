@@ -19,4 +19,8 @@ Gem::Specification.new do |s|
   if RUBY_VERSION < "1.9"
     s.add_runtime_dependency 'json', '>= 1.6' 
   end
+
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rack-test'
+  s.add_development_dependency 'activerecord', '~> 3.0'
 end
