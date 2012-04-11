@@ -4,6 +4,8 @@ require 'thread'
 
 require 'mini_profiler/page_struct'
 require 'mini_profiler/sql_timer_struct'
+require 'mini_profiler/client_timer_struct'
+require 'mini_profiler/request_timer_struct'
 require 'mini_profiler/body_add_proxy'
 
 module Rack
@@ -21,124 +23,9 @@ module Rack
 			rand(36**20).to_s(36)
 		end
 
-		# Structs holding Page loading data
-		# PageStruct
-		#   ClientTimings: ClientTimerStruct
-		#   Root: RequestTimer
-		#     :has_many RequestTimer children
-		#     :has_many SqlTimer children
-		class ClientTimerStruct
-			def initialize(env)
-				@attributes = {}
-			end
-
-			def to_json(*a)
-				::JSON.generate(@attributes, a[0])
-			end
-
-			def init_from_form_data(env, page_struct)
-				timings = []
-				clientTimes, clientPerf, baseTime = nil 
-				form = env['rack.request.form_hash']
-
-				clientPerf = form['clientPerformance'] if form 
-				clientTimes = clientPerf['timing'] if clientPerf 
-
-				baseTime = clientTimes['navigationStart'].to_i if clientTimes
-				return unless clientTimes && baseTime 
-
-				clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
-					start = clientTimes[k].to_i - baseTime 
-					finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
-					duration = 0 
-					duration = finish - start if finish > start 
-					name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
-					timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
-				end
-
-				clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
-					timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
-				end
-
-				@attributes.merge!({
-					"RedirectCount" => env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount'],
-					"Timings" => timings
-				})
-			end
-		end
-
-		class RequestTimerStruct
-			def self.createRoot(name, page)
-				rt = RequestTimerStruct.new(name, page)
-				rt["IsRoot"]= true
-				rt
-			end
-
-			def initialize(name, page)
-				@attributes = {
-					"Id" => MiniProfiler.generate_id,
-					"Name" => name,
-					"DurationMilliseconds" => 0,
-					"DurationWithoutChildrenMilliseconds"=> 0,
-					"StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
-					"ParentTimingId" => nil,
-					"Children" => [],
-					"HasChildren"=> false,
-					"KeyValues" => nil,
-					"HasSqlTimings"=> false,
-					"HasDuplicateSqlTimings"=> false,
-					"SqlTimings" => [],
-					"SqlTimingsDurationMilliseconds"=> 0,
-					"IsTrivial"=> false,
-					"IsRoot"=> false,
-					"Depth"=> 0,
-					"ExecutedReaders"=> 0,
-					"ExecutedScalars"=> 0,
-					"ExecutedNonQueries"=> 0				
-				}
-				@children_duration = 0
-			end
-			
-			def [](name)
-				@attributes[name]
-			end
-
-			def []=(name, value)
-				@attributes[name] = value
-				self
-			end
-
-			def to_json(*a)
-				::JSON.generate(@attributes, a[0])
-			end
-
-			def add_child(request_timer)
-				@attributes['Children'].push(request_timer)
-				@attributes['HasChildren'] = true
-				request_timer['ParentTimingId'] = @attributes['Id']
-				request_timer['Depth'] = @attributes['Depth'] + 1
-				@children_duration += request_timer['DurationMilliseconds']
-			end
-
-			def add_sql(query, elapsed_ms, page)
-				timer = SqlTimerStruct.new(query, elapsed_ms, page)
-				timer['ParentTimingId'] = @attributes['Id']
-				@attributes['SqlTimings'].push(timer)
-				@attributes['HasSqlTimings'] = true
-				@attributes['SqlTimingsDurationMilliseconds'] += elapsed_ms
-			end
-
-			def record_time(milliseconds)
-				@attributes['DurationMilliseconds'] = milliseconds
-				@attributes['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
- 			end			
-		end
-
 		#
 		# options:
 		# :auto_inject - should script be automatically injected on every html page (not xhr)
-		# :
-
 		def initialize(app, options={})
 			@@instance = self
 			@options = {

@@ -1,7 +1,10 @@
 module Rack
   class MiniProfiler
 
-    # MiniProfiles page, part of 
+    # PageStruct
+    #   Root: RequestTimer
+    #     :has_many RequestTimer children
+    #     :has_many SqlTimer children
     class PageStruct
       def initialize(env)
         @attributes = {
