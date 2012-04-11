@@ -12,25 +12,41 @@ env['profiler.mini'] is the profiler
 
 Install/add to Gemfile
 
+```ruby
 	gem 'rack-mini-profiler'
+```
 
 Add it to your middleware stack:
 
 Using Builder:
 
-	require 'rack-mini-profiler'
-	builder = Rack::Builder.new do
-  	use Rack::MiniProfiler
+```ruby
+require 'rack-mini-profiler'
+builder = Rack::Builder.new do
+	use Rack::MiniProfiler
 
-  	map('/')    { run get }
-  end
+	map('/')    { run get }
+end
+```
 
 Using Sinatra:
 
-	require 'rack-mini-profiler'
-	class MyApp < Sinatra::Base
-		use Rack::MiniProfiler
-	end
+```ruby
+require 'rack-mini-profiler'
+class MyApp < Sinatra::Base
+	use Rack::MiniProfiler
+end
+```
+
+## Running the Specs
+
+```
+$ rake build
+$ rake spec
+```
+
+Additionally you can also run `autotest` if you like.
+
 
 ## TODO: prior to release - pull requests welcome
 
