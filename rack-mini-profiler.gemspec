@@ -1,4 +1,3 @@
-require 'ruby-debug'
 Gem::Specification.new do |s|
 	s.name = "rack-mini-profiler"
 	s.version = "2.0.1a"
@@ -15,7 +14,6 @@ Gem::Specification.new do |s|
 		"README.md"
 	]
 	s.add_runtime_dependency 'rack', '>= 1.3' # for Rack::File.cache_control
-	s.add_runtime_dependency 'ruby-debug', '>= 0.10' 
   if RUBY_VERSION < "1.9"
     s.add_runtime_dependency 'json', '>= 1.6' 
   end

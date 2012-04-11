@@ -1,7 +1,6 @@
 require 'json'
 require 'timeout'
 require 'thread'
-require 'ruby-debug'
 
 module Rack
 
