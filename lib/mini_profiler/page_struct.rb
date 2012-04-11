@@ -43,7 +43,7 @@ module Rack
           "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds']
           })
         
-        ::JSON.generate(attribs, *a)
+        ::JSON.generate(attribs, a[0])
       end
     end
     

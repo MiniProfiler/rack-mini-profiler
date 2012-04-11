@@ -33,7 +33,7 @@ module Rack
 			end
 
 			def to_json(*a)
-				::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, a[0])
 			end
 
 			def init_from_form_data(env, page_struct)
@@ -109,7 +109,7 @@ module Rack
 			end
 
 			def to_json(*a)
-				::JSON.generate(@attributes, *a)
+				::JSON.generate(@attributes, a[0])
 			end
 
 			def add_child(request_timer)
@@ -189,7 +189,6 @@ module Rack
 		EXPIRE_TIMER_CACHE = 3600 * 24 # expire cache in seconds
 
 		def cleanup_cache
-			puts "Cleaning up cache"
 			expire_older_than = ((Time.now.to_f - MiniProfiler::EXPIRE_TIMER_CACHE) * 1000).to_i
 			@timer_struct_lock.synchronize {
 				@timer_struct_cache.delete_if { |k, v| v['Root']['StartMilliseconds'] < expire_older_than }

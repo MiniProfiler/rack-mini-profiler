@@ -18,7 +18,7 @@ module Rack
       end
 
       def to_json(*a)
-        ::JSON.generate(@attributes, *a)
+        ::JSON.generate(@attributes, a[0])
       end
 
       def []=(name, val)
