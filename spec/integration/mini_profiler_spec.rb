@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'profiler/profiler'
+require 'rack-mini-profiler'
 require 'rack/test'
 
 describe Rack::MiniProfiler do

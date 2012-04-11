@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'profiler/profiler'
+require 'mini_profiler/body_add_proxy'
 
 describe Rack::MiniProfiler::BodyAddProxy do
 

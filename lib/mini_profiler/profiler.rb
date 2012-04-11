@@ -204,27 +204,6 @@ module Rack
 			end
 		end
 
-		# inserts additional text at the end of the body
-		class BodyAddProxy
-			def initialize(body, additional_text)
-				@body = body
-				@additional_text = additional_text
-			end
-
-			def respond_to?(*args)
-				super or @body.respond_to?(*args)
-			end
-
-			def method_missing(*args, &block)
-				@body.__send__(*args, &block)
-			end
-
-			def each(&block)
-				@body.each(&block)
-				yield @additional_text
-				self
-			end
-		end
 
 		#
 		# options:
