@@ -7,7 +7,6 @@ module SqlPatches
 end
 
 if SqlPatches.class_exists? "Sequel::Database" then
-	puts "Patching Sequel"
 	module Sequel
 		class Database
 			alias_method :log_duration_original, :log_duration

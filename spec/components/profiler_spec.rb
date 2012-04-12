@@ -18,7 +18,26 @@ describe Rack::MiniProfiler do
     end
 
     # TODO: Way more specs
-    
+    describe 'step' do
+
+      it 'yields the block given' do
+        Rack::MiniProfiler.step('test') { "hello" }.should == "hello"
+      end
+
+      describe 'current' do
+
+        before do
+          Rack::MiniProfiler.create_current
+        end
+
+        it 'yields the block given' do
+          Rack::MiniProfiler.step('test') { "mini profiler" }.should == "mini profiler"
+        end
+
+      end
+
+    end
+
   end
 
 end

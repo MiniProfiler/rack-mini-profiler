@@ -107,6 +107,15 @@ module Rack
       MiniProfiler.current=c
     end
 
+    def self.create_current(env={}, options={})
+      # profiling the request
+      self.current = {}
+      self.current['inject_js'] = options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+      self.current['page_struct'] = PageTimerStruct.new(env)
+      self.current['current_timer'] = current['page_struct']['Root']
+
+    end
+
 		def call(env)
 			status = headers = body = nil
 
@@ -116,11 +125,7 @@ module Rack
 			# handle all /mini-profiler requests here
 			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
-			# profiling the request
-			self.current = {}
-			current['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-			current['page_struct'] = PageTimerStruct.new(env)
-			current['current_timer'] = current['page_struct']['Root']
+      MiniProfiler.create_current(env, @options)
 
       start = Time.now 
 			status, headers, body = @app.call(env)
@@ -138,8 +143,10 @@ module Rack
 					body = MiniProfiler::BodyAddProxy.new(body, self.get_profile_script(env))
 				end
 			end
-			current = nil
 			[status, headers, body]
+    ensure
+      # Make sure this always happens
+      current = nil
 		end
 
 		# get_profile_script returns script to be injected inside current html page
@@ -185,10 +192,11 @@ module Rack
         current['current_timer'] = new_step
         new_step['Name'] = name
         start = Time.now
-        yield if block_given?
+        result = yield if block_given?
         new_step.record_time((Time.now - start)*1000)
         old_timer.add_child(new_step)
         current['current_timer'] = old_timer
+        result
       else
         yield if block_given?
       end

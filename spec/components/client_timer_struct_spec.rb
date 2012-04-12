@@ -20,7 +20,6 @@ describe Rack::MiniProfiler::ClientTimerStruct do
     ::JSON.parse(@client.to_json).should be_empty
   end
 
-  # TODO: Write specs for init_from_form_data
   describe 'init_from_form_data' do
 
     describe 'without a form' do
