@@ -4,11 +4,14 @@ module Rack
   class MiniProfiler
 
     class RequestTimerStruct < TimerStruct
+      
       def self.createRoot(name, page)
         rt = RequestTimerStruct.new(name, page)
         rt["IsRoot"]= true
         rt
       end
+
+      attr_reader :children_duration
 
       def initialize(name, page)
         super("Id" => MiniProfiler.generate_id,
@@ -34,24 +37,24 @@ module Rack
       end
 
       def add_child(request_timer)
-        @attributes['Children'].push(request_timer)
-        @attributes['HasChildren'] = true
-        request_timer['ParentTimingId'] = @attributes['Id']
-        request_timer['Depth'] = @attributes['Depth'] + 1
+        self['Children'].push(request_timer)
+        self['HasChildren'] = true
+        request_timer['ParentTimingId'] = self['Id']
+        request_timer['Depth'] = self['Depth'] + 1
         @children_duration += request_timer['DurationMilliseconds']
       end
 
       def add_sql(query, elapsed_ms, page)
         timer = SqlTimerStruct.new(query, elapsed_ms, page)
-        timer['ParentTimingId'] = @attributes['Id']
-        @attributes['SqlTimings'].push(timer)
-        @attributes['HasSqlTimings'] = true
-        @attributes['SqlTimingsDurationMilliseconds'] += elapsed_ms
+        timer['ParentTimingId'] = self['Id']
+        self['SqlTimings'].push(timer)
+        self['HasSqlTimings'] = true
+        self['SqlTimingsDurationMilliseconds'] += elapsed_ms
       end
 
       def record_time(milliseconds)
-        @attributes['DurationMilliseconds'] = milliseconds
-        @attributes['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
+        self['DurationMilliseconds'] = milliseconds
+        self['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
       end     
     end
   end
