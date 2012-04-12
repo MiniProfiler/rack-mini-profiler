@@ -5,7 +5,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
 
   before do
     @name = 'cool request'
-    @request = Rack::MiniProfiler::RequestTimerStruct.new(@name, Rack::MiniProfiler::PageStruct.new({}))
+    @request = Rack::MiniProfiler::RequestTimerStruct.new(@name, Rack::MiniProfiler::PageTimerStruct.new({}))
   end
 
   it 'has an Id' do

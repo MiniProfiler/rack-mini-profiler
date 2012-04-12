@@ -2,7 +2,7 @@ require 'json'
 require 'timeout'
 require 'thread'
 
-require 'mini_profiler/page_struct'
+require 'mini_profiler/page_timer_struct'
 require 'mini_profiler/sql_timer_struct'
 require 'mini_profiler/client_timer_struct'
 require 'mini_profiler/request_timer_struct'
@@ -119,7 +119,7 @@ module Rack
 			# profiling the request
 			self.current = {}
 			current['inject_js'] = @options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-			current['page_struct'] = PageStruct.new(env)
+			current['page_struct'] = PageTimerStruct.new(env)
 			current['current_timer'] = current['page_struct']['Root']
 
       start = Time.now 

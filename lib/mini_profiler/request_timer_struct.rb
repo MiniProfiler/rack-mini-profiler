@@ -1,7 +1,9 @@
+require 'mini_profiler/timer_struct'
+
 module Rack
   class MiniProfiler
 
-    class RequestTimerStruct
+    class RequestTimerStruct < TimerStruct
       def self.createRoot(name, page)
         rt = RequestTimerStruct.new(name, page)
         rt["IsRoot"]= true
@@ -9,41 +11,26 @@ module Rack
       end
 
       def initialize(name, page)
-        @attributes = {
-          "Id" => MiniProfiler.generate_id,
-          "Name" => name,
-          "DurationMilliseconds" => 0,
-          "DurationWithoutChildrenMilliseconds"=> 0,
-          "StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
-          "ParentTimingId" => nil,
-          "Children" => [],
-          "HasChildren"=> false,
-          "KeyValues" => nil,
-          "HasSqlTimings"=> false,
-          "HasDuplicateSqlTimings"=> false,
-          "SqlTimings" => [],
-          "SqlTimingsDurationMilliseconds"=> 0,
-          "IsTrivial"=> false,
-          "IsRoot"=> false,
-          "Depth"=> 0,
-          "ExecutedReaders"=> 0,
-          "ExecutedScalars"=> 0,
-          "ExecutedNonQueries"=> 0        
-        }
+        super("Id" => MiniProfiler.generate_id,
+              "Name" => name,
+              "DurationMilliseconds" => 0,
+              "DurationWithoutChildrenMilliseconds"=> 0,
+              "StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
+              "ParentTimingId" => nil,
+              "Children" => [],
+              "HasChildren"=> false,
+              "KeyValues" => nil,
+              "HasSqlTimings"=> false,
+              "HasDuplicateSqlTimings"=> false,
+              "SqlTimings" => [],
+              "SqlTimingsDurationMilliseconds"=> 0,
+              "IsTrivial"=> false,
+              "IsRoot"=> false,
+              "Depth"=> 0,
+              "ExecutedReaders"=> 0,
+              "ExecutedScalars"=> 0,
+              "ExecutedNonQueries"=> 0)
         @children_duration = 0
-      end
-      
-      def [](name)
-        @attributes[name]
-      end
-
-      def []=(name, value)
-        @attributes[name] = value
-        self
-      end
-
-      def to_json(*a)
-        ::JSON.generate(@attributes, a[0])
       end
 
       def add_child(request_timer)

@@ -1,14 +1,13 @@
+require 'mini_profiler/timer_struct'
+
 module Rack
   class MiniProfiler
 
     # This class holds the client timings
-    class ClientTimerStruct
-      def initialize(env)
-        @attributes = {}
-      end
+    class ClientTimerStruct < TimerStruct
 
-      def to_json(*a)
-        ::JSON.generate(@attributes, a[0])
+      def initialize(env)
+        super
       end
 
       def init_from_form_data(env, page_struct)
@@ -35,10 +34,8 @@ module Rack
           timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
         end
 
-        @attributes.merge!({
-          "RedirectCount" => env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount'],
-          "Timings" => timings
-        })
+        self['RedirectCount'] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount']
+        self['Timings'] = timing
       end
     end
 
