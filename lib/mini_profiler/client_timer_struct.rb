@@ -6,7 +6,7 @@ module Rack
     # This class holds the client timings
     class ClientTimerStruct < TimerStruct
 
-      def initialize(env)
+      def initialize(env={})
         super
       end
 
@@ -35,7 +35,7 @@ module Rack
         end
 
         self['RedirectCount'] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount']
-        self['Timings'] = timing
+        self['Timings'] = timings
       end
     end
 

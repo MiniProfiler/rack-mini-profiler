@@ -16,7 +16,7 @@ module Rack
               "Level" => 0,
               "User" => "unknown user",
               "HasUserViewed" => false,
-              "ClientTimings" => ClientTimerStruct.new(env),
+              "ClientTimings" => ClientTimerStruct.new,
               "DurationMilliseconds" => 0,
               "HasTrivialTimings" => true,
               "HasAllTrivialTimigs" => false,
