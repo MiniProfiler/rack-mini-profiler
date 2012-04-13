@@ -211,12 +211,10 @@ module Rack
       klass.send :alias_method, without_profiling, method
       klass.send :define_method, with_profiling do |*args, &orig|
         name = default_name 
-        rval = nil
         name = yield *args if block_given?
         ::Rack::MiniProfiler.step name do 
-          rval = self.send without_profiling, *args, &orig
+          self.send without_profiling, *args, &orig
         end
-        return rval
       end
       klass.send :alias_method, method, with_profiling
     end
