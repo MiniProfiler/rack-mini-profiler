@@ -18,11 +18,27 @@ module Rack
         @body.__send__(*args, &block)
       end
 
+      # In the case of to_str we don't want to use method_missing as it might avoid
+      # a call to each (such as in Rack::Test)
+      def to_str
+        result = ""
+        each {|token| result << token}
+        result
+      end
+
       def each(&block)
-        @body.each(&block)
+
+        # In ruby 1.9 we don't support String#each
+        if @body.is_a?(String)
+          yield @body
+        else
+          @body.each(&block)
+        end
+
         yield @additional_text
         self
       end
+
     end
 
   end

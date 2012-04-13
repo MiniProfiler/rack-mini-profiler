@@ -23,18 +23,32 @@ module Rack
 			rand(36**20).to_s(36)
 		end
 
+    # Defaults for MiniProfiler's configuration
+    def self.configuration_defaults
+      {
+        :auto_inject => true, # automatically inject on every html page
+        :base_url_path => "/mini-profiler-resources/",
+        :authorize_cb => lambda {|env| true} # callback returns true if this request is authorized to profile
+      }
+    end
+
+    def self.reset_configuration
+      @configuration = configuration_defaults
+    end
+
+    # So we can change the configuration if we want
+    def self.configuration
+      @configuration ||= configuration_defaults
+    end
+
 		#
 		# options:
 		# :auto_inject - should script be automatically injected on every html page (not xhr)
-		def initialize(app, options={})
+		def initialize(app, opts={})
 			@@instance = self
-			@options = {
-				:auto_inject => true,	# automatically inject on every html page
-				:base_url_path => "/mini-profiler-resources",
-				:authorize_cb => lambda {|env| return true;} # callback returns true if this request is authorized to profile
-			}.merge(options)
+      @options = MiniProfiler.configuration.merge(opts)
 			@app = app
-			@options[:base_url_path] += "/" unless @options[:base_url_path].end_with? "/"
+			@options[:base_url_path] << "/" unless @options[:base_url_path].end_with? "/"
 			@timer_struct_cache = {}
 			@timer_struct_lock = Mutex.new
 		end
@@ -107,6 +121,10 @@ module Rack
       MiniProfiler.current=c
     end
 
+    def options
+      @options
+    end
+
     def self.create_current(env={}, options={})
       # profiling the request
       self.current = {}
@@ -136,6 +154,7 @@ module Rack
 				add_to_timer_cache(current['page_struct'])
 				# inject header
 				headers['X-MiniProfilerID'] = current['page_struct']["Id"] if headers.is_a? Hash
+
 				# inject script
 				if current['inject_js'] \
 					&& headers.has_key?('Content-Type') \
@@ -143,6 +162,7 @@ module Rack
 					body = MiniProfiler::BodyAddProxy.new(body, self.get_profile_script(env))
 				end
 			end
+
 			[status, headers, body]
     ensure
       # Make sure this always happens

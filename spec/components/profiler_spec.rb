@@ -17,7 +17,34 @@ describe Rack::MiniProfiler do
       @unique.should_not be_empty
     end
 
-    # TODO: Way more specs
+    describe 'configuration' do
+
+      it 'allows us to set configuration settings' do
+        Rack::MiniProfiler.configuration[:abc] = 123
+        Rack::MiniProfiler.configuration[:abc].should == 123
+      end
+
+      it 'can reset the settings' do
+        Rack::MiniProfiler.configuration[:abc] = 345
+        Rack::MiniProfiler.reset_configuration
+        Rack::MiniProfiler.configuration[:abc].should be_nil
+      end
+
+      describe 'base_url_path' do
+        it 'adds a trailing slash onto the base_url_path' do
+          profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource")
+          profiler.options[:base_url_path].should == "/test-resource/"
+        end
+
+        it "doesn't add the trailing slash when it's already there" do
+          profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource/")
+          profiler.options[:base_url_path].should == "/test-resource/"
+        end
+
+      end      
+
+    end
+
     describe 'step' do
 
       it 'yields the block given' do

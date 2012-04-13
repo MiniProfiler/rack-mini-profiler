@@ -62,6 +62,4 @@ Additionally you can also run `autotest` if you like.
 - Beef up the documentation 
 - Auto-wire-up rails middleware 
 - Review our API and ensure it is trivial
-- Refactor big file into an organised structure, clean up namespacing 
-- Add tests 
 

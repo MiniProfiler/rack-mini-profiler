@@ -3,6 +3,9 @@ module MiniProfilerRails
 
     initializer "rack_mini_profiler.configure_rails_initialization" do |app|
 
+      # By default, only show the MiniProfiler in development mode
+      Rack::MiniProfiler.configuration[:authorize_cb] = lambda {|env| Rails.env.development? }
+
       # Install the Middleware
       app.middleware.use Rack::MiniProfiler
 
@@ -11,6 +14,6 @@ module MiniProfilerRails
       ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
 
     end
-    
+
   end
 end
