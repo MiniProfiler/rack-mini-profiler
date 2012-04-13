@@ -203,7 +203,7 @@ module Rack
       end
 		end
 
-    def self.profile_method(klass, method)
+    def self.profile_method(klass, method, &blk)
       default_name = klass.to_s + " " + method.to_s
       with_profiling = (method.to_s + "_with_mini_profiler").intern
       without_profiling = (method.to_s + "_without_mini_profiler").intern
@@ -211,7 +211,7 @@ module Rack
       klass.send :alias_method, without_profiling, method
       klass.send :define_method, with_profiling do |*args, &orig|
         name = default_name 
-        name = yield *args if block_given?
+        name = blk.bind(self).call(*args) if blk
         ::Rack::MiniProfiler.step name do 
           self.send without_profiling, *args, &orig
         end
