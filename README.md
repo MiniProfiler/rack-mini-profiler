@@ -19,6 +19,10 @@ gem 'rack-mini-profiler'
 
 Add it to your middleware stack:
 
+Using Rails:
+
+All you have to do is include the Gem and you're good to go.
+
 Using Builder:
 
 ```ruby
