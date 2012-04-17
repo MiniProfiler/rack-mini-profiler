@@ -153,8 +153,12 @@ module Rack
 			# inject headers, script
 			if status == 200
 				add_to_timer_cache(current['page_struct'])
+        
 				# inject header
-				headers['X-MiniProfilerID'] = current['page_struct']["Id"] if headers.is_a? Hash
+        if headers.is_a? Hash
+				  headers['X-MiniProfilerID'] = current['page_struct']["Id"] 
+          headers['X-MiniProfiler-Ids'] = "[\"#{current['page_struct']['Id']}\"]"
+        end
 
 				# inject script
 				if current['inject_js'] \
