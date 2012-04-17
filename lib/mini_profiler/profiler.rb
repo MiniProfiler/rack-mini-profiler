@@ -28,7 +28,8 @@ module Rack
       {
         :auto_inject => true, # automatically inject on every html page
         :base_url_path => "/mini-profiler-resources/",
-        :authorize_cb => lambda {|env| true} # callback returns true if this request is authorized to profile
+        :authorize_cb => lambda {|env| true}, # callback returns true if this request is authorized to profile
+        :position => 'left'  # Where it is displayed
       }
     end
 
@@ -179,7 +180,7 @@ module Rack
 			ids = "[\"%s\"]" % current['page_struct']['Id'].to_s
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
-			position = 'left'
+			position = @options[:position]
 			showTrivial = false
 			showChildren = false
 			maxTracesToShow = 10
