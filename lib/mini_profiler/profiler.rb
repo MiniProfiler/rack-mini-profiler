@@ -29,7 +29,9 @@ module Rack
         :auto_inject => true, # automatically inject on every html page
         :base_url_path => "/mini-profiler-resources/",
         :authorize_cb => lambda {|env| true}, # callback returns true if this request is authorized to profile
-        :position => 'left'  # Where it is displayed
+        :position => 'left',  # Where it is displayed
+        :backtrace_remove => nil,
+        :backtrace_filter => nil
       }
     end
 
