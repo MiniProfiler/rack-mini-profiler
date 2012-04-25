@@ -111,10 +111,19 @@ describe Rack::MiniProfiler::RequestTimerStruct do
         @request.children_duration.should == 1111
       end
 
+      it 'marks short timings as trivial' do
+        @request.record_time(1)
+        @request['IsTrivial'].should be_true
+      end
 
+      
       describe 'record time on parent' do
         before do
           @request.record_time(1234)
+        end
+
+        it "is not a trivial query" do
+          @request['IsTrivial'].should be_false
         end
 
         it 'has stores the recorded time in DurationMilliseconds' do

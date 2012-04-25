@@ -25,6 +25,7 @@ module Rack
               "KeyValues" => nil,
               "HasSqlTimings"=> false,
               "HasDuplicateSqlTimings"=> false,
+              "TrivialDurationThresholdMilliseconds" => 2,
               "SqlTimings" => [],
               "SqlTimingsDurationMilliseconds"=> 0,
               "IsTrivial"=> false,
@@ -54,6 +55,7 @@ module Rack
 
       def record_time(milliseconds)
         self['DurationMilliseconds'] = milliseconds
+        self['IsTrivial'] = true if milliseconds < self["TrivialDurationThresholdMilliseconds"]
         self['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
       end     
     end
