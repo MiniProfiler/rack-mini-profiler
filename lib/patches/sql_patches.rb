@@ -37,8 +37,16 @@ module Rack
         sql, name, binds = args
         t0 = Time.now
         rval = log_without_miniprofiler(*args, &block)
+
+        # Get our MP Instance
+        instance = ::Rack::MiniProfiler.instance
+        return rval unless instance
+
+        # Don't log schema queries if the option is set
+        return rval if instance.options[:skip_schema_queries] and name =~ /SCHEMA/
+
         elapsed_time = ((Time.now - t0).to_f * 1000).to_i
-        ::Rack::MiniProfiler.instance.record_sql(sql, elapsed_time) if ::Rack::MiniProfiler.instance
+        instance.record_sql(sql, elapsed_time)
         rval
       end
     end

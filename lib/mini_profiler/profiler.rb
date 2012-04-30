@@ -31,7 +31,8 @@ module Rack
         :authorize_cb => lambda {|env| true}, # callback returns true if this request is authorized to profile
         :position => 'left',  # Where it is displayed
         :backtrace_remove => nil,
-        :backtrace_filter => nil
+        :backtrace_filter => nil,
+        :skip_schema_queries => true
       }
     end
 
