@@ -45,7 +45,7 @@ module Rack
         # Don't log schema queries if the option is set
         return rval if instance.options[:skip_schema_queries] and name =~ /SCHEMA/
 
-        elapsed_time = ((Time.now - t0).to_f * 1000).to_i
+        elapsed_time = ((Time.now - t0).to_f * 1000).round(1)
         instance.record_sql(sql, elapsed_time)
         rval
       end

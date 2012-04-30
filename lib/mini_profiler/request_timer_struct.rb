@@ -51,6 +51,7 @@ module Rack
         self['SqlTimings'].push(timer)
         self['HasSqlTimings'] = true
         self['SqlTimingsDurationMilliseconds'] += elapsed_ms
+        page['DurationMillisecondsInSql'] += elapsed_ms        
       end
 
       def record_time(milliseconds)

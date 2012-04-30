@@ -55,8 +55,8 @@ describe Rack::MiniProfiler::RequestTimerStruct do
   describe 'add SQL' do
 
     before do
-      #def add_sql(query, elapsed_ms, page)
-      @request.add_sql("SELECT 1 FROM users", 77, new_page)
+      @page = new_page
+      @request.add_sql("SELECT 1 FROM users", 77, @page)
     end
 
     it 'has a true HasSqlTimings attribute' do
@@ -73,6 +73,10 @@ describe Rack::MiniProfiler::RequestTimerStruct do
 
     it 'increases SqlTimingsDurationMilliseconds' do
       @request['SqlTimingsDurationMilliseconds'].should == 77
+    end
+
+    it "increases the page's " do
+      @page['DurationMillisecondsInSql'].should == 77
     end
 
   end
