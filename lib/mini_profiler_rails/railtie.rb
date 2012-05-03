@@ -11,7 +11,7 @@ module MiniProfilerRails
       Rack::MiniProfiler.configuration[:backtrace_filter] =  /^\/?(app|config|lib|test)/
 
       # Install the Middleware
-      app.middleware.use Rack::MiniProfiler
+      app.middleware.insert_after 'Rack::ConditionalGet', 'Rack::MiniProfiler'
 
       # Attach to various Rails methods
       ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
