@@ -32,6 +32,10 @@ module Rack
         self['Root'] = RequestTimerStruct.createRoot(name, self)
       end
 
+      def duration_ms
+        @attributes['Root']['DurationMilliseconds']
+      end
+      
       def to_json(*a)
         attribs = @attributes.merge(
           "Started" => '/Date(%d)/' % @attributes['Started'], 

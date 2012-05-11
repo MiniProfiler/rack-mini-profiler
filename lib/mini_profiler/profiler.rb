@@ -45,6 +45,11 @@ module Rack
       @configuration ||= configuration_defaults
     end
 
+    def self.share_template
+      return @share_template unless @share_template.nil?
+      @share_template = ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+    end
+
 		#
 		# options:
 		# :auto_inject - should script be automatically injected on every html page (not xhr)
@@ -58,14 +63,32 @@ module Rack
 		end
 
 		def serve_results(env)
-			request = Rack::Request.new(env)
+			request = Rack::Request.new(env)      
 			page_struct = get_from_timer_cache(request['id'])
 			return [404, {}, ["No such result #{request['id']}"]] unless page_struct
 			unless page_struct['HasUserViewed']
 				page_struct['ClientTimings'].init_from_form_data(env, page_struct)
 				page_struct["HasUserViewed"] = true
 			end
-			[200, { 'Content-Type' => 'application/json'}, [page_struct.to_json]]
+
+      result_json = page_struct.to_json
+      # If we're an XMLHttpRequest, serve up the contents as JSON
+      if request.xhr?
+  			[200, { 'Content-Type' => 'application/json'}, [result_json]]
+      else
+
+        # Otherwise give the HTML back
+        html = MiniProfiler.share_template.dup  
+        html.gsub!(/\{path\}/, @options[:base_url_path])      
+        html.gsub!(/\{version\}/, MiniProfiler::VERSION)      
+        html.gsub!(/\{json\}/, result_json)
+        html.gsub!(/\{includes\}/, get_profile_script(env))
+        html.gsub!(/\{name\}/, page_struct['Name'])
+        html.gsub!(/\{duration\}/, page_struct.duration_ms.round(1).to_s)
+        
+        [200, {'Content-Type' => 'text/html'}, [html]]
+      end
+
 		end
 
 		def serve_html(env)
