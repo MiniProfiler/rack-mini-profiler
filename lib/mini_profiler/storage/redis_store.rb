@@ -1,5 +1,3 @@
-require 'redis'
-
 module Rack
   class MiniProfiler
     class RedisStore < AbstractStore

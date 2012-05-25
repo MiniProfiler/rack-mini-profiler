@@ -9,6 +9,7 @@ require 'mini_profiler/request_timer_struct'
 require 'mini_profiler/body_add_proxy'
 require 'mini_profiler/storage/abstract_store'
 require 'mini_profiler/storage/memory_store'
+require 'mini_profiler/storage/redis_store'
 
 module Rack
 
@@ -166,9 +167,7 @@ module Rack
         
 				# inject header
         if headers.is_a? Hash
-				  headers['X-MiniProfilerID'] = page_struct["Id"] 
-          ids = [page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
-          headers['X-MiniProfiler-Ids'] = ::JSON.generate(ids)
+          headers['X-MiniProfiler-Ids'] = ids_json(env)
         end
 
 				# inject script
@@ -185,6 +184,11 @@ module Rack
       current = nil
 		end
 
+    def ids_json(env)
+      ids = [current['page_struct']["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
+      ::JSON.generate(ids)
+    end
+
 		# get_profile_script returns script to be injected inside current html page
 		# By default, profile_script is appended to the end of all html requests automatically.
 		# Calling get_profile_script cancels automatic append for the current page
@@ -192,7 +196,7 @@ module Rack
 		# * you have disabled auto append behaviour throught :auto_inject => false flag
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
 		def get_profile_script(env)
-			ids = "[\"%s\"]" % current['page_struct']['Id'].to_s
+			ids = ids_json(env)
 			path = @options[:base_url_path]
 			version = MiniProfiler::VERSION
 			position = @options[:position]
