@@ -7,6 +7,8 @@ require 'mini_profiler/sql_timer_struct'
 require 'mini_profiler/client_timer_struct'
 require 'mini_profiler/request_timer_struct'
 require 'mini_profiler/body_add_proxy'
+require 'mini_profiler/storage/abstract_store'
+require 'mini_profiler/storage/memory_store'
 
 module Rack
 
@@ -32,7 +34,9 @@ module Rack
         :position => 'left',  # Where it is displayed
         :backtrace_remove => nil,
         :backtrace_filter => nil,
-        :skip_schema_queries => true
+        :skip_schema_queries => true,
+        :storage => MiniProfiler::MemoryStore,
+        :user_provider => Proc.new{|env| "TODO" }
       }
     end
 
@@ -58,17 +62,24 @@ module Rack
       @options = MiniProfiler.configuration.merge(opts)
 			@app = app
 			@options[:base_url_path] << "/" unless @options[:base_url_path].end_with? "/"
-			@timer_struct_cache = {}
-			@timer_struct_lock = Mutex.new
+      unless @options[:storage_instance]
+        @storage = @options[:storage_instance] = @options[:storage].new
+      end
 		end
+    
+    def user(env)
+      options[:user_provider].call(env)
+    end
 
 		def serve_results(env)
 			request = Rack::Request.new(env)      
-			page_struct = get_from_timer_cache(request['id'])
+			page_struct = @storage.load(request['id'])
 			return [404, {}, ["No such result #{request['id']}"]] unless page_struct
 			unless page_struct['HasUserViewed']
 				page_struct['ClientTimings'].init_from_form_data(env, page_struct)
-				page_struct["HasUserViewed"] = true
+				page_struct['HasUserViewed'] = true
+        @storage.save(page_struct) 
+        @storage.set_viewed(user(env), page_struct['Id']) 
 			end
 
       result_json = page_struct.to_json
@@ -102,35 +113,6 @@ module Rack
 			f.serving env
 		end
 
-		def add_to_timer_cache(page_struct)
-			@timer_struct_lock.synchronize {
-				@timer_struct_cache[page_struct['Id']] = page_struct
-			}
-		end
-
-		def get_from_timer_cache(id)
-			@timer_struct_lock.synchronize {
-				@timer_struct_cache[id]
-			}
-		end
-
-		EXPIRE_TIMER_CACHE = 3600 * 24 # expire cache in seconds
-
-		def cleanup_cache
-			expire_older_than = ((Time.now.to_f - MiniProfiler::EXPIRE_TIMER_CACHE) * 1000).to_i
-			@timer_struct_lock.synchronize {
-				@timer_struct_cache.delete_if { |k, v| v['Root']['StartMilliseconds'] < expire_older_than }
-			}
-		end
-
-		# clean up the cache every hour
-		Thread.new do
-			while true do
-				MiniProfiler.instance.cleanup_cache if MiniProfiler.instance
-				sleep(3600)
-			end
-		end
-
     def self.current
       Thread.current['profiler.mini.private']
     end
@@ -158,7 +140,6 @@ module Rack
       self.current['inject_js'] = options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
       self.current['page_struct'] = PageTimerStruct.new(env)
       self.current['current_timer'] = current['page_struct']['Root']
-
     end
 
 		def call(env)
@@ -174,16 +155,20 @@ module Rack
 
       start = Time.now 
 			status, headers, body = @app.call(env)
-			current['page_struct']['Root'].record_time((Time.now - start) * 1000)
+
+      page_struct = current['page_struct']
+			page_struct['Root'].record_time((Time.now - start) * 1000)
 
 			# inject headers, script
 			if status == 200
-				add_to_timer_cache(current['page_struct'])
+				@storage.save(page_struct)
+        @storage.set_unviewed(user(env), page_struct['Id']) 
         
 				# inject header
         if headers.is_a? Hash
-				  headers['X-MiniProfilerID'] = current['page_struct']["Id"] 
-          headers['X-MiniProfiler-Ids'] = "[\"#{current['page_struct']['Id']}\"]"
+				  headers['X-MiniProfilerID'] = page_struct["Id"] 
+          ids = [page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
+          headers['X-MiniProfiler-Ids'] = ::JSON.generate(ids)
         end
 
 				# inject script
