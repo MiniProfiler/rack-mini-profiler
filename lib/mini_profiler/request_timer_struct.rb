@@ -45,8 +45,8 @@ module Rack
         @children_duration += request_timer['DurationMilliseconds']
       end
 
-      def add_sql(query, elapsed_ms, page)
-        timer = SqlTimerStruct.new(query, elapsed_ms, page)
+      def add_sql(query, elapsed_ms, page, skip_backtrace = false)
+        timer = SqlTimerStruct.new(query, elapsed_ms, page, skip_backtrace)
         timer['ParentTimingId'] = self['Id']
         self['SqlTimings'].push(timer)
         self['HasSqlTimings'] = true

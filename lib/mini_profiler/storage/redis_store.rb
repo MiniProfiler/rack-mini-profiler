@@ -14,7 +14,9 @@ module Rack
 
       def load(id)
         raw = redis.get "#{@prefix}#{id}"
-        Marshal::load raw
+        if raw
+          Marshal::load raw
+        end
       end
 
       def set_unviewed(user, id)
@@ -32,7 +34,8 @@ module Rack
       private 
 
       def redis
-        Redis.new '127.0.0.1'
+        require 'redis' unless defined? Redis
+        Redis.new 
       end
 
     end

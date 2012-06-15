@@ -11,6 +11,12 @@ describe Rack::MiniProfiler do
       map '/html' do
         run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>Hi</h1>'] }
       end
+      map '/db' do 
+        run lambda { |env| 
+          ::Rack::MiniProfiler.instance.record_sql("I want to be, in a db", 10)
+          [200, {'Content-Type' => 'text/html'}, '<h1>Hi+db</h1>'] 
+        }
+      end
     }.to_app
   end
 
@@ -28,8 +34,8 @@ describe Rack::MiniProfiler do
       last_response.should be_ok
     end
 
-    it 'has the X-MiniProfilerID header' do
-      last_response.headers.has_key?('X-MiniProfilerID').should be_true
+    it 'has the X-MiniProfiler-Ids header' do
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
     end
 
     it 'has the JS in the body' do
@@ -39,13 +45,23 @@ describe Rack::MiniProfiler do
   end
 
   describe 'configuration' do
-
     it "doesn't add MiniProfiler if the callback fails" do
       Rack::MiniProfiler.configuration[:authorize_cb] = lambda {|env| false }
       get '/html'
       last_response.headers.has_key?('X-MiniProfilerID').should be_false
     end
+  end
 
+  describe 'special options' do
+    it "omits db backtrace if requested" do 
+      get '/db?pp=skip-backtrace' 
+      id = last_response.headers['X-MiniProfiler-Ids']
+      id = ::JSON.parse(id)[0]
+      prof = Rack::MiniProfiler.configuration[:storage_instance].load(id)
+      stack = prof["Root"]["SqlTimings"][0]["StackTraceSnippet"]
+      stack.should be_nil
+    end
+    
   end
 
 

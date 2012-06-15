@@ -47,7 +47,7 @@ module Rack
 
     # So we can change the configuration if we want
     def self.configuration
-      @configuration ||= configuration_defaults
+      @configuration ||= configuration_defaults.dup
     end
 
     def self.share_template
@@ -60,7 +60,8 @@ module Rack
 		# :auto_inject - should script be automatically injected on every html page (not xhr)
 		def initialize(app, opts={})
 			@@instance = self
-      @options = MiniProfiler.configuration.merge(opts)
+      MiniProfiler.configuration.merge!(opts)
+      @options = MiniProfiler.configuration 
 			@app = app
 			@options[:base_url_path] << "/" unless @options[:base_url_path].end_with? "/"
       unless @options[:storage_instance]
@@ -75,7 +76,10 @@ module Rack
 		def serve_results(env)
 			request = Rack::Request.new(env)      
 			page_struct = @storage.load(request['id'])
-			return [404, {}, ["No such result #{request['id']}"]] unless page_struct
+      unless page_struct
+        @storage.set_viewed(user(env), request['Id']) 
+			  return [404, {}, ["No such result #{request['id']}"]] 
+      end
 			unless page_struct['HasUserViewed']
 				page_struct['ClientTimings'].init_from_form_data(env, page_struct)
 				page_struct['HasUserViewed'] = true
@@ -153,6 +157,9 @@ module Rack
 			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
 
       MiniProfiler.create_current(env, @options)
+      if env["QUERY_STRING"] =~ /pp=skip-backtrace/
+        current['skip-backtrace'] = true
+      end
 
       start = Time.now 
 			status, headers, body = @app.call(env)
@@ -260,7 +267,8 @@ module Rack
     end
 
 		def record_sql(query, elapsed_ms)
-			current['current_timer'].add_sql(query, elapsed_ms, current['page_struct']) if (current && current['current_timer'])
+      c = current
+			c['current_timer'].add_sql(query, elapsed_ms, c['page_struct'], c['skip-backtrace']) if (c && c['current_timer'])
 		end
 
 	end

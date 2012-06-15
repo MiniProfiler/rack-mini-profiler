@@ -5,18 +5,20 @@ module Rack
 
     # Timing system for a SQL query
     class SqlTimerStruct < TimerStruct
-      def initialize(query, duration_ms, page)
+      def initialize(query, duration_ms, page, skip_backtrace = false)
 
-        # Allow us to filter the stack trace
-        stack_trace = ""
-         # Clean up the stack trace if there are options to do so
-        Kernel.caller.each do |ln|
-          ln.gsub!(Rack::MiniProfiler.configuration[:backtrace_remove], '') if Rack::MiniProfiler.configuration[:backtrace_remove]
-          if Rack::MiniProfiler.configuration[:backtrace_filter].nil? or ln =~ Rack::MiniProfiler.configuration[:backtrace_filter]
-            stack_trace << ln << "\n" 
+        stack_trace = nil 
+        unless skip_backtrace 
+          # Allow us to filter the stack trace
+          stack_trace = ""
+           # Clean up the stack trace if there are options to do so
+          Kernel.caller.each do |ln|
+            ln.gsub!(Rack::MiniProfiler.configuration[:backtrace_remove], '') if Rack::MiniProfiler.configuration[:backtrace_remove]
+            if Rack::MiniProfiler.configuration[:backtrace_filter].nil? or ln =~ Rack::MiniProfiler.configuration[:backtrace_filter]
+              stack_trace << ln << "\n" 
+            end
           end
         end
-
 
         super("ExecuteType" => 3, # TODO
               "FormattedCommandString" => query,
