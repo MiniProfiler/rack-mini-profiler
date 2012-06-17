@@ -38,6 +38,12 @@ describe Rack::MiniProfiler do
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
     end
 
+    it 'has only one X-MiniProfiler-Ids header' do
+      h = last_response.headers['X-MiniProfiler-Ids']
+      ids = ::JSON.parse(h)
+      ids.count.should == 1
+    end
+
     it 'has the JS in the body' do
       last_response.body.include?('MiniProfiler.init').should be_true
     end

@@ -193,7 +193,7 @@ module Rack
 
     def ids_json(env)
       ids = [current['page_struct']["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
-      ::JSON.generate(ids)
+      ::JSON.generate(ids.uniq)
     end
 
 		# get_profile_script returns script to be injected inside current html page
