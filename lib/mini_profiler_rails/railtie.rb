@@ -6,7 +6,7 @@ module MiniProfilerRails
       # By default, only show the MiniProfiler in development mode
       Rack::MiniProfiler.configuration[:authorize_cb] = lambda {|env| Rails.env.development? }
       tmp = Rails.root.to_s + "/tmp/miniprofiler"
-      Dir::mkdir(tmp) unless File.exists?(tmp)
+      FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
       Rack::MiniProfiler.configuration[:storage_options] = {:path => tmp}
       Rack::MiniProfiler.configuration[:storage] = Rack::MiniProfiler::FileStore
 
