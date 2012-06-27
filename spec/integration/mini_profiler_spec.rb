@@ -17,6 +17,12 @@ describe Rack::MiniProfiler do
           [200, {'Content-Type' => 'text/html'}, '<h1>Hi+db</h1>'] 
         }
       end
+      map '/3ms' do 
+        run lambda { |env| 
+          sleep(0.003)
+          [200, {'Content-Type' => 'text/html'}, '<h1>Hi</h1>'] 
+        }
+      end
     }.to_app
   end
 
@@ -58,16 +64,31 @@ describe Rack::MiniProfiler do
     end
   end
 
+  def load_prof(response)
+    id = response.headers['X-MiniProfiler-Ids']
+    id = ::JSON.parse(id)[0]
+    Rack::MiniProfiler.configuration[:storage_instance].load(id)
+  end
+
   describe 'special options' do
     it "omits db backtrace if requested" do 
       get '/db?pp=skip-backtrace' 
-      id = last_response.headers['X-MiniProfiler-Ids']
-      id = ::JSON.parse(id)[0]
-      prof = Rack::MiniProfiler.configuration[:storage_instance].load(id)
+      prof = load_prof(last_response)
       stack = prof["Root"]["SqlTimings"][0]["StackTraceSnippet"]
       stack.should be_nil
     end
     
+  end
+  
+  describe 'sampling mode' do
+    it "should sample stack traces if requested" do 
+      get '/3ms?pp=sample' 
+      prof = load_prof(last_response)
+
+      # TODO: implement me
+      #prof["Root"]["SampleData"].length should > 0 
+
+    end
   end
 
 

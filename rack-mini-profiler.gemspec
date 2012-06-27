@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
 	s.name = "rack-mini-profiler"
-	s.version = "2.0.1a"
+	s.version = "0.1"
 	s.summary = "Profiles loading speed for html pages."
 	s.authors = ["Aleks Totic","Sam Saffron", "Robin Ward"]
 	s.date = "2012-04-02"
-	s.description = "Page loading speed displayed on every page. Optimize while you develop, peformance is a feature."
-	s.email = "a@totic.org"
+	s.description = "Page loading speed displayed on every page. Optimize while you develop, performance is a feature."
+	s.email = "sam.saffron@gmail.com"
 	s.homepage = "http://miniprofiler.com"
 	s.files = [
 		'rack-mini-profiler.gemspec',

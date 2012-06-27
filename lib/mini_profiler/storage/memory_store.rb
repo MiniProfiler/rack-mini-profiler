@@ -4,15 +4,17 @@ module Rack
 
       EXPIRE_TIMER_CACHE = 3600 * 24
      
-      def initialize
+      def initialize(args)
         @timer_struct_lock = Mutex.new
         @timer_struct_cache = {}
         @user_view_lock = Mutex.new
         @user_view_cache = {}
 
+        # TODO: fix it to use weak ref, trouble is may be broken in 1.9 so need to use the 'ref' gem
+        me = self
         Thread.new do
           while true do
-            MiniProfiler.instance.cleanup_cache if MiniProfiler.instance
+            me.cleanup_cache
             sleep(3600)
           end
         end

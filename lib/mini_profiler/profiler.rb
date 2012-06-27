@@ -10,6 +10,7 @@ require 'mini_profiler/body_add_proxy'
 require 'mini_profiler/storage/abstract_store'
 require 'mini_profiler/storage/memory_store'
 require 'mini_profiler/storage/redis_store'
+require 'mini_profiler/storage/file_store'
 
 module Rack
 
@@ -65,7 +66,7 @@ module Rack
 			@app = app
 			@options[:base_url_path] << "/" unless @options[:base_url_path].end_with? "/"
       unless @options[:storage_instance]
-        @storage = @options[:storage_instance] = @options[:storage].new
+        @storage = @options[:storage_instance] = @options[:storage].new(@options[:storage_options])
       end
 		end
     
@@ -162,7 +163,33 @@ module Rack
       end
 
       start = Time.now 
-			status, headers, body = @app.call(env)
+
+      done_sampling = false
+      quit_sampler = false
+      backtraces = nil
+      if env["QUERY_STRING"] =~ /pp=sample/
+        backtraces = []
+        t = Thread.current
+        Thread.new {
+          i = 10000 # for sanity never grab more than 10k samples 
+          unless done_sampling || i < 0
+            i -= 1
+            backtraces << t.backtrace
+            sleep 0.001
+          end
+          quit_sampler = true
+        }
+      end
+
+			status, headers, body = nil
+      begin 
+        status,headers, body = @app.call(env)
+      ensure
+        if backtraces 
+          done_sampling = true
+          sleep 0.001 until quit_sampler
+        end
+      end
 
       page_struct = current['page_struct']
 			page_struct['Root'].record_time((Time.now - start) * 1000)
@@ -185,6 +212,11 @@ module Rack
 				end
 			end
 
+      # mini profiler is meddling with stuff, we can not cache cause we will get incorrect data
+      # Rack::ETag has already inserted some nonesense in the chain
+      headers.delete('ETag')
+      headers.delete('Date')
+      headers['Cache-Control'] = 'must-revalidate, private, max-age=0'
 			[status, headers, body]
     ensure
       # Make sure this always happens

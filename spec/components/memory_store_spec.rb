@@ -7,7 +7,7 @@ describe Rack::MiniProfiler::MemoryStore do
   context 'page struct' do
 
     before do
-      @store = Rack::MiniProfiler::MemoryStore.new
+      @store = Rack::MiniProfiler::MemoryStore.new nil
     end
 
     describe 'storage' do
