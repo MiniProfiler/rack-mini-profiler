@@ -7,10 +7,11 @@ module MiniProfilerRails
       Rack::MiniProfiler.configuration[:authorize_cb] = lambda { |env|
         Rails.env.development? && !(env['PATH_INFO'] =~ /^\/assets\//)
       }
+
+      # The file store is just so much less flaky
       tmp = Rails.root.to_s + "/tmp/miniprofiler"
       Dir::mkdir(tmp) unless File.exists?(tmp)
       
-      # The file store is just so much less flaky
       Rack::MiniProfiler.configuration[:storage_options] = {:path => tmp}
       Rack::MiniProfiler.configuration[:storage] = Rack::MiniProfiler::FileStore
 

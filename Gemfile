@@ -8,4 +8,5 @@ group :test do
   gem 'rspec'
   gem 'ZenTest'
   gem 'autotest'
+  gem 'redis'
 end
