@@ -38,7 +38,7 @@ module Rack
         :backtrace_filter => nil,
         :skip_schema_queries => true,
         :storage => MiniProfiler::MemoryStore,
-        :user_provider => Proc.new{|env| "TODO" }
+        :user_provider => Proc.new{|env| Rack::Request.new(env).ip }
       }
     end
 
@@ -76,16 +76,17 @@ module Rack
 
 		def serve_results(env)
 			request = Rack::Request.new(env)      
-			page_struct = @storage.load(request['id'])
+      id = request['id']
+			page_struct = @storage.load(id)
       unless page_struct
-        @storage.set_viewed(user(env), request['Id']) 
-			  return [404, {}, ["No such result #{request['id']}"]] 
+        @storage.set_viewed(user(env), id) 
+        return [404, {}, ["Request not found: #{request['id']} - user #{user(env)}"]] 
       end
 			unless page_struct['HasUserViewed']
 				page_struct['ClientTimings'].init_from_form_data(env, page_struct)
 				page_struct['HasUserViewed'] = true
         @storage.save(page_struct) 
-        @storage.set_viewed(user(env), page_struct['Id']) 
+        @storage.set_viewed(user(env), id) 
 			end
 
       result_json = page_struct.to_json
@@ -194,10 +195,12 @@ module Rack
       page_struct = current['page_struct']
 			page_struct['Root'].record_time((Time.now - start) * 1000)
 
-			# inject headers, script
+      # no matter what it is, it should be unviewed, otherwise we will miss POST
+      @storage.set_unviewed(user(env), page_struct['Id']) 
+			@storage.save(page_struct)
+			
+      # inject headers, script
 			if status == 200
-				@storage.save(page_struct)
-        @storage.set_unviewed(user(env), page_struct['Id']) 
         
 				# inject header
         if headers.is_a? Hash

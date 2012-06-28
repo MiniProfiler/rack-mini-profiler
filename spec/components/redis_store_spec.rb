@@ -9,7 +9,7 @@ describe Rack::MiniProfiler::RedisStore do
   context 'page struct' do
 
     before do
-      @store = Rack::MiniProfiler::RedisStore.new
+      @store = Rack::MiniProfiler::RedisStore.new(nil)
     end
 
     describe 'storage' do

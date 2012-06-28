@@ -8,6 +8,9 @@ describe Rack::MiniProfiler do
   def app
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
+      map '/post' do
+        run lambda { |env| [302, {'Content-Type' => 'text/html'}, '<h1>POST</h1>'] }
+      end
       map '/html' do
         run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>Hi</h1>'] }
       end
@@ -78,6 +81,16 @@ describe Rack::MiniProfiler do
       stack.should be_nil
     end
     
+  end
+
+  describe 'POST followed by GET' do
+    it "should end up with 2 ids" do
+      post '/post'
+      get '/html'
+
+      ids = last_response.headers['X-MiniProfiler-Ids']
+      ::JSON.parse(ids).length.should == 2
+    end
   end
   
   describe 'sampling mode' do
