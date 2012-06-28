@@ -23,7 +23,7 @@ module Rack
         super("ExecuteType" => 3, # TODO
               "FormattedCommandString" => query,
               "StackTraceSnippet" => stack_trace, 
-              "StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
+              "StartMilliseconds" => ((Time.now.to_f * 1000).to_i - page['Started']) - duration_ms,
               "DurationMilliseconds" => duration_ms,
               "FirstFetchDurationMilliseconds" => 0,
               "Parameters" => nil,
