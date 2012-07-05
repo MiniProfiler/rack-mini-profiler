@@ -13,8 +13,8 @@ module Rack
           stack_trace = ""
            # Clean up the stack trace if there are options to do so
           Kernel.caller.each do |ln|
-            ln.gsub!(Rack::MiniProfiler.configuration[:backtrace_remove], '') if Rack::MiniProfiler.configuration[:backtrace_remove]
-            if Rack::MiniProfiler.configuration[:backtrace_filter].nil? or ln =~ Rack::MiniProfiler.configuration[:backtrace_filter]
+            ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove
+            if Rack::MiniProfiler.config.backtrace_filter.nil? or ln =~ Rack::MiniProfiler.config.backtrace_filter
               stack_trace << ln << "\n" 
             end
           end

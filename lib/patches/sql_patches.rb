@@ -43,7 +43,7 @@ module Rack
         return rval unless instance
 
         # Don't log schema queries if the option is set
-        return rval if instance.options[:skip_schema_queries] and name =~ /SCHEMA/
+        return rval if instance.config.skip_schema_queries and name =~ /SCHEMA/
 
         elapsed_time = ((Time.now - t0).to_f * 1000).round(1)
         instance.record_sql(sql, elapsed_time)
@@ -59,14 +59,7 @@ module Rack
   end
 
   if defined?(::Rails)
-    if ::Rails::VERSION::MAJOR.to_i == 3
-    # in theory this is the right thing to do for rails 3 ... but it seems to work anyway
-    #Rails.configuration.after_initialize do
-        insert_instrumentation
-    #end
-    else
-      insert_instrumentation
-    end
+    insert_instrumentation
   end
 end
 

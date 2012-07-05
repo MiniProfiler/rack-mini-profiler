@@ -2,22 +2,31 @@ module MiniProfilerRails
   class Railtie < ::Rails::Railtie
 
     initializer "rack_mini_profiler.configure_rails_initialization" do |app|
+      c = Rack::MiniProfiler.config
 
-      # By default, only show the MiniProfiler in development mode
-      Rack::MiniProfiler.configuration[:authorize_cb] = lambda { |env|
-        Rails.env.development? && !(env['PATH_INFO'] =~ /^\/assets\//)
+      # By default, only show the MiniProfiler in development mode, in production allow profiling if post_authorize_cb is set
+      c.pre_authorize_cb = lambda { |env|
+        Rails.env.development? ||  
+        (Rack::MiniProfiler.config.post_authorize_cb && Rack::MiniProfiler.has_profiling_cookie?(env))
       }
+
+      if Rails.env.development?
+        c.skip_paths ||= []
+        c.skip_paths << "/assets/"
+        c.skip_schema_queries = true
+      end
 
       # The file store is just so much less flaky
       tmp = Rails.root.to_s + "/tmp/miniprofiler"
       Dir::mkdir(tmp) unless File.exists?(tmp)
-      
-      Rack::MiniProfiler.configuration[:storage_options] = {:path => tmp}
-      Rack::MiniProfiler.configuration[:storage] = Rack::MiniProfiler::FileStore
+
+      c.storage_options = {:path => tmp}
+      c.storage = Rack::MiniProfiler::FileStore
 
       # Quiet the SQL stack traces
-      Rack::MiniProfiler.configuration[:backtrace_remove] = Rails.root.to_s + "/"
-      Rack::MiniProfiler.configuration[:backtrace_filter] =  /^\/?(app|config|lib|test)/
+      c.backtrace_remove = Rails.root.to_s + "/"
+      c.backtrace_filter =  /^\/?(app|config|lib|test)/
+      c.skip_schema_queries =  Rails.env != 'production'
 
       # Install the Middleware
       app.middleware.insert_before 'Rack::Lock', 'Rack::MiniProfiler'

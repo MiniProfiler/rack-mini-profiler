@@ -1,13 +1,6 @@
 # rack-mini-profiler
 
-Middleware that displays speed badge for every html page.
-
-## What does it do
-
-MiniProfiler keeps you aware of your site's performance as you are developing it.
-It does this by....
-
-`env['profiler.mini']` is the profiler 
+Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
 ## Using mini-profiler in your app
 
@@ -16,12 +9,9 @@ Install/add to Gemfile
 ```ruby
 gem 'rack-mini-profiler'
 ```
-
-Add it to your middleware stack:
-
 Using Rails:
 
-All you have to do is include the Gem and you're good to go.
+All you have to do is include the Gem and you're good to go in development.
 
 Using Builder:
 
@@ -58,15 +48,17 @@ You can set configuration options using the configuration accessor on Rack::Mini
 
 ```
 # Have Mini Profiler show up on the right
-Rack::MiniProfiler.configuration[:position] = 'right'
+Rack::MiniProfiler.config.position = 'right'
 ```
 
 In a Rails app, this can be done conveniently in an initializer such as config/initializers/mini_profiler.rb.
 
 ## Available Options
 
-* authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
+* pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
+* post_authorize_cb - A lambda that is called after your request executed to ensure you really have access to the results. 
 * position - Can either be 'right' or 'left'. Default is 'left'.
-* skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'true'
+* skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
+
 
 

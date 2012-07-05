@@ -5,3 +5,4 @@
   * Amended Rack.MiniProfiler.config[:user_provider] to use ip addres for identity 
   * Fixed bug where unviewed missing ids never got cleared
   * Supress all '/assets/' in the rails tie (makes debugging easier)
+  * record_sql was mega buggy

@@ -11,6 +11,7 @@ require 'mini_profiler/storage/abstract_store'
 require 'mini_profiler/storage/memory_store'
 require 'mini_profiler/storage/redis_store'
 require 'mini_profiler/storage/file_store'
+require 'mini_profiler/config'
 
 module Rack
 
@@ -27,28 +28,13 @@ module Rack
 			rand(36**20).to_s(36)
 		end
 
-    # Defaults for MiniProfiler's configuration
-    def self.configuration_defaults
-      {
-        :auto_inject => true, # automatically inject on every html page
-        :base_url_path => "/mini-profiler-resources/",
-        :authorize_cb => lambda {|env| true}, # callback returns true if this request is authorized to profile
-        :position => 'left',  # Where it is displayed
-        :backtrace_remove => nil,
-        :backtrace_filter => nil,
-        :skip_schema_queries => true,
-        :storage => MiniProfiler::MemoryStore,
-        :user_provider => Proc.new{|env| Rack::Request.new(env).ip }
-      }
-    end
-
-    def self.reset_configuration
-      @configuration = configuration_defaults
+    def self.reset_config
+      @config = Config.default
     end
 
     # So we can change the configuration if we want
-    def self.configuration
-      @configuration ||= configuration_defaults.dup
+    def self.config
+      @config ||= Config.default
     end
 
     def self.share_template
@@ -59,19 +45,19 @@ module Rack
 		#
 		# options:
 		# :auto_inject - should script be automatically injected on every html page (not xhr)
-		def initialize(app, opts={})
+		def initialize(app, config = nil)
 			@@instance = self
-      MiniProfiler.configuration.merge!(opts)
-      @options = MiniProfiler.configuration 
+      MiniProfiler.config.merge!(config)
+      @config = MiniProfiler.config 
 			@app = app
-			@options[:base_url_path] << "/" unless @options[:base_url_path].end_with? "/"
-      unless @options[:storage_instance]
-        @storage = @options[:storage_instance] = @options[:storage].new(@options[:storage_options])
+			@config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
+      unless @config.storage_instance
+        @storage = @config.storage_instance = @config.storage.new(@config.storage_options)
       end
 		end
     
     def user(env)
-      options[:user_provider].call(env)
+      @config.user_provider.call(env)
     end
 
 		def serve_results(env)
@@ -97,7 +83,7 @@ module Rack
 
         # Otherwise give the HTML back
         html = MiniProfiler.share_template.dup  
-        html.gsub!(/\{path\}/, @options[:base_url_path])      
+        html.gsub!(/\{path\}/, @config.base_url_path)      
         html.gsub!(/\{version\}/, MiniProfiler::VERSION)      
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
@@ -110,7 +96,7 @@ module Rack
 		end
 
 		def serve_html(env)
-			file_name = env['PATH_INFO'][(@options[:base_url_path].length)..1000]
+			file_name = env['PATH_INFO'][(@config.base_url_path.length)..1000]
 			return serve_results(env) if file_name.eql?('results')
 			full_path = ::File.expand_path("../html/#{file_name}", ::File.dirname(__FILE__))
 			return [404, {}, ["Not found"]] unless ::File.exists? full_path
@@ -128,7 +114,23 @@ module Rack
       # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
  			Thread.current['profiler.mini.private'] = c
     end
-   
+
+    def self.discard_results
+      current[:discard] = true if current
+    end
+ 
+    def self.has_profiling_cookie?(env)
+      env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin=stylin")
+    end
+
+    def self.remove_profiling_cookie(headers)
+      Rack::Utils.delete_cookie_header!(headers, '__profilin')
+    end
+
+    def self.set_profiling_cookie(headers)
+      Rack::Utils.set_cookie_header!(headers, '__profilin', 'stylin')
+    end
+
     def current
       MiniProfiler.current
     end
@@ -137,34 +139,45 @@ module Rack
       MiniProfiler.current=c
     end
 
-    def options
-      @options
+    def config
+      @config
     end
 
     def self.create_current(env={}, options={})
       # profiling the request
       self.current = {}
-      self.current['inject_js'] = options[:auto_inject] && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+      self.current['inject_js'] = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
       self.current['page_struct'] = PageTimerStruct.new(env)
       self.current['current_timer'] = current['page_struct']['Root']
     end
 
+
 		def call(env)
 			status = headers = body = nil
 
+      path = env['PATH_INFO']
 			# only profile if authorized
-			return @app.call(env) unless @options[:authorize_cb].call(env)
+			if  !@config.pre_authorize_cb.call(env) ||
+          (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
+          env["QUERY_STRING"] =~ /pp=skip/
 
-			# handle all /mini-profiler requests here
-			return serve_html(env) if env['PATH_INFO'].start_with? @options[:base_url_path]
-
-      MiniProfiler.create_current(env, @options)
-      if env["QUERY_STRING"] =~ /pp=skip-backtrace/
-        current['skip-backtrace'] = true
+        status,headers,body = @app.call(env)
+        if @config.post_authorize_cb 
+          if @config.post_authorize_cb.call(env) 
+            self.class.set_profiling_cookie(headers)
+          end
+        end
+        return [status,headers,body]
       end
 
-      start = Time.now 
+      # handle all /mini-profiler requests here
+			return serve_html(env) if env['PATH_INFO'].start_with? @config.base_url_path
 
+      MiniProfiler.create_current(env, @config)
+      if env["QUERY_STRING"] =~ /pp=no-backtrace/
+        current['skip-backtrace'] = true
+      end
+      
       done_sampling = false
       quit_sampler = false
       backtraces = nil
@@ -172,10 +185,16 @@ module Rack
         backtraces = []
         t = Thread.current
         Thread.new {
+          require 'stacktrace'
+          if !t.respond_to? :stacktrace
+            quit_sampler = true 
+            return
+          end
           i = 10000 # for sanity never grab more than 10k samples 
-          unless done_sampling || i < 0
+          while i > 0
+            break if done_sampling
             i -= 1
-            backtraces << t.backtrace
+            backtraces << t.stacktrace
             sleep 0.001
           end
           quit_sampler = true
@@ -183,8 +202,9 @@ module Rack
       end
 
 			status, headers, body = nil
+      start = Time.now 
       begin 
-        status,headers, body = @app.call(env)
+        status,headers,body = @app.call(env)
       ensure
         if backtraces 
           done_sampling = true
@@ -192,8 +212,33 @@ module Rack
         end
       end
 
+      skip_it = current['discard']
+      if @config.post_authorize_cb && !@config.post_authorize_cb.call(env)
+        self.class.remove_profiling_cookie(headers)
+        skip_it = true
+      end
+
+      return [status,headers,body] if skip_it
+      
+      # we must do this here, otherwise current['discard'] is not being properly treated
+      if env["QUERY_STRING"] =~ /pp=env/
+        body.close if body.respond_to? :close
+        return dump_env env
+      end
+
+      if env["QUERY_STRING"] =~ /pp=help/
+        body.close if body.respond_to? :close
+        return help
+      end
+      
       page_struct = current['page_struct']
 			page_struct['Root'].record_time((Time.now - start) * 1000)
+
+      if backtraces
+        body.close if body.respond_to? :close
+        return analyze(backtraces, page_struct)
+      end
+      
 
       # no matter what it is, it should be unviewed, otherwise we will miss POST
       @storage.set_unviewed(user(env), page_struct['Id']) 
@@ -226,6 +271,41 @@ module Rack
       current = nil
 		end
 
+    def dump_env(env)
+      headers = {'Content-Type' => 'text/plain'}
+      body = "" 
+      env.each do |k,v|
+        body << "#{k}: #{v}\n"
+      end
+      [200, headers, [body]]
+    end
+
+    def help
+      headers = {'Content-Type' => 'text/plain'}
+      body = "Append the following to your query string:
+
+  pp=help : display this screen
+  pp=env : display the rack environment
+  pp=skip : skip mini profiler for this request
+  pp=no-backtrace : don't collect stack traces from all the SQL calls
+  pp=sample : sample stack traces and return a report isolating heavy usage (requires the stacktrace gem)
+"
+      #headers['Content-Length'] = body.length
+      [200, headers, [body]]
+    end
+
+    def analyze(traces, page_struct)
+      headers = {'Content-Type' => 'text/plain'}
+      body = "Collected: #{traces.count} stack traces. Duration(ms): #{page_struct.duration_ms}"
+      traces.each do |trace| 
+        body << "\n\n"
+        trace.each do |frame|
+          body << "#{frame.klass} #{frame.method}\n"
+        end
+      end
+      [200, headers, [body]]
+    end
+
     def ids_json(env)
       ids = [current['page_struct']["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
       ::JSON.generate(ids.uniq)
@@ -239,9 +319,9 @@ module Rack
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
 		def get_profile_script(env)
 			ids = ids_json(env)
-			path = @options[:base_url_path]
+			path = @config.base_url_path
 			version = MiniProfiler::VERSION
-			position = @options[:position]
+			position = @config.position
 			showTrivial = false
 			showChildren = false
 			maxTracesToShow = 10

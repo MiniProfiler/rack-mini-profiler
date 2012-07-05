@@ -8,6 +8,12 @@ describe Rack::MiniProfiler do
   def app
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
+      map '/path2/a' do
+        run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>path1</h1>'] }
+      end
+      map '/path1/a' do
+        run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>path2</h1>'] }
+      end
       map '/post' do
         run lambda { |env| [302, {'Content-Type' => 'text/html'}, '<h1>POST</h1>'] }
       end
@@ -30,7 +36,7 @@ describe Rack::MiniProfiler do
   end
 
   before do
-    Rack::MiniProfiler.reset_configuration
+    Rack::MiniProfiler.reset_config
   end
 
   describe 'with a valid request' do
@@ -61,21 +67,36 @@ describe Rack::MiniProfiler do
 
   describe 'configuration' do
     it "doesn't add MiniProfiler if the callback fails" do
-      Rack::MiniProfiler.configuration[:authorize_cb] = lambda {|env| false }
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda {|env| false }
       get '/html'
-      last_response.headers.has_key?('X-MiniProfilerID').should be_false
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
+    end
+
+    it "doesn't add MiniProfiler if the post callback fails" do 
+      Rack::MiniProfiler.config.post_authorize_cb = lambda {|env| false }
+      get '/html'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
+    end
+
+    it "skips paths listed" do 
+      Rack::MiniProfiler.config.skip_paths = ['/path/', '/path2/']
+      get '/path2/a'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
+      get '/path1/a'
+      p last_response.headers
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
     end
   end
 
   def load_prof(response)
     id = response.headers['X-MiniProfiler-Ids']
     id = ::JSON.parse(id)[0]
-    Rack::MiniProfiler.configuration[:storage_instance].load(id)
+    Rack::MiniProfiler.config.storage_instance.load(id)
   end
 
   describe 'special options' do
     it "omits db backtrace if requested" do 
-      get '/db?pp=skip-backtrace' 
+      get '/db?pp=no-backtrace' 
       prof = load_prof(last_response)
       stack = prof["Root"]["SqlTimings"][0]["StackTraceSnippet"]
       stack.should be_nil
@@ -96,11 +117,7 @@ describe Rack::MiniProfiler do
   describe 'sampling mode' do
     it "should sample stack traces if requested" do 
       get '/3ms?pp=sample' 
-      prof = load_prof(last_response)
-
-      # TODO: implement me
-      #prof["Root"]["SampleData"].length should > 0 
-
+      last_response["Content-Type"].should == 'text/plain'
     end
   end
 
