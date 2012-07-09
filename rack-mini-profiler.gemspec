@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
 	].concat( Dir.glob('lib/**/*').reject {|f| File.directory?(f) || f =~ /~$/ } )
 	s.extra_rdoc_files = [
 		"README.md",
-    "CHANGELOG.md"
+    "CHANGELOG"
 	]
 	s.add_runtime_dependency 'rack', '>= 1.1.3' 
   if RUBY_VERSION < "1.9"
