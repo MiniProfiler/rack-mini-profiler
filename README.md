@@ -2,7 +2,7 @@
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
-## Using mini-profiler in your app
+## Using rack-mini-profiler in your app
 
 Install/add to Gemfile
 
@@ -12,6 +12,20 @@ gem 'rack-mini-profiler'
 Using Rails:
 
 All you have to do is include the Gem and you're good to go in development.
+
+rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
+
+For example: 
+
+```ruby
+# A hook in your ApplicationController
+def authorize
+  if current_user.is_admin? 
+    Rack::MiniProfiler.authorize_request
+  end
+end
+````
+
 
 Using Builder:
 
@@ -56,9 +70,10 @@ In a Rails app, this can be done conveniently in an initializer such as config/i
 ## Available Options
 
 * pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
-* post_authorize_cb - A lambda that is called after your request executed to ensure you really have access to the results. 
 * position - Can either be 'right' or 'left'. Default is 'left'.
 * skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
 
+## Special query strings 
 
+If you include the query string `pp=help` at the end of your request you will see the various option you have. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers. 
 

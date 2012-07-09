@@ -12,9 +12,9 @@ module Rack
       @attributes
     end
 
-    attr_accessor :auto_inject, :base_url_path, :pre_authorize_cb, :post_authorize_cb, :position,
+    attr_accessor :auto_inject, :base_url_path, :pre_authorize_cb, :position,
         :backtrace_remove, :backtrace_filter, :skip_schema_queries, 
-        :storage, :user_provider, :storage_instance, :storage_options, :skip_paths
+        :storage, :user_provider, :storage_instance, :storage_options, :skip_paths, :authorization_mode
       
       def self.default
         new.instance_eval {
@@ -25,11 +25,11 @@ module Rack
           @pre_authorize_cb = lambda {|env| true} 
                                                   
           # called after rack chain, to ensure we are REALLY allowed to profile
-          @post_authorize_cb = nil
           @position = 'left'  # Where it is displayed
           @skip_schema_queries = false
           @storage = MiniProfiler::MemoryStore
           @user_provider = Proc.new{|env| Rack::Request.new(env).ip}
+          @authorization_mode = :allow_all
           self
         }
       end

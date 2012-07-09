@@ -114,29 +114,32 @@ module Rack
       # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
  			Thread.current['profiler.mini.private'] = c
     end
-
-    def self.discard_results
-      current[:discard] = true if current
-    end
- 
-    def self.has_profiling_cookie?(env)
-      env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin=stylin")
-    end
-
-    def self.remove_profiling_cookie(headers)
-      Rack::Utils.delete_cookie_header!(headers, '__profilin')
-    end
-
-    def self.set_profiling_cookie(headers)
-      Rack::Utils.set_cookie_header!(headers, '__profilin', 'stylin')
-    end
-
+    
     def current
       MiniProfiler.current
     end
 
     def current=(c)
       MiniProfiler.current=c
+    end
+
+    # discard existing results, don't track this request
+    def self.discard_results
+      current[:discard] = true if current
+    end
+
+    # user has the mini profiler cookie, only used when config.authorization_mode == :whitelist
+    def self.has_profiling_cookie?(env)
+      env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin=stylin")
+    end
+
+    # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
+    def self.remove_profiling_cookie(headers)
+      Rack::Utils.delete_cookie_header!(headers, '__profilin')
+    end
+
+    def self.set_profiling_cookie(headers)
+      Rack::Utils.set_cookie_header!(headers, '__profilin', 'stylin')
     end
 
     def config
@@ -151,21 +154,32 @@ module Rack
       self.current['current_timer'] = current['page_struct']['Root']
     end
 
+    def self.authorize_request
+      Thread.current[:mp_authorized] = true
+    end
+
+    def self.deauthorize_request
+      Thread.current[:mp_authorized] = nil
+    end
+
+    def self.request_authorized?
+      Thread.current[:mp_authorized]
+    end
 
 		def call(env)
-			status = headers = body = nil
-
+      status = headers = body = nil
       path = env['PATH_INFO']
-			# only profile if authorized
-			if  !@config.pre_authorize_cb.call(env) ||
-          (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
-          env["QUERY_STRING"] =~ /pp=skip/
 
+      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
+                (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
+                env["QUERY_STRING"] =~ /pp=skip/ 
+      
+      has_profiling_cookie = self.class.has_profiling_cookie?(env)
+    
+      if skip_it || (@config.authorization_mode == :whitelist && !has_profiling_cookie)
         status,headers,body = @app.call(env)
-        if @config.post_authorize_cb 
-          if @config.post_authorize_cb.call(env) 
-            self.class.set_profiling_cookie(headers)
-          end
+        if !skip_it && @config.authorization_mode == :whitelist && !has_profiling_cookie && MiniProfiler.request_authorized? 
+          self.class.set_profiling_cookie(headers) 
         end
         return [status,headers,body]
       end
@@ -174,10 +188,14 @@ module Rack
 			return serve_html(env) if env['PATH_INFO'].start_with? @config.base_url_path
 
       MiniProfiler.create_current(env, @config)
+
+      MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
       if env["QUERY_STRING"] =~ /pp=no-backtrace/
         current['skip-backtrace'] = true
+      elsif env["QUERY_STRING"] =~ /pp=full-backtrace/
+        current['full-backtrace'] = true
       end
-      
+
       done_sampling = false
       quit_sampler = false
       backtraces = nil
@@ -212,15 +230,15 @@ module Rack
         end
       end
 
-      skip_it = current['discard']
-      if @config.post_authorize_cb && !@config.post_authorize_cb.call(env)
-        self.class.remove_profiling_cookie(headers)
+      skip_it = current[:discard]
+      if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
+        MiniProfiler.remove_profiling_cookie(headers)
         skip_it = true
       end
-
+      
       return [status,headers,body] if skip_it
       
-      # we must do this here, otherwise current['discard'] is not being properly treated
+      # we must do this here, otherwise current[:discard] is not being properly treated
       if env["QUERY_STRING"] =~ /pp=env/
         body.close if body.respond_to? :close
         return dump_env env
@@ -287,7 +305,8 @@ module Rack
   pp=help : display this screen
   pp=env : display the rack environment
   pp=skip : skip mini profiler for this request
-  pp=no-backtrace : don't collect stack traces from all the SQL calls
+  pp=no-backtrace : don't collect stack traces from all the SQL executed
+  pp=full-backtrace : enable full backtrace for SQL executed
   pp=sample : sample stack traces and return a report isolating heavy usage (requires the stacktrace gem)
 "
       #headers['Content-Length'] = body.length
@@ -383,7 +402,7 @@ module Rack
 
 		def record_sql(query, elapsed_ms)
       c = current
-			c['current_timer'].add_sql(query, elapsed_ms, c['page_struct'], c['skip-backtrace']) if (c && c['current_timer'])
+			c['current_timer'].add_sql(query, elapsed_ms, c['page_struct'], c['skip-backtrace'], c['full-backtrace']) if (c && c['current_timer'])
 		end
 
 	end

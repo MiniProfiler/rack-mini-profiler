@@ -32,6 +32,12 @@ describe Rack::MiniProfiler do
           [200, {'Content-Type' => 'text/html'}, '<h1>Hi</h1>'] 
         }
       end
+      map '/whitelisted' do
+        run lambda { |env| 
+          Rack::MiniProfiler.authorize_request
+          [200, {'Content-Type' => 'text/html'}, '<h1>path1</h1>'] 
+        }
+      end
     }.to_app
   end
 
@@ -72,18 +78,11 @@ describe Rack::MiniProfiler do
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
     end
 
-    it "doesn't add MiniProfiler if the post callback fails" do 
-      Rack::MiniProfiler.config.post_authorize_cb = lambda {|env| false }
-      get '/html'
-      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
-    end
-
     it "skips paths listed" do 
       Rack::MiniProfiler.config.skip_paths = ['/path/', '/path2/']
       get '/path2/a'
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
       get '/path1/a'
-      p last_response.headers
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
     end
   end
@@ -118,6 +117,24 @@ describe Rack::MiniProfiler do
     it "should sample stack traces if requested" do 
       get '/3ms?pp=sample' 
       last_response["Content-Type"].should == 'text/plain'
+    end
+  end
+
+
+  describe 'authorization mode whitelist' do
+    before do 
+      Rack::MiniProfiler.config.authorization_mode = :whitelist
+    end
+
+    it "should ban requests that are not whitelisted" do 
+      get '/html'
+      last_response.headers['X-MiniProfiler-Ids'].should be_nil
+    end
+
+    it "should allow requests that are whitelisted" do 
+      set_cookie("__profilin=stylin")
+      get '/whitelisted'
+      last_response.headers['X-MiniProfiler-Ids'].should_not be_nil
     end
   end
 

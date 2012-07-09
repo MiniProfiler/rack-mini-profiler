@@ -6,14 +6,17 @@ module MiniProfilerRails
 
       # By default, only show the MiniProfiler in development mode, in production allow profiling if post_authorize_cb is set
       c.pre_authorize_cb = lambda { |env|
-        Rails.env.development? ||  
-        (Rack::MiniProfiler.config.post_authorize_cb && Rack::MiniProfiler.has_profiling_cookie?(env))
+        Rails.env.development? || Rails.env.production?  
       }
 
       if Rails.env.development?
         c.skip_paths ||= []
         c.skip_paths << "/assets/"
         c.skip_schema_queries = true
+      end
+
+      if Rails.env.production? 
+        c.authorization_mode = :whitelist
       end
 
       # The file store is just so much less flaky
@@ -29,7 +32,7 @@ module MiniProfilerRails
       c.skip_schema_queries =  Rails.env != 'production'
 
       # Install the Middleware
-      app.middleware.insert_before 'Rack::Lock', 'Rack::MiniProfiler'
+      app.middleware.insert(0, Rack::MiniProfiler)
 
       # Attach to various Rails methods
       ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
