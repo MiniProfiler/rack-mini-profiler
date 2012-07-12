@@ -76,7 +76,7 @@ module MiniProfilerRails
     #     end
     #   end
 
-    end
+    # end
 
   end
 end
