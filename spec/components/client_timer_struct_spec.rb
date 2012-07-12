@@ -48,6 +48,21 @@ describe Rack::MiniProfiler::ClientTimerStruct do
       it 'has Timings' do
         @client['Timings'].should_not be_empty
       end
+      
+      describe "bob.js" do
+        before do
+          @bob = @client['Timings'].find {|t| t["Name"] == "bob.js"}
+        end
+
+        it 'has it in the timings' do 
+          @bob.should_not be_nil
+        end
+
+        it 'has the correct duration' do 
+          @bob["Duration"].should == 6
+        end
+        
+      end
 
       describe "Navigation" do
         before do

@@ -35,9 +35,23 @@ module Rack
         return unless clientTimes && baseTime 
 
         probes = form['clientProbes']
+        translated = {}
         if probes 
-          probes.each do |n|
+          probes.each do |id, val|
+            name = val["n"]
+            translated[name] ||= {} 
+            if translated[name][:start]
+              translated[name][:finish] = val["d"]
+            else 
+              translated[name][:start] = val["d"]
+            end
           end
+        end
+
+        translated.each do |name, data|
+          h = {"Name" => name, "Start" => data[:start].to_i - baseTime}
+          h["Duration"] = data[:finish].to_i - data[:start].to_i if data[:finish]
+          timings.push(h)
         end
 
         clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|

@@ -8,3 +8,10 @@ rack.request.form_hash:
       navigationEnd: 1334245970
       simpleStart: 1334245955
       simpleEnd: 1334245965
+  clientProbes:
+    0:
+      d: 1334245970
+      n: bob.js
+    1:
+      d: 1334245976
+      n: bob.js
