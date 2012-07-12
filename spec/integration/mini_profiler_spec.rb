@@ -22,7 +22,7 @@ describe Rack::MiniProfiler do
       end
       map '/db' do 
         run lambda { |env| 
-          ::Rack::MiniProfiler.instance.record_sql("I want to be, in a db", 10)
+          ::Rack::MiniProfiler.record_sql("I want to be, in a db", 10)
           [200, {'Content-Type' => 'text/html'}, '<h1>Hi+db</h1>'] 
         }
       end

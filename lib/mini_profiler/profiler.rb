@@ -12,41 +12,90 @@ require 'mini_profiler/storage/memory_store'
 require 'mini_profiler/storage/redis_store'
 require 'mini_profiler/storage/file_store'
 require 'mini_profiler/config'
+require 'mini_profiler/profiling_methods'
+require 'mini_profiler/context'
 
 module Rack
 
 	class MiniProfiler
 
-		VERSION = 'rZlycOOTnzxZvxTmFuOEV0dSmu4P5m5bLrCtwJHVXPA='.freeze
-		@@instance = nil
+		VERSION = 'rZlycOOTnzxZvxTmFuOEV0dSmu4P5m5bLrCtwJHVXPA=A'.freeze
 
-		def self.instance
-			@@instance
-		end
+    class << self 
+      
+      include Rack::MiniProfiler::ProfilingMethods
 
-		def self.generate_id
-			rand(36**20).to_s(36)
-		end
+      def generate_id
+        rand(36**20).to_s(36)
+      end
 
-    def self.reset_config
-      @config = Config.default
-    end
+      def reset_config
+        @config = Config.default
+      end
 
-    # So we can change the configuration if we want
-    def self.config
-      @config ||= Config.default
-    end
+      # So we can change the configuration if we want
+      def config
+        @config ||= Config.default
+      end
 
-    def self.share_template
-      return @share_template unless @share_template.nil?
-      @share_template = ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+      def share_template
+        return @share_template unless @share_template.nil?
+        @share_template = ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+      end
+      
+      def current
+        Thread.current[:mini_profiler_private]
+      end
+
+      def current=(c)
+        # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
+        Thread.current[:mini_profiler_private]= c
+      end
+
+      # discard existing results, don't track this request
+      def discard_results
+        self.current.discard = true if current
+      end
+
+      # user has the mini profiler cookie, only used when config.authorization_mode == :whitelist
+      def has_profiling_cookie?(env)
+        env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin=stylin")
+      end
+
+      # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
+      def remove_profiling_cookie(headers)
+        Rack::Utils.delete_cookie_header!(headers, '__profilin')
+      end
+
+      def set_profiling_cookie(headers)
+        Rack::Utils.set_cookie_header!(headers, '__profilin', 'stylin')
+      end
+
+      def create_current(env={}, options={})
+        # profiling the request
+        self.current = Context.new
+        self.current.inject_js = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+        self.current.page_struct = PageTimerStruct.new(env)
+        self.current.current_timer = current.page_struct['Root']
+      end
+
+      def authorize_request
+        Thread.current[:mp_authorized] = true
+      end
+
+      def deauthorize_request
+        Thread.current[:mp_authorized] = nil
+      end
+
+      def request_authorized?
+        Thread.current[:mp_authorized]
+      end
     end
 
 		#
 		# options:
 		# :auto_inject - should script be automatically injected on every html page (not xhr)
 		def initialize(app, config = nil)
-			@@instance = self
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config 
 			@app = app
@@ -106,14 +155,6 @@ module Rack
 			f.serving env
 		end
 
-    def self.current
-      Thread.current['profiler.mini.private']
-    end
-
-    def self.current=(c)
-      # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
- 			Thread.current['profiler.mini.private'] = c
-    end
     
     def current
       MiniProfiler.current
@@ -123,48 +164,11 @@ module Rack
       MiniProfiler.current=c
     end
 
-    # discard existing results, don't track this request
-    def self.discard_results
-      current[:discard] = true if current
-    end
-
-    # user has the mini profiler cookie, only used when config.authorization_mode == :whitelist
-    def self.has_profiling_cookie?(env)
-      env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin=stylin")
-    end
-
-    # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
-    def self.remove_profiling_cookie(headers)
-      Rack::Utils.delete_cookie_header!(headers, '__profilin')
-    end
-
-    def self.set_profiling_cookie(headers)
-      Rack::Utils.set_cookie_header!(headers, '__profilin', 'stylin')
-    end
 
     def config
       @config
     end
 
-    def self.create_current(env={}, options={})
-      # profiling the request
-      self.current = {}
-      self.current['inject_js'] = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-      self.current['page_struct'] = PageTimerStruct.new(env)
-      self.current['current_timer'] = current['page_struct']['Root']
-    end
-
-    def self.authorize_request
-      Thread.current[:mp_authorized] = true
-    end
-
-    def self.deauthorize_request
-      Thread.current[:mp_authorized] = nil
-    end
-
-    def self.request_authorized?
-      Thread.current[:mp_authorized]
-    end
 
 		def call(env)
       status = headers = body = nil
@@ -174,12 +178,12 @@ module Rack
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
                 env["QUERY_STRING"] =~ /pp=skip/ 
       
-      has_profiling_cookie = self.class.has_profiling_cookie?(env)
+      has_profiling_cookie = MiniProfiler.has_profiling_cookie?(env)
     
       if skip_it || (@config.authorization_mode == :whitelist && !has_profiling_cookie)
         status,headers,body = @app.call(env)
         if !skip_it && @config.authorization_mode == :whitelist && !has_profiling_cookie && MiniProfiler.request_authorized? 
-          self.class.set_profiling_cookie(headers) 
+          MiniProfiler.set_profiling_cookie(headers) 
         end
         return [status,headers,body]
       end
@@ -188,34 +192,38 @@ module Rack
 			return serve_html(env) if env['PATH_INFO'].start_with? @config.base_url_path
 
       MiniProfiler.create_current(env, @config)
-
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
       if env["QUERY_STRING"] =~ /pp=no-backtrace/
-        current['skip-backtrace'] = true
+        current.skip_backtrace = true
       elsif env["QUERY_STRING"] =~ /pp=full-backtrace/
-        current['full-backtrace'] = true
+        current.full_backtrace = true
       end
 
       done_sampling = false
       quit_sampler = false
       backtraces = nil
+      missing_stacktrace = false
       if env["QUERY_STRING"] =~ /pp=sample/
         backtraces = []
         t = Thread.current
         Thread.new {
-          require 'stacktrace'
-          if !t.respond_to? :stacktrace
-            quit_sampler = true 
-            return
+          begin
+            require 'stacktrace' rescue nil
+            if !t.respond_to? :stacktrace
+              missing_stacktrace = true
+              quit_sampler = true 
+              return
+            end
+            i = 10000 # for sanity never grab more than 10k samples 
+            while i > 0
+              break if done_sampling
+              i -= 1
+              backtraces << t.stacktrace
+              sleep 0.001
+            end
+          ensure
+            quit_sampler = true
           end
-          i = 10000 # for sanity never grab more than 10k samples 
-          while i > 0
-            break if done_sampling
-            i -= 1
-            backtraces << t.stacktrace
-            sleep 0.001
-          end
-          quit_sampler = true
         }
       end
 
@@ -230,7 +238,7 @@ module Rack
         end
       end
 
-      skip_it = current[:discard]
+      skip_it = current.discard
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
         MiniProfiler.remove_profiling_cookie(headers)
         skip_it = true
@@ -249,11 +257,12 @@ module Rack
         return help
       end
       
-      page_struct = current['page_struct']
+      page_struct = current.page_struct
 			page_struct['Root'].record_time((Time.now - start) * 1000)
 
       if backtraces
         body.close if body.respond_to? :close
+        return help(:stacktrace) if missing_stacktrace
         return analyze(backtraces, page_struct)
       end
       
@@ -271,7 +280,7 @@ module Rack
         end
 
 				# inject script
-				if current['inject_js'] \
+				if current.inject_js \
 					&& headers.has_key?('Content-Type') \
 					&& !headers['Content-Type'].match(/text\/html/).nil? then
 					body = MiniProfiler::BodyAddProxy.new(body, self.get_profile_script(env))
@@ -298,7 +307,7 @@ module Rack
       [200, headers, [body]]
     end
 
-    def help
+    def help(category = nil)
       headers = {'Content-Type' => 'text/plain'}
       body = "Append the following to your query string:
 
@@ -309,24 +318,48 @@ module Rack
   pp=full-backtrace : enable full backtrace for SQL executed
   pp=sample : sample stack traces and return a report isolating heavy usage (requires the stacktrace gem)
 "
-      #headers['Content-Length'] = body.length
+      if (category == :stacktrace)
+        body = "pp=stacktrace requires the stacktrace gem - add gem 'stacktrace' to your Gemfile"
+      end
+    
       [200, headers, [body]]
     end
 
     def analyze(traces, page_struct)
       headers = {'Content-Type' => 'text/plain'}
       body = "Collected: #{traces.count} stack traces. Duration(ms): #{page_struct.duration_ms}"
+
+      seen = {}
+      fulldump = ""
       traces.each do |trace| 
-        body << "\n\n"
+        fulldump << "\n\n"
+        distinct = {}
         trace.each do |frame|
-          body << "#{frame.klass} #{frame.method}\n"
+          name = "#{frame.klass} #{frame.method}"
+          unless distinct[name]
+            distinct[name] = true
+            seen[name] ||= 0
+            seen[name] += 1
+          end
+          fulldump << name << "\n"
         end
       end
+
+      body << "\n\nStack Trace Analysis\n"
+      seen.to_a.sort{|x,y| y[1] <=> x[1]}.each do |name, count|
+        if count > traces.count / 10
+          body << "#{name} x #{count}\n"
+        end
+      end
+      
+      body << "\n\n\nRaw traces \n"
+      body << fulldump
+
       [200, headers, [body]]
     end
 
     def ids_json(env)
-      ids = [current['page_struct']["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
+      ids = [current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
       ::JSON.generate(ids.uniq)
     end
 
@@ -345,7 +378,7 @@ module Rack
 			showChildren = false
 			maxTracesToShow = 10
 			showControls = false
-			currentId = current['page_struct']["Id"]
+			currentId = current.page_struct["Id"]
 			authorized = true
       useExistingjQuery = false
 			# TODO : cache this snippet 
@@ -357,52 +390,13 @@ module Rack
 			end
 			# replace the '{{' and '}}''
 			script.gsub!(/\{\{/, '{').gsub!(/\}\}/, '}')
-			current['inject_js'] = false
+			current.inject_js = false
 			script
 		end
 
 		# cancels automatic injection of profile script for the current page
 		def cancel_auto_inject(env)
-		  current['inject_js'] = false
-		end
-
-		# perform a profiling step on given block
-		def self.step(name)
-      if current
-        old_timer = current['current_timer']
-        new_step = RequestTimerStruct.new(name, current['page_struct'])
-        current['current_timer'] = new_step
-        new_step['Name'] = name
-        start = Time.now
-        result = yield if block_given?
-        new_step.record_time((Time.now - start)*1000)
-        old_timer.add_child(new_step)
-        current['current_timer'] = old_timer
-        result
-      else
-        yield if block_given?
-      end
-		end
-
-    def self.profile_method(klass, method, &blk)
-      default_name = klass.to_s + " " + method.to_s
-      with_profiling = (method.to_s + "_with_mini_profiler").intern
-      without_profiling = (method.to_s + "_without_mini_profiler").intern
-      
-      klass.send :alias_method, without_profiling, method
-      klass.send :define_method, with_profiling do |*args, &orig|
-        name = default_name 
-        name = blk.bind(self).call(*args) if blk
-        ::Rack::MiniProfiler.step name do 
-          self.send without_profiling, *args, &orig
-        end
-      end
-      klass.send :alias_method, method, with_profiling
-    end
-
-		def record_sql(query, elapsed_ms)
-      c = current
-			c['current_timer'].add_sql(query, elapsed_ms, c['page_struct'], c['skip-backtrace'], c['full-backtrace']) if (c && c['current_timer'])
+		  current.inject_js = false
 		end
 
 	end

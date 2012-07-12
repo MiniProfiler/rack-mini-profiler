@@ -5,7 +5,7 @@ module Rack
 
     # Timing system for a SQL query
     class SqlTimerStruct < TimerStruct
-      def initialize(query, duration_ms, page, skip_backtrace = false, full_backtrace = false)
+      def initialize(query, duration_ms, page, parent, skip_backtrace = false, full_backtrace = false)
 
         stack_trace = nil 
         unless skip_backtrace 
@@ -20,15 +20,26 @@ module Rack
           end
         end
 
+        @parent = parent
+        @page = page
+
         super("ExecuteType" => 3, # TODO
               "FormattedCommandString" => query,
               "StackTraceSnippet" => stack_trace, 
               "StartMilliseconds" => ((Time.now.to_f * 1000).to_i - page['Started']) - duration_ms,
               "DurationMilliseconds" => duration_ms,
-              "FirstFetchDurationMilliseconds" => 0,
+              "FirstFetchDurationMilliseconds" => duration_ms,
               "Parameters" => nil,
               "ParentTimingId" => nil,
               "IsDuplicate" => false)
+      end
+
+      def report_reader_duration(elapsed_ms)
+        return if @reported
+        @reported = true
+        self["DurationMilliseconds"] += elapsed_ms
+        @parent["SqlTimingsDurationMilliseconds"] += elapsed_ms
+        @page["DurationMillisecondsInSql"] += elapsed_ms
       end
 
     end

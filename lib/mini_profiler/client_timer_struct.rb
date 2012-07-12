@@ -6,6 +6,19 @@ module Rack
     # This class holds the client timings
     class ClientTimerStruct < TimerStruct
 
+      def self.init_instrumentation
+        "<script type=\"text/javascript\">mPt=function(){var t=[];return{t:t,probe:function(n){t.push({d:new Date(),n:n})}}}()</script>"
+      end
+      
+      def self.instrument(name,orig)
+        probe = "<script>mPt.probe('#{name}')</script>"
+        wrapped = probe
+        wrapped << orig 
+        wrapped << probe 
+        wrapped
+      end
+
+
       def initialize(env={})
         super
       end
@@ -20,6 +33,12 @@ module Rack
 
         baseTime = clientTimes['navigationStart'].to_i if clientTimes
         return unless clientTimes && baseTime 
+
+        probes = form['clientProbes']
+        if probes 
+          probes.each do |n|
+          end
+        end
 
         clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
           start = clientTimes[k].to_i - baseTime 
