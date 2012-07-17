@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name = "rack-mini-profiler"
-	s.version = "0.1.6"
+	s.version = "0.1.7"
 	s.summary = "Profiles loading speed for rack applications."
 	s.authors = ["Aleks Totic","Sam Saffron", "Robin Ward"]
 	s.date = "2012-04-02"
