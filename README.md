@@ -47,6 +47,24 @@ class MyApp < Sinatra::Base
 end
 ```
 
+## Storage
+
+By default, rack-mini-profiler stores its results in a memory store: 
+
+```ruby 
+# our default
+Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
+```
+
+There are 2 other available storage engines, `RedisStore` and `FileStore`. 
+
+MemoryStore is stores results in a processes heap - something that does not work well in a multi process environment. 
+FileStore stores results in the file system - something that may not work well in a multi machine environment. 
+
+Additionally you may implement an AbstractStore for your own provider. 
+
+Rails hooks up a FileStore for all environments. 
+
 ## Running the Specs
 
 ```
