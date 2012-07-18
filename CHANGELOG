@@ -24,3 +24,9 @@
 	* Added some more client probing built in to rails
 	* More tests
 
+18-July-2012 - Sam 
+  
+  * Added First Paint time for chrome
+  * Bug fix to ensure non Rails installs have mini profiler
+  * Version 0.1.7
+

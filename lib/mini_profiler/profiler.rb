@@ -19,7 +19,7 @@ module Rack
 
 	class MiniProfiler
 
-		VERSION = 'rZlycOOTnzxZvxTmFuOEV0dSmu4P5m5bLrCtwJHVXPA=A'.freeze
+		VERSION = '104'.freeze
 
     class << self 
       
