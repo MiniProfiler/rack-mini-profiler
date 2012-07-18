@@ -12,15 +12,28 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
 desc "builds a gem"
-task :build => :copy_files do
+task :build => :compile_less do
 	`gem build rack-mini-profiler.gemspec 1>&2`
 end
+
+desc "compile less"
+task :compile_less => :copy_files do 
+  `lessc lib/html/includes.less > lib/html/includes.css`
+end
+
 
 desc "copy files from other parts of the tree"
 task :copy_files do
 	`rm -R -f lib/html && mkdir lib/html 1>&2`
-	`cp -v ../StackExchange.Profiling/UI/*.* lib/html 1>&2`
-	# TODO this is html it should not be .js
-  `mv lib/html/include.partial.html lib/html/profile_handler.js`
+  path = File.expand_path('../StackExchange.Profiling/UI')
+  `ln -s #{path}/includes.less lib/html/includes.less`
+  `ln -s #{path}/includes.js lib/html/includes.js`
+  `ln -s #{path}/includes.tmpl lib/html/includes.tmpl`
+  `ln -s #{path}/jquery.1.7.1.js lib/html/jquery.1.7.1.js`
+  `ln -s #{path}/jquery.tmpl.js lib/html/jquery.tmpl.js`
+  `ln -s #{path}/list.css lib/html/list.css`
+  `ln -s #{path}/list.js lib/html/list.js`
+  `ln -s #{path}/list.tmpl lib/html/list.tmpl`
+  `ln -s #{path}/include.partial.html lib/html/profile_handler.js`
 end
 

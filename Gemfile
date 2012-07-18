@@ -2,6 +2,9 @@ source 'http://rubygems.org'
 
 gemspec
 
+gem 'therubyracer', :require => 'v8'
+gem 'less'
+
 group :test do
   gem 'rake'
   gem 'rack'
