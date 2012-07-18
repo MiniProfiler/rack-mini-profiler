@@ -380,7 +380,7 @@ module Rack
 			showControls = false
 			currentId = current.page_struct["Id"]
 			authorized = true
-      useExistingjQuery = false
+			useExistingjQuery = @config.use_existing_jquery
 			# TODO : cache this snippet 
 			script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
 			# replace the variables
