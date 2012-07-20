@@ -17,7 +17,7 @@ task :build => :compile_less do
 end
 
 desc "compile less"
-task :compile_less => :copy_files do 
+task :compile_less => :copy_files do
   `lessc lib/html/includes.less > lib/html/includes.css`
 end
 
@@ -35,5 +35,6 @@ task :copy_files do
   `ln -s #{path}/list.js lib/html/list.js`
   `ln -s #{path}/list.tmpl lib/html/list.tmpl`
   `ln -s #{path}/include.partial.html lib/html/profile_handler.js`
+  `ln -s #{path}/share.html lib/html/share.html`
 end
 
