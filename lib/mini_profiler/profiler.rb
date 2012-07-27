@@ -245,7 +245,7 @@ module Rack
       end
       
       return [status,headers,body] if skip_it
-      
+
       # we must do this here, otherwise current[:discard] is not being properly treated
       if env["QUERY_STRING"] =~ /pp=env/
         body.close if body.respond_to? :close
@@ -274,6 +274,12 @@ module Rack
       # inject headers, script
 			if status == 200
         
+        # mini profiler is meddling with stuff, we can not cache cause we will get incorrect data
+        # Rack::ETag has already inserted some nonesense in the chain
+        headers.delete('ETag')
+        headers.delete('Date')
+        headers['Cache-Control'] = 'must-revalidate, private, max-age=0'
+
 				# inject header
         if headers.is_a? Hash
           headers['X-MiniProfiler-Ids'] = ids_json(env)
@@ -283,20 +289,27 @@ module Rack
 				if current.inject_js \
 					&& headers.has_key?('Content-Type') \
 					&& !headers['Content-Type'].match(/text\/html/).nil? then
-					body = MiniProfiler::BodyAddProxy.new(body, self.get_profile_script(env))
+					
+          response = Rack::Response.new([], status, headers)
+          script = self.get_profile_script(env)
+          body.each { |fragment| response.write inject(fragment, script) }
+          body.close
+          response.finish
+          
+          return response
+
 				end
 			end
 
-      # mini profiler is meddling with stuff, we can not cache cause we will get incorrect data
-      # Rack::ETag has already inserted some nonesense in the chain
-      headers.delete('ETag')
-      headers.delete('Date')
-      headers['Cache-Control'] = 'must-revalidate, private, max-age=0'
 			[status, headers, body]
     ensure
       # Make sure this always happens
       current = nil
 		end
+
+    def inject(fragment, script)
+      fragment.gsub(/<\/body>\s*$/mi, script + "</body>") 
+    end
 
     def dump_env(env)
       headers = {'Content-Type' => 'text/plain'}
