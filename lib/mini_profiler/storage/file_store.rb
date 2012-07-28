@@ -88,10 +88,6 @@ module Rack
         }
       end
       
-
-      private 
-
-
       def cleanup_cache
         files = Dir.entries(@path)
         @timer_struct_lock.synchronize {
