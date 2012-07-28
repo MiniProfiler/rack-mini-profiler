@@ -18,7 +18,7 @@ describe Rack::MiniProfiler do
         run lambda { |env| [302, {'Content-Type' => 'text/html'}, '<h1>POST</h1>'] }
       end
       map '/html' do
-        run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>Hi</h1>'] }
+        run lambda { |env| [200, {'Content-Type' => 'text/html'}, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
       end
       map '/db' do 
         run lambda { |env| 
@@ -67,6 +67,13 @@ describe Rack::MiniProfiler do
 
     it 'has the JS in the body' do
       last_response.body.include?('MiniProfiler.init').should be_true
+    end
+
+    it 'has a functioning share link' do 
+      h = last_response.headers['X-MiniProfiler-Ids']
+      id = ::JSON.parse(h)[0]
+      get "/mini-profiler-resources/results?id=#{id}"
+      last_response.should be_ok
     end
 
   end
