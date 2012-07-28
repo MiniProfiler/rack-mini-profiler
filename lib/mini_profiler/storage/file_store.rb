@@ -39,9 +39,14 @@ module Rack
 
         me = self
         Thread.new do
-          while true do
-            me.cleanup_cache if MiniProfiler.instance
-            sleep(3600)
+          begin 
+            while true do
+              # TODO: a sane retry count before bailing
+              me.cleanup_cache
+              sleep(3600)
+            end
+          rescue
+            # don't crash the thread, we can clean up next time 
           end
         end
       end
