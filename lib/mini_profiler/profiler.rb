@@ -100,8 +100,9 @@ module Rack
 			@app = app
 			@config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
       unless @config.storage_instance
-        @storage = @config.storage_instance = @config.storage.new(@config.storage_options)
+        @config.storage_instance = @config.storage.new(@config.storage_options)
       end
+      @storage = @config.storage_instance 
 		end
     
     def user(env)
@@ -150,8 +151,17 @@ module Rack
 			return [404, {}, ["Not found"]] unless ::File.exists? full_path
 			f = Rack::File.new nil
 			f.path = full_path
-			f.cache_control = "max-age:86400"
-			f.serving env
+
+      begin 
+        f.cache_control = "max-age:86400"
+        f.serving env
+      rescue
+        # old versions of rack have a different api 
+        status, headers, body = f.serving
+        headers.merge! 'Cache-Control' => "max-age:86400"
+        [status, headers, body]
+      end
+
 		end
 
     
@@ -297,10 +307,7 @@ module Rack
             body.each { |fragment| response.write inject(fragment, script) }
           end
           body.close if body.respond_to? :close
-          response.finish
-          
-          return response
-
+          return response.finish
 				end
 			end
 
