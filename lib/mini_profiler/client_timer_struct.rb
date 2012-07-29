@@ -23,7 +23,7 @@ module Rack
         super
       end
 
-      def init_from_form_data(env, page_struct)
+      def self.init_from_form_data(env, page_struct)
         timings = []
         clientTimes, clientPerf, baseTime = nil 
         form = env['rack.request.form_hash']
@@ -67,8 +67,10 @@ module Rack
           timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
         end
 
-        self['RedirectCount'] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount']
-        self['Timings'] = timings
+        rval = self.new
+        rval['RedirectCount'] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount']
+        rval['Timings'] = timings
+        rval
       end
     end
 
