@@ -87,7 +87,7 @@ In a Rails app, this can be done conveniently in an initializer such as config/i
 
 ## Rails 2.X support
 
-MiniProfiler uses [railstie](https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler_rails/railtie.rb) to bootstrap itself. This will not be called in a Rails 2 app. You are going to need to hook it up manually. (TODO: document this - pull request please)
+MiniProfiler uses [railtie](https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler_rails/railtie.rb) to bootstrap itself. This will not be called in a Rails 2 app. You are going to need to hook it up manually. (TODO: document this - pull request please)
 
 ## Available Options
 
