@@ -30,3 +30,11 @@
   * Bug fix to ensure non Rails installs have mini profiler
   * Version 0.1.7
 
+30-July-2012 - Sam 
+  
+  * Made compliant with ancient versions of Rack (including Rack used by Rails2)
+  * Fixed broken share link 
+  * Fixed crashes on startup (in MemoryStore and FileStore)
+  * Version 0.1.8
+  * Unicode fix 
+  * Version 0.1.9
