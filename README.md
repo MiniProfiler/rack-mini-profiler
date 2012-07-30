@@ -85,11 +85,18 @@ Rack::MiniProfiler.config.position = 'right'
 
 In a Rails app, this can be done conveniently in an initializer such as config/initializers/mini_profiler.rb.
 
+## Rails 2.X support
+
+MiniProfiler uses [railtie](https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler_rails/railtie.rb) to bootstrap itself. This will not be called in a Rails 2 app. You are going to need to hook it up manually. (TODO: document this - pull request please)
+
 ## Available Options
 
 * pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
 * position - Can either be 'right' or 'left'. Default is 'left'.
 * skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
+* use_existing_jquery - Use the version of jQuery on the page as opposed to the self contained one
+* auto_inject (default true) - when false the miniprofiler script is not injected in the page
+* backtrace_filter - a regex you can use to filter out unwanted lines from the backtraces
 
 ## Special query strings 
 
