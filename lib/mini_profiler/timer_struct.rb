@@ -22,7 +22,12 @@ module Rack
       end
 
       def to_json(*a)
-        ::JSON.generate(@attributes, a[0])
+        if a[0] == nil
+          # YAJL doesnt like nil as options
+          ::JSON.generate( @attributes )
+        else
+          ::JSON.generate(@attributes, a[0])
+        end
       end
 
     end
