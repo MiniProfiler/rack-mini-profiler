@@ -63,11 +63,26 @@ module Rack
 
       # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
       def remove_profiling_cookie(headers)
-        Rack::Utils.delete_cookie_header!(headers, '__profilin')
+        Rack::Utils.set_cookie_header!(headers, '__profilin', :value => 'notstylin', :path => '/')
       end
 
       def set_profiling_cookie(headers)
-        Rack::Utils.set_cookie_header!(headers, '__profilin', 'stylin')
+        Rack::Utils.set_cookie_header!(headers, '__profilin', :value => 'stylin', :path => '/')
+      end
+
+      # user has the mini profiler cookie, only used when config.authorization_mode == :whitelist
+      def has_disable_profiling_cookie?(env)
+        env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin_disable=stylin")
+      end
+
+      # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
+      def remove_disable_profiling_cookie(headers)
+        #something is odd with delete_cookie_header
+        Rack::Utils.set_cookie_header!(headers, '__profilin_disable', :value => 'notstylin', :path => '/')
+      end
+
+      def set_disable_profiling_cookie(headers)
+        Rack::Utils.set_cookie_header!(headers, '__profilin_disable', :value => 'stylin', :path => '/')
       end
 
       def create_current(env={}, options={})
@@ -181,11 +196,12 @@ module Rack
 
 		def call(env)
       status = headers = body = nil
+      query_string = env['QUERY_STRING']
       path = env['PATH_INFO']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
-                env["QUERY_STRING"] =~ /pp=skip/ 
+                query_string =~ /pp=skip/ 
       
       has_profiling_cookie = MiniProfiler.has_profiling_cookie?(env)
     
@@ -198,13 +214,29 @@ module Rack
       end
 
       # handle all /mini-profiler requests here
-			return serve_html(env) if env['PATH_INFO'].start_with? @config.base_url_path
+			return serve_html(env) if path.start_with? @config.base_url_path
+
+      has_disable_cookie = MiniProfiler.has_disable_profiling_cookie?(env)
+      # manual session disable / enable
+      if query_string =~ /pp=disable/ || has_disable_cookie
+        skip_it = true
+      end
+
+      if query_string =~ /pp=enable/
+        skip_it = false
+      end
+
+      if skip_it
+        status,headers,body = @app.call(env)
+        MiniProfiler.set_disable_profiling_cookie(headers) unless has_disable_cookie
+        return [status,headers,body]
+      end
 
       MiniProfiler.create_current(env, @config)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
-      if env["QUERY_STRING"] =~ /pp=no-backtrace/
+      if query_string =~ /pp=no-backtrace/
         current.skip_backtrace = true
-      elsif env["QUERY_STRING"] =~ /pp=full-backtrace/
+      elsif query_string =~ /pp=full-backtrace/
         current.full_backtrace = true
       end
 
@@ -212,7 +244,7 @@ module Rack
       quit_sampler = false
       backtraces = nil
       missing_stacktrace = false
-      if env["QUERY_STRING"] =~ /pp=sample/
+      if query_string =~ /pp=sample/
         backtraces = []
         t = Thread.current
         Thread.new {
@@ -240,6 +272,9 @@ module Rack
       start = Time.now 
       begin 
         status,headers,body = @app.call(env)
+        if has_disable_cookie
+          MiniProfiler.remove_disable_profiling_cookie(headers)
+        end
       ensure
         if backtraces 
           done_sampling = true
@@ -256,12 +291,12 @@ module Rack
       return [status,headers,body] if skip_it
 
       # we must do this here, otherwise current[:discard] is not being properly treated
-      if env["QUERY_STRING"] =~ /pp=env/
+      if query_string =~ /pp=env/
         body.close if body.respond_to? :close
         return dump_env env
       end
 
-      if env["QUERY_STRING"] =~ /pp=help/
+      if query_string =~ /pp=help/
         body.close if body.respond_to? :close
         return help
       end
@@ -348,6 +383,8 @@ module Rack
   pp=no-backtrace : don't collect stack traces from all the SQL executed
   pp=full-backtrace : enable full backtrace for SQL executed
   pp=sample : sample stack traces and return a report isolating heavy usage (requires the stacktrace gem)
+  pp=disable : disable profiling for this session 
+  pp=enable : enable profiling for this session (if previously disabled)
 "
       if (category == :stacktrace)
         body = "pp=stacktrace requires the stacktrace gem - add gem 'stacktrace' to your Gemfile"
