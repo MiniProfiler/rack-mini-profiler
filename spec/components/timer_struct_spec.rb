@@ -30,13 +30,8 @@ describe Rack::MiniProfiler::TimerStruct do
     end
 
     it 'should not add a second (nil) argument if no arguments were passed' do
-      ::JSON.should_receive( :generate ).once.with( @timer.attributes ).and_return( nil )
+      ::JSON.should_receive( :generate ).once.with( @timer.attributes, :max_nesting => 100 ).and_return( nil )
       @timer.to_json
-    end
-
-    it 'should pass given arguments' do
-      ::JSON.should_receive( :generate ).once.with( @timer.attributes, :foo => true ).and_return( nil )
-      @timer.to_json( :foo => true )
     end
 
     describe 'deserialized' do
