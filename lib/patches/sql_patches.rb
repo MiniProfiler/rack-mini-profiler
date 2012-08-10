@@ -91,6 +91,23 @@ if SqlPatches.class_exists? "PG::Result"
   class PG::Connection
     alias_method :exec_without_profiling, :exec
     alias_method :async_exec_without_profiling, :async_exec
+    alias_method :exec_prepared_without_profiling, :exec_prepared
+    alias_method :send_query_prepared_without_profiling, :send_query_prepared
+    alias_method :prepare_without_profiling, :prepare
+
+    def prepare(*args,&blk)
+      current = ::Rack::MiniProfiler.current
+      return prepare_without_profiling(*args,&blk) unless current
+
+      @prepare_map ||= {}
+      @prepare_map[args[0]] = args[1]
+
+      # dont leak more than 10k ever
+      @prepare_map = {} if @prepare_map.length > 10000
+
+      prepare_without_profiling(*args,&blk) 
+
+    end
 
     def exec(*args,&blk)
       current = ::Rack::MiniProfiler.current
@@ -104,6 +121,34 @@ if SqlPatches.class_exists? "PG::Result"
       result
     end
 
+    def exec_prepared(*args,&blk)
+      current = ::Rack::MiniProfiler.current
+      return exec_prepared_without_profiling(*args,&blk) unless current
+
+      start = Time.now
+      result = exec_prepared_without_profiling(*args,&blk)
+      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
+      mapped = args[0]
+      mapped = @prepare_map[mapped] || args[0] if @prepare_map
+      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(mapped, elapsed_time))
+
+      result
+    end
+    
+    def send_query_prepared(*args,&blk)
+      current = ::Rack::MiniProfiler.current
+      return send_query_prepared_without_profiling(*args,&blk) unless current
+
+      start = Time.now
+      result = send_query_prepared_without_profiling(*args,&blk)
+      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
+      mapped = args[0]
+      mapped = @prepare_map[mapped] || args[0] if @prepare_map
+      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(mapped, elapsed_time))
+
+      result
+    end
+    
     def async_exec(*args,&blk)
       current = ::Rack::MiniProfiler.current
       return exec_without_profiling(*args,&blk) unless current

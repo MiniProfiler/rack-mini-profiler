@@ -44,3 +44,6 @@
   * Added option to disable profiler for the current session (pp=disable / pp=enable)
   * yajl compatability contributed by Sven Riedel 
 
+10-August-2012 - Sam 
+
+  * Added basic prepared statement profiling for postgres 
