@@ -427,7 +427,8 @@ module Rack
     end
 
     def ids_json(env)
-      ids = [current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])
+      # cap at 10 ids, otherwise there is a chance you can blow the header
+      ids = [current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]
       ::JSON.generate(ids.uniq)
     end
 
