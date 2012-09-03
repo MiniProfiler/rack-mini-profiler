@@ -87,7 +87,33 @@ In a Rails app, this can be done conveniently in an initializer such as config/i
 
 ## Rails 2.X support
 
-MiniProfiler uses [railtie](https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler_rails/railtie.rb) to bootstrap itself. This will not be called in a Rails 2 app. You are going to need to hook it up manually. (TODO: document this - pull request please)
+To get MiniProfiler working with Rails 2.3.X you need to do the initialization manually as well as monkey patch away an incompatibility between activesupport and json_pure.
+
+Add the following code to your environment.rb (or just in a specific environment such as development.rb) for initialization and configuration of MiniProfiler.
+
+```ruby
+# configure and initialize MiniProfiler
+require 'rack-mini-profiler'
+c = ::Rack::MiniProfiler.config
+c.pre_authorize_cb = lambda { |env|
+  Rails.env.development? || Rails.env.production?
+}
+tmp = Rails.root.to_s + "/tmp/miniprofiler"
+FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
+c.storage_options = {:path => tmp}
+c.storage = ::Rack::MiniProfiler::FileStore
+config.middleware.use(::Rack::MiniProfiler)
+::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
+::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
+
+# monkey patch away an activesupport and json_pure incompatability
+# http://pivotallabs.com/users/alex/blog/articles/1332-monkey-patch-of-the-day-activesupport-vs-json-pure-vs-ruby-1-8
+if JSON.const_defined?(:Pure)
+  class JSON::Pure::Generator::State
+    include ActiveSupport::CoreExtensions::Hash::Except
+  end
+end
+```
 
 ## Available Options
 
