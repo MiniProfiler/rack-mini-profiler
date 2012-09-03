@@ -13,6 +13,7 @@ require 'mini_profiler/storage/file_store'
 require 'mini_profiler/config'
 require 'mini_profiler/profiling_methods'
 require 'mini_profiler/context'
+require 'mini_profiler/client_settings'
 
 module Rack
 
@@ -54,35 +55,6 @@ module Rack
       # discard existing results, don't track this request
       def discard_results
         self.current.discard = true if current
-      end
-
-      # user has the mini profiler cookie, only used when config.authorization_mode == :whitelist
-      def has_profiling_cookie?(env)
-        env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin=stylin")
-      end
-
-      # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
-      def remove_profiling_cookie(headers)
-        Rack::Utils.set_cookie_header!(headers, '__profilin', :value => 'notstylin', :path => '/')
-      end
-
-      def set_profiling_cookie(headers)
-        Rack::Utils.set_cookie_header!(headers, '__profilin', :value => 'stylin', :path => '/')
-      end
-
-      # user has the mini profiler cookie, only used when config.authorization_mode == :whitelist
-      def has_disable_profiling_cookie?(env)
-        env['HTTP_COOKIE'] && env['HTTP_COOKIE'].include?("__profilin_disable=stylin")
-      end
-
-      # remove the mini profiler cookie, only used when config.authorization_mode == :whitelist
-      def remove_disable_profiling_cookie(headers)
-        #something is odd with delete_cookie_header
-        Rack::Utils.set_cookie_header!(headers, '__profilin_disable', :value => 'notstylin', :path => '/')
-      end
-
-      def set_disable_profiling_cookie(headers)
-        Rack::Utils.set_cookie_header!(headers, '__profilin_disable', :value => 'stylin', :path => '/')
       end
 
       def create_current(env={}, options={})
@@ -195,6 +167,9 @@ module Rack
 
 
 		def call(env)
+
+      client_settings = ClientSettings.new(env)
+
       status = headers = body = nil
       query_string = env['QUERY_STRING']
       path = env['PATH_INFO']
@@ -203,12 +178,12 @@ module Rack
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
                 query_string =~ /pp=skip/ 
       
-      has_profiling_cookie = MiniProfiler.has_profiling_cookie?(env)
+      has_profiling_cookie = client_settings.has_cookie?
     
       if skip_it || (@config.authorization_mode == :whitelist && !has_profiling_cookie)
         status,headers,body = @app.call(env)
         if !skip_it && @config.authorization_mode == :whitelist && !has_profiling_cookie && MiniProfiler.request_authorized? 
-          MiniProfiler.set_profiling_cookie(headers) 
+          client_settings.write!(headers) 
         end
         return [status,headers,body]
       end
@@ -216,7 +191,7 @@ module Rack
       # handle all /mini-profiler requests here
 			return serve_html(env) if path.start_with? @config.base_url_path
 
-      has_disable_cookie = MiniProfiler.has_disable_profiling_cookie?(env)
+      has_disable_cookie = client_settings.disable_profiling?
       # manual session disable / enable
       if query_string =~ /pp=disable/ || has_disable_cookie
         skip_it = true
@@ -228,16 +203,23 @@ module Rack
 
       if skip_it
         status,headers,body = @app.call(env)
-        MiniProfiler.set_disable_profiling_cookie(headers) unless has_disable_cookie
+        client_settings.disable_profiling = true
+        client_settings.write!(headers)
         return [status,headers,body]
       end
 
       MiniProfiler.create_current(env, @config)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
-      if query_string =~ /pp=no-backtrace/
+      if query_string =~ /pp=normal-backtrace/
+        client_settings.backtrace_level = ClientSettings::BACKTRACE_DEFAULT
+      elsif query_string =~ /pp=no-backtrace/
         current.skip_backtrace = true
-      elsif query_string =~ /pp=full-backtrace/
+        client_settings.backtrace_level = ClientSettings::BACKTRACE_NONE
+      elsif query_string =~ /pp=full-backtrace/ || client_settings.backtrace_full?
         current.full_backtrace = true
+        client_settings.backtrace_level = ClientSettings::BACKTRACE_FULL
+      elsif client_settings.backtrace_none?
+        current.skip_backtrace = true
       end
 
       done_sampling = false
@@ -249,17 +231,11 @@ module Rack
         t = Thread.current
         Thread.new {
           begin
-            require 'stacktrace' rescue nil
-            if !t.respond_to? :stacktrace
-              missing_stacktrace = true
-              quit_sampler = true 
-              return
-            end
             i = 10000 # for sanity never grab more than 10k samples 
             while i > 0
               break if done_sampling
               i -= 1
-              backtraces << t.stacktrace
+              backtraces << t.backtrace
               sleep 0.001
             end
           ensure
@@ -272,9 +248,7 @@ module Rack
       start = Time.now 
       begin 
         status,headers,body = @app.call(env)
-        if has_disable_cookie
-          MiniProfiler.remove_disable_profiling_cookie(headers)
-        end
+        client_settings.write!(headers)
       ensure
         if backtraces 
           done_sampling = true
@@ -284,7 +258,7 @@ module Rack
 
       skip_it = current.discard
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
-        MiniProfiler.remove_profiling_cookie(headers)
+        client_settings.discard_cookie!(headers)
         skip_it = true
       end
       
@@ -298,7 +272,7 @@ module Rack
 
       if query_string =~ /pp=help/
         body.close if body.respond_to? :close
-        return help
+        return help(nil, client_settings)
       end
       
       page_struct = current.page_struct
@@ -306,7 +280,7 @@ module Rack
 
       if backtraces
         body.close if body.respond_to? :close
-        return help(:stacktrace) if missing_stacktrace
+        return help(:stacktrace, client_settings) if missing_stacktrace
         return analyze(backtraces, page_struct)
       end
       
@@ -317,6 +291,8 @@ module Rack
 			
       # inject headers, script
 			if status == 200
+
+        client_settings.write!(headers)
         
         # mini profiler is meddling with stuff, we can not cache cause we will get incorrect data
         # Rack::ETag has already inserted some nonesense in the chain
@@ -346,6 +322,7 @@ module Rack
 				end
 			end
 
+      client_settings.write!(headers)
 			[status, headers, body]
     ensure
       # Make sure this always happens
@@ -373,16 +350,17 @@ module Rack
       [200, headers, [body]]
     end
 
-    def help(category = nil)
+    def help(category = nil, client_settings)
       headers = {'Content-Type' => 'text/plain'}
       body = "Append the following to your query string:
 
   pp=help : display this screen
   pp=env : display the rack environment
   pp=skip : skip mini profiler for this request
-  pp=no-backtrace : don't collect stack traces from all the SQL executed
-  pp=full-backtrace : enable full backtrace for SQL executed
-  pp=sample : sample stack traces and return a report isolating heavy usage (requires the stacktrace gem)
+  pp=no-backtrace #{"(*) " if client_settings.backtrace_none?}: don't collect stack traces from all the SQL executed (sticky, use pp=normal-backtrace to enable)
+  pp=normal-backtrace #{"(*) " if client_settings.backtrace_default?}: collect stack traces from all the SQL executed and filter normally
+  pp=full-backtrace #{"(*) " if client_settings.backtrace_full?}: enable full backtraces for SQL executed (use pp=normal-backtrace to disable) 
+  pp=sample : sample stack traces and return a report isolating heavy usage (experimental)
   pp=disable : disable profiling for this session 
   pp=enable : enable profiling for this session (if previously disabled)
 "
@@ -390,6 +368,7 @@ module Rack
         body = "pp=stacktrace requires the stacktrace gem - add gem 'stacktrace' to your Gemfile"
       end
     
+      client_settings.write!(headers)
       [200, headers, [body]]
     end
 
@@ -403,13 +382,12 @@ module Rack
         fulldump << "\n\n"
         distinct = {}
         trace.each do |frame|
-          name = "#{frame.klass} #{frame.method}"
-          unless distinct[name]
-            distinct[name] = true
-            seen[name] ||= 0
-            seen[name] += 1
+          unless distinct[frame]
+            distinct[frame] = true
+            seen[frame] ||= 0
+            seen[frame] += 1
           end
-          fulldump << name << "\n"
+          fulldump << frame << "\n"
         end
       end
 

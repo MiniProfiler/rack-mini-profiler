@@ -58,7 +58,6 @@ module Rack
           @timer_struct_cache.delete_if { |k, v| v['Root']['StartMilliseconds'] < expire_older_than }
         }
       end
-    
     end
   end
 end

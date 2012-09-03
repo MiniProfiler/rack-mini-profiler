@@ -52,3 +52,14 @@
   
   * 1.12.pre 
   * Cap X-MiniProfiler-Ids at 10, otherwise the header can get killed
+
+3-September-2012 - Sam
+
+  * 1.13.pre
+  * pg gem prepared statements were not being logged correctly 
+  * added setting config.backtrace_ignores = [] - an array of regexes that match on caller lines that get ignored
+  * added setting config.backtrace_includes = [] - an array of regexes that get included in the trace by default 
+  * cleaned up the way client settings are stored
+  * made pp=full-backtrace "sticky"
+  * added pp=normal-backtrace to clear the "sticky" state
+  * change "pp=sample" to work with "caller" no need for stack trace gem

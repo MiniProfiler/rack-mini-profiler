@@ -13,7 +13,7 @@ module Rack
     end
 
     attr_accessor :auto_inject, :base_url_path, :pre_authorize_cb, :position,
-        :backtrace_remove, :backtrace_filter, :skip_schema_queries, 
+        :backtrace_remove, :backtrace_includes, :backtrace_ignores, :skip_schema_queries, 
         :storage, :user_provider, :storage_instance, :storage_options, :skip_paths, :authorization_mode, :use_existing_jquery
       
       def self.default

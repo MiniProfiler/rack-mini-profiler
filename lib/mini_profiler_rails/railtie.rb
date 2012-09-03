@@ -31,7 +31,7 @@ module MiniProfilerRails
 
       # Quiet the SQL stack traces
       c.backtrace_remove = Rails.root.to_s + "/"
-      c.backtrace_filter =  /^\/?(app|config|lib|test)/
+      c.backtrace_includes =  [/^\/?(app|config|lib|test)/]
       c.skip_schema_queries =  Rails.env != 'production'
 
       # Install the Middleware

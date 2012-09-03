@@ -9,7 +9,7 @@ module Rack
 		  end
 
       # perform a profiling step on given block
-      def step(name)
+      def step(name, opts = nil)
         if current
           parent_timer = current.current_timer
           result = nil
@@ -20,7 +20,6 @@ module Rack
             current_timer.record_time
             current.current_timer = parent_timer
           end
-          result
         else
           yield if block_given?
         end

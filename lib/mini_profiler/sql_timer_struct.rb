@@ -14,7 +14,17 @@ module Rack
            # Clean up the stack trace if there are options to do so
           Kernel.caller.each do |ln|
             ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove and !full_backtrace
-            if full_backtrace or Rack::MiniProfiler.config.backtrace_filter.nil? or ln =~ Rack::MiniProfiler.config.backtrace_filter
+            if    full_backtrace or 
+                  (
+                    (
+                      Rack::MiniProfiler.config.backtrace_includes.nil? or 
+                      Rack::MiniProfiler.config.backtrace_includes.all?{|regex| ln =~ regex}
+                    ) and
+                    (
+                      Rack::MiniProfiler.config.backtrace_ignores.nil? or 
+                      Rack::MiniProfiler.config.backtrace_ignores.all?{|regex| !(ln =~ regex)}
+                    )
+                  ) 
               stack_trace << ln << "\n" 
             end
           end

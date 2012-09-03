@@ -47,16 +47,23 @@ describe Rack::MiniProfiler::SqlTimerStruct do
     end
 
     it "doesn't include rspec if we filter for only app" do
-      Rack::MiniProfiler.config.backtrace_filter = /\/app/
+      Rack::MiniProfiler.config.backtrace_includes = [/\/app/]
       sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 200, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
       sql['StackTraceSnippet'].should_not match /rspec/
     end
 
     it "includes rspec if we filter for it" do
-      Rack::MiniProfiler.config.backtrace_filter = /\/(app|rspec)/
+      Rack::MiniProfiler.config.backtrace_includes = [/\/(app|rspec)/]
       sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 200, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
       sql['StackTraceSnippet'].should match /rspec/
     end
+
+    it "ingores rspec if we specifically ignore it" do  
+      Rack::MiniProfiler.config.backtrace_ignores = [/\/rspec/]
+      sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 200, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
+      sql['StackTraceSnippet'].should_not match /rspec/
+    end
+
 
   end
 

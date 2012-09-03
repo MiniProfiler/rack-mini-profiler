@@ -96,17 +96,18 @@ if SqlPatches.class_exists? "PG::Result"
     alias_method :prepare_without_profiling, :prepare
 
     def prepare(*args,&blk)
+      # we have no choice but to do this here, 
+      # if we do the check for profiling first, our cache may miss critical stuff  
+      
+      @prepare_map ||= {}
+      @prepare_map[args[0]] = args[1]
+      # dont leak more than 10k ever
+      @prepare_map = {} if @prepare_map.length > 1000
+
       current = ::Rack::MiniProfiler.current
       return prepare_without_profiling(*args,&blk) unless current
 
-      @prepare_map ||= {}
-      @prepare_map[args[0]] = args[1]
-
-      # dont leak more than 10k ever
-      @prepare_map = {} if @prepare_map.length > 10000
-
       prepare_without_profiling(*args,&blk) 
-
     end
 
     def exec(*args,&blk)
