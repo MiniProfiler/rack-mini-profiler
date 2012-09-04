@@ -63,3 +63,9 @@
   * made pp=full-backtrace "sticky"
   * added pp=normal-backtrace to clear the "sticky" state
   * change "pp=sample" to work with "caller" no need for stack trace gem
+
+4-September-2012 - Sam 
+
+  * 1.15.pre
+  * fixed annoying bug where client settings were not sticking 
+  * fixed long standing issue with Rack::ConditionalGet stopping MiniProfiler from working properly

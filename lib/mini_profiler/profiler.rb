@@ -167,7 +167,6 @@ module Rack
 
 
 		def call(env)
-
       client_settings = ClientSettings.new(env)
 
       status = headers = body = nil
@@ -247,6 +246,12 @@ module Rack
 			status, headers, body = nil
       start = Time.now 
       begin 
+
+        # Strip all the caching headers so we don't get 304s back 
+        #  This solves a very annoying bug where rack mini profiler never shows up
+        env['HTTP_IF_MODIFIED_SINCE'] = nil
+        env['HTTP_IF_NONE_MATCH'] = nil
+
         status,headers,body = @app.call(env)
         client_settings.write!(headers)
       ensure

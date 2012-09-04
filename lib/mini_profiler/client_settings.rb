@@ -33,12 +33,12 @@ module Rack
           settings["dp"] = "t" if @disable_profiling 
           settings["bt"] = @backtrace_level if @backtrace_level
           settings_string = settings.map{|k,v| "#{k}=#{v}"}.join(",")
-          Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, :value => settings_string)
+          Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, :value => settings_string, :path => '/')
         end
       end
 
       def discard_cookie!(headers)
-        Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME)
+        Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, :path => '/')
       end
 
       def has_cookie?
