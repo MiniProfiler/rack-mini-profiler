@@ -55,7 +55,7 @@ module Rack
       def cleanup_cache
         expire_older_than = ((Time.now.to_f - MiniProfiler::MemoryStore::EXPIRE_TIMER_CACHE) * 1000).to_i
         @timer_struct_lock.synchronize {
-          @timer_struct_cache.delete_if { |k, v| v['Root']['StartMilliseconds'] < expire_older_than }
+          @timer_struct_cache.delete_if { |k, v| v['Started'] < expire_older_than }
         }
       end
     end

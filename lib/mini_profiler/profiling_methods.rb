@@ -26,8 +26,11 @@ module Rack
       end
 
       def unprofile_method(klass, method)
-        with_profiling = (method.to_s + "_with_mini_profiler").intern
-        without_profiling = (method.to_s + "_without_mini_profiler").intern
+
+        clean = clean_method_name(method)
+
+        with_profiling = ("#{clean}_with_mini_profiler").intern
+        without_profiling = ("#{clean}_without_mini_profiler").intern
         
         if klass.send :method_defined?, with_profiling
           klass.send :alias_method, method, without_profiling
@@ -38,8 +41,10 @@ module Rack
 
       def profile_method(klass, method, &blk)
         default_name = klass.to_s + " " + method.to_s
-        with_profiling = (method.to_s + "_with_mini_profiler").intern
-        without_profiling = (method.to_s + "_without_mini_profiler").intern
+        clean = clean_method_name(method)
+
+        with_profiling =  ("#{clean}_with_mini_profiler").intern
+        without_profiling = ("#{clean}_without_mini_profiler").intern
         
         if klass.send :method_defined?, with_profiling
           return # dont double profile
@@ -67,6 +72,13 @@ module Rack
         end
         klass.send :alias_method, method, with_profiling
       end
+
+      private
+
+      def clean_method_name(method)
+        method.to_s.gsub(/[\?\!]/, "")
+      end
+
     end
   end
 end

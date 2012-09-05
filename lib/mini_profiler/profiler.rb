@@ -167,6 +167,7 @@ module Rack
 
 
 		def call(env)
+
       client_settings = ClientSettings.new(env)
 
       status = headers = body = nil
@@ -224,17 +225,30 @@ module Rack
       done_sampling = false
       quit_sampler = false
       backtraces = nil
-      missing_stacktrace = false
+      stacktrace_installed = true
       if query_string =~ /pp=sample/
+        skip_frames = 0
         backtraces = []
         t = Thread.current
+        
+        begin 
+          require 'stacktrace'
+          skip_frames = stacktrace.length
+        rescue
+          stacktrace_installed = false
+        end
+
         Thread.new {
           begin
             i = 10000 # for sanity never grab more than 10k samples 
             while i > 0
               break if done_sampling
               i -= 1
-              backtraces << t.backtrace
+              if stacktrace_installed
+                backtraces << t.stacktrace(0,-(1+skip_frames), StackFrame::Flags::METHOD | StackFrame::Flags::KLASS)
+              else
+                backtraces << t.backtrace 
+              end
               sleep 0.001
             end
           ensure
@@ -263,10 +277,14 @@ module Rack
 
       skip_it = current.discard
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
-        client_settings.discard_cookie!(headers)
+        # this is non-obvious, don't kill the profiling cookie on errors or short requests
+        # this ensures that stuff that never reaches the rails stack does not kill profiling
+        if status == 200 && ((Time.now - start) > 0.1) 
+          client_settings.discard_cookie!(headers)
+        end
         skip_it = true
       end
-      
+
       return [status,headers,body] if skip_it
 
       # we must do this here, otherwise current[:discard] is not being properly treated
@@ -285,7 +303,6 @@ module Rack
 
       if backtraces
         body.close if body.respond_to? :close
-        return help(:stacktrace, client_settings) if missing_stacktrace
         return analyze(backtraces, page_struct)
       end
       
@@ -365,7 +382,7 @@ module Rack
   pp=no-backtrace #{"(*) " if client_settings.backtrace_none?}: don't collect stack traces from all the SQL executed (sticky, use pp=normal-backtrace to enable)
   pp=normal-backtrace #{"(*) " if client_settings.backtrace_default?}: collect stack traces from all the SQL executed and filter normally
   pp=full-backtrace #{"(*) " if client_settings.backtrace_full?}: enable full backtraces for SQL executed (use pp=normal-backtrace to disable) 
-  pp=sample : sample stack traces and return a report isolating heavy usage (experimental)
+  pp=sample : sample stack traces and return a report isolating heavy usage (experimental works best with the stacktrace gem)
   pp=disable : disable profiling for this session 
   pp=enable : enable profiling for this session (if previously disabled)
 "
@@ -387,6 +404,7 @@ module Rack
         fulldump << "\n\n"
         distinct = {}
         trace.each do |frame|
+          frame = "#{frame.klass}::#{frame.method}" unless String === frame
           unless distinct[frame]
             distinct[frame] = true
             seen[frame] ||= 0
