@@ -69,3 +69,10 @@
   * 1.15.pre
   * fixed annoying bug where client settings were not sticking 
   * fixed long standing issue with Rack::ConditionalGet stopping MiniProfiler from working properly
+
+5-September-2012 - Sam 
+
+  * 1.16
+  * fixed long standing problem specs (issue with memory store)
+  * fixed issue where profiler would be dumped when you got a 404 in production (and any time rails is bypassed)
+  * implemented stacktrace properly

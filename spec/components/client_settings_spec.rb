@@ -33,9 +33,7 @@ describe Rack::MiniProfiler::ClientSettings do
       @settings.disable_profiling = false
       hash = {}
       @settings.write!(hash)
-      p hash
       hash.should_not == {}
-    
     end
   end
 
