@@ -234,7 +234,7 @@ module Rack
         begin 
           require 'stacktrace'
           skip_frames = stacktrace.length
-        rescue
+        rescue LoadError
           stacktrace_installed = false
         end
 

@@ -76,3 +76,8 @@
   * fixed long standing problem specs (issue with memory store)
   * fixed issue where profiler would be dumped when you got a 404 in production (and any time rails is bypassed)
   * implemented stacktrace properly
+
+9-September-2012 - Sam
+
+  * 1.17
+  * pp=sample was bust unless stacktrace was installed
