@@ -295,7 +295,7 @@ module Rack
 
       if query_string =~ /pp=help/
         body.close if body.respond_to? :close
-        return help(nil, client_settings)
+        return help(client_settings, nil)
       end
       
       page_struct = current.page_struct
@@ -372,7 +372,7 @@ module Rack
       [200, headers, [body]]
     end
 
-    def help(category = nil, client_settings)
+    def help(client_settings, category = nil)
       headers = {'Content-Type' => 'text/plain'}
       body = "Append the following to your query string:
 
