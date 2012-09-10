@@ -295,7 +295,7 @@ module Rack
 
       if query_string =~ /pp=help/
         body.close if body.respond_to? :close
-        return help(client_settings, nil)
+        return help(client_settings)
       end
       
       page_struct = current.page_struct
@@ -372,7 +372,7 @@ module Rack
       [200, headers, [body]]
     end
 
-    def help(client_settings, category = nil)
+    def help(client_settings)
       headers = {'Content-Type' => 'text/plain'}
       body = "Append the following to your query string:
 
@@ -386,9 +386,6 @@ module Rack
   pp=disable : disable profiling for this session 
   pp=enable : enable profiling for this session (if previously disabled)
 "
-      if (category == :stacktrace)
-        body = "pp=stacktrace requires the stacktrace gem - add gem 'stacktrace' to your Gemfile"
-      end
     
       client_settings.write!(headers)
       [200, headers, [body]]
