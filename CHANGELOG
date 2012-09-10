@@ -81,3 +81,8 @@
 
   * 1.17
   * pp=sample was bust unless stacktrace was installed
+
+10-September-2012 - Sam 
+
+  * 1.19
+  * fix compat issue with 1.8.7
