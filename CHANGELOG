@@ -86,3 +86,8 @@
 
   * 1.19
   * fix compat issue with 1.8.7
+
+12-September-2012 - Sam
+  
+  * 1.20
+  * Added pp=profile-gc , it allows you to profile the GC in Ruby 1.9.3

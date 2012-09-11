@@ -208,6 +208,10 @@ module Rack
         return [status,headers,body]
       end
 
+      if query_string =~ /pp=profile-gc/
+        return profile_gc(env)
+      end
+
       MiniProfiler.create_current(env, @config)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
       if query_string =~ /pp=normal-backtrace/
@@ -385,10 +389,68 @@ module Rack
   pp=sample : sample stack traces and return a report isolating heavy usage (experimental works best with the stacktrace gem)
   pp=disable : disable profiling for this session 
   pp=enable : enable profiling for this session (if previously disabled)
+  pp=profile-gc: perform gc profiling on this request (ruby 1.9.3 only)
 "
     
       client_settings.write!(headers)
       [200, headers, [body]]
+    end
+
+
+    def object_space_stats
+      stats = {}
+      ObjectSpace.each_object { |o|
+        stats[o.class] ||= 1
+        stats[o.class] += 1
+      }
+      stats
+    end
+
+    def diff_object_stats(before,after)
+      diff = {}
+      after.each do |k,v|
+        diff[k] = v - (before[k] || 0)
+      end
+      before.each do |k,v|
+        diff[k] = 0 - v unless after[k]
+      end
+
+      diff
+    end
+
+    def profile_gc(env)
+      
+      body = "";
+
+      stat_before = object_space_stats
+      begin
+        GC::Profiler.clear
+        GC::Profiler.enable
+        @app.call(env)
+        body << GC::Profiler.result
+      ensure
+        GC::Profiler.disable
+      end
+      stat_after = object_space_stats
+
+      diff = diff_object_stats(stat_before,stat_after)
+
+      body << "
+ObjectSpace delta caused by request:
+--------------------------------------------\n"
+      diff.to_a.reject{|k,v| v == 0}.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
+        body << "#{k} : #{v}\n" if v != 0
+      end
+
+      body << "\n
+ObjectSpace stats:
+-----------------\n"
+
+      stat_after.to_a.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
+        body << "#{k} : #{v}\n" 
+      end
+
+      return [200, {'Content-Type' => 'text/plain'}, body]
     end
 
     def analyze(traces, page_struct)
