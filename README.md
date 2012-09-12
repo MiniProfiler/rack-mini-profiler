@@ -56,7 +56,7 @@ By default, rack-mini-profiler stores its results in a memory store:
 Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
 ```
 
-There are 2 other available storage engines, `RedisStore` and `FileStore`. 
+There are 2 other available storage engines, `RedisStore`, `MemcacheStore`, and `FileStore`.
 
 MemoryStore is stores results in a processes heap - something that does not work well in a multi process environment. 
 FileStore stores results in the file system - something that may not work well in a multi machine environment. 
