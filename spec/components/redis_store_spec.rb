@@ -22,15 +22,15 @@ describe Rack::MiniProfiler::RedisStore do
         page_struct = @store.load("XYZ")
         page_struct['Random'].should == "random"
         page_struct['Id'].should == "XYZ"
-      end    
+      end
 
-      it 'can list unviewed items for a user' do 
+      it 'can list unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
         @store.get_unviewed_ids('a').should == ['XYZ', 'ABC']
       end
 
-      it 'can set an item to viewed once it is unviewed' do 
+      it 'can set an item to viewed once it is unviewed' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
         @store.set_viewed('a', 'XYZ')

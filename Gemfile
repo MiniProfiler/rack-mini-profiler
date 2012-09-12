@@ -6,6 +6,7 @@ gem 'therubyracer', :require => 'v8'
 gem 'less'
 
 group :test do
+  gem 'dalli'
   gem 'rake'
   gem 'rack'
   gem 'rspec'
