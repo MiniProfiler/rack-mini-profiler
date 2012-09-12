@@ -12,8 +12,9 @@ module MiniProfilerRails
         Rails.env.development? || Rails.env.production?  
       }
 
+      c.skip_paths ||= []
+
       if Rails.env.development?
-        c.skip_paths ||= []
         c.skip_paths << "/assets/"
         c.skip_schema_queries = true
       end
