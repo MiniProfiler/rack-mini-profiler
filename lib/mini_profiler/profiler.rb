@@ -210,12 +210,7 @@ module Rack
       end
 
       if query_string =~ /pp=profile-gc/
-        begin 
-          return profile_gc(env)
-        rescue => err
-          p err
-          p err.backtrace
-        end
+        return profile_gc(env)
       end
 
       MiniProfiler.create_current(env, @config)
@@ -478,7 +473,7 @@ ObjectSpace stats:
 String stats:
 ------------\n"
 
-      r.to_a.sort{|x,y| y[1] <=> x[1] }.take(200).each do |string,count|
+      r.to_a.sort{|x,y| y[1] <=> x[1] }.take(1000).each do |string,count|
         body << "#{count} : #{string}\n"
       end
 
