@@ -6,6 +6,7 @@
   * Fixed bug where unviewed missing ids never got cleared
   * Supress all '/assets/' in the rails tie (makes debugging easier)
   * record_sql was mega buggy
+  * added MemcacheStore
 
 9-July-2012 - Sam 
 
