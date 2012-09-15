@@ -209,7 +209,12 @@ module Rack
       end
 
       if query_string =~ /pp=profile-gc/
-        return profile_gc(env)
+        begin 
+          return profile_gc(env)
+        rescue => err
+          p err
+          p err.backtrace
+        end
       end
 
       MiniProfiler.create_current(env, @config)
@@ -399,11 +404,13 @@ module Rack
 
     def object_space_stats
       stats = {}
+      ids = Set.new
       ObjectSpace.each_object { |o|
         stats[o.class] ||= 1
         stats[o.class] += 1
+        ids << o.object_id
       }
-      stats
+      {:stats => stats, :ids => ids}
     end
 
     def diff_object_stats(before,after)
@@ -418,22 +425,36 @@ module Rack
       diff
     end
 
+    def analyze_strings(ids_before,ids_after)
+      result = {}
+      ids_after.each do |id|
+        obj = ObjectSpace._id2ref(id)
+        if String === obj && !ids_before.include?(obj.object_id) 
+          result[obj] ||= 0 
+          result[obj] += 1
+        end
+      end
+      result
+    end
+
     def profile_gc(env)
       
-      body = "";
+      body = [];
 
+      stat_after = nil
       stat_before = object_space_stats
       begin
         GC::Profiler.clear
         GC::Profiler.enable
-        @app.call(env)
+        b = @app.call(env)[2]
+        b.close if b.respond_to? :close
+        stat_after = object_space_stats
         body << GC::Profiler.result
       ensure
         GC::Profiler.disable
       end
-      stat_after = object_space_stats
 
-      diff = diff_object_stats(stat_before,stat_after)
+      diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
 
       body << "
 ObjectSpace delta caused by request:
@@ -446,8 +467,18 @@ ObjectSpace delta caused by request:
 ObjectSpace stats:
 -----------------\n"
 
-      stat_after.to_a.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
+      stat_after[:stats].to_a.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
         body << "#{k} : #{v}\n" 
+      end
+
+      r = analyze_strings(stat_before[:ids], stat_after[:ids])
+
+      body << "\n
+String stats:
+------------\n"
+
+      r.to_a.sort{|x,y| y[1] <=> x[1] }.take(200).each do |string,count|
+        body << "#{count} : #{string}\n"
       end
 
       return [200, {'Content-Type' => 'text/plain'}, body]
