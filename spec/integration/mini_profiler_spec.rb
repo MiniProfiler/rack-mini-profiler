@@ -146,4 +146,12 @@ describe Rack::MiniProfiler do
   end
 
 
+  describe 'gc profiler' do 
+    it "should return a report" do 
+      get '/html?pp=profile-gc'
+      last_response.header['Content-Type'].should == 'text/plain'
+    end
+  end
+
+
 end
