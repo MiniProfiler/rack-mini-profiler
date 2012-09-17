@@ -27,7 +27,7 @@ end
 desc "copy files from other parts of the tree"
 task :copy_files do
 	`rm -R -f lib/html && mkdir lib/html 1>&2`
-  path = File.expand_path('../StackExchange.Profiling/UI')
+  path = ('../../../StackExchange.Profiling/UI')
   `ln -s #{path}/includes.less lib/html/includes.less`
   `ln -s #{path}/includes.js lib/html/includes.js`
   `ln -s #{path}/includes.tmpl lib/html/includes.tmpl`
