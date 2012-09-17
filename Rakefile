@@ -13,7 +13,9 @@ end
 
 desc "builds a gem"
 task :build => :compile_less do
-	`gem build rack-mini-profiler.gemspec 1>&2`
+  Dir.chdir("..") do 
+    `gem build rack-mini-profiler.gemspec 1>&2 && mv *.gem Ruby/`
+  end
 end
 
 desc "compile less"

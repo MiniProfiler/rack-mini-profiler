@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gemspec
+gemspec :path => '../'
 
 gem 'therubyracer', :require => 'v8'
 gem 'less'
