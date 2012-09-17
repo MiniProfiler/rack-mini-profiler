@@ -3,10 +3,12 @@ class Rack::MiniProfiler::GCProfiler
   def object_space_stats
     stats = {}
     ids = Set.new
+    i=0
     ObjectSpace.each_object { |o|
-      stats[o.class] ||= 1
-      stats[o.class] += 1
-      ids << o.object_id
+      i = stats[o.class] || 0
+      i += 1
+      stats[o.class] = i
+      ids << o.object_id if Integer === o.object_id 
     }
     {:stats => stats, :ids => ids}
   end
@@ -35,24 +37,42 @@ class Rack::MiniProfiler::GCProfiler
     result
   end
 
-  def profile_gc(app,env)
-    
-    body = [];
+  def profile_gc_time(app,env)
+    body = []
 
-    stat_after = nil
-    stat_before = object_space_stats
     begin
       GC::Profiler.clear
       GC::Profiler.enable
       b = app.call(env)[2]
       b.close if b.respond_to? :close
-      stat_after = object_space_stats
+      body << "GC Profiler ran during this request, if it fired you will see the cost below:\n\n"
       body << GC::Profiler.result
     ensure
+      GC.enable
       GC::Profiler.disable
     end
 
-    diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
+    return [200, {'Content-Type' => 'text/plain'}, body]
+  end
+
+  def profile_gc(app,env)
+    
+    body = [];
+
+    stat_before,stat_after,diff,string_analysis = nil
+    begin
+      GC.disable
+      stat_before = object_space_stats
+      b = app.call(env)[2]
+      b.close if b.respond_to? :close
+      stat_after = object_space_stats
+      
+      diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
+      string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
+    ensure
+      GC.enable
+    end
+
 
     body << "
 ObjectSpace delta caused by request:
@@ -69,13 +89,12 @@ ObjectSpace stats:
       body << "#{k} : #{v}\n" 
     end
 
-    r = analyze_strings(stat_before[:ids], stat_after[:ids])
 
     body << "\n
 String stats:
 ------------\n"
 
-    r.to_a.sort{|x,y| y[1] <=> x[1] }.take(1000).each do |string,count|
+    string_analysis.to_a.sort{|x,y| y[1] <=> x[1] }.take(1000).each do |string,count|
       body << "#{count} : #{string}\n"
     end
 
