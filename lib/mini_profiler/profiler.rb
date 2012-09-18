@@ -21,7 +21,8 @@ module Rack
 
 	class MiniProfiler
 
-		VERSION = '107'.freeze
+    # we really should add a cleaner way to version JS and includes
+		VERSION = '108'.freeze
 
     class << self 
       
