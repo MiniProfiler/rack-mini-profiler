@@ -101,3 +101,7 @@
 17-September-2012
   * Allow rack-mini-profiler to be sourced from github
   * Extracted the pp=profile-gc-time out, the object space profiler needs to disable gc
+
+20-September-2010
+  * 1.22
+  * Fix permission issue in the gem
