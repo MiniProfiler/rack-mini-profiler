@@ -5,8 +5,8 @@ module Rack
       EXPIRE_SECONDS = 60 * 60 * 24
      
       def initialize(args)
-        args ||= {}
-        @prefix = args[:prefix] || 'MPRedisStore'
+        @args = args || {}
+        @prefix = @args.delete(:prefix) || 'MPRedisStore'
       end
 
       def save(page_struct)
@@ -36,7 +36,7 @@ module Rack
 
       def redis
         require 'redis' unless defined? Redis
-        Redis.new 
+        Redis.new @args
       end
 
     end

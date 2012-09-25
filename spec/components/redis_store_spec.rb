@@ -6,6 +6,28 @@ require 'mini_profiler/storage/redis_store'
 
 describe Rack::MiniProfiler::RedisStore do
 
+  context 'establishing a connection to something other than the default' do
+    before do
+      @store = Rack::MiniProfiler::RedisStore.new(:db=>2)
+    end
+
+    describe "connection" do
+      it 'can still store the resulting value' do
+        page_struct = Rack::MiniProfiler::PageTimerStruct.new({})
+        page_struct['Id'] = "XYZ"
+        page_struct['Random'] = "random"
+        @store.save(page_struct)
+      end
+
+      it 'uses the correct db' do
+        # redis is private, and possibly should remain so?
+        underlying_client = @store.send(:redis).client
+
+        underlying_client.db.should == 2
+      end
+    end
+  end
+
   context 'page struct' do
 
     before do
