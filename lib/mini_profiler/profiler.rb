@@ -4,6 +4,7 @@ require 'thread'
 
 require 'mini_profiler/page_timer_struct'
 require 'mini_profiler/sql_timer_struct'
+require 'mini_profiler/custom_timer_struct'
 require 'mini_profiler/client_timer_struct'
 require 'mini_profiler/request_timer_struct'
 require 'mini_profiler/storage/abstract_store'

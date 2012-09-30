@@ -7,6 +7,7 @@ module Rack
     #   Root: RequestTimer
     #     :has_many RequestTimer children
     #     :has_many SqlTimer children
+    #     :has_many CustomTimer children
     class PageTimerStruct < TimerStruct
       def initialize(env)
         super("Id" => MiniProfiler.generate_id,
@@ -27,7 +28,10 @@ module Rack
               "HasDuplicateSqlTimings" => false,
               "ExecutedReaders" => 0,
               "ExecutedScalars" => 0,
-              "ExecutedNonQueries" => 0)
+              "ExecutedNonQueries" => 0,
+              "CustomTimingNames" => [],
+              "CustomTimingStats" => {}
+             )
         name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
         self['Root'] = RequestTimerStruct.createRoot(name, self)
       end
@@ -43,7 +47,8 @@ module Rack
       def to_json(*a)
         attribs = @attributes.merge(
           "Started" => '/Date(%d)/' % @attributes['Started'], 
-          "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds']
+          "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds'],
+          "CustomTimingNames" => @attributes['CustomTimingStats'].keys.sort
         )        
         ::JSON.generate(attribs, :max_nesting => 100)
       end
