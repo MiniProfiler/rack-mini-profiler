@@ -80,6 +80,29 @@ module Rack
       def request_authorized?
         Thread.current[:mp_authorized]
       end
+
+      # Add a custom timing. These are displayed similar to SQL/query time in
+      # columns expanding to the right.
+      #
+      # type        - String counter type. Each distinct type gets its own column.
+      # duration_ms - Duration of the call in ms. Either this or a block must be
+      #               given but not both.
+      #
+      # When a block is given, calculate the duration by yielding to the block
+      # and keeping a record of its run time.
+      #
+      # Returns the result of the block, or nil when no block is given.
+      def counter(type, duration_ms=nil)
+        result = nil
+        if block_given?
+          start = Time.now
+          result = yield
+          duration_ms = (Time.now - start).to_f * 1000
+        end
+        return result if current.nil? || !request_authorized?
+        current.current_timer.add_custom(type, duration_ms, current.page_struct)
+        result
+      end
     end
 
 		#
