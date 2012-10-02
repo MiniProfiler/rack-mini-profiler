@@ -2,6 +2,7 @@ require 'json'
 require 'timeout'
 require 'thread'
 
+require 'mini_profiler/version'
 require 'mini_profiler/page_timer_struct'
 require 'mini_profiler/sql_timer_struct'
 require 'mini_profiler/client_timer_struct'
@@ -19,11 +20,8 @@ require 'mini_profiler/gc_profiler'
 
 module Rack
 
-	class MiniProfiler
-
-    # we really should add a cleaner way to version JS and includes
-		VERSION = '108'.freeze
-
+  class MiniProfiler
+    
     class << self 
       
       include Rack::MiniProfiler::ProfilingMethods

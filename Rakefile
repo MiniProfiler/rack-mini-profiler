@@ -12,7 +12,7 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
 desc "builds a gem"
-task :build => :compile_less do
+task :build => :update_asset_version do
   Dir.chdir("..") do 
     `gem build rack-mini-profiler.gemspec 1>&2 && mv *.gem Ruby/`
   end
@@ -21,6 +21,22 @@ end
 desc "compile less"
 task :compile_less => :copy_files do
   `lessc lib/html/includes.less > lib/html/includes.css`
+end
+
+desc "update asset version file" 
+task :update_asset_version => :compile_less do 
+  require 'digest/md5'
+  h = []
+  Dir.glob('lib/html/*.{js,html,css,tmpl}').each do |f|
+    h << Digest::MD5.hexdigest(::File.read(f))
+  end
+  File.open('lib/mini_profiler/version.rb','w') do |f| 
+    f.write "module Rack
+  class MiniProfiler 
+    VERSION = '#{Digest::MD5.hexdigest(h.sort.join(''))}'.freeze
+  end
+end" 
+  end
 end
 
 
