@@ -127,7 +127,7 @@ module Rack
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
         html.gsub!(/\{name\}/, page_struct['Name'])
-        html.gsub!(/\{duration\}/, page_struct.duration_ms.round(1).to_s)
+        html.gsub!(/\{duration\}/, "%.1f" % page_struct.duration_ms)
         
         [200, {'Content-Type' => 'text/html'}, [html]]
       end
