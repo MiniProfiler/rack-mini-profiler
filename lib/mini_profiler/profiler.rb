@@ -207,6 +207,8 @@ module Rack
         client_settings.disable_profiling = true
         client_settings.write!(headers)
         return [status,headers,body]
+      else
+        client_settings.disable_profiling = false
       end
 
       if query_string =~ /pp=profile-gc/
