@@ -474,6 +474,12 @@ module Rack
       ::JSON.generate(ids.uniq)
     end
 
+    def ids_comma_separated(env)
+      # cap at 10 ids, otherwise there is a chance you can blow the header
+      ids = [current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]
+      ids.join(",")
+    end
+
 		# get_profile_script returns script to be injected inside current html page
 		# By default, profile_script is appended to the end of all html requests automatically.
 		# Calling get_profile_script cancels automatic append for the current page
@@ -481,7 +487,7 @@ module Rack
 		# * you have disabled auto append behaviour throught :auto_inject => false flag
 		# * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
 		def get_profile_script(env)
-			ids = ids_json(env)
+			ids = ids_comma_separated(env)
 			path = @config.base_url_path
 			version = MiniProfiler::VERSION
 			position = @config.position
@@ -498,8 +504,6 @@ module Rack
 				regex = Regexp.new("\\{#{v.to_s}\\}")
 				script.gsub!(regex, eval(v.to_s).to_s)
 			end
-			# replace the '{{' and '}}''
-			script.gsub!(/\{\{/, '{').gsub!(/\}\}/, '}')
 			current.inject_js = false
 			script
 		end
