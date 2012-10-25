@@ -394,13 +394,29 @@ module Rack
 		end
 
     def inject(fragment, script)
-      fragment.sub(/<\/body>/i) do 
-        # if for whatever crazy reason we dont get a utf string, 
-        #   just force the encoding, no utf in the mp scripts anyway 
+      if fragment.match(/<\/body>/i)
+        # explicit </body>
+
+        regex = /<\/body>/i
+        close_tag = '</body>'
+      elsif fragment.match(/<\/html>/i)
+        # implicit </body>
+
+        regex = /<\/html>/i
+        close_tag = '</html>'
+      else
+        # implicit </body> and </html>. Just append the script.
+
+        return fragment + script
+      end
+
+      fragment.sub(regex) do
+        # if for whatever crazy reason we dont get a utf string,
+        #   just force the encoding, no utf in the mp scripts anyway
         if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
-          (script + "</body>").force_encoding(fragment.encoding)
+          (script + close_tag).force_encoding(fragment.encoding)
         else
-          script + "</body>"
+          script + close_tag
         end
       end
     end
