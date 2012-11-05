@@ -47,6 +47,10 @@ class MyApp < Sinatra::Base
 end
 ```
 
+## Database profiling
+
+Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to ActiveRecord)
+
 ## Storage
 
 rack-mini-profiler stores it's results so they can be shared later and aren't lost at the end of the request.
