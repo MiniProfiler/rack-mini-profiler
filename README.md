@@ -15,7 +15,7 @@ All you have to do is include the Gem and you're good to go in development.
 
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
-For example: 
+Using Rails:
 
 ```ruby
 # A hook in your ApplicationController
@@ -49,21 +49,31 @@ end
 
 ## Storage
 
-By default, rack-mini-profiler stores its results in a memory store: 
+rack-mini-profiler stores it's results so they can be shared later and aren't lost at the end of the request.
+
+There are 4 storage options: `MemoryStore`, `RedisStore`, `MemcacheStore`, and `FileStore`.
+
+`FileStore` is the default in Rails environments and will write files to `tmp/miniprofiler/*`.  `MemoryStore` is the default otherwise.
+
+To change the default you can create a file in `config/initializers/mini_profiler.rb`
 
 ```ruby 
-# our default
+# set MemoryStore
 Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
+
+# set RedisStore
+if Rails.env.production?
+  uri = URI.parse(ENV["REDIS_SERVER_URL"])
+  Rack::MiniProfiler.config.storage_options = { :host => uri.host, :port => uri.port, :password => uri.password }
+  Rack::MiniProfiler.config.storage = Rack::MiniProfiler::RedisStore
+end
 ```
 
-There are 2 other available storage engines, `RedisStore`, `MemcacheStore`, and `FileStore`.
-
-MemoryStore is stores results in a processes heap - something that does not work well in a multi process environment. 
+MemoryStore stores results in a processes heap - something that does not work well in a multi process environment. 
 FileStore stores results in the file system - something that may not work well in a multi machine environment. 
+RedisStore/MemcacheStore work in multi process and multi machine environments (RedisStore only saves results for up to 24 hours so it won't continue to fill up Redis).
 
 Additionally you may implement an AbstractStore for your own provider. 
-
-Rails hooks up a FileStore for all environments. 
 
 ## Running the Specs
 
