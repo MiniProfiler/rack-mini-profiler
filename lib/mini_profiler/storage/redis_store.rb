@@ -7,6 +7,7 @@ module Rack
       def initialize(args)
         @args = args || {}
         @prefix = @args.delete(:prefix) || 'MPRedisStore'
+        @redis_connection = @args.delete(:connection)
       end
 
       def save(page_struct)
@@ -35,6 +36,7 @@ module Rack
       private 
 
       def redis
+        return @redis_connection if @redis_connection
         require 'redis' unless defined? Redis
         Redis.new @args
       end
