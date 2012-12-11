@@ -29,16 +29,14 @@ describe Rack::MiniProfiler::RedisStore do
   end
 
   context 'passing in a Redis connection' do
-    before(:each) do
-      @connection = double("redis-connection")
-      @store = Rack::MiniProfiler::RedisStore.new(:connection => @connection)
-    end
-
     describe 'connection' do
       it 'uses the passed in object rather than creating a new one' do
-        @connection.should_receive(:get)
+        connection = double("redis-connection")
+        store = Rack::MiniProfiler::RedisStore.new(:connection => connection)
+
+        connection.should_receive(:get)
         Redis.should_not_receive(:new)
-        @store.load("XYZ")
+        store.load("XYZ")
       end
     end
   end
