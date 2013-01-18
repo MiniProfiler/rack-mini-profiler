@@ -5,10 +5,14 @@ class Rack::MiniProfiler::GCProfiler
     ids = Set.new
     i=0
     ObjectSpace.each_object { |o|
-      i = stats[o.class] || 0
-      i += 1
-      stats[o.class] = i
-      ids << o.object_id if Integer === o.object_id 
+      begin
+        i = stats[o.class] || 0
+        i += 1
+        stats[o.class] = i
+        ids << o.object_id if Integer === o.object_id 
+      rescue NoMethodError
+        # Redis::Future undefines .class and .object_id super weird
+      end
     }
     {:stats => stats, :ids => ids}
   end
