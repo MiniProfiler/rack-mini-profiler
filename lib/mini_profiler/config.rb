@@ -33,6 +33,8 @@ module Rack
           @storage = MiniProfiler::MemoryStore
           @user_provider = Proc.new{|env| Rack::Request.new(env).ip}
           @authorization_mode = :allow_all
+          @toggle_shortcut = 'Alt+P'
+          @start_hidden = false
           self
         }
       end
