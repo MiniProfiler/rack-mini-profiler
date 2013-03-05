@@ -520,10 +520,12 @@ module Rack
       showControls = false
       currentId = current.page_struct["Id"]
       authorized = true
+      toggleShortcut = @config.toggle_shortcut
+      startHidden = @config.start_hidden
       # TODO : cache this snippet
       script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
       # replace the variables
-      [:ids, :path, :version, :position, :showTrivial, :showChildren, :maxTracesToShow, :showControls, :currentId, :authorized].each do |v|
+      [:ids, :path, :version, :position, :showTrivial, :showChildren, :maxTracesToShow, :showControls, :currentId, :authorized, :toggleShortcut, :startHidden].each do |v|
         regex = Regexp.new("\\{#{v.to_s}\\}")
         script.gsub!(regex, eval(v.to_s).to_s)
       end
