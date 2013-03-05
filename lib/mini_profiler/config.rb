@@ -14,7 +14,8 @@ module Rack
 
     attr_accessor :auto_inject, :base_url_path, :pre_authorize_cb, :position,
         :backtrace_remove, :backtrace_includes, :backtrace_ignores, :skip_schema_queries, 
-        :storage, :user_provider, :storage_instance, :storage_options, :skip_paths, :authorization_mode
+        :storage, :user_provider, :storage_instance, :storage_options, :skip_paths, :authorization_mode,
+        :toggle_shortcut, :start_hidden
 
     # Deprecated options
     attr_accessor :use_existing_jquery
