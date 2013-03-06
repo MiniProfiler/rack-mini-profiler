@@ -423,10 +423,17 @@ module Rack
 
     def dump_env(env)
       headers = {'Content-Type' => 'text/plain'}
-      body = "" 
+      body = "Rack Environment\n---------------\n" 
       env.each do |k,v|
         body << "#{k}: #{v}\n"
       end
+
+      body = "\n\nEnvironment\n---------------\n" 
+      ENV.each do |k,v|
+        body << "#{k}: #{v}\n"
+      end
+
+
       [200, headers, [body]]
     end
 
