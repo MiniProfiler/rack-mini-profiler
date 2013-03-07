@@ -428,7 +428,7 @@ module Rack
         body << "#{k}: #{v}\n"
       end
 
-      body = "\n\nEnvironment\n---------------\n" 
+      body << "\n\nEnvironment\n---------------\n" 
       ENV.each do |k,v|
         body << "#{k}: #{v}\n"
       end
