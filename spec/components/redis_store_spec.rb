@@ -62,7 +62,7 @@ describe Rack::MiniProfiler::RedisStore do
       it 'can list unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
-        @store.get_unviewed_ids('a').should == ['XYZ', 'ABC']
+        @store.get_unviewed_ids('a').should =~ ['XYZ', 'ABC']
       end
 
       it 'can set an item to viewed once it is unviewed' do
