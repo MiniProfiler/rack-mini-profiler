@@ -13,7 +13,7 @@ end
 
 desc "builds a gem"
 task :build => :update_asset_version do
-  Dir.chdir("..") do 
+  Dir.chdir("..") do
     `gem build rack-mini-profiler.gemspec 1>&2 && mv *.gem Ruby/`
   end
 end
@@ -23,26 +23,27 @@ task :compile_less => :copy_files do
   `lessc lib/html/includes.less > lib/html/includes.css`
 end
 
-desc "update asset version file" 
-task :update_asset_version => :compile_less do 
+desc "update asset version file"
+task :update_asset_version => :compile_less do
   require 'digest/md5'
   h = []
   Dir.glob('lib/html/*.{js,html,css,tmpl}').each do |f|
     h << Digest::MD5.hexdigest(::File.read(f))
   end
-  File.open('lib/mini_profiler/version.rb','w') do |f| 
-    f.write "module Rack
-  class MiniProfiler 
+  File.open('lib/mini_profiler/version.rb','w') do |f|
+    f.write \
+"module Rack
+  class MiniProfiler
     VERSION = '#{Digest::MD5.hexdigest(h.sort.join(''))}'.freeze
   end
-end" 
+end"
   end
 end
 
 
 desc "copy files from other parts of the tree"
 task :copy_files do
-	`rm -R -f lib/html && mkdir lib/html 1>&2`
+  `rm -R -f lib/html && mkdir lib/html 1>&2`
   path = ('../../../StackExchange.Profiling/UI')
   `ln -s #{path}/includes.less lib/html/includes.less`
   `ln -s #{path}/includes.js lib/html/includes.js`
