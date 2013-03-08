@@ -8,31 +8,30 @@ require 'logger'
 use Rack::MiniProfiler
 options = {}
 options[:logger] = Logger.new(STDOUT)
-DB = Sequel.connect("mysql2://sveg:svegsveg@localhost/sveg_development",
-	options)
+DB = Sequel.connect("mysql2://sveg:svegsveg@localhost/sveg_development", options)
 
 app = proc do |env|
-	sleep(0.1)
-	env['profiler.mini'].benchmark(env, "sleep0.2") do
-		sleep(0.2)
-	end
-	env['profiler.mini'].benchmark(env, 'sleep0.1') do
-		sleep(0.1)
-		env['profiler.mini'].benchmark(env, 'sleep0.01') do
-			sleep(0.01)
-			env['profiler.mini'].benchmark(env, 'sleep0.001') do
-				sleep(0.001)
-				DB.fetch('SHOW TABLES') do |row|
-					puts row
-				end
-			end
-			env['profiler.mini'].benchmark(env, 'litl sql') do
-				DB.fetch('select * from auth_logins') do |row|
-					puts row
-				end
-			end
-		end
-	end
+  sleep(0.1)
+  env['profiler.mini'].benchmark(env, "sleep0.2") do
+    sleep(0.2)
+  end
+  env['profiler.mini'].benchmark(env, 'sleep0.1') do
+    sleep(0.1)
+    env['profiler.mini'].benchmark(env, 'sleep0.01') do
+      sleep(0.01)
+      env['profiler.mini'].benchmark(env, 'sleep0.001') do
+        sleep(0.001)
+        DB.fetch('SHOW TABLES') do |row|
+          puts row
+        end
+      end
+      env['profiler.mini'].benchmark(env, 'litl sql') do
+        DB.fetch('select * from auth_logins') do |row|
+          puts row
+        end
+      end
+    end
+  end
   [ 200, {'Content-Type' => 'text/html'}, ["<h1>This is Rack::MiniProfiler test"] ]
 end
 

@@ -8,32 +8,32 @@ class SqlPatches
     @patched = val
   end
 
-	def self.class_exists?(name)
-		eval(name + ".class").to_s.eql?('Class')
-	rescue NameError
-		false
-	end
-	
+  def self.class_exists?(name)
+    eval(name + ".class").to_s.eql?('Class')
+  rescue NameError
+    false
+  end
+
   def self.module_exists?(name)
-		eval(name + ".class").to_s.eql?('Module')
-	rescue NameError
-		false
-	end
+    eval(name + ".class").to_s.eql?('Module')
+  rescue NameError
+    false
+  end
 end
 
 # The best kind of instrumentation is in the actual db provider, however we don't want to double instrument
 if SqlPatches.class_exists? "Mysql2::Client"
-  
+
   class Mysql2::Result
     alias_method :each_without_profiling, :each
     def each(*args, &blk)
       return each_without_profiling(*args, &blk) unless @miniprofiler_sql_id
 
       start = Time.now
-      result = each_without_profiling(*args,&blk) 
+      result = each_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
 
-      @miniprofiler_sql_id.report_reader_duration(elapsed_time) 
+      @miniprofiler_sql_id.report_reader_duration(elapsed_time)
       result
     end
   end
@@ -53,14 +53,14 @@ if SqlPatches.class_exists? "Mysql2::Client"
 
     end
   end
-    
+
   SqlPatches.patched = true
 end
 
 
-# PG patches, keep in mind exec and async_exec have a exec{|r| } semantics that is yet to be implemented 
+# PG patches, keep in mind exec and async_exec have a exec{|r| } semantics that is yet to be implemented
 if SqlPatches.class_exists? "PG::Result"
-  
+
   class PG::Result
     alias_method :each_without_profiling, :each
     alias_method :values_without_profiling, :values
@@ -69,10 +69,10 @@ if SqlPatches.class_exists? "PG::Result"
       return values_without_profiling(*args, &blk) unless @miniprofiler_sql_id
 
       start = Time.now
-      result = values_without_profiling(*args,&blk) 
+      result = values_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
 
-      @miniprofiler_sql_id.report_reader_duration(elapsed_time) 
+      @miniprofiler_sql_id.report_reader_duration(elapsed_time)
       result
     end
 
@@ -80,10 +80,10 @@ if SqlPatches.class_exists? "PG::Result"
       return each_without_profiling(*args, &blk) unless @miniprofiler_sql_id
 
       start = Time.now
-      result = each_without_profiling(*args,&blk) 
+      result = each_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
 
-      @miniprofiler_sql_id.report_reader_duration(elapsed_time) 
+      @miniprofiler_sql_id.report_reader_duration(elapsed_time)
       result
     end
   end
@@ -96,9 +96,9 @@ if SqlPatches.class_exists? "PG::Result"
     alias_method :prepare_without_profiling, :prepare
 
     def prepare(*args,&blk)
-      # we have no choice but to do this here, 
-      # if we do the check for profiling first, our cache may miss critical stuff  
-      
+      # we have no choice but to do this here,
+      # if we do the check for profiling first, our cache may miss critical stuff
+
       @prepare_map ||= {}
       @prepare_map[args[0]] = args[1]
       # dont leak more than 10k ever
@@ -107,7 +107,7 @@ if SqlPatches.class_exists? "PG::Result"
       current = ::Rack::MiniProfiler.current
       return prepare_without_profiling(*args,&blk) unless current
 
-      prepare_without_profiling(*args,&blk) 
+      prepare_without_profiling(*args,&blk)
     end
 
     def exec(*args,&blk)
@@ -135,7 +135,7 @@ if SqlPatches.class_exists? "PG::Result"
 
       result
     end
-    
+
     def send_query_prepared(*args,&blk)
       current = ::Rack::MiniProfiler.current
       return send_query_prepared_without_profiling(*args,&blk) unless current
@@ -149,7 +149,7 @@ if SqlPatches.class_exists? "PG::Result"
 
       result
     end
-    
+
     def async_exec(*args,&blk)
       current = ::Rack::MiniProfiler.current
       return exec_without_profiling(*args,&blk) unless current
@@ -161,10 +161,10 @@ if SqlPatches.class_exists? "PG::Result"
 
       result
     end
-    
+
     alias_method :query, :exec
   end
-    
+
   SqlPatches.patched = true
 end
 
@@ -213,15 +213,15 @@ end
 
 # Fallback for sequel
 if SqlPatches.class_exists?("Sequel::Database") && !SqlPatches.patched?
-	module Sequel
-		class Database
-			alias_method :log_duration_original, :log_duration
-			def log_duration(duration, message)
-				::Rack::MiniProfiler.record_sql(message, duration)
-				log_duration_original(duration, message)
-			end
-		end
-	end
+  module Sequel
+    class Database
+      alias_method :log_duration_original, :log_duration
+      def log_duration(duration, message)
+        ::Rack::MiniProfiler.record_sql(message, duration)
+        log_duration_original(duration, message)
+      end
+    end
+  end
 end
 
 
@@ -229,7 +229,7 @@ end
 ## fallback for alls sorts of weird dbs
 if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
   module Rack
-    class MiniProfiler  
+    class MiniProfiler
       module ActiveRecordInstrumentation
         def self.included(instrumented_class)
           instrumented_class.class_eval do
@@ -248,7 +248,7 @@ if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
           sql, name, binds = args
           t0 = Time.now
           rval = log_without_miniprofiler(*args, &block)
-          
+
           # Don't log schema queries if the option is set
           return rval if Rack::MiniProfiler.config.skip_schema_queries and name =~ /SCHEMA/
 
@@ -259,7 +259,7 @@ if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
       end
     end
 
-    def self.insert_instrumentation 
+    def self.insert_instrumentation
       ActiveRecord::ConnectionAdapters::AbstractAdapter.module_eval do
         include ::Rack::MiniProfiler::ActiveRecordInstrumentation
       end
