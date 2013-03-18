@@ -42,7 +42,7 @@ if SqlPatches.class_exists? "Mysql2::Client"
     alias_method :query_without_profiling, :query
     def query(*args,&blk)
       current = ::Rack::MiniProfiler.current
-      return query_without_profiling(*args,&blk) unless current
+      return query_without_profiling(*args,&blk) unless current && current.measure
 
       start = Time.now
       result = query_without_profiling(*args,&blk)
@@ -105,14 +105,14 @@ if SqlPatches.class_exists? "PG::Result"
       @prepare_map = {} if @prepare_map.length > 1000
 
       current = ::Rack::MiniProfiler.current
-      return prepare_without_profiling(*args,&blk) unless current
+      return prepare_without_profiling(*args,&blk) unless current && current.measure
 
       prepare_without_profiling(*args,&blk)
     end
 
     def exec(*args,&blk)
       current = ::Rack::MiniProfiler.current
-      return exec_without_profiling(*args,&blk) unless current
+      return exec_without_profiling(*args,&blk) unless current && current.measure
 
       start = Time.now
       result = exec_without_profiling(*args,&blk)
@@ -124,7 +124,7 @@ if SqlPatches.class_exists? "PG::Result"
 
     def exec_prepared(*args,&blk)
       current = ::Rack::MiniProfiler.current
-      return exec_prepared_without_profiling(*args,&blk) unless current
+      return exec_prepared_without_profiling(*args,&blk) unless current && current.measure
 
       start = Time.now
       result = exec_prepared_without_profiling(*args,&blk)
@@ -138,7 +138,7 @@ if SqlPatches.class_exists? "PG::Result"
 
     def send_query_prepared(*args,&blk)
       current = ::Rack::MiniProfiler.current
-      return send_query_prepared_without_profiling(*args,&blk) unless current
+      return send_query_prepared_without_profiling(*args,&blk) unless current && current.measure
 
       start = Time.now
       result = send_query_prepared_without_profiling(*args,&blk)
@@ -152,7 +152,7 @@ if SqlPatches.class_exists? "PG::Result"
 
     def async_exec(*args,&blk)
       current = ::Rack::MiniProfiler.current
-      return exec_without_profiling(*args,&blk) unless current
+      return exec_without_profiling(*args,&blk) unless current && current.measure
 
       start = Time.now
       result = exec_without_profiling(*args,&blk)
@@ -175,7 +175,7 @@ if SqlPatches.class_exists?("Moped::Node")
     alias_method :process_without_profiling, :process
     def process(*args,&blk)
       current = ::Rack::MiniProfiler.current
-      return process_without_profiling(*args,&blk) unless current
+      return process_without_profiling(*args,&blk) unless current && current.measure
 
       start = Time.now
       result = process_without_profiling(*args,&blk)
@@ -192,7 +192,7 @@ if SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0" #  
     alias_method :execute_without_profiling, :execute
     def execute_with_profiling(client, request_context)
       current = ::Rack::MiniProfiler.current
-      return execute_without_profiling(client, request_context) unless current
+      return execute_without_profiling(client, request_context) unless current && current.measure
 
       start = Time.now
       result = execute_without_profiling(client, request_context)
@@ -243,7 +243,7 @@ if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
 
         def log_with_miniprofiler(*args, &block)
           current = ::Rack::MiniProfiler.current
-          return log_without_miniprofiler(*args, &block) unless current
+          return log_without_miniprofiler(*args, &block) unless current && current.measure
 
           sql, name, binds = args
           t0 = Time.now
