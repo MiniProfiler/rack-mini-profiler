@@ -28,9 +28,80 @@
 var data = /*DATA*/;
 var maxX = 0;
 var maxY = 0;
+
+debounce = function(func, wait, trickle) {
+  var timeout;
+
+  timeout = null;
+  return function() {
+    var args, context, currentWait, later;
+    context = this;
+    args = arguments;
+    later = function() {
+      timeout = null;
+      return func.apply(context, args);
+    };
+
+    if (timeout && trickle) {
+      // already queued, let it through
+      return;
+    }
+
+    if (typeof wait === "function") {
+      currentWait = wait();
+    } else {
+      currentWait = wait;
+    }
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(later, currentWait);
+    return timeout;
+  };
+};
+
+
+var guessGem = function(frame)
+{
+  var split = frame.split('/gems/'); 
+  if(split.length == 1) {
+    split = frame.split('/app/');
+    if(split.length == 1) {
+      split = frame.split('/lib/');
+    }
+
+    split = split[Math.max(split.length-2,0)].split('/');
+    return split[split.length-1];
+  }
+  else 
+  {
+    return split[split.length -1].split('/')[0];
+  }
+}
+
+var guessMethod = function(frame) {
+  var split = frame.split('`');
+  if(split.length == 2) {
+    return split[1].split("'")[0];
+  }
+  return '?';
+}
+
+var guessFile = function(frame) {
+  var split = frame.split(".rb:");
+  if(split.length == 2) {
+    split = split[0].split('/');
+    return split[split.length - 1];
+  }
+  return "";
+}
+
 $.each(data, function(){
    maxX = Math.max(maxX, this.x + this.width);
    maxY = Math.max(maxY, this.y);
+   this.shortName = /* guessGem(this.frame) + " " + guessFile(this.frame) + " "  */ guessMethod(this.frame);
 });
 
 var width = $(window).width();
@@ -46,10 +117,40 @@ var yScale = d3.scale.linear()
     .domain([0, maxY])
     .range([0,height]);
 
+var realHeight = 0;
+var debouncedHeightCheck = debounce(function(){
+  if (realHeight > 15) {
+    svg.selectAll('text').attr('display','show');
+  } else {
+    svg.selectAll('text').attr('display','none');
+  }
+}, 200);
 
-var svg = d3.select(".graph").append("svg")
+function zoom() 
+{
+  svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")"); 
+
+  realHeight = yScale(1) * d3.event.scale;
+  debouncedHeightCheck();
+}    
+
+var svg = d3.select(".graph")
+                    .append("svg")
                     .attr("width", "100%")
-                    .attr("height", "100%");
+                    .attr("height", "100%")
+                    .attr("pointer-events", "all")
+                    .append('svg:g')
+                    .call(d3.behavior.zoom().on("zoom", zoom))
+                    .append('svg:g');
+
+
+// so zoom works everywhere
+svg.append("rect")
+    .attr("x",function(d) { return xScale(0); })
+    .attr("y",function(d) { return yScale(0);})
+    .attr("width", function(d){return xScale(maxX);})
+    .attr("height", yScale(maxY))
+    .attr("fill", "white");
 
 var color = function() {
   var r = parseInt(205 + Math.random() * 50);
@@ -112,24 +213,6 @@ var rainbow = function(numOfSteps, step) {
 // assign some colors, analyze samples per gem 
 var gemStats = {} 
 
-var guessGem = function(frame)
-{
-  var split = frame.split('/gems/'); 
-  if(split.length == 1) {
-    split = frame.split('/app/');
-    if(split.length == 1) {
-      split = frame.split('/lib/');
-    }
-
-    split = split[Math.max(split.length-2,0)].split('/');
-    return split[split.length-1];
-  }
-  else 
-  {
-    return split[split.length -1].split('/')[0];
-  }
-}
-
 $.each(data, function(){
 
   var gem = guessGem(this.frame);
@@ -163,28 +246,60 @@ $.each(gemStats, function(k,stat){
 });
 
 
+// see: http://bl.ocks.org/mundhradevang/1387786
+function fontSize(d,i) {
+  var size = yScale(1) / 3;
+  // var words = d.shortName.split(' ');
+  var word = d.shortName; // words[0];
+  var width = xScale(d.width+100);
+  var height = yScale(1);
+  var length = 0;
+  d3.select(this).style("font-size", size + "px").text(word);
+  while(((this.getBBox().width >= width) || (this.getBBox().height >= height)) && (size > 12))
+   {
+    size -= 0.1;
+    d3.select(this).style("font-size", size + "px");
+   }
 
-svg.selectAll("rect")
+   d3.select(this).attr("dy", size);
+}
+
+svg.selectAll("g")
 	.data(data)
 	.enter()
-    .append("rect")
-    .attr("x",function(d) { return xScale(d.x-1); })
-    .attr("y",function(d) { return yScale(maxY - d.y);})
-    .attr("width", function(d){return xScale(d.width);})
-    .attr("height", yScale(1))
-    .attr("fill", function(d){
-      var i = info[d.frame];
-      if(!i) {
-        info[d.frame] = i = {nodes: [], samples: [], color: color()};
-      }
-      i.nodes.push(this);
-      for(var j=0; j < d.width; j++){
-        i.samples.push(d.x + j);
-      }
-      return i.color;
-    })
-    .on("mouseover", mouseover)
-    .on("mouseout", mouseout);
+    .append("g")
+    .each(function(){
+      d3.select(this)
+      .append("rect")
+      .attr("x",function(d) { return xScale(d.x-1); })
+      .attr("y",function(d) { return yScale(maxY - d.y);})
+      .attr("width", function(d){return xScale(d.width);})
+      .attr("height", yScale(1))
+      .attr("fill", function(d){
+        var i = info[d.frame];
+        if(!i) {
+          info[d.frame] = i = {nodes: [], samples: [], color: color()};
+        }
+        i.nodes.push(this);
+        for(var j=0; j < d.width; j++){
+          i.samples.push(d.x + j);
+        }
+        return i.color;
+      })
+      .on("mouseover", mouseover)
+      .on("mouseout", mouseout);
+
+      d3.select(this)
+        .append("text")
+        .attr("x",function(d) { return xScale(d.x - 0.98); })
+        .attr("y",function(d) { return yScale(maxY - d.y);})
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
+        .each(fontSize)
+        .attr("display", "none");
+
+    });
+    
 
 // Samples may overlap on the same line
 for (var r in info) {
@@ -204,19 +319,6 @@ $.each(gemStats, function(k,v){
 
 
 
-/*
-svg.selectAll("text")
-  .data($.grep(data, function(d){
-    return d.width > 2;
-  }))
-  .enter()
-  .append("text")
-  .text(function(d){ return d.frame; })
-  .attr("x",function(d) { return xScale(d.x - 0.7); })
-  .attr("y",function(d) { return yScale(maxY - d.y + 0.7);})
-  .on("mouseover", mouseover)
-  .on("mouseout", mouseout);
-  */
   </script>
 </body>
 </html>
