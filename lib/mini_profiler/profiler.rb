@@ -239,6 +239,7 @@ module Rack
       done_sampling = false
       quit_sampler = false
       backtraces = nil
+      
       if query_string =~ /pp=sample/ || query_string =~ /pp=flamegraph/
         current.measure = false
         skip_frames = 0
@@ -284,6 +285,7 @@ module Rack
       end
 
       skip_it = current.discard
+
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
         # this is non-obvious, don't kill the profiling cookie on errors or short requests
         # this ensures that stuff that never reaches the rails stack does not kill profiling
@@ -347,6 +349,7 @@ module Rack
 
           response = Rack::Response.new([], status, headers)
           script = self.get_profile_script(env)
+
           if String === body
             response.write inject(body,script)
           else
@@ -381,13 +384,22 @@ module Rack
         return fragment + script
       end
 
-      fragment.sub(regex) do
-        # if for whatever crazy reason we dont get a utf string,
-        #   just force the encoding, no utf in the mp scripts anyway
-        if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
-          (script + close_tag).force_encoding(fragment.encoding)
+      matches = fragment.scan(regex).length
+      index = 1
+      fragment.gsub(regex) do
+        # though malformed there is an edge case where /body exists earlier in the html, work around
+        if index < matches 
+          index += 1
+          close_tag        
         else
-          script + close_tag
+
+          # if for whatever crazy reason we dont get a utf string,
+          #   just force the encoding, no utf in the mp scripts anyway
+          if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
+            (script + close_tag).force_encoding(fragment.encoding)
+          else
+            script + close_tag
+          end
         end
       end
     end
