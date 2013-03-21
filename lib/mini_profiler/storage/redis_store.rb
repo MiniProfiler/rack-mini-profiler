@@ -38,7 +38,7 @@ module Rack
       def redis
         return @redis_connection if @redis_connection
         require 'redis' unless defined? Redis
-        Redis.new @args
+        @redis_connection ||= Redis.new @args
       end
 
     end
