@@ -27,10 +27,12 @@ module Rack
         end
       end
 
-      EXPIRE_TIMER_CACHE = 3600 * 24
+      EXPIRES_IN = 3600 * 24
 
-      def initialize(args)
+      def initialize(args = nil)
+        args ||= {}
         @path = args[:path]
+        @expires_in = args[:expires_in] || EXPIRES_IN
         raise ArgumentError.new :path unless @path
         @timer_struct_cache = FileCache.new(@path, "mp_timers")
         @timer_struct_lock = Mutex.new

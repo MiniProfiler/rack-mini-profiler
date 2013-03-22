@@ -2,9 +2,11 @@ module Rack
   class MiniProfiler
     class MemoryStore < AbstractStore
 
-      EXPIRE_TIMER_CACHE = 3600 * 24
+      EXPIRES_IN = 3600 * 24
 
-      def initialize(args)
+      def initialize(args = nil)
+        args ||= {}
+        @expires_in = args[:expires_in] || EXPIRES_IN
         @timer_struct_lock = Mutex.new
         @timer_struct_cache = {}
         @user_view_lock = Mutex.new
@@ -53,7 +55,7 @@ module Rack
       end
 
       def cleanup_cache
-        expire_older_than = ((Time.now.to_f - MiniProfiler::MemoryStore::EXPIRE_TIMER_CACHE) * 1000).to_i
+        expire_older_than = ((Time.now.to_f - @expires_in) * 1000).to_i
         @timer_struct_lock.synchronize {
           @timer_struct_cache.delete_if { |k, v| v['Started'] < expire_older_than }
         }

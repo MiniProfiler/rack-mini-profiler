@@ -2,16 +2,17 @@ module Rack
   class MiniProfiler
     class RedisStore < AbstractStore
 
-      EXPIRE_SECONDS = 60 * 60 * 24
+      EXPIRES_IN = 60 * 60 * 24
      
-      def initialize(args)
+      def initialize(args = nil)
         @args = args || {}
         @prefix = @args.delete(:prefix) || 'MPRedisStore'
         @redis_connection = @args.delete(:connection)
+        @expires_in = @args.delete(:expires_in) || EXPIRES_IN
       end
 
       def save(page_struct)
-        redis.setex "#{@prefix}#{page_struct['Id']}", EXPIRE_SECONDS, Marshal::dump(page_struct) 
+        redis.setex "#{@prefix}#{page_struct['Id']}", @expires_in, Marshal::dump(page_struct) 
       end
 
       def load(id)
