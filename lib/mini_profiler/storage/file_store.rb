@@ -93,13 +93,13 @@ module Rack
         @timer_struct_lock.synchronize {
           files.each do |f|
             f = @path + '/' + f
-            File.delete f if f =~ /^mp_timers/ and (Time.now - File.mtime(f)) > EXPIRE_TIMER_CACHE
+            ::File.delete f if ::File.basename(f) =~ /^mp_timers/ and (Time.now - ::File.mtime(f)) > EXPIRE_TIMER_CACHE
           end
         }
         @user_view_lock.synchronize {
           files.each do |f|
             f = @path + '/' + f
-            File.delete f if f =~ /^mp_views/ and (Time.now - File.mtime(f)) > EXPIRE_TIMER_CACHE
+            ::File.delete f if ::File.basename(f) =~ /^mp_views/ and (Time.now - ::File.mtime(f)) > EXPIRE_TIMER_CACHE
           end
         }
       end
