@@ -416,6 +416,10 @@ module Rack
         body << "#{k}: #{v}\n"
       end
 
+      body << "\n\nInternals\n---------------\n"
+      body << "Storage Provider #{config.storage_instance}\n"
+      body << "User #{user(env)}\n"
+      body << config.storage_instance.diagnostics(user(env)) rescue "no diagnostics implemented for storage"
 
       [200, headers, [body]]
     end

@@ -21,6 +21,10 @@ module Rack
       def get_unviewed_ids(user)
         raise NotImplementedError.new("get_unviewed_ids is not implemented")
       end
+
+      def diagnostics(user)
+        raise NotImplementedError.new("diagnostics not implemented") 
+      end
     
     end
   end

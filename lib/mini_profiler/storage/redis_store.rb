@@ -34,6 +34,13 @@ module Rack
         redis.smembers "#{@prefix}-#{user}-v"
       end
 
+      def diagnostics(user)
+"Redis prefix: #{@prefix}
+Redis location: #{redis.client.host}:#{redis.client.port} db: #{redis.client.db}
+unviewed_ids: #{get_unviewed_ids(user)}
+"
+      end
+
       private 
 
       def redis
