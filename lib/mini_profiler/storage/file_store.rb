@@ -27,12 +27,12 @@ module Rack
         end
       end
 
-      EXPIRES_IN = 3600 * 24
+      EXPIRES_IN_SECONDS = 60 * 60 * 24
 
       def initialize(args = nil)
         args ||= {}
         @path = args[:path]
-        @expires_in = args[:expires_in] || EXPIRES_IN
+        @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
         raise ArgumentError.new :path unless @path
         @timer_struct_cache = FileCache.new(@path, "mp_timers")
         @timer_struct_lock = Mutex.new
@@ -95,13 +95,13 @@ module Rack
         @timer_struct_lock.synchronize {
           files.each do |f|
             f = @path + '/' + f
-            ::File.delete f if ::File.basename(f) =~ /^mp_timers/ and (Time.now - ::File.mtime(f)) > EXPIRE_TIMER_CACHE
+            ::File.delete f if ::File.basename(f) =~ /^mp_timers/ and (Time.now - ::File.mtime(f)) > @expires_in_seconds
           end
         }
         @user_view_lock.synchronize {
           files.each do |f|
             f = @path + '/' + f
-            ::File.delete f if ::File.basename(f) =~ /^mp_views/ and (Time.now - ::File.mtime(f)) > EXPIRE_TIMER_CACHE
+            ::File.delete f if ::File.basename(f) =~ /^mp_views/ and (Time.now - ::File.mtime(f)) > @expires_in_seconds
           end
         }
       end

@@ -2,7 +2,7 @@ module Rack
   class MiniProfiler
     class MemcacheStore < AbstractStore
 
-      EXPIRES_IN = 60*60*24
+      EXPIRES_IN_SECONDS = 60 * 60 * 24
       MAX_RETRIES = 10
 
       def initialize(args = nil)
@@ -10,11 +10,11 @@ module Rack
         args ||= {}
         @prefix = args[:prefix] || "MPMemcacheStore"
         @client = args[:client] || Dalli::Client.new
-        @expires_in = args[:expires_in] || EXPIRES_IN
+        @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
       end
 
       def save(page_struct)
-        @client.set("#{@prefix}#{page_struct['Id']}", Marshal::dump(page_struct), @expires_in)
+        @client.set("#{@prefix}#{page_struct['Id']}", Marshal::dump(page_struct), @expires_in_seconds)
       end
 
       def load(id)
@@ -25,9 +25,9 @@ module Rack
       end
 
       def set_unviewed(user, id)
-        @client.add("#{@prefix}-#{user}-v", [], @expires_in)
+        @client.add("#{@prefix}-#{user}-v", [], @expires_in_seconds)
         MAX_RETRIES.times do
-          break if @client.cas("#{@prefix}-#{user}-v", @expires_in) do |ids|
+          break if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
             ids << id unless ids.include?(id)
             ids
           end
@@ -35,9 +35,9 @@ module Rack
       end
 
       def set_viewed(user, id)
-        @client.add("#{@prefix}-#{user}-v", [], @expires_in)
+        @client.add("#{@prefix}-#{user}-v", [], @expires_in_seconds)
         MAX_RETRIES.times do
-          break if @client.cas("#{@prefix}-#{user}-v", @expires_in) do |ids|
+          break if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
             ids.delete id
             ids
           end

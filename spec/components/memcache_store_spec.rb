@@ -43,4 +43,17 @@ describe Rack::MiniProfiler::MemcacheStore do
 
   end
 
+  context 'passing in a Memcache client' do
+    describe 'client' do
+      it 'uses the passed in object rather than creating a new one' do
+        client = double("memcache-client")
+        store = Rack::MiniProfiler::MemcacheStore.new(:client => client)
+
+        client.should_receive(:get)
+        Dalli::Client.should_not_receive(:new)
+        store.load("XYZ")
+      end
+    end
+  end
+
 end
