@@ -79,6 +79,22 @@ RedisStore/MemcacheStore work in multi process and multi machine environments (R
 
 Additionally you may implement an AbstractStore for your own provider. 
 
+## User result segragation
+
+MiniProfiler will attempt to keep all user results isolated, out-of-the-box the user provider uses the ip address: 
+
+```ruby
+Rack::MiniProfiler.config.user_provider = Proc.new{|env| Rack::Request.new(env).ip} 
+```
+
+You can override (something that is very important in a multi-machine production setup: 
+
+```ruby
+Rack::MiniProfiler.config.user_provider = Proc.new{ |env| CurrentUser.get(env) } 
+```
+
+The string this function returns should be unique for each user on the system (for anonymous you may need to fall back to ip address)
+
 ## Running the Specs
 
 ```
