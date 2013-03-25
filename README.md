@@ -87,7 +87,7 @@ MiniProfiler will attempt to keep all user results isolated, out-of-the-box the 
 Rack::MiniProfiler.config.user_provider = Proc.new{|env| Rack::Request.new(env).ip} 
 ```
 
-You can override (something that is very important in a multi-machine production setup: 
+You can override (something that is very important in a multi-machine production setup): 
 
 ```ruby
 Rack::MiniProfiler.config.user_provider = Proc.new{ |env| CurrentUser.get(env) } 
