@@ -79,7 +79,7 @@ RedisStore/MemcacheStore work in multi process and multi machine environments (R
 
 Additionally you may implement an AbstractStore for your own provider. 
 
-## User result segragation
+## User result segregation
 
 MiniProfiler will attempt to keep all user results isolated, out-of-the-box the user provider uses the ip address: 
 
@@ -157,5 +157,5 @@ end
 
 ## Special query strings 
 
-If you include the query string `pp=help` at the end of your request you will see the various option you have. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers. 
+If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers. 
 
