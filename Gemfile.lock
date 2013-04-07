@@ -1,7 +1,7 @@
 PATH
   remote: /home/sam/Source/MiniProfiler
   specs:
-    rack-mini-profiler (0.1.23)
+    rack-mini-profiler (0.1.24)
       rack (>= 1.1.3)
 
 GEM
