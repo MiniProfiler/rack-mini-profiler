@@ -102,6 +102,26 @@
   * Allow rack-mini-profiler to be sourced from github
   * Extracted the pp=profile-gc-time out, the object space profiler needs to disable gc
 
-20-September-2010
+20-September-2012
   * 1.22
   * Fix permission issue in the gem
+
+8-April-2013
+  * 1.24
+  * Flame Graph Support see: http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler
+  * Fix file retention leak in file_store
+  * New toggle_shortcut and start_hidden options
+  * Fix for AngularJS support and MooTools
+  * More robust gc profiling
+  * Mongoid support
+  * Fix for html5 implicit body tags
+  * script tag initialized via data-attributes
+  * new - Rack::MiniProfiler.counter counter_name {}
+  * Allow usage of existing jQuery if its already loaded
+  * Fix pp=enable
+  * 1.8.7 support ... grrr
+  * Net:HTTP profiling
+  * pre authorize to run in all non development? and production? modes
+
+
+
