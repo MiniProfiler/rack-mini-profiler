@@ -127,4 +127,9 @@
   * 1.25
   * Missed flamegraph.html from build
 
+11-April-2013
+  * 1.26
+  * (minor) allow Rack::MiniProfilerRails.initialize!(Rails.application), for post config intialization
+
+
 
