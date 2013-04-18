@@ -123,7 +123,7 @@ module Rack
 
         # Otherwise give the HTML back
         html = MiniProfiler.share_template.dup
-        html.gsub!(/\{path\}/, @config.base_url_path)
+        html.gsub!(/\{path\}/, "#{env['SCRIPT_NAME']}#{@config.base_url_path}")
         html.gsub!(/\{version\}/, MiniProfiler::VERSION)
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
@@ -511,7 +511,7 @@ module Rack
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
       ids = ids_comma_separated(env)
-      path = @config.base_url_path
+      path = "#{env['SCRIPT_NAME']}#{@config.base_url_path}"
       version = MiniProfiler::VERSION
       position = @config.position
       showTrivial = false
