@@ -111,7 +111,10 @@ You can set configuration options using the configuration accessor on Rack::Mini
 ```
 # Have Mini Profiler show up on the right
 Rack::MiniProfiler.config.position = 'right'
+# Have Mini Profiler start in hidden mode - display with short cut (defaulted to 'Alt+P')
+Rack::MiniProfiler.config.start_hidden = true
 ```
+
 
 In a Rails app, this can be done conveniently in an initializer such as config/initializers/mini_profiler.rb.
 
