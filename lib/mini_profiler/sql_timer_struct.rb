@@ -8,7 +8,7 @@ module Rack
       def initialize(query, duration_ms, page, parent, skip_backtrace = false, full_backtrace = false)
 
         stack_trace = nil 
-        unless skip_backtrace 
+        unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
           # Allow us to filter the stack trace
           stack_trace = ""
            # Clean up the stack trace if there are options to do so

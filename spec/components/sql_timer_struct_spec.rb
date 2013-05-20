@@ -64,7 +64,17 @@ describe Rack::MiniProfiler::SqlTimerStruct do
       sql['StackTraceSnippet'].should_not match /rspec/
     end
 
+    it "should omit the backtrace if the query takes less than the threshold time" do
+      Rack::MiniProfiler.config.backtrace_threshold_ms = 100
+      sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 50, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
+      sql['StackTraceSnippet'].should be nil
+    end
 
+    it "should not omit the backtrace if the query takes more than the threshold time" do
+      Rack::MiniProfiler.config.backtrace_threshold_ms = 100
+      sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 200, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
+      sql['StackTraceSnippet'].should_not be nil
+    end
   end
 
 end
