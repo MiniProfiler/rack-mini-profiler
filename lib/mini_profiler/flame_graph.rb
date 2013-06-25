@@ -6,9 +6,9 @@ class Rack::MiniProfiler::FlameGraph
   end
 
   def graph_data
-    height = 0 
+    height = 0
 
-    table = [] 
+    table = []
     prev = []
 
     # a 2d array makes collapsing easy
@@ -17,7 +17,7 @@ class Rack::MiniProfiler::FlameGraph
 
       stack.reverse.map{|r| r.to_s}.each_with_index do |frame, i|
 
-        if !prev[i].nil? 
+        if !prev[i].nil?
           last_col = prev[i]
           if last_col[0] == frame
             last_col[1] += 1
@@ -26,7 +26,7 @@ class Rack::MiniProfiler::FlameGraph
           end
         end
 
-        prev[i] = [frame, 1] 
+        prev[i] = [frame, 1]
         col << prev[i]
       end
       prev = prev[0..col.length-1].to_a
