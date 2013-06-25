@@ -111,6 +111,18 @@ describe Rack::MiniProfiler do
   end
 
 
+  describe 'with a SCRIPT_NAME' do
+
+    before do
+      get '/html', nil, 'SCRIPT_NAME' => '/test'
+    end
+
+    it 'has the JS in the body with the correct path' do
+      last_response.body.include?('/test/mini-profiler-resources/includes.js').should be_true
+    end
+
+  end
+
   describe 'configuration' do
     it "doesn't add MiniProfiler if the callback fails" do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda {|env| false }

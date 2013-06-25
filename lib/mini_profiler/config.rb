@@ -15,7 +15,7 @@ module Rack
     attr_accessor :auto_inject, :base_url_path, :pre_authorize_cb, :position,
         :backtrace_remove, :backtrace_includes, :backtrace_ignores, :skip_schema_queries, 
         :storage, :user_provider, :storage_instance, :storage_options, :skip_paths, :authorization_mode,
-        :toggle_shortcut, :start_hidden
+        :toggle_shortcut, :start_hidden, :backtrace_threshold_ms
 
     # Deprecated options
     attr_accessor :use_existing_jquery
@@ -36,6 +36,7 @@ module Rack
           @authorization_mode = :allow_all
           @toggle_shortcut = 'Alt+P'
           @start_hidden = false
+          @backtrace_threshold_ms = 0
           self
         }
       end
