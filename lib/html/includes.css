@@ -321,6 +321,9 @@
 .profiler-results .profiler-controls span:last-child {
   border-right: none;
 }
+.profiler-popup {
+  -webkit-transform: translateZ(0); /* Fix for a Chrome bug causing the .profiler-popup to not fully render sometimes. Full details on the bug can be found here: https://code.google.com/p/chromium/issues/detail?id=95338 */
+}
 .profiler-results .profiler-popup {
   display: none;
   z-index: 2147483641;
