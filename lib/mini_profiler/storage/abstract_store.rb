@@ -23,7 +23,8 @@ module Rack
       end
 
       def diagnostics(user)
-        raise NotImplementedError.new("diagnostics not implemented") 
+        # this is opt in, no need to explode if not implemented
+        ""
       end
     
     end

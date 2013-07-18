@@ -137,5 +137,10 @@
   * Add Rack::MiniProfiler.config.backtrace_threshold_ms
   * jQuery 2.0 support
 
+18-July-2013
+  * 1.28
+	* diagnostics in abstract storage was raising not implemented killing
+	?pp=env and others
+
 
 
