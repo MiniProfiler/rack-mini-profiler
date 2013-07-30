@@ -224,6 +224,7 @@ module Rack
 
       MiniProfiler.create_current(env, @config)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
+
       if query_string =~ /pp=normal-backtrace/
         client_settings.backtrace_level = ClientSettings::BACKTRACE_DEFAULT
       elsif query_string =~ /pp=no-backtrace/

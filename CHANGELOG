@@ -141,6 +141,7 @@
   * 1.28
 	* diagnostics in abstract storage was raising not implemented killing
 	?pp=env and others
+  * SOLR xml unescaped by mistake
 
 
 
