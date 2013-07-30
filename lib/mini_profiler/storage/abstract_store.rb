@@ -1,7 +1,7 @@
 module Rack
   class MiniProfiler
     class AbstractStore
-      
+
       def save(page_struct)
         raise NotImplementedError.new("save is not implemented")
       end
@@ -26,7 +26,7 @@ module Rack
         # this is opt in, no need to explode if not implemented
         ""
       end
-    
+
     end
   end
 end

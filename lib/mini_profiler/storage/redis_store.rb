@@ -3,7 +3,7 @@ module Rack
     class RedisStore < AbstractStore
 
       EXPIRES_IN_SECONDS = 60 * 60 * 24
-     
+
       def initialize(args = nil)
         @args = args || {}
         @prefix = @args.delete(:prefix) || 'MPRedisStore'
@@ -12,7 +12,7 @@ module Rack
       end
 
       def save(page_struct)
-        redis.setex "#{@prefix}#{page_struct['Id']}", @expires_in_seconds, Marshal::dump(page_struct) 
+        redis.setex "#{@prefix}#{page_struct['Id']}", @expires_in_seconds, Marshal::dump(page_struct)
       end
 
       def load(id)
@@ -41,7 +41,7 @@ unviewed_ids: #{get_unviewed_ids(user)}
 "
       end
 
-      private 
+      private
 
       def redis
         return @redis_connection if @redis_connection
