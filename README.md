@@ -151,6 +151,10 @@ if JSON.const_defined?(:Pure)
 end
 ```
 
+## Notes
+
+- Be sure to require rack_mini_profiler last in your Gemfile, when it is required it will monkey patch pg and mysql gems to insert instrumentation. If included to early no SQL will show up.
+
 ## Available Options
 
 * pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
