@@ -450,6 +450,9 @@ module Rack
         body << "#{k}: #{v}\n"
       end
 
+      body << "\n\nRuby Version\n---------------\n"
+      body << "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL}\n"
+
       body << "\n\nInternals\n---------------\n"
       body << "Storage Provider #{config.storage_instance}\n"
       body << "User #{user(env)}\n"
