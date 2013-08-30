@@ -4,7 +4,7 @@ module Rack
   class MiniProfiler
 
     class RequestTimerStruct < TimerStruct
-      
+
       def self.createRoot(name, page)
         rt = RequestTimerStruct.new(name, page, nil)
         rt["IsRoot"]= true
@@ -77,7 +77,7 @@ module Rack
         self['SqlTimings'].push(timer)
         self['HasSqlTimings'] = true
         self['SqlTimingsDurationMilliseconds'] += elapsed_ms
-        page['DurationMillisecondsInSql'] += elapsed_ms        
+        page['DurationMillisecondsInSql'] += elapsed_ms
         timer
       end
 
@@ -103,13 +103,13 @@ module Rack
         self['DurationMilliseconds'] = milliseconds
         self['IsTrivial'] = true if milliseconds < self["TrivialDurationThresholdMilliseconds"]
         self['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
-        
+
         if @parent
           @parent.children_duration += milliseconds
         end
 
-      end     
+      end
     end
   end
-  
+
 end

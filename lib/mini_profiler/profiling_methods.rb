@@ -55,8 +55,16 @@ module Rack
         end
       end
 
-      def profile_method(klass, method, &blk)
-        default_name = klass.to_s + " " + method.to_s
+      def counter_method(klass, method, &blk)
+        self.profile_method(klass, method, :counter, &blk)
+      end
+
+      def uncounter_method(klass, method)
+        self.unprofile_method(klass, method)
+      end
+
+      def profile_method(klass, method, type = :profile, &blk)
+        default_name = type==:counter ? method.to_s  : klass.to_s + " " + method.to_s
         clean = clean_method_name(method)
 
         with_profiling =  ("#{clean}_with_mini_profiler").intern
@@ -81,22 +89,34 @@ module Rack
               end
           end
 
-          parent_timer = Rack::MiniProfiler.current.current_timer
-          page_struct = Rack::MiniProfiler.current.page_struct
           result = nil
+          parent_timer = Rack::MiniProfiler.current.current_timer
 
-          Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
-          begin
-            result = self.send without_profiling, *args, &orig
-          ensure
-            current_timer.record_time
-            Rack::MiniProfiler.current.current_timer = parent_timer
+          if type == :counter
+            start = Time.now
+            begin
+              result = self.send without_profiling, *args, &orig
+            ensure
+              duration_ms = (Time.now - start).to_f * 1000
+              parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct )
+            end
+          else
+            page_struct = Rack::MiniProfiler.current.page_struct
+
+            Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
+            begin
+              result = self.send without_profiling, *args, &orig
+            ensure
+              current_timer.record_time
+              Rack::MiniProfiler.current.current_timer = parent_timer
+            end
           end
+
           result
         end
         klass.send :alias_method, method, with_profiling
       end
-      
+
       # Add a custom timing. These are displayed similar to SQL/query time in
       # columns expanding to the right.
       #
