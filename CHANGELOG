@@ -148,5 +148,9 @@
   * Bugfix: SOLR patching had an incorrect monkey patch
   * Implemented exception tracing using TracePoint see pp=trace-exceptions
 
+30-August-2013
 
+  * 1.30
+  * Feature: Added Rack::MiniProfiler.counter_method(klass,name) for injecting counters
+  * Bug: Counters were not shifting the table correctly
 
