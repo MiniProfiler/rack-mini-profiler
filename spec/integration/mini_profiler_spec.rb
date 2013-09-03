@@ -165,14 +165,6 @@ describe Rack::MiniProfiler do
     end
   end
 
-  describe 'sampling mode' do
-    it "should sample stack traces if requested" do
-      get '/3ms?pp=sample'
-      last_response["Content-Type"].should == 'text/plain'
-    end
-  end
-
-
   describe 'authorization mode whitelist' do
     before do
       Rack::MiniProfiler.config.authorization_mode = :whitelist

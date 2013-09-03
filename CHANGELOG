@@ -154,3 +154,8 @@
   * Feature: Added Rack::MiniProfiler.counter_method(klass,name) for injecting counters
   * Bug: Counters were not shifting the table correctly
 
+3-September-2013
+
+  * Ripped out flamegraph so it can be isolated into a gem
+  * Flamegraph now has much increased fidelity
+  * Ripped out pp=sample it just was never really used

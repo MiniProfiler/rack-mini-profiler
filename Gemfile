@@ -4,6 +4,7 @@ gemspec :path => '../'
 
 gem 'therubyracer', :require => 'v8'
 gem 'less'
+gem 'flamegraph'
 
 group :test do
   gem 'dalli'
