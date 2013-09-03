@@ -18,7 +18,8 @@ require 'mini_profiler/profiling_methods'
 require 'mini_profiler/context'
 require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
-require 'mini_profiler/gc_profiler_ruby_head' if Gem::Version.new('2.1.0') <= Gem::Version.new(RUBY_VERSION)
+# TODO
+# require 'mini_profiler/gc_profiler_ruby_head' if Gem::Version.new('2.1.0') <= Gem::Version.new(RUBY_VERSION)
 
 module Rack
 
@@ -260,9 +261,18 @@ module Rack
         env['HTTP_IF_NONE_MATCH'] = ''
 
         if query_string =~ /pp=flamegraph/
-          # 0.5 means attempt to collect a sample each 0.5 secs
-          flamegraph = Flamegraph.generate(0.5) do
+          unless defined?(Flamegraph) && Flamegraph.respond_to?(:generate)
+
+            flamegraph = "Please install the flamegraph gem and require it: add gem 'flamegraph' to your Gemfile"
             status,headers,body = @app.call(env)
+          else
+            # do not sully our profile with mini profiler timings
+            current.measure = false
+            # first param is the path
+            # 0.5 means attempt to collect a sample each 0.5 secs
+            flamegraph = Flamegraph.generate(nil, fidelity: 0.5) do
+              status,headers,body = @app.call(env)
+            end
           end
         else
           status,headers,body = @app.call(env)
@@ -307,7 +317,7 @@ module Rack
 
       if flamegraph
         body.close if body.respond_to? :close
-        return self.flamegraph(graph)
+        return self.flamegraph(flamegraph)
       end
 
 
