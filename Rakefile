@@ -55,6 +55,5 @@ task :copy_files do
   `ln -s #{path}/list.tmpl lib/html/list.tmpl`
   `ln -s #{path}/include.partial.html lib/html/profile_handler.js`
   `ln -s #{path}/share.html lib/html/share.html`
-  `ln -s #{path}/flamegraph.html lib/html/flamegraph.html`
 end
 
