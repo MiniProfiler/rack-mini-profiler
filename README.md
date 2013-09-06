@@ -7,7 +7,7 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 We have decided to restructure our repository so there is a central UI repo and the various language implementation have thier own.
 
-Currently rack-mini-profiler lives at https://github.com/SamSaffron/MiniProfiler/tree/master/Ruby , the new home is here. 
+The new home for rack-mini-profiler is https://github.com/MiniProfiler/rack-mini-profiler
 
 **WE NEED HELP.**
 
