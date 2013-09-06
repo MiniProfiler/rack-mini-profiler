@@ -2,6 +2,25 @@
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
+
+##rack-mini-profiler needs your help
+
+We have decided to restructure our repository so there is a central UI repo and the various language implementation have thier own.
+
+Currently rack-mini-profiler lives at https://github.com/SamSaffron/MiniProfiler/tree/master/Ruby , the new home is here. 
+
+**WE NEED HELP.**
+
+- Moving the repo over here, and setting up a build that reuses https://github.com/MiniProfiler/ui
+- Migrating the internal data structures per spec at: https://github.com/MiniProfiler/ui 
+- Cleaning up the horrendous class structure that using string as keys and crazy non-objects https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler/sql_timer_struct.rb#L36-L44 
+- Add travis-ci testing at least 1.9.3, jRuby and 2.0
+- Adding code climate 
+
+
+If you feel like taking on any of this start an issue and update us on your progress.
+
+
 ## Using rack-mini-profiler in your app
 
 Install/add to Gemfile
