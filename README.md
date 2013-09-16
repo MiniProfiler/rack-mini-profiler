@@ -1,5 +1,7 @@
 # rack-mini-profiler
 
+[![Code Climate](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler.png)](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler)
+
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
 
@@ -15,7 +17,7 @@ The new home for rack-mini-profiler is https://github.com/MiniProfiler/rack-mini
 - Migrating the internal data structures per spec at: https://github.com/MiniProfiler/ui 
 - Cleaning up the horrendous class structure that using string as keys and crazy non-objects https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler/sql_timer_struct.rb#L36-L44 
 - Add travis-ci testing at least MRI 1.9.3, JRuby and MRI 2.0
-- Adding code climate 
+
 
 
 If you feel like taking on any of this start an issue and update us on your progress.
