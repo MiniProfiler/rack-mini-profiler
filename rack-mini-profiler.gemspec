@@ -23,5 +23,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'activerecord', '~> 3.0'
 
-  s.require_paths = ["Ruby/lib"]
+  s.require_paths = ["lib"]
 end
