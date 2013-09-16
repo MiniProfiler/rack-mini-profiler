@@ -1,1 +1,222 @@
-../../../StackExchange.Profiling/UI/includes.tmpl
+﻿<script id="profilerTemplate" type="text/x-jquery-tmpl">
+
+  <div class="profiler-result">
+
+    <div class="profiler-button {{if HasDuplicateSqlTimings}}profiler-warning{{/if}}">
+    {{if HasDuplicateSqlTimings}}<span class="profiler-nuclear">!</span>{{/if}}
+      <span class="profiler-number">
+        ${MiniProfiler.formatDuration(DurationMilliseconds)} <span class="profiler-unit">ms</span>
+      </span>
+    </div>
+
+    <div class="profiler-popup">
+      <div class="profiler-info">
+        <span class="profiler-name">
+          ${Name} <span class="profiler-overall-duration">(${MiniProfiler.formatDuration(DurationMilliseconds)} ms)</span>
+        </span>
+        <span class="profiler-server-time">${MachineName} on ${MiniProfiler.renderDate(Started)}</span>
+      </div>
+      <div class="profiler-output">
+        <table class="profiler-timings">
+          <thead>
+            <tr>
+              <th></th>
+              <th>duration (ms)</th>
+              <th class="profiler-duration-with-children">with children (ms)</th>
+              <th class="time-from-start">from start (ms)</th>
+            {{if HasSqlTimings}}
+              <th colspan="2">query time (ms)</th>
+            {{/if}}
+            {{each CustomTimingNames}}
+              <th colspan="2">${$value.toLowerCase()} (ms)</th>
+            {{/each}}
+            </tr>
+          </thead>
+          <tbody>
+            {{tmpl({timing:Root, page:this.data}) "#timingTemplate"}}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">
+                {{if !ClientTimings}}
+                {{tmpl "#linksTemplate"}}
+                {{/if}}
+                <a class="profiler-toggle-duration-with-children" title="toggles column with aggregate child durations">show time with children</a>
+              </td>
+            {{if HasSqlTimings}}
+              <td colspan="2" class="profiler-number profiler-percent-in-sql" title="${MiniProfiler.getSqlTimingsCount(Root)} queries spent ${MiniProfiler.formatDuration(DurationMillisecondsInSql)} ms of total request time">
+                ${MiniProfiler.formatDuration(DurationMillisecondsInSql / DurationMilliseconds * 100)}
+                <span class="profiler-unit">% in sql</span>
+              </td>
+            {{/if}}
+            {{each CustomTimingNames}}
+              <td colspan="2" class="profiler-number profiler-percentage-in-sql" title="${CustomTimingStats[$value].Count} ${$value.toLowerCase()} invocations spent ${MiniProfiler.formatDuration(CustomTimingStats[$value].Duration)} ms of total request time">
+                ${MiniProfiler.formatDuration(CustomTimingStats[$value].Duration / DurationMilliseconds * 100)}
+                <span class="profiler-unit">% in ${$value.toLowerCase()}</span>
+              </td>
+            {{/each}}
+            </tr>
+          </tfoot>
+        </table>
+        {{if ClientTimings}}
+        <table class="profiler-timings profiler-client-timings">
+          <thead>
+            <tr>
+              <th>client event</th>
+              <th>duration (ms)</th>
+              <th>from start (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{each MiniProfiler.getClientTimings(ClientTimings)}}
+            <tr class="{{if $value.isTrivial }}profiler-trivial{{/if}}">
+              <td class="profiler-label">${$value.name}</td>
+              <td class="profiler-duration">
+                {{if $value.duration >= 0}}
+                <span class="profiler-unit"></span>${MiniProfiler.formatDuration($value.duration)}
+                {{/if}}
+              </td>
+              <td class="profiler-duration time-from-start">
+                <span class="profiler-unit">+</span>${MiniProfiler.formatDuration($value.start)}
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+          <tfoot>
+            <td colspan="3">
+              {{tmpl "#linksTemplate"}}
+            </td>
+          </tfoot>
+        </table>
+        {{/if}}
+      </div>
+    </div>
+
+  {{if HasSqlTimings}}
+    <div class="profiler-queries">
+      <table>
+      <thead>
+        <tr>
+          <th style="text-align:right">step<br />time from start<br />query type<br />duration</th>
+          <th style="text-align:left">call stack<br />query</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{each(i, s) MiniProfiler.getSqlTimings(Root)}}
+          {{tmpl({ g:s.prevGap }) "#sqlGapTemplate"}}
+          {{tmpl({ i:i, s:s }) "#sqlTimingTemplate"}}
+          {{if s.nextGap}}
+            {{tmpl({ g:s.nextGap }) "#sqlGapTemplate"}}
+          {{/if}}
+        {{/each}}
+      </tbody>
+      </table>
+      <p class="profiler-trivial-gap-container">
+        <a class="profiler-toggle-trivial-gaps" href="#">show trivial gaps</a>
+      </p>
+    </div>
+  {{/if}}
+
+  </div>
+
+</script>
+
+<script id="linksTemplate" type="text/x-jquery-tmpl">
+  <a href="${MiniProfiler.shareUrl(Id)}" class="profiler-share-profiler-results" target="_blank">share</a>
+  {{if CustomLink}}
+  <a href="${CustomLink}" class="profiler-custom-link" target="_blank">${CustomLinkName}</a>
+  {{/if}}
+  {{if HasTrivialTimings}}
+  <a class="profiler-toggle-trivial" data-show-on-load="${HasAllTrivialTimings}" title="toggles any rows with &lt; ${TrivialDurationThresholdMilliseconds} ms">
+    show trivial
+  </a>
+  {{/if}}
+</script>
+
+<script id="timingTemplate" type="text/x-jquery-tmpl">
+
+  <tr class="{{if timing.IsTrivial }}profiler-trivial{{/if}}" data-timing-id="${timing.Id}">
+    <td class="profiler-label" title="{{if timing.Name && timing.Name.length > 45 }}${timing.Name}{{/if}}">
+      <span class="profiler-indent">${MiniProfiler.renderIndent(timing.Depth)}</span> ${timing.Name.slice(0,45)}{{if timing.Name && timing.Name.length > 45 }}...{{/if}}
+    </td>
+    <td class="profiler-duration" title="duration of this step without any children's durations">
+      ${MiniProfiler.formatDuration(timing.DurationWithoutChildrenMilliseconds)}
+    </td>
+    <td class="profiler-duration profiler-duration-with-children" title="duration of this step and its children">
+      ${MiniProfiler.formatDuration(timing.DurationMilliseconds)}
+    </td>
+    <td class="profiler-duration time-from-start" title="time elapsed since profiling started">
+      <span class="profiler-unit">+</span>${MiniProfiler.formatDuration(timing.StartMilliseconds)}
+    </td>
+
+  {{if timing.HasSqlTimings}}
+    <td class="profiler-duration {{if timing.HasDuplicateSqlTimings}}profiler-warning{{/if}}" title="{{if timing.HasDuplicateSqlTimings}}duplicate queries detected - {{/if}}{{if timing.ExecutedReaders > 0 || timing.ExecutedScalars > 0 || timing.ExecutedNonQueries > 0}}${timing.ExecutedReaders} reader, ${timing.ExecutedScalars} scalar, ${timing.ExecutedNonQueries} non-query statements executed{{/if}}">
+      <a class="profiler-queries-show">
+        {{if timing.HasDuplicateSqlTimings}}<span class="profiler-nuclear">!</span>{{/if}}
+        ${timing.SqlTimings.length} <span class="profiler-unit">sql</span>
+      </a>
+    </td>
+    <td class="profiler-duration" title="aggregate duration of all queries in this step (excludes children)">
+      ${MiniProfiler.formatDuration(timing.SqlTimingsDurationMilliseconds)}
+    </td>
+  {{else}}
+    <td colspan="2"></td>
+  {{/if}}
+
+  {{each page.CustomTimingNames}}
+    {{if timing.CustomTimings && timing.CustomTimings[$value]}}
+      <td class="profiler-duration" title="aggregate number of all ${$value.toLowerCase()} invocations in this step (excludes children)">
+        ${timing.CustomTimings[$value].length} ${$value.toLowerCase()}
+      </td>
+      <td class="profiler-duration" title="aggregate duration of all ${$value.toLowerCase()} invocations in this step (excludes children)">
+        ${MiniProfiler.formatDuration(timing.CustomTimingStats[$value].Duration)}
+      </td>
+    {{else}}
+      <td colspan="2"></td>
+    {{/if}}
+  {{/each}}
+
+  </tr>
+
+  {{if timing.HasChildren}}
+    {{each timing.Children}}
+      {{tmpl({timing: $value, page: page}) "#timingTemplate"}}
+    {{/each}}
+  {{/if}}
+
+</script>
+
+<script id="sqlTimingTemplate" type="text/x-jquery-tmpl">
+
+  <tr class="{{if i % 2 == 1}}profiler-odd{{/if}}" data-timing-id="${s.ParentTimingId}">
+    <td class="profiler-info">
+      <div>${s.ParentTimingName}</div>
+      <div class="profiler-number"><span class="profiler-unit">T+</span>${MiniProfiler.formatDuration(s.StartMilliseconds)} <span class="profiler-unit">ms</span></div>
+      <div>
+        {{if s.IsDuplicate}}<span class="profiler-warning">DUPLICATE</span>{{/if}}
+        ${MiniProfiler.renderExecuteType(s.ExecuteType)}
+      </div>
+      <div title="{{if s.ExecuteType == 3}}first result fetched: ${s.FirstFetchDurationMilliseconds}ms{{/if}}">${MiniProfiler.formatDuration(s.DurationMilliseconds)} <span class="profiler-unit">ms</span></div>
+    </td>
+    <td>
+      <div class="query">
+        <pre class="profiler-stack-trace">${s.StackTraceSnippet}</pre>
+        <pre class="prettyprint lang-sql"><code>${s.FormattedCommandString}   </code></pre>
+      </div>
+    </td>
+  </tr>
+
+</script>
+
+<script id="sqlGapTemplate" type="text/x-jquery-tmpl">
+
+  <tr class="profiler-gap-info{{if g.duration < 4}} profiler-trivial-gaps{{/if}}">
+    <td class="profiler-info">
+      ${g.duration} <span class="profiler-unit">ms</span>  
+    </td>
+    <td class="query">
+      <div>${g.topReason.name} &mdash; ${g.topReason.duration.toFixed(2)} <span class="profiler-unit">ms</span></div>
+    </td>
+  </tr>
+
+</script>

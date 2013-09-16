@@ -1,1 +1,34 @@
-../../../StackExchange.Profiling/UI/list.tmpl
+﻿<script id="tableTemplate" type="text/x-jquery-tmpl">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Started</th>
+        <th>Sql Duration</th>
+        <th>Total Duration</th>
+        <th>Request Start</th>
+        <th>Response Start</th>
+        <th>Dom Complete</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+    </tbody>
+  </table>
+</script>
+<script id="rowTemplate" type="text/x-jquery-tmpl">
+  <tr>
+    <td>
+      <a href="${MiniProfiler.path}results?id=${Id}">${Name}</a></td>
+    <td class="date">${MiniProfiler.renderDate(Started)}</td>
+    <td class="time">${DurationMillisecondsInSql}</td>
+    <td class="time">${DurationMilliseconds}</td>
+    {{if ClientTimings}}
+    <td class="time">${MiniProfiler.getClientTimingByName(ClientTimings,"Request").Start}</td>
+    <td class="time">${MiniProfiler.getClientTimingByName(ClientTimings,"Response").Start}</td>
+    <td class="time">${MiniProfiler.getClientTimingByName(ClientTimings,"Dom Complete").Start}</td>
+    {{else}}
+    <td colspan="3"></td>
+    {{/if}}
+  </tr>
+</script>
