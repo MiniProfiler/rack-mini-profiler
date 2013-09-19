@@ -1,5 +1,5 @@
 class Rack::MiniProfiler::GCProfiler
-  
+
   def object_space_stats
     stats = {}
     ids = Set.new
@@ -9,7 +9,7 @@ class Rack::MiniProfiler::GCProfiler
         i = stats[o.class] || 0
         i += 1
         stats[o.class] = i
-        ids << o.object_id if Integer === o.object_id 
+        ids << o.object_id if Integer === o.object_id
       rescue NoMethodError
         # Redis::Future undefines .class and .object_id super weird
       end
@@ -33,8 +33,8 @@ class Rack::MiniProfiler::GCProfiler
     result = {}
     ids_after.each do |id|
       obj = ObjectSpace._id2ref(id)
-      if String === obj && !ids_before.include?(obj.object_id) 
-        result[obj] ||= 0 
+      if String === obj && !ids_before.include?(obj.object_id)
+        result[obj] ||= 0
         result[obj] += 1
       end
     end
@@ -46,35 +46,37 @@ class Rack::MiniProfiler::GCProfiler
 
     begin
       GC::Profiler.clear
+      prev_profiler_state = GC::Profiler.enabled?
+      prev_gc_state = GC.enable
       GC::Profiler.enable
       b = app.call(env)[2]
       b.close if b.respond_to? :close
       body << "GC Profiler ran during this request, if it fired you will see the cost below:\n\n"
       body << GC::Profiler.result
     ensure
-      GC.enable
-      GC::Profiler.disable
+      prev_gc_state ? GC.disable : GC.enable
+      GC::Profiler.disable unless prev_profiler_state
     end
 
     return [200, {'Content-Type' => 'text/plain'}, body]
   end
 
   def profile_gc(app,env)
-    
+
     body = [];
 
     stat_before,stat_after,diff,string_analysis = nil
     begin
-      GC.disable
+      prev_gc_state = GC.disable
       stat_before = object_space_stats
       b = app.call(env)[2]
       b.close if b.respond_to? :close
       stat_after = object_space_stats
-      
+
       diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
       string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
     ensure
-      GC.enable
+      prev_gc_state ? GC.disable : GC.enable
     end
 
 
@@ -90,7 +92,7 @@ ObjectSpace stats:
 -----------------\n"
 
     stat_after[:stats].to_a.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
-      body << "#{k} : #{v}\n" 
+      body << "#{k} : #{v}\n"
     end
 
 
