@@ -14,7 +14,7 @@ module Rack::MiniProfilerRails
     c.skip_paths ||= []
 
     if Rails.env.development?
-      c.skip_paths << "/assets/"
+      c.skip_paths << app.config.assets.prefix
       c.skip_schema_queries = true
     end
 
