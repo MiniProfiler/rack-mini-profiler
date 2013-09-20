@@ -190,5 +190,13 @@ describe Rack::MiniProfiler do
     end
   end
 
+  describe 'error handling when storage_instance fails to save' do
+    it "should recover gracefully" do
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda {|env| true }
+      Rack::MiniProfiler::MemoryStore.any_instance.stub(:save) { raise "This error" }
+      Rack::MiniProfiler.config.storage_failure.should_receive(:call)
+      get '/html'
+    end
+  end
 
 end
