@@ -1,3 +1,8 @@
+17-September-2013 - Ross Wilson
+  * Instead of supressing all "/assets/" requests we now check the configured
+  config.assets.prefix path since developers can rename the path to serve Asset Pipeline
+  files from
+
 28-June-2012 - Sam
 
   * Started change log
