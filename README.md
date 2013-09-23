@@ -1,6 +1,6 @@
 # rack-mini-profiler
 
-[![Code Climate](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler.png)](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler)
+[![Code Climate](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler.png)](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler) [![Build Status](https://travis-ci.org/MiniProfiler/rack-mini-profiler.png)](https://travis-ci.org/MiniProfiler/rack-mini-profiler)
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
