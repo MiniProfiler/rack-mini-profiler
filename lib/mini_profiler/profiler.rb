@@ -393,9 +393,9 @@ module Rack
         regex = /<\/html>/i
         close_tag = '</html>'
       else
-        # implicit </body> and </html>. Just append the script.
+        # implicit </body> and </html>. Don't do anything.
 
-        return fragment + script
+        return fragment
       end
 
       matches = fragment.scan(regex).length
