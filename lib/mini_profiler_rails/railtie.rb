@@ -22,6 +22,10 @@ module Rack::MiniProfilerRails
       c.authorization_mode = :whitelist
     end
 
+    if Rails.logger
+      c.logger = Rails.logger
+    end
+
     # The file store is just so much less flaky
     tmp = Rails.root.to_s + "/tmp/miniprofiler"
     FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
