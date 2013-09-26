@@ -331,16 +331,22 @@ module Rack
       end
 
 
-      # no matter what it is, it should be unviewed, otherwise we will miss POST
-      @storage.set_unviewed(page_struct['User'], page_struct['Id'])
-      @storage.save(page_struct)
+      begin
+        # no matter what it is, it should be unviewed, otherwise we will miss POST
+        @storage.set_unviewed(page_struct['User'], page_struct['Id'])
+        @storage.save(page_struct)
 
-      # inject headers, script
-      if headers['Content-Type'] && status == 200
-        client_settings.write!(headers)
+        # inject headers, script
+        if headers['Content-Type'] && status == 200
+          client_settings.write!(headers)
 
-        result = inject_profiler(env,status,headers,body)
-        return result if result
+            result = inject_profiler(env,status,headers,body)
+          return result if result
+        end
+      rescue Exception => e
+        if @config.storage_failure != nil
+          @config.storage_failure.call(e)
+        end
       end
 
       client_settings.write!(headers)
