@@ -104,8 +104,8 @@ describe Rack::MiniProfiler do
       get '/implicitbodyhtml'
     end
 
-    it 'has the JS in the body' do
-      last_response.body.include?('/mini-profiler-resources/includes.js').should be_true
+    it 'does not include the JS in the body' do
+      last_response.body.include?('/mini-profiler-resources/includes.js').should be_false
     end
 
   end
