@@ -27,13 +27,11 @@ Install/add to Gemfile
 gem 'rack-mini-profiler'
 ```
 
-Using Rails:
-
-All you have to do is include the Gem and you're good to go in development.
-
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
 Using Rails:
+
+All you have to do is include the Gem and you're good to go in development.
 
 ```ruby
 # A hook in your ApplicationController
@@ -42,8 +40,7 @@ def authorize
     Rack::MiniProfiler.authorize_request
   end
 end
-````
-
+```
 
 Using Builder:
 
