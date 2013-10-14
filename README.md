@@ -27,6 +27,8 @@ Install/add to Gemfile
 gem 'rack-mini-profiler'
 ```
 
+NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in your Gemfile. rack_mini_profiler will identify these gems if they are loaded to insert instrumentation. If included too early no SQL will show up.
+
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
 Using Rails:
@@ -165,10 +167,6 @@ if JSON.const_defined?(:Pure)
   end
 end
 ```
-
-## Notes
-
-- Be sure to require rack_mini_profiler last in your Gemfile, when it is required it will monkey patch pg and mysql gems to insert instrumentation. If included too early no SQL will show up.
 
 ## Available Options
 
