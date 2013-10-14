@@ -4,24 +4,20 @@
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
+## rack-mini-profiler needs your help
 
-##rack-mini-profiler needs your help
-
-We have decided to restructure our repository so there is a central UI repo and the various language implementation have thier own.
+We have decided to restructure our repository so there is a central UI repo and the various language implementation have their own.
 
 The new home for rack-mini-profiler is https://github.com/MiniProfiler/rack-mini-profiler
 
 **WE NEED HELP.**
 
 - Setting up a build that reuses https://github.com/MiniProfiler/ui
-- Migrating the internal data structures per spec at: https://github.com/MiniProfiler/ui 
-- Cleaning up the horrendous class structure that using string as keys and crazy non-objects https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler/sql_timer_struct.rb#L36-L44 
+- Migrating the internal data structures per spec at: https://github.com/MiniProfiler/ui
+- Cleaning up the horrendous class structure that using string as keys and crazy non-objects https://github.com/SamSaffron/MiniProfiler/blob/master/Ruby/lib/mini_profiler/sql_timer_struct.rb#L36-L44
 - Add travis-ci testing at least MRI 1.9.3, JRuby and MRI 2.0
 
-
-
 If you feel like taking on any of this start an issue and update us on your progress.
-
 
 ## Using rack-mini-profiler in your app
 
@@ -30,6 +26,7 @@ Install/add to Gemfile
 ```ruby
 gem 'rack-mini-profiler'
 ```
+
 Using Rails:
 
 All you have to do is include the Gem and you're good to go in development.
@@ -41,7 +38,7 @@ Using Rails:
 ```ruby
 # A hook in your ApplicationController
 def authorize
-  if current_user.is_admin? 
+  if current_user.is_admin?
     Rack::MiniProfiler.authorize_request
   end
 end
@@ -82,7 +79,7 @@ There are 4 storage options: `MemoryStore`, `RedisStore`, `MemcacheStore`, and `
 
 To change the default you can create a file in `config/initializers/mini_profiler.rb`
 
-```ruby 
+```ruby
 # set MemoryStore
 Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
 
@@ -94,24 +91,24 @@ if Rails.env.production?
 end
 ```
 
-MemoryStore stores results in a processes heap - something that does not work well in a multi process environment. 
-FileStore stores results in the file system - something that may not work well in a multi machine environment. 
+MemoryStore stores results in a processes heap - something that does not work well in a multi process environment.
+FileStore stores results in the file system - something that may not work well in a multi machine environment.
 RedisStore/MemcacheStore work in multi process and multi machine environments (RedisStore only saves results for up to 24 hours so it won't continue to fill up Redis).
 
-Additionally you may implement an AbstractStore for your own provider. 
+Additionally you may implement an AbstractStore for your own provider.
 
 ## User result segregation
 
-MiniProfiler will attempt to keep all user results isolated, out-of-the-box the user provider uses the ip address: 
+MiniProfiler will attempt to keep all user results isolated, out-of-the-box the user provider uses the ip address:
 
 ```ruby
-Rack::MiniProfiler.config.user_provider = Proc.new{|env| Rack::Request.new(env).ip} 
+Rack::MiniProfiler.config.user_provider = Proc.new{|env| Rack::Request.new(env).ip}
 ```
 
-You can override (something that is very important in a multi-machine production setup): 
+You can override (something that is very important in a multi-machine production setup):
 
 ```ruby
-Rack::MiniProfiler.config.user_provider = Proc.new{ |env| CurrentUser.get(env) } 
+Rack::MiniProfiler.config.user_provider = Proc.new{ |env| CurrentUser.get(env) }
 ```
 
 The string this function returns should be unique for each user on the system (for anonymous you may need to fall back to ip address)
@@ -187,7 +184,7 @@ end
 * start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
 * backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
 
-## Special query strings 
+## Special query strings
 
-If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers. 
+If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
 
