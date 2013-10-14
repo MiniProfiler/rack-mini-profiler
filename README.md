@@ -19,7 +19,7 @@ The new home for rack-mini-profiler is https://github.com/MiniProfiler/rack-mini
 
 If you feel like taking on any of this start an issue and update us on your progress.
 
-## Using rack-mini-profiler in your app
+## Installation
 
 Install/add to Gemfile
 
@@ -29,22 +29,11 @@ gem 'rack-mini-profiler'
 
 NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in your Gemfile. rack_mini_profiler will identify these gems if they are loaded to insert instrumentation. If included too early no SQL will show up.
 
-rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
+#### Rails
 
-Using Rails:
+All you have to do is include the Gem and you're good to go in development. See notes below for use in production.
 
-All you have to do is include the Gem and you're good to go in development.
-
-```ruby
-# A hook in your ApplicationController
-def authorize
-  if current_user.is_admin?
-    Rack::MiniProfiler.authorize_request
-  end
-end
-```
-
-Using Builder:
+#### Rack Builder
 
 ```ruby
 require 'rack-mini-profiler'
@@ -55,12 +44,25 @@ builder = Rack::Builder.new do
 end
 ```
 
-Using Sinatra:
+#### Sinatra
 
 ```ruby
 require 'rack-mini-profiler'
 class MyApp < Sinatra::Base
   use Rack::MiniProfiler
+end
+```
+
+## Using rack-mini-profiler in your app
+
+rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
+
+```ruby
+# A hook in your ApplicationController
+def authorize
+  if current_user.is_admin?
+    Rack::MiniProfiler.authorize_request
+  end
 end
 ```
 
