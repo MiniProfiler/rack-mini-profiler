@@ -38,9 +38,6 @@ module Rack::MiniProfilerRails
     c.backtrace_includes =  [/^\/?(app|config|lib|test)/]
     c.skip_schema_queries =  Rails.env != 'production'
 
-    # Install the Middleware
-    app.middleware.insert(0, Rack::MiniProfiler)
-
     # Attach to various Rails methods
     ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
     ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
@@ -50,6 +47,18 @@ module Rack::MiniProfilerRails
 
     initializer "rack_mini_profiler.configure_rails_initialization" do |app|
       Rack::MiniProfilerRails.initialize!(app)
+    end
+
+    config.after_initialize do |app|
+      # Install the Middleware - wait until all middlewares have been added
+      insert_position = 0
+      insert_after_middlewares = Array(Rack::MiniProfiler.config.insert_after_middlewares)
+
+      app.config.middleware.each_with_index do |middleware, index|
+        insert_position = (index + 1) if insert_after_middlewares.include?(middleware.klass.name)
+      end
+
+      app.middleware.insert(insert_position, Rack::MiniProfiler)
     end
 
     # TODO: Implement something better here
