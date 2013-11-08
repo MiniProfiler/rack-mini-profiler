@@ -204,9 +204,10 @@ module Rack
 
       if query_string =~ /pp=enable/
         skip_it = false
+        config.start_disabled = false
       end
 
-      if skip_it
+      if skip_it || config.start_disabled
         status,headers,body = @app.call(env)
         client_settings.disable_profiling = true
         client_settings.write!(headers)

@@ -137,6 +137,12 @@ describe Rack::MiniProfiler do
       get '/path1/a'
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
     end
+
+    it 'disables default functionality' do
+      Rack::MiniProfiler.config.start_disabled = true
+      get '/html'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
+    end
   end
 
   def load_prof(response)
@@ -153,6 +159,23 @@ describe Rack::MiniProfiler do
       stack.should be_nil
     end
 
+    it 'disables functionality if requested' do
+      get '/html?pp=disable'
+      last_response.body.should_not include('/mini-profiler-resources/includes.js')
+    end
+
+    context 'when disabled' do
+      before(:each) do
+        get '/html?pp=disable'
+        get '/html'
+        last_response.body.should_not include('/mini-profiler-resources/includes.js')
+      end
+
+      it 're-enables functionality if requested' do
+        get '/html?pp=enable'
+        last_response.body.should include('/mini-profiler-resources/includes.js')
+      end
+    end
   end
 
   describe 'POST followed by GET' do
@@ -196,6 +219,21 @@ describe Rack::MiniProfiler do
       Rack::MiniProfiler::MemoryStore.any_instance.stub(:save) { raise "This error" }
       Rack::MiniProfiler.config.storage_failure.should_receive(:call)
       get '/html'
+    end
+  end
+
+  describe 'when profiler is disabled by default' do
+    before(:each) do
+      Rack::MiniProfiler.config.start_disabled = true
+      get '/html'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
+    end
+
+    it 'functionality can be re-enabled' do
+      get '/html?pp=enable'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
+      get '/html'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
     end
   end
 
