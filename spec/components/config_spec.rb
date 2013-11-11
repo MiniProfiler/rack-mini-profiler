@@ -5,8 +5,8 @@ module Rack
   describe MiniProfiler::Config do
 
     describe '.default' do
-      it 'has "disabled" set to false' do
-        MiniProfiler::Config.default.start_disabled.should be_false
+      it 'has "enabled" set to true' do
+        MiniProfiler::Config.default.enabled.should be_true
       end
     end
 

@@ -24,9 +24,9 @@ describe Rack::MiniProfiler do
         Rack::MiniProfiler.config.auto_inject.should == false
       end
 
-      it 'allows us to set default disabled' do
-        Rack::MiniProfiler.config.start_disabled = true
-        Rack::MiniProfiler.config.start_disabled.should == true
+      it 'allows us to start the profiler disabled' do
+        Rack::MiniProfiler.config.enabled = false
+        Rack::MiniProfiler.config.enabled.should == false
       end
 
       it 'can reset the settings' do

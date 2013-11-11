@@ -139,7 +139,7 @@ describe Rack::MiniProfiler do
     end
 
     it 'disables default functionality' do
-      Rack::MiniProfiler.config.start_disabled = true
+      Rack::MiniProfiler.config.enabled = false
       get '/html'
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
     end
@@ -224,7 +224,7 @@ describe Rack::MiniProfiler do
 
   describe 'when profiler is disabled by default' do
     before(:each) do
-      Rack::MiniProfiler.config.start_disabled = true
+      Rack::MiniProfiler.config.enabled = false
       get '/html'
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
     end
