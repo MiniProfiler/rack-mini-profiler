@@ -47,18 +47,7 @@ module Rack::MiniProfilerRails
 
     initializer "rack_mini_profiler.configure_rails_initialization" do |app|
       Rack::MiniProfilerRails.initialize!(app)
-    end
-
-    config.after_initialize do |app|
-      # Install the Middleware - wait until all middlewares have been added
-      insert_position = 0
-      insert_after_middlewares = Array(Rack::MiniProfiler.config.insert_after_middlewares)
-
-      app.config.middleware.each_with_index do |middleware, index|
-        insert_position = (index + 1) if insert_after_middlewares.include?(middleware.klass.name)
-      end
-
-      app.middleware.insert(insert_position, Rack::MiniProfiler)
+      app.middleware.insert_before(ActionDispatch::Static, Rack::MiniProfiler)
     end
 
     # TODO: Implement something better here
