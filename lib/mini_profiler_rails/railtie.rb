@@ -47,7 +47,7 @@ module Rack::MiniProfilerRails
 
     initializer "rack_mini_profiler.configure_rails_initialization" do |app|
       Rack::MiniProfilerRails.initialize!(app)
-      app.middleware.insert_before(ActionDispatch::Static, Rack::MiniProfiler)
+      app.middleware.use(Rack::MiniProfiler)
     end
 
     # TODO: Implement something better here
