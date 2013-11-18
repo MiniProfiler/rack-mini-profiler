@@ -16,7 +16,7 @@ module Rack
         :backtrace_remove, :backtrace_includes, :backtrace_ignores, :skip_schema_queries,
         :storage, :user_provider, :storage_instance, :storage_options, :skip_paths, :authorization_mode,
         :toggle_shortcut, :start_hidden, :backtrace_threshold_ms, :storage_failure, :logger,
-        :insert_after_middlewares
+        :insert_after_middlewares, :enabled
 
     # Deprecated options
     attr_accessor :use_existing_jquery
@@ -44,6 +44,7 @@ module Rack
               @logger.warn("MiniProfiler storage failure: #{exception.message}")
             end
           end
+          @enabled = true
           self
         }
       end
