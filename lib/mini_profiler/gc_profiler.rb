@@ -11,7 +11,7 @@ class Rack::MiniProfiler::GCProfiler
         stats[o.class] = i
         ids << o.object_id if Integer === o.object_id
       rescue NoMethodError
-        # Redis::Future undefines .class and .object_id super weird
+        # protect against BasicObject
       end
     }
     {:stats => stats, :ids => ids}
@@ -41,6 +41,36 @@ class Rack::MiniProfiler::GCProfiler
     result
   end
 
+  def analyze_growth(ids_before, ids_after)
+    new_objects = 0
+    memory_allocated = 0
+
+    ids_after.each do |id|
+      if !ids_before.include?(id) && obj=ObjectSpace._id2ref(id)
+        # this is going to be version specific (may change in 2.1)
+        memory_allocated += ObjectSpace.memsize_of(obj)
+        new_objects += 1
+      end
+    end
+
+    [new_objects, memory_allocated]
+  end
+
+  def analyze_initial_state(ids_before)
+    memory_allocated = 0
+    objects = 0
+
+    ids_before.each do |id|
+      if obj=ObjectSpace._id2ref(id)
+        # this is going to be version specific (may change in 2.1)
+        memory_allocated += ObjectSpace.memsize_of(obj)
+        objects += 1
+      end
+    end
+
+    [objects,memory_allocated]
+  end
+
   def profile_gc_time(app,env)
     body = []
 
@@ -63,10 +93,17 @@ class Rack::MiniProfiler::GCProfiler
 
   def profile_gc(app,env)
 
+    # for memsize_of
+    require 'objspace'
+
     body = [];
 
-    stat_before,stat_after,diff,string_analysis = nil
+    stat_before,stat_after,diff,string_analysis,
+      new_objects, memory_allocated, stat, memory_before, objects_before = nil
     begin
+      # clean up before
+      GC.start
+      stat = GC.stat
       prev_gc_state = GC.disable
       stat_before = object_space_stats
       b = app.call(env)[2]
@@ -75,10 +112,22 @@ class Rack::MiniProfiler::GCProfiler
 
       diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
       string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
+      new_objects, memory_allocated = analyze_growth(stat_before[:ids], stat_after[:ids])
+      objects_before, memory_before = analyze_initial_state(stat_before[:ids])
     ensure
       prev_gc_state ? GC.disable : GC.enable
     end
 
+    body << "
+Overview
+------------------------------------
+Initial state: object count - #{objects_before} , memory allocated outside heap (bytes) #{memory_before}
+
+GC Stats: #{stat.map{|k,v| "#{k} : #{v}" }.join(", ")}
+
+New bytes allocated outside of Ruby heaps: #{memory_allocated}
+New objects: #{new_objects}
+"
 
     body << "
 ObjectSpace delta caused by request:

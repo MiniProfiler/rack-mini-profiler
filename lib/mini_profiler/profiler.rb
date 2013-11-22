@@ -217,7 +217,7 @@ module Rack
       end
 
       if query_string =~ /pp=profile-gc/
-        current.measure = false
+        current.measure = false if current
 
         if query_string =~ /pp=profile-gc-time/
           return Rack::MiniProfiler::GCProfiler.new.profile_gc_time(@app, env)
@@ -355,7 +355,7 @@ module Rack
 
     ensure
       # Make sure this always happens
-      current = nil
+      self.current = nil
     end
 
     def inject_profiler(env,status,headers,body)
