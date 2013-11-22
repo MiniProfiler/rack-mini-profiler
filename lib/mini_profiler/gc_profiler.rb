@@ -1,20 +1,40 @@
 class Rack::MiniProfiler::GCProfiler
 
+  def initialize
+    @ignore = []
+    @ignore << @ignore.__id__
+  end
+
   def object_space_stats
     stats = {}
-    ids = Set.new
+    ids = {}
+
+    @ignore << stats.__id__
+    @ignore << ids.__id__
+
     i=0
     ObjectSpace.each_object { |o|
       begin
         i = stats[o.class] || 0
         i += 1
         stats[o.class] = i
-        ids << o.object_id if Integer === o.object_id
+        ids[o.__id__] = o if Integer === o.__id__
       rescue NoMethodError
         # protect against BasicObject
       end
     }
-    {:stats => stats, :ids => ids}
+
+    @ignore.each do |id|
+      if ids.delete(id)
+        klass = ObjectSpace._id2ref(id).class
+        stats[klass] -= 1
+      end
+    end
+
+    result = {:stats => stats, :ids => ids}
+    @ignore << result.__id__
+
+    result
   end
 
   def diff_object_stats(before,after)
@@ -31,7 +51,7 @@ class Rack::MiniProfiler::GCProfiler
 
   def analyze_strings(ids_before,ids_after)
     result = {}
-    ids_after.each do |id|
+    ids_after.each do |id,_|
       obj = ObjectSpace._id2ref(id)
       if String === obj && !ids_before.include?(obj.object_id)
         result[obj] ||= 0
@@ -45,10 +65,11 @@ class Rack::MiniProfiler::GCProfiler
     new_objects = 0
     memory_allocated = 0
 
-    ids_after.each do |id|
+    ids_after.each do |id,_|
       if !ids_before.include?(id) && obj=ObjectSpace._id2ref(id)
         # this is going to be version specific (may change in 2.1)
-        memory_allocated += ObjectSpace.memsize_of(obj)
+        size = ObjectSpace.memsize_of(obj)
+        memory_allocated += size
         new_objects += 1
       end
     end
@@ -60,7 +81,7 @@ class Rack::MiniProfiler::GCProfiler
     memory_allocated = 0
     objects = 0
 
-    ids_before.each do |id|
+    ids_before.each do |id,_|
       if obj=ObjectSpace._id2ref(id)
         # this is going to be version specific (may change in 2.1)
         memory_allocated += ObjectSpace.memsize_of(obj)
@@ -100,23 +121,23 @@ class Rack::MiniProfiler::GCProfiler
 
     stat_before,stat_after,diff,string_analysis,
       new_objects, memory_allocated, stat, memory_before, objects_before = nil
-    begin
-      # clean up before
-      GC.start
-      stat = GC.stat
-      prev_gc_state = GC.disable
-      stat_before = object_space_stats
-      b = app.call(env)[2]
-      b.close if b.respond_to? :close
-      stat_after = object_space_stats
 
-      diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
-      string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
-      new_objects, memory_allocated = analyze_growth(stat_before[:ids], stat_after[:ids])
-      objects_before, memory_before = analyze_initial_state(stat_before[:ids])
-    ensure
-      prev_gc_state ? GC.disable : GC.enable
-    end
+    # clean up before
+    GC.start
+    stat = GC.stat
+    prev_gc_state = GC.disable
+    stat_before = object_space_stats
+    b = app.call(env)[2]
+    b.close if b.respond_to? :close
+    stat_after = object_space_stats
+    # so we don't blow out on memory
+    prev_gc_state ? GC.disable : GC.enable
+
+    diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
+    string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
+    new_objects, memory_allocated = analyze_growth(stat_before[:ids], stat_after[:ids])
+    objects_before, memory_before = analyze_initial_state(stat_before[:ids])
+
 
     body << "
 Overview
@@ -154,5 +175,7 @@ String stats:
     end
 
     return [200, {'Content-Type' => 'text/plain'}, body]
+  ensure
+    prev_gc_state ? GC.disable : GC.enable
   end
 end
