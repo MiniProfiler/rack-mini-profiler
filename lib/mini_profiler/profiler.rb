@@ -202,7 +202,7 @@ module Rack
         skip_it = true
       end
 
-      if query_string =~ /pp=enable/
+      if query_string =~ /pp=enable/ && (@config.authorization_mode != :whitelist || MiniProfiler.request_authorized?)
         skip_it = false
         config.enabled = true
       end
