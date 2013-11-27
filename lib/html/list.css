@@ -1,4 +1,4 @@
-﻿tbody tr:nth-child(odd)    { background-color:#eee; }
+tbody tr:nth-child(odd)    { background-color:#eee; }
 tbody tr:nth-child(even)    { background-color:#fff; }
 table { border: 0; border-spacing:0;}
 tr {border: 0;}
