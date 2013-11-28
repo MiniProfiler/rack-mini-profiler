@@ -137,6 +137,8 @@ Rack::MiniProfiler.config.enabled = false
 # Don't collect backtraces on SQL queries that take less than 5 ms to execute
 # (necessary on Rubies earlier than 2.0)
 Rack::MiniProfiler.config.backtrace_threshold_ms = 5
+# Set the sampling rate for flamegraph, in ms - defaults to 0.5ms
+Rack::MiniProfiler.config.flamegraph_sample_rate = 1
 ```
 
 
@@ -182,6 +184,7 @@ end
 * toggle_shortcut (default Alt+P) - a jquery.hotkeys.js-style keyboard shortcut, used to toggle the mini_profiler's visibility. See http://code.google.com/p/js-hotkeys/ for more info.
 * start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
 * backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
+* flamegraph_sample_rate (default 0.5ms) - How often fast_stack should get stack trace info to generate flamegraphs
 
 ## Special query strings
 
