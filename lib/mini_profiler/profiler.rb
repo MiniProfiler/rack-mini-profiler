@@ -280,8 +280,14 @@ module Rack
             # do not sully our profile with mini profiler timings
             current.measure = false
             # first param is the path
-            # 0.5 means attempt to collect a sample each 0.5 secs
-            flamegraph = Flamegraph.generate(nil, fidelity: 0.5, embed_resources: query_string =~ /embed/) do
+            # 0.5 means attempt to collect a sample each 0.5 millisecs
+            match_data = query_string.match(/flamegraph_sample_rate=(?<rate>[\d\.]+)/)
+            if match_data && !match_data[:rate].to_f.zero?
+              sample_rate = match_data[:rate].to_f
+            else
+              sample_rate = config.flamegraph_sample_rate
+            end
+            flamegraph = Flamegraph.generate(nil, fidelity: sample_rate, embed_resources: query_string =~ /embed/) do
               status,headers,body = @app.call(env)
             end
           end
@@ -478,6 +484,7 @@ module Rack
   pp=profile-gc-time: perform built-in gc profiling on this request (ruby 1.9.3 only)
   pp=profile-gc-ruby-head: requires the memory_profiler gem, new location based report
   pp=flamegraph: works best on Ruby 2.0, a graph representing sampled activity (requires the flamegraph gem).
+  pp=flamegraph&flamegraph_sample_rate=1: creates a flamegraph with the specified sample rate (in ms). Overrides value set in config
   pp=flamegraph_embed: works best on Ruby 2.0, a graph representing sampled activity (requires the flamegraph gem), embedded resources for use on an intranet.
   pp=trace-exceptions: requires Ruby 2.0, will return all the spots where your application raises execptions
 "
