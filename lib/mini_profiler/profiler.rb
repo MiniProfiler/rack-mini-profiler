@@ -138,7 +138,9 @@ module Rack
 
     def serve_html(env)
       file_name = env['PATH_INFO'][(@config.base_url_path.length)..1000]
+
       return serve_results(env) if file_name.eql?('results')
+
       full_path = ::File.expand_path("../html/#{file_name}", ::File.dirname(__FILE__))
       return [404, {}, ["Not found"]] unless ::File.exists? full_path
       f = Rack::File.new nil
@@ -279,9 +281,8 @@ module Rack
           else
             # do not sully our profile with mini profiler timings
             current.measure = false
-            # first param is the path
-            # 0.5 means attempt to collect a sample each 0.5 millisecs
             match_data = query_string.match(/flamegraph_sample_rate=(?<rate>[\d\.]+)/)
+
             if match_data && !match_data[:rate].to_f.zero?
               sample_rate = match_data[:rate].to_f
             else
@@ -498,16 +499,17 @@ module Rack
       [200, headers, [graph]]
     end
 
-    def ids_json(env)
+    def ids(env)
       # cap at 10 ids, otherwise there is a chance you can blow the header
-      ids = [current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]
-      ::JSON.generate(ids.uniq)
+      ([current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq!
+    end
+
+    def ids_json(env)
+      ::JSON.generate(ids(env))
     end
 
     def ids_comma_separated(env)
-      # cap at 10 ids, otherwise there is a chance you can blow the header
-      ids = [current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]
-      ids.uniq.join(",")
+      ids(env).join(",")
     end
 
     # get_profile_script returns script to be injected inside current html page
@@ -517,8 +519,8 @@ module Rack
     # * you have disabled auto append behaviour throught :auto_inject => false flag
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
+
       settings = {
-       :ids => ids_comma_separated(env),
        :path => "#{env['SCRIPT_NAME']}#{@config.base_url_path}",
        :version => MiniProfiler::VERSION,
        :position => @config.position,
@@ -526,11 +528,18 @@ module Rack
        :showChildren => false,
        :maxTracesToShow => 10,
        :showControls => false,
-       :currentId => current.page_struct["Id"],
        :authorized => true,
        :toggleShortcut => @config.toggle_shortcut,
        :startHidden => @config.start_hidden
       }
+
+      if current && current.page_struct
+        settings[:ids] = ids_comma_separated(env)
+        settings[:currentId] = current.page_struct["Id"]
+      else
+        settings[:ids] = []
+        settings[:currentId] = ""
+      end
 
       # TODO : cache this snippet
       script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
@@ -540,7 +549,7 @@ module Rack
         script.gsub!(regex, v.to_s)
       end
 
-      current.inject_js = false
+      current.inject_js = false if current
       script
     end
 
