@@ -347,8 +347,7 @@ module Rack
         # inject headers, script
         if headers['Content-Type'] && status == 200
           client_settings.write!(headers)
-
-            result = inject_profiler(env,status,headers,body)
+          result = inject_profiler(env,status,headers,body)
           return result if result
         end
       rescue Exception => e
@@ -501,7 +500,7 @@ module Rack
 
     def ids(env)
       # cap at 10 ids, otherwise there is a chance you can blow the header
-      ([current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq!
+      ([current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
     end
 
     def ids_json(env)
