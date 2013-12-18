@@ -175,6 +175,19 @@ describe Rack::MiniProfiler do
         get '/html?pp=enable'
         last_response.body.should include('/mini-profiler-resources/includes.js')
       end
+
+      it "does not re-enable functionality if not whitelisted" do
+        Rack::MiniProfiler.config.authorization_mode = :whitelist
+        get '/html?pp=enable'
+        last_response.body.should_not include('/mini-profiler-resources/includes.js')
+      end
+
+      it "re-enabled functionality if whitelisted" do
+        Rack::MiniProfiler.config.authorization_mode = :whitelist
+        expect(Rack::MiniProfiler).to receive(:request_authorized?) { true }.twice
+        get '/html?pp=enable'
+        last_response.body.should include('/mini-profiler-resources/includes.js')
+      end
     end
   end
 
