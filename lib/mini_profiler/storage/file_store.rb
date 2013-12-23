@@ -2,6 +2,10 @@ module Rack
   class MiniProfiler
     class FileStore < AbstractStore
 
+      # Sub-class thread so we have a named thread (useful for debugging in Thread.list).
+      class CacheCleanupThread < Thread
+      end
+
       class FileCache
         def initialize(path, prefix)
           @path = path
@@ -40,17 +44,35 @@ module Rack
         @user_view_lock = Mutex.new
 
         me = self
-        Thread.new do
+        t = CacheCleanupThread.new do
+          interval = 10
+          cleanup_cache_cycle = 3600
+          cycle_count = 1
+
           begin
-            while true do
+            until Thread.current[:should_exit] do
               # TODO: a sane retry count before bailing
-              me.cleanup_cache
-              sleep(3600)
+
+              # We don't want to hit the filesystem every 10s to clean up the cache so we need to do a bit of
+              # accounting to avoid sleeping that entire time.  We don't want to sleep for the entire period because
+              # it means the thread will stay live in hot deployment scenarios, keeping a potentially large memory
+              # graph from being garbage collected upon undeploy.
+              if cycle_count * interval >= cleanup_cache_cycle
+                cycle_count = 1
+                me.cleanup_cache
+              end
+
+              sleep(interval)
+              cycle_count += 1
             end
           rescue
             # don't crash the thread, we can clean up next time
           end
         end
+
+        at_exit { t[:should_exit] = true }
+
+        t
       end
 
       def save(page_struct)
