@@ -22,6 +22,14 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'activerecord', '~> 3.0'
+  s.add_development_dependency 'dalli'
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'ZenTest'
+  s.add_development_dependency 'autotest'
+  s.add_development_dependency 'redis'
+  s.add_development_dependency 'therubyracer'
+  s.add_development_dependency 'less'
+  s.add_development_dependency 'flamegraph'
 
   s.require_paths = ["lib"]
 end
