@@ -10,45 +10,45 @@ module Rack
     #     :has_many CustomTimer children
     class PageTimerStruct < TimerStruct
       def initialize(env)
-        super("Id" => MiniProfiler.generate_id,
-              "Name" => env['PATH_INFO'],
-              "Started" => (Time.now.to_f * 1000).to_i,
-              "MachineName" => env['SERVER_NAME'],
-              "Level" => 0,
-              "User" => "unknown user",
-              "HasUserViewed" => false,
-              "ClientTimings" => nil,
-              "DurationMilliseconds" => 0,
-              "HasTrivialTimings" => true,
-              "HasAllTrivialTimigs" => false,
-              "TrivialDurationThresholdMilliseconds" => 2,
-              "Head" => nil,
-              "DurationMillisecondsInSql" => 0,
-              "HasSqlTimings" => true,
-              "HasDuplicateSqlTimings" => false,
-              "ExecutedReaders" => 0,
-              "ExecutedScalars" => 0,
-              "ExecutedNonQueries" => 0,
-              "CustomTimingNames" => [],
-              "CustomTimingStats" => {}
+        super(:id => MiniProfiler.generate_id,
+              :name => env['PATH_INFO'],
+              :started => (Time.now.to_f * 1000).to_i,
+              :machineName => env['SERVER_NAME'],
+              :level => 0,
+              :user => "unknown user",
+              :hasUserViewed => false,
+              :clientTimings => nil,
+              :durationMilliseconds => 0,
+              :hasTrivialTimings => true,
+              :hasAllTrivialTimigs => false,
+              :trivialDurationThresholdMilliseconds => 2,
+              :head => nil,
+              :durationMillisecondsInSql => 0,
+              :hasSqlTimings => true,
+              :hasDuplicateSqlTimings => false,
+              :executedReaders => 0,
+              :executedScalars => 0,
+              :executedNonQueries => 0,
+              :customTimingNames => [],
+              :customTimingStats => {}
              )
         name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
-        self['Root'] = RequestTimerStruct.createRoot(name, self)
+        self[:root] = RequestTimerStruct.createRoot(name, self)
       end
 
       def duration_ms
-        @attributes['Root']['DurationMilliseconds']
+        @attributes[:root][:durationMilliseconds]
       end
 
       def root
-        @attributes['Root']
+        @attributes[:root]
       end
 
       def to_json(*a)
         attribs = @attributes.merge(
-          "Started" => '/Date(%d)/' % @attributes['Started'],
-          "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds'],
-          "CustomTimingNames" => @attributes['CustomTimingStats'].keys.sort
+          :started => '/Date(%d)/' % @attributes[:started],
+          :durationMilliseconds => @attributes[:root][:durationMilliseconds],
+          :customTimingNames => @attributes[:customTimingStats].keys.sort
         )
         ::JSON.generate(attribs, :max_nesting => 100)
       end
