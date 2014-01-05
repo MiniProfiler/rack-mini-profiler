@@ -46,7 +46,7 @@ module Rack
 
       def to_json(*a)
         attribs = @attributes.merge(
-          :started => '/date(%d)/' % @attributes[:started],
+          :started => '/Date(%d)/' % @attributes[:started],
           :duration_milliseconds => @attributes[:root][:duration_milliseconds],
           :custom_timing_names => @attributes[:custom_timing_stats].keys.sort
         )
