@@ -66,7 +66,7 @@ module Rack
         self.current = Context.new
         self.current.inject_js = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
         self.current.page_struct = PageTimerStruct.new(env)
-        self.current.current_timer = current.page_struct['Root']
+        self.current.current_timer = current.page_struct[:root]
       end
 
       def authorize_request
@@ -111,9 +111,9 @@ module Rack
         user_info = ERB::Util.html_escape(user(env))
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
-      unless page_struct['HasUserViewed']
-        page_struct['ClientTimings'] = ClientTimerStruct.init_from_form_data(env, page_struct)
-        page_struct['HasUserViewed'] = true
+      unless page_struct[:hasUserViewed]
+        page_struct[:clientTimings] = ClientTimerStruct.init_from_form_data(env, page_struct)
+        page_struct[:hasUserViewed] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)
       end
@@ -130,7 +130,7 @@ module Rack
         html.gsub!(/\{version\}/, MiniProfiler::VERSION)
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
-        html.gsub!(/\{name\}/, page_struct['Name'])
+        html.gsub!(/\{name\}/, page_struct[:name])
         html.gsub!(/\{duration\}/, "%.1f" % page_struct.duration_ms)
 
         [200, {'Content-Type' => 'text/html'}, [html]]
@@ -334,8 +334,8 @@ module Rack
       end
 
       page_struct = current.page_struct
-      page_struct['User'] = user(env)
-      page_struct['Root'].record_time((Time.now - start) * 1000)
+      page_struct[:user] = user(env)
+      page_struct[:root].record_time((Time.now - start) * 1000)
 
       if flamegraph
         body.close if body.respond_to? :close
@@ -345,7 +345,7 @@ module Rack
 
       begin
         # no matter what it is, it should be unviewed, otherwise we will miss POST
-        @storage.set_unviewed(page_struct['User'], page_struct['Id'])
+        @storage.set_unviewed(page_struct[:user], page_struct[:id])
         @storage.save(page_struct)
 
         # inject headers, script
@@ -504,7 +504,7 @@ module Rack
 
     def ids(env)
       # cap at 10 ids, otherwise there is a chance you can blow the header
-      ([current.page_struct["Id"]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
+      ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
     end
 
     def ids_json(env)
@@ -538,7 +538,7 @@ module Rack
 
       if current && current.page_struct
         settings[:ids] = ids_comma_separated(env)
-        settings[:currentId] = current.page_struct["Id"]
+        settings[:currentId] = current.page_struct[:id]
       else
         settings[:ids] = []
         settings[:currentId] = ""
