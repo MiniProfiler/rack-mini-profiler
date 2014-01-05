@@ -7,12 +7,12 @@ describe Rack::MiniProfiler::PageTimerStruct do
     @page = Rack::MiniProfiler::PageTimerStruct.new({})
   end
 
-  it 'has an Id' do
-    @page['Id'].should_not be_nil
+  it 'has an id' do
+    @page[:id].should_not be_nil
   end
 
-  it 'has a Root' do
-    @page['Root'].should_not be_nil
+  it 'has a root' do
+    @page[:root].should_not be_nil
   end
 
   describe 'to_json' do
@@ -21,12 +21,12 @@ describe Rack::MiniProfiler::PageTimerStruct do
       @deserialized = ::JSON.parse(@json)
     end
 
-    it 'has a Started element' do
-      @deserialized['Started'].should_not be_nil
+    it 'has a started element' do
+      @deserialized[:started].should_not be_nil
     end
 
-    it 'has a DurationMilliseconds element' do
-      @deserialized['DurationMilliseconds'].should_not be_nil
+    it 'has a durationMilliseconds element' do
+      @deserialized[:durationMilliseconds].should_not be_nil
     end
   end
   
