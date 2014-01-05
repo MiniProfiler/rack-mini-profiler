@@ -283,12 +283,14 @@ module Rack
             current.measure = false
             match_data = query_string.match(/flamegraph_sample_rate=(?<rate>[\d\.]+)/)
 
+            mode = query_string =~ /mode=c/ ? :c : :ruby
+
             if match_data && !match_data[:rate].to_f.zero?
               sample_rate = match_data[:rate].to_f
             else
               sample_rate = config.flamegraph_sample_rate
             end
-            flamegraph = Flamegraph.generate(nil, fidelity: sample_rate, embed_resources: query_string =~ /embed/) do
+            flamegraph = Flamegraph.generate(nil, fidelity: sample_rate, embed_resources: query_string =~ /embed/, mode: mode) do
               status,headers,body = @app.call(env)
             end
           end
