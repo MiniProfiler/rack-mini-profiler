@@ -4,6 +4,10 @@
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
+#### Features
+
+* database profiling. Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to ActiveRecord)
+
 ## rack-mini-profiler needs your help
 
 We have decided to restructure our repository so there is a central UI repo and the various language implementation have their own.
@@ -62,10 +66,6 @@ def authorize
   end
 end
 ```
-
-## Database profiling
-
-Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to ActiveRecord)
 
 ## Configuration
 
