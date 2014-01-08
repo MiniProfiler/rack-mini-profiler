@@ -119,23 +119,14 @@ The string this function returns should be unique for each user on the system (f
 
 ### Configuration Options
 
-You can set configuration options using the configuration accessor on Rack::MiniProfiler:
+You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
+For example:
 
-```
-# Have Mini Profiler show up on the right
+```ruby
 Rack::MiniProfiler.config.position = 'right'
-# Have Mini Profiler start in hidden mode - display with short cut (defaulted to 'Alt+P')
 Rack::MiniProfiler.config.start_hidden = true
-# Have Rack::MiniProfiler start disabled - you can use query string option to re-enable later
-Rack::MiniProfiler.config.enabled = false
-# Don't collect backtraces on SQL queries that take less than 5 ms to execute
-# (necessary on Rubies earlier than 2.0)
-Rack::MiniProfiler.config.backtrace_threshold_ms = 5
-# Set the sampling rate for flamegraph, in ms - defaults to 0.5ms
-Rack::MiniProfiler.config.flamegraph_sample_rate = 1
 ```
-
-### Available Options
+The available configuration options are:
 
 * pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
 * position - Can either be 'right' or 'left'. Default is 'left'.
