@@ -8,6 +8,12 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 * database profiling. Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to ActiveRecord)
 
+#### Learn more
+
+* [Watch the RailsCast](http://railscasts.com/episodes/368-miniprofiler)
+* [Read about Flame graphs in rack-mini-profiler](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler)
+* [Read the announcement posts from 2012](http://samsaffron.com/archive/2012/07/12/miniprofiler-ruby-edition)
+
 ## rack-mini-profiler needs your help
 
 We have decided to restructure our repository so there is a central UI repo and the various language implementation have their own.
