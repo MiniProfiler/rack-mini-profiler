@@ -61,6 +61,16 @@ class MyApp < Sinatra::Base
 end
 ```
 
+### Flamegraphs
+
+To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler):
+
+* add the **flamegraph** gem to your Gemfile
+* visit a page in your app with `?pp=flamegraph`
+
+Flamegraph generation is supported in MRI 2.0 and 2.1 only.
+
+
 ## Access control in production
 
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
