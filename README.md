@@ -52,7 +52,7 @@ class MyApp < Sinatra::Base
 end
 ```
 
-## Using rack-mini-profiler in your app
+## Access control in production
 
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
