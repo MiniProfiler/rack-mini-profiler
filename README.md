@@ -10,6 +10,7 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 #### Learn more
 
+* [Visit our community](http://community.miniprofiler.com)
 * [Watch the RailsCast](http://railscasts.com/episodes/368-miniprofiler)
 * [Read about Flame graphs in rack-mini-profiler](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler)
 * [Read the announcement posts from 2012](http://samsaffron.com/archive/2012/07/12/miniprofiler-ruby-edition)
