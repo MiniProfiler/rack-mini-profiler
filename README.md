@@ -69,9 +69,11 @@ end
 
 Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to ActiveRecord)
 
-## Storage
+## Configuration
 
-rack-mini-profiler stores it's results so they can be shared later and aren't lost at the end of the request.
+### Storage
+
+rack-mini-profiler stores its results so they can be shared later and aren't lost at the end of the request.
 
 There are 4 storage options: `MemoryStore`, `RedisStore`, `MemcacheStore`, and `FileStore`.
 
@@ -97,7 +99,7 @@ RedisStore/MemcacheStore work in multi process and multi machine environments (R
 
 Additionally you may implement an AbstractStore for your own provider.
 
-## User result segregation
+### User result segregation
 
 MiniProfiler will attempt to keep all user results isolated, out-of-the-box the user provider uses the ip address:
 
@@ -113,16 +115,7 @@ Rack::MiniProfiler.config.user_provider = Proc.new{ |env| CurrentUser.get(env) }
 
 The string this function returns should be unique for each user on the system (for anonymous you may need to fall back to ip address)
 
-## Running the Specs
-
-```
-$ rake build
-$ rake spec
-```
-
-Additionally you can also run `autotest` if you like.
-
-## Configuration Options
+### Configuration Options
 
 You can set configuration options using the configuration accessor on Rack::MiniProfiler:
 
@@ -140,8 +133,25 @@ Rack::MiniProfiler.config.backtrace_threshold_ms = 5
 Rack::MiniProfiler.config.flamegraph_sample_rate = 1
 ```
 
-
 In a Rails app, this can be done conveniently in an initializer such as config/initializers/mini_profiler.rb.
+
+### Available Options
+
+* pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
+* position - Can either be 'right' or 'left'. Default is 'left'.
+* skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
+* auto_inject (default true) - when false the miniprofiler script is not injected in the page
+* backtrace_filter - a regex you can use to filter out unwanted lines from the backtraces
+* toggle_shortcut (default Alt+P) - a jquery.hotkeys.js-style keyboard shortcut, used to toggle the mini_profiler's visibility. See http://code.google.com/p/js-hotkeys/ for more info.
+* start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
+* backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
+* flamegraph_sample_rate (default 0.5ms) - How often fast_stack should get stack trace info to generate flamegraphs
+
+
+## Special query strings
+
+If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
+
 
 ## Rails 2.X support
 
@@ -173,21 +183,14 @@ if JSON.const_defined?(:Pure)
 end
 ```
 
-## Available Options
+## Running the Specs
 
-* pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
-* position - Can either be 'right' or 'left'. Default is 'left'.
-* skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
-* auto_inject (default true) - when false the miniprofiler script is not injected in the page
-* backtrace_filter - a regex you can use to filter out unwanted lines from the backtraces
-* toggle_shortcut (default Alt+P) - a jquery.hotkeys.js-style keyboard shortcut, used to toggle the mini_profiler's visibility. See http://code.google.com/p/js-hotkeys/ for more info.
-* start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
-* backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
-* flamegraph_sample_rate (default 0.5ms) - How often fast_stack should get stack trace info to generate flamegraphs
+```
+$ rake build
+$ rake spec
+```
 
-## Special query strings
-
-If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
+Additionally you can also run `autotest` if you like.
 
 ## Licence
 
