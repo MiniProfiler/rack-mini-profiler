@@ -71,6 +71,10 @@ Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to Acti
 
 ## Configuration
 
+Various aspects of rack-mini-profiler's behavior can be configured when your app boots.
+For example in a Rails app, this should be done in an initializer:
+**config/initializers/mini_profiler.rb**
+
 ### Storage
 
 rack-mini-profiler stores its results so they can be shared later and aren't lost at the end of the request.
@@ -78,8 +82,6 @@ rack-mini-profiler stores its results so they can be shared later and aren't los
 There are 4 storage options: `MemoryStore`, `RedisStore`, `MemcacheStore`, and `FileStore`.
 
 `FileStore` is the default in Rails environments and will write files to `tmp/miniprofiler/*`.  `MemoryStore` is the default otherwise.
-
-To change the default you can create a file in `config/initializers/mini_profiler.rb`
 
 ```ruby
 # set MemoryStore
@@ -132,8 +134,6 @@ Rack::MiniProfiler.config.backtrace_threshold_ms = 5
 # Set the sampling rate for flamegraph, in ms - defaults to 0.5ms
 Rack::MiniProfiler.config.flamegraph_sample_rate = 1
 ```
-
-In a Rails app, this can be done conveniently in an initializer such as config/initializers/mini_profiler.rb.
 
 ### Available Options
 
