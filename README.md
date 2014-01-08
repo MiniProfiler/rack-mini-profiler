@@ -142,6 +142,32 @@ The available configuration options are:
 * backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
 * flamegraph_sample_rate (default 0.5ms) - How often fast_stack should get stack trace info to generate flamegraphs
 
+### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
+
+If you are using `Rack::Deflate` with rails and rack-mini-profiler in its default configuration,
+`Rack::MiniProfiler` will be injected (as always) at position 0 in the middleware stack. This
+will result in it attempting to inject html into the already-compressed response body. To fix this,
+the middleware ordering must be overriden.
+
+To do this, first add `, require: false` to the gemfile entry for rack-mini-profiler.
+This will prevent the railtie from running. Then, customize the initialization
+in the initializer like so:
+
+```ruby
+require 'rack-mini-profiler'
+
+Rack::MiniProfilerRails.initialize!(Rails.application)
+
+Rails.application.middleware.delete(Rack::MiniProfiler)
+Rails.application.middleware.insert_after(Rack::Deflater, Rack::MiniProfiler)
+```
+
+Deleting the middleware and then reinserting it is a bit inelegant, but
+a sufficient and costless solution. It is possible that rack-mini-profiler might
+support this scenario more directly if it is found that
+there is significant need for this confriguration or that
+the above recipe causes problems.
+
 
 ## Special query strings
 
