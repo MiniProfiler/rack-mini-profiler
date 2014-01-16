@@ -47,7 +47,7 @@ if SqlPatches.class_exists? "Mysql2::Client"
       start = Time.now
       result = query_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(args[0], elapsed_time))
+      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)) unless result.nil?
 
       result
 
