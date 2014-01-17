@@ -9,12 +9,12 @@ module Rack
       def self.init_instrumentation
         "<script type=\"text/javascript\">mPt=function(){var t=[];return{t:t,probe:function(n){t.push({d:new Date(),n:n})}}}()</script>"
       end
-      
+
       def self.instrument(name,orig)
         probe = "<script>mPt.probe('#{name}')</script>"
         wrapped = probe
-        wrapped << orig 
-        wrapped << probe 
+        wrapped << orig
+        wrapped << probe
         wrapped
       end
 
@@ -25,24 +25,24 @@ module Rack
 
       def self.init_from_form_data(env, page_struct)
         timings = []
-        clientTimes, clientPerf, baseTime = nil 
+        clientTimes, clientPerf, baseTime = nil
         form = env['rack.request.form_hash']
 
-        clientPerf = form['clientPerformance'] if form 
-        clientTimes = clientPerf['timing'] if clientPerf 
+        clientPerf = form['clientPerformance'] if form
+        clientTimes = clientPerf['timing'] if clientPerf
 
         baseTime = clientTimes['navigationStart'].to_i if clientTimes
-        return unless clientTimes && baseTime 
+        return unless clientTimes && baseTime
 
         probes = form['clientProbes']
         translated = {}
         if probes && !["null", ""].include?(probes)
           probes.each do |id, val|
             name = val["n"]
-            translated[name] ||= {} 
+            translated[name] ||= {}
             if translated[name][:start]
               translated[name][:finish] = val["d"]
-            else 
+            else
               translated[name][:start] = val["d"]
             end
           end
@@ -55,10 +55,10 @@ module Rack
         end
 
         clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
-          start = clientTimes[k].to_i - baseTime 
+          start = clientTimes[k].to_i - baseTime
           finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
-          duration = 0 
-          duration = finish - start if finish > start 
+          duration = 0
+          duration = finish - start if finish > start
           name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
           timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
         end
