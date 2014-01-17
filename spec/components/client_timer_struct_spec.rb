@@ -38,17 +38,17 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data(fixture(:simple_client_request), new_page)
       end
 
-      it 'has the correct RedirectCount' do
-        @client['RedirectCount'].should == 1
+      it 'has the correct redirect_count' do
+        @client[:redirect_count].should == 1
       end
 
-      it 'has Timings' do
-        @client['Timings'].should_not be_empty
+      it 'has timings' do
+        @client[:timings].should_not be_empty
       end
 
       describe "bob.js" do
         before do
-          @bob = @client['Timings'].find {|t| t["Name"] == "bob.js"}
+          @bob = @client[:timings].find {|t| t[:name] == "bob.js"}
         end
 
         it 'has it in the timings' do
@@ -56,44 +56,44 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         end
 
         it 'has the correct duration' do
-          @bob["Duration"].should == 6
+          @bob[:duration].should == 6
         end
 
       end
 
-      describe "Navigation" do
+      describe "navigation" do
         before do
-          @nav = @client['Timings'].find {|t| t["Name"] == "Navigation"}
+          @nav = @client[:timings].find {|t| t[:name] == :navigation}
         end
 
-        it 'has a Timing for the Navigation' do
+        it 'has a timing for the navigation' do
           @nav.should_not be_nil
         end
 
         it 'has the correct start' do
-          @nav['Start'].should == 0
+          @nav[:start].should == 0
         end
 
         it 'has the correct duration' do
-          @nav['Duration'].should == 16
+          @nav[:duration].should == 16
         end
       end
 
-      describe "Simple" do
+      describe "simple" do
         before do
-          @simple = @client['Timings'].find {|t| t["Name"] == "Simple"}
+          @simple = @client[:timings].find {|t| t[:name] == :simple}
         end
 
-        it 'has a Timing for the Simple' do
+        it 'has a timing for the simple' do
           @simple.should_not be_nil
         end
 
         it 'has the correct start' do
-          @simple['Start'].should == 1
+          @simple[:start].should == 1
         end
 
         it 'has the correct duration' do
-          @simple['Duration'].should == 10
+          @simple[:duration].should == 10
         end
       end
 
@@ -104,51 +104,51 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data(fixture(:weird_client_request), new_page)
       end
 
-      it 'has the correct RedirectCount' do
-        @client['RedirectCount'].should == 99
+      it 'has the correct redirect_count' do
+        @client[:redirect_count].should == 99
       end
 
-      it 'has Timings' do
-        @client['Timings'].should_not be_empty
+      it 'has timings' do
+        @client[:timings].should_not be_empty
       end
 
-      it 'has no timing when the start is before Navigation' do
-        @client['Timings'].find {|t| t["Name"] == "Previous"}.should be_nil
+      it 'has no timing when the start is before navigation' do
+        @client[:timings].find {|t| t[:name] == :previous}.should be_nil
       end
 
       describe "weird" do
         before do
-          @weird = @client['Timings'].find {|t| t["Name"] == "Weird"}
+          @weird = @client[:timings].find {|t| t[:name] == :weird}
         end
 
-        it 'has a Timing for the Weird' do
+        it 'has a timing for the weird' do
           @weird.should_not be_nil
         end
 
         it 'has the correct start' do
-          @weird['Start'].should == 11
+          @weird[:start].should == 11
         end
 
         it 'has a 0 duration because start time is greater than end time' do
-          @weird['Duration'].should == 0
+          @weird[:duration].should == 0
         end
       end
 
-      describe "differentFormat" do
+      describe "different_format" do
         before do
-          @diff = @client['Timings'].find {|t| t["Name"] == "differentFormat"}
+          @diff = @client[:timings].find {|t| t[:name] == :different_format}
         end
 
-        it 'has a Timing for the differentFormat' do
+        it 'has a timing for the different_format' do
           @diff.should_not be_nil
         end
 
         it 'has the correct start' do
-          @diff['Start'].should == 1
+          @diff[:start].should == 1
         end
 
         it 'has a -1 duration because the format was different' do
-          @diff['Duration'].should == -1
+          @diff[:duration].should == -1
         end
       end
 
