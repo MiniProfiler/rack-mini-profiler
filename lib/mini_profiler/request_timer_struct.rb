@@ -5,7 +5,7 @@ module Rack
 
     class RequestTimerStruct < TimerStruct
 
-      def self.createRoot(name, page)
+      def self.create_root(name, page)
         rt = RequestTimerStruct.new(name, page, nil)
         rt[:isRoot]= true
         rt
