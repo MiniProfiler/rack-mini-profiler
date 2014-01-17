@@ -111,9 +111,9 @@ module Rack
         user_info = ERB::Util.html_escape(user(env))
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
-      unless page_struct[:hasUserViewed]
-        page_struct[:clientTimings] = ClientTimerStruct.init_from_form_data(env, page_struct)
-        page_struct[:hasUserViewed] = true
+      unless page_struct[:has_user_viewed]
+        page_struct[:client_timings] = ClientTimerStruct.init_from_form_data(env, page_struct)
+        page_struct[:has_user_viewed] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)
       end
@@ -527,21 +527,21 @@ module Rack
        :path => "#{env['SCRIPT_NAME']}#{@config.base_url_path}",
        :version => MiniProfiler::VERSION,
        :position => @config.position,
-       :showTrivial => false,
-       :showChildren => false,
-       :maxTracesToShow => 10,
-       :showControls => false,
+       :show_trivial => false,
+       :show_children => false,
+       :max_traces_to_show => 10,
+       :show_controls => false,
        :authorized => true,
-       :toggleShortcut => @config.toggle_shortcut,
-       :startHidden => @config.start_hidden
+       :toggle_shortcut => @config.toggle_shortcut,
+       :start_hidden => @config.start_hidden
       }
 
       if current && current.page_struct
         settings[:ids] = ids_comma_separated(env)
-        settings[:currentId] = current.page_struct[:id]
+        settings[:current_id] = current.page_struct[:id]
       else
         settings[:ids] = []
-        settings[:currentId] = ""
+        settings[:current_id] = ""
       end
 
       # TODO : cache this snippet
