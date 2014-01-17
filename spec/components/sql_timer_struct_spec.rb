@@ -18,23 +18,21 @@ describe Rack::MiniProfiler::SqlTimerStruct do
 
     it 'has a StackTraceSnippet' do
       @sql['StackTraceSnippet'].should_not be_nil
-    end  
+    end
 
     it 'has a StartMilliseconds' do
       @sql['StartMilliseconds'].should_not be_nil
-    end   
+    end
 
     it 'has a DurationMilliseconds' do
       @sql['DurationMilliseconds'].should_not be_nil
-    end 
+    end
 
     it 'has a IsDuplicate' do
       @sql['IsDuplicate'].should_not be_nil
-    end       
+    end
   end
 
-
-  
   describe 'backtrace' do
     it 'has a snippet' do
       sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 200, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
@@ -58,7 +56,7 @@ describe Rack::MiniProfiler::SqlTimerStruct do
       sql['StackTraceSnippet'].should match /rspec/
     end
 
-    it "ingores rspec if we specifically ignore it" do  
+    it "ingores rspec if we specifically ignore it" do
       Rack::MiniProfiler.config.backtrace_ignores = [/\/rspec/]
       sql = Rack::MiniProfiler::SqlTimerStruct.new("SELECT * FROM users", 200, Rack::MiniProfiler::PageTimerStruct.new({}), nil)
       sql['StackTraceSnippet'].should_not match /rspec/
