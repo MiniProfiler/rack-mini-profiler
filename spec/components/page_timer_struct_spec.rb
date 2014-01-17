@@ -25,8 +25,8 @@ describe Rack::MiniProfiler::PageTimerStruct do
       @deserialized[:started].should_not be_nil
     end
 
-    it 'has a durationMilliseconds element' do
-      @deserialized[:durationMilliseconds].should_not be_nil
+    it 'has a duration_milliseconds element' do
+      @deserialized[:duration_milliseconds].should_not be_nil
     end
   end
   

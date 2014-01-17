@@ -16,26 +16,26 @@ module Rack
       def initialize(name, page, parent)
         super(:id => MiniProfiler.generate_id,
               :name => name,
-              :durationMilliseconds => 0,
-              :durationWithoutChildrenMilliseconds => 0,
-              :startMilliseconds => (Time.now.to_f * 1000).to_i - page[:started],
-              :parentTimingId => nil,
+              :duration_milliseconds => 0,
+              :duration_without_children_milliseconds => 0,
+              :start_milliseconds => (Time.now.to_f * 1000).to_i - page[:started],
+              :parent_timing_id => nil,
               :children => [],
-              :hasChildren => false,
-              :keyValues => nil,
-              :hasSqlTimings => false,
-              :hasDuplicateSqlTimings => false,
-              :trivialDurationThresholdMilliseconds => 2,
-              :sqlTimings => [],
-              :sqlTimingsDurationMilliseconds => 0,
-              :isTrivial => false,
-              :isRoot => false,
+              :has_children => false,
+              :key_values => nil,
+              :has_sql_timings => false,
+              :has_duplicate_sql_timings => false,
+              :trivial_duration_threshold_milliseconds => 2,
+              :sql_timings => [],
+              :sql_timings_duration_milliseconds => 0,
+              :is_trivial => false,
+              :is_root => false,
               :depth => parent ? parent.depth + 1 : 0,
-              :executedReaders => 0,
-              :executedScalars => 0,
-              :executedNonQueries => 0,
-              :customTimingStats => {},
-              :customTimings => {})
+              :executed_readers => 0,
+              :executed_scalars => 0,
+              :executed_non_queries => 0,
+              :custom_timing_stats => {},
+              :custom_timings => {})
         @children_duration = 0
         @start = Time.now
         @parent = parent
@@ -43,11 +43,11 @@ module Rack
       end
 
       def duration_ms
-        self[:durationMilliseconds]
+        self[:duration_milliseconds]
       end
 
       def start_ms
-        self[:startMilliseconds]
+        self[:start_milliseconds]
       end
 
       def start
@@ -65,44 +65,44 @@ module Rack
       def add_child(name)
         request_timer =  RequestTimerStruct.new(name, @page, self)
         self[:children].push(request_timer)
-        self[:hasChildren] = true
-        request_timer[:parentTimingId] = self[:id]
+        self[:has_children] = true
+        request_timer[:parent_timing_id] = self[:id]
         request_timer[:depth] = self[:depth] + 1
         request_timer
       end
 
       def add_sql(query, elapsed_ms, page, skip_backtrace = false, full_backtrace = false)
         timer = SqlTimerStruct.new(query, elapsed_ms, page, self , skip_backtrace, full_backtrace)
-        timer[:parentTimingId] = self[:id]
-        self[:sqlTimings].push(timer)
-        self[:hasSqlTimings] = true
-        self[:sqlTimingsDurationMilliseconds] += elapsed_ms
-        page[:durationMillisecondsInSql] += elapsed_ms
+        timer[:parent_timing_id] = self[:id]
+        self[:sql_timings].push(timer)
+        self[:has_sql_timings] = true
+        self[:sql_timings_duration_milliseconds] += elapsed_ms
+        page[:duration_milliseconds_in_sql] += elapsed_ms
         timer
       end
 
       def add_custom(type, elapsed_ms, page)
         timer = CustomTimerStruct.new(type, elapsed_ms, page, self)
-        timer[:parentTimingId] = self[:id]
-        self[:customTimings][type] ||= []
-        self[:customTimings][type].push(timer)
+        timer[:parent_timing_id] = self[:id]
+        self[:custom_timings][type] ||= []
+        self[:custom_timings][type].push(timer)
 
-        self[:customTimingStats][type] ||= {:count => 0, :duration => 0.0}
-        self[:customTimingStats][type][:count] += 1
-        self[:customTimingStats][type][:duration] += elapsed_ms
+        self[:custom_timing_stats][type] ||= {:count => 0, :duration => 0.0}
+        self[:custom_timing_stats][type][:count] += 1
+        self[:custom_timing_stats][type][:duration] += elapsed_ms
 
-        page[:customTimingStats][type] ||= {:count => 0, :duration => 0.0}
-        page[:customTimingStats][type][:count] += 1
-        page[:customTimingStats][type][:duration] += elapsed_ms
+        page[:custom_timing_stats][type] ||= {:count => 0, :duration => 0.0}
+        page[:custom_timing_stats][type][:count] += 1
+        page[:custom_timing_stats][type][:duration] += elapsed_ms
 
         timer
       end
 
       def record_time(milliseconds = nil)
         milliseconds ||= (Time.now - @start) * 1000
-        self[:durationMilliseconds] = milliseconds
-        self[:isTrivial] = true if milliseconds < self[:trivialDurationThresholdMilliseconds]
-        self[:durationWithoutChildrenMilliseconds] = milliseconds - @children_duration
+        self[:duration_milliseconds] = milliseconds
+        self[:is_trivial] = true if milliseconds < self[:trivial_duration_threshold_milliseconds]
+        self[:duration_without_children_milliseconds] = milliseconds - @children_duration
 
         if @parent
           @parent.children_duration += milliseconds
