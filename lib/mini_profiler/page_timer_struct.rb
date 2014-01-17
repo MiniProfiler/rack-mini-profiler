@@ -33,7 +33,7 @@ module Rack
               :custom_timing_stats => {}
              )
         name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
-        self[:root] = RequestTimerStruct.createRoot(name, self)
+        self[:root] = RequestTimerStruct.create_root(name, self)
       end
 
       def duration_ms
@@ -46,7 +46,7 @@ module Rack
 
       def to_json(*a)
         attribs = @attributes.merge(
-          :started => '/Date(%d)/' % @attributes[:started],
+          :started => '/date(%d)/' % @attributes[:started],
           :duration_milliseconds => @attributes[:root][:duration_milliseconds],
           :custom_timing_names => @attributes[:custom_timing_stats].keys.sort
         )
