@@ -31,8 +31,8 @@ module Rack
         client_perf = form[:client_performance] if form
         client_times = client_perf[:timing] if client_perf
 
-        baseTime = client_times[:navigation_start].to_i if client_times
-        return unless client_times && baseTime
+        base_time = client_times[:navigation_start].to_i if client_times
+        return unless client_times && base_time
 
         probes = form[:client_probes]
         translated = {}
@@ -49,14 +49,14 @@ module Rack
         end
 
         translated.each do |name, data|
-          h = {:name => name, :start => data[:start].to_i - baseTime}
+          h = {:name => name, :start => data[:start].to_i - base_time}
           h[:duration] = data[:finish].to_i - data[:start].to_i if data[:finish]
           timings.push(h)
         end
 
         client_times.keys.find_all{|k| k =~ /start$/ }.each do |k|
-          start = client_times[k].to_i - baseTime
-          finish = client_times[k.sub(/start$/, :end)].to_i - baseTime
+          start = client_times[k].to_i - base_time
+          finish = client_times[k.sub(/start$/, :end)].to_i - base_time
           duration = 0
           duration = finish - start if finish > start
           name = k.sub(/start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
@@ -64,7 +64,7 @@ module Rack
         end
 
         client_times.keys.find_all{|k| !(k =~ /(end|start)$/)}.each do |k|
-          timings.push(:name => k, :start => client_times[k].to_i - baseTime, :duration => -1)
+          timings.push(:name => k, :start => client_times[k].to_i - base_time, :duration => -1)
         end
 
         rval = self.new
