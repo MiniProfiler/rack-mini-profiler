@@ -27,7 +27,8 @@ module Rack::MiniProfilerRails
     end
 
     # The file store is just so much less flaky
-    tmp = Rails.root.to_s + "/tmp/miniprofiler"
+    base_path = Rails.application.config.paths['tmp'].first rescue "#{Rails.root}/tmp"
+    tmp       = base_path + '/miniprofiler'
     FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
 
     c.storage_options = {:path => tmp}
