@@ -43,8 +43,12 @@ module Rack::MiniProfilerRails
     app.middleware.insert(0, Rack::MiniProfiler)
 
     # Attach to various Rails methods
-    ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
-    ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
+    ActiveSupport.on_load(:action_controller) do
+      ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
+    end
+    ActiveSupport.on_load(:action_view) do
+      ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
+    end
   end
 
   class Railtie < ::Rails::Railtie
