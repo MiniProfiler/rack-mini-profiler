@@ -204,7 +204,7 @@ c.storage_options = {:path => tmp}
 c.storage = ::Rack::MiniProfiler::FileStore
 config.middleware.use(::Rack::MiniProfiler)
 ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
-::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
+::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{path_without_format_and_extension}"}
 
 # monkey patch away an activesupport and json_pure incompatability
 # http://pivotallabs.com/users/alex/blog/articles/1332-monkey-patch-of-the-day-activesupport-vs-json-pure-vs-ruby-1-8
