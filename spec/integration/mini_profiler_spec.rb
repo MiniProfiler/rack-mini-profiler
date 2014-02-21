@@ -82,6 +82,14 @@ describe Rack::MiniProfiler do
       last_response.should be_ok
     end
 
+    it 'avoids xss attacks' do
+      h = last_response.headers['X-MiniProfiler-Ids']
+      id = ::JSON.parse(h)[0]
+      get "/mini-profiler-resources/results?id=%22%3E%3Cqss%3E"
+      last_response.should_not be_ok
+      last_response.body.should_not =~ /<qss>/
+      last_response.body.should =~ /&lt;qss&gt;/
+    end
   end
 
 
