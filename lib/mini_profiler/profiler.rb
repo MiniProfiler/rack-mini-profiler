@@ -107,7 +107,9 @@ module Rack
       page_struct = @storage.load(id)
       unless page_struct
         @storage.set_viewed(user(env), id)
-        return [404, {}, ["Request not found: #{request['id']} - user #{user(env)}"]]
+        id = ERB::Util.html_escape(request['id'])
+        user_info = ERB::Util.html_escape(user(env))
+        return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
       unless page_struct['HasUserViewed']
         page_struct['ClientTimings'] = ClientTimerStruct.init_from_form_data(env, page_struct)
