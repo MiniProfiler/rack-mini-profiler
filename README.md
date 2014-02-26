@@ -41,6 +41,26 @@ NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in y
 
 All you have to do is include the Gem and you're good to go in development. See notes below for use in production.
 
+#### Rails and manual initialization
+
+In case you need to make sure rack_mini_profiler initialized after all other gems.
+Or you want to execute some code before rack_mini_profiler required.
+
+```ruby
+gem 'rack-mini-profiler', require: false
+```
+
+Then put initialize code in file like `config/initializers/rack_profiler.rb`
+
+```ruby
+if Rails.env == 'development'
+  require 'rack-mini-profiler'
+
+  # initialization is skipped so trigger it
+  Rack::MiniProfilerRails.initialize!(Rails.application)
+end
+```
+
 #### Rack Builder
 
 ```ruby
