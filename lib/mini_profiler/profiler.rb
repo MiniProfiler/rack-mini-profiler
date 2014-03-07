@@ -283,16 +283,16 @@ module Rack
           else
             # do not sully our profile with mini profiler timings
             current.measure = false
-            match_data = query_string.match(/flamegraph_sample_rate=(?<rate>[\d\.]+)/)
+            match_data = query_string.match(/flamegraph_sample_rate=([\d\.]+)/)
 
             mode = query_string =~ /mode=c/ ? :c : :ruby
 
-            if match_data && !match_data[:rate].to_f.zero?
-              sample_rate = match_data[:rate].to_f
+            if match_data && !match_data[1].to_f.zero?
+              sample_rate = match_data[1].to_f
             else
               sample_rate = config.flamegraph_sample_rate
             end
-            flamegraph = Flamegraph.generate(nil, fidelity: sample_rate, embed_resources: query_string =~ /embed/, mode: mode) do
+            flamegraph = Flamegraph.generate(nil, :fidelity => sample_rate, :embed_resources => query_string =~ /embed/, :mode => mode) do
               status,headers,body = @app.call(env)
             end
           end
