@@ -145,7 +145,9 @@ if SqlPatches.class_exists? "PG::Result"
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
       mapped = args[0]
       mapped = @prepare_map[mapped] || args[0] if @prepare_map
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(mapped, elapsed_time))
+      unless result.nil?
+        result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(mapped, elapsed_time))
+      end
 
       result
     end
