@@ -170,5 +170,12 @@
   * Improved reports for pp=profile-gc
   * pp=flamegraph&flamegraph_sample_rate=1 , allow you to specify sampling rates
 
+13-March-2013 - Sam Saffron
+  * Version 0.9.1
+  * Added back Ruby 1.8 support (thanks Malet)
+  * Corrected Rails 3.0 support (thanks Zlatko)
+  * Corrected fix possible XSS (admin only)
+  * Amend Railstie so MiniProfiler can be launched with action view or action controller (Thanks Akira)
+  * Corrected Sql patching to avoid setting instance vars on nil which is frozen (thanks Andy, huoxito)
 
 
