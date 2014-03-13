@@ -7,7 +7,10 @@ module Rack::MiniProfilerRails
     c = Rack::MiniProfiler.config
 
     # By default, only show the MiniProfiler in development mode, in production allow profiling if post_authorize_cb is set
-    c.pre_authorize_cb ||= lambda { |env|
+    #
+    # NOTE: this must be set here with = and not ||=
+    #  The out of the box default is "true"
+    c.pre_authorize_cb = lambda { |env|
       !Rails.env.test?
     }
 
