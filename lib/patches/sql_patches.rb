@@ -47,7 +47,8 @@ if SqlPatches.class_exists? "Mysql2::Client"
       start = Time.now
       result = query_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)) unless result.nil?
+      record = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
 
@@ -117,7 +118,8 @@ if SqlPatches.class_exists? "PG::Result"
       start = Time.now
       result = exec_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(args[0], elapsed_time))
+      record = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
     end
@@ -131,7 +133,8 @@ if SqlPatches.class_exists? "PG::Result"
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
       mapped = args[0]
       mapped = @prepare_map[mapped] || args[0] if @prepare_map
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(mapped, elapsed_time))
+      record = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+      result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
     end
@@ -142,10 +145,12 @@ if SqlPatches.class_exists? "PG::Result"
 
       start = Time.now
       result = send_query_prepared_without_profiling(*args,&blk)
+
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
       mapped = args[0]
       mapped = @prepare_map[mapped] || args[0] if @prepare_map
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(mapped, elapsed_time))
+      record = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+      result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
     end
@@ -157,7 +162,8 @@ if SqlPatches.class_exists? "PG::Result"
       start = Time.now
       result = exec_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(args[0], elapsed_time))
+      record = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
     end
@@ -180,7 +186,7 @@ if SqlPatches.class_exists?("Moped::Node")
       start = Time.now
       result = process_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(args[0].log_inspect, elapsed_time))
+      ::Rack::MiniProfiler.record_sql(args[0].log_inspect, elapsed_time)
 
       result
     end
@@ -207,7 +213,7 @@ if SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0" #  
           data << "\n#{Rack::Utils.unescape(request_context[:data])}"
         end
       end
-      result.instance_variable_set("@miniprofiler_sql_id", ::Rack::MiniProfiler.record_sql(data, elapsed_time))
+      ::Rack::MiniProfiler.record_sql(data, elapsed_time)
 
       result
     end
