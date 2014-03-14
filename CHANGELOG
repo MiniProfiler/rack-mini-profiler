@@ -170,7 +170,7 @@
   * Improved reports for pp=profile-gc
   * pp=flamegraph&flamegraph_sample_rate=1 , allow you to specify sampling rates
 
-13-March-2013 - Sam Saffron
+13-March-2014 - Sam Saffron
   * Version 0.9.1
   * Added back Ruby 1.8 support (thanks Malet)
   * Corrected Rails 3.0 support (thanks Zlatko)
