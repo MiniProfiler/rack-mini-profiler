@@ -304,7 +304,7 @@ module Rack
         trace.disable if trace
       end
 
-      skip_it = current.discard
+      skip_it = current.nil? ? true : current.discard
 
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
         # this is non-obvious, don't kill the profiling cookie on errors or short requests
