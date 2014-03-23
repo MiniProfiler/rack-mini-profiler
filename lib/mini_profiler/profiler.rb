@@ -375,7 +375,7 @@ module Rack
 
       headers.delete('ETag')
       headers.delete('Date')
-      headers['Cache-Control'] = 'must-revalidate, private, max-age=0'
+      headers['Cache-Control'] = 'no-store, must-revalidate, private, max-age=0'
 
       # inject header
       if headers.is_a? Hash
