@@ -134,6 +134,20 @@ describe Rack::MiniProfiler do
 
   end
 
+  describe 'within a Rails application' do
+
+    before do
+      mock_controller = double
+      mock_controller.should_receive(:url_for).with('/mini-profiler-resources/').and_return('/test/mini-profiler-resources/')
+      get '/html', nil, 'action_controller.instance' => mock_controller
+    end
+
+    it 'has the JS in the body with the correct path' do
+      last_response.body.include?('/test/mini-profiler-resources/includes.js').should be_true
+    end
+
+  end
+
 
   describe 'with a SCRIPT_NAME' do
 
