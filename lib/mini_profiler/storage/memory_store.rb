@@ -45,7 +45,7 @@ module Rack
 
       def save(page_struct)
         @timer_struct_lock.synchronize {
-          @timer_struct_cache[page_struct['Id']] = page_struct
+          @timer_struct_cache[page_struct[:id]] = page_struct
         }
       end
 
@@ -78,7 +78,7 @@ module Rack
       def cleanup_cache
         expire_older_than = ((Time.now.to_f - @expires_in_seconds) * 1000).to_i
         @timer_struct_lock.synchronize {
-          @timer_struct_cache.delete_if { |k, v| v['Started'] < expire_older_than }
+          @timer_struct_cache.delete_if { |k, v| v[:started] < expire_older_than }
         }
       end
     end

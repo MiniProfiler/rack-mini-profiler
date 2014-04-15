@@ -12,7 +12,7 @@ module Rack
       end
 
       def save(page_struct)
-        redis.setex "#{@prefix}#{page_struct['Id']}", @expires_in_seconds, Marshal::dump(page_struct)
+        redis.setex "#{@prefix}#{page_struct[:id]}", @expires_in_seconds, Marshal::dump(page_struct)
       end
 
       def load(id)

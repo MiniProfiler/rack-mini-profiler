@@ -77,7 +77,7 @@ module Rack
 
       def save(page_struct)
         @timer_struct_lock.synchronize {
-          @timer_struct_cache[page_struct['Id']] = page_struct
+          @timer_struct_cache[page_struct[:id]] = page_struct
         }
       end
 
