@@ -4,7 +4,7 @@ class Rack::MiniProfiler::Context
   def initialize(opts = {})
     opts[:measure] = true unless opts.key? :measure
     opts.each do |k,v|
-      self.instance_variable_set('@' + k, v)
+      self.instance_variable_set("@#{k}", v)
     end
   end
 
