@@ -9,7 +9,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
 
   before do
     @name = 'cool request'
-    @request = Rack::MiniProfiler::RequestTimerStruct.createRoot(@name, new_page)
+    @request = Rack::MiniProfiler::RequestTimerStruct.create_root(@name, new_page)
   end
 
   it 'sets is_root to true' do
