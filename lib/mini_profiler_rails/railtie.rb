@@ -4,6 +4,9 @@ module Rack::MiniProfilerRails
 
   # call direct if needed to do a defer init
   def self.initialize!(app)
+    
+    raise "MiniProfilerRails initialized twice. Set `require: false' for rack-mini-profiler in your Gemfile" if @already_initialized
+      
     c = Rack::MiniProfiler.config
 
     # By default, only show the MiniProfiler in development mode, in production allow profiling if post_authorize_cb is set
@@ -52,6 +55,8 @@ module Rack::MiniProfilerRails
     ActiveSupport.on_load(:action_view) do
       ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
     end
+    
+    @already_initialized = true
   end
 
   class Railtie < ::Rails::Railtie
