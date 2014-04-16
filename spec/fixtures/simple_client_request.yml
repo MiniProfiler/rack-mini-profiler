@@ -1,17 +1,17 @@
 ---
 rack.request.form_hash:
-  client_performance:
-    navigation:
-      redirect_count: 1
-    timing:
-      navigation_start: 1334245954
-      navigation_end: 1334245970
-      simple_start: 1334245955
-      simple_end: 1334245965
-  client_probes:
-    0:
-      d: 1334245970
-      n: bob.js
-    1:
-      d: 1334245976
-      n: bob.js
+  :client_performance:
+    :navigation:
+      :redirect_count: 1
+    :timing:
+      :navigation_start: 1334245954
+      :navigation_end: 1334245970
+      :simple_start: 1334245955
+      :simple_end: 1334245965
+  :client_probes:
+    :0:
+      :d: 1334245970
+      :n: bob.js
+    :1:
+      :d: 1334245976
+      :n: bob.js

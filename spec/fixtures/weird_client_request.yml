@@ -1,14 +1,14 @@
 ---
 rack.request.form_hash:
-  client_probes: ''
-  client_performance:
-    navigation:
-      redirect_count: 99
-    timing:
-      navigation_start: 1334245954
-      navigation_end: 1334245970
-      weird_start: 1334245965
-      weird_end: 1334245955
-      previous_start: 1334245950
-      previous_end: 1334245952
-      different_format: 1334245955
+  :client_probes: ''
+  :client_performance:
+    :navigation:
+      :redirect_count: 99
+    :timing:
+      :navigation_start: 1334245954
+      :navigation_end: 1334245970
+      :weird_start: 1334245965
+      :weird_end: 1334245955
+      :previous_start: 1334245950
+      :previous_end: 1334245952
+      :different_format: 1334245955
