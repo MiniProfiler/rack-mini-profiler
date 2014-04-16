@@ -38,12 +38,12 @@ module Rack
         translated = {}
         if probes && !["null", ""].include?(probes)
           probes.each do |id, val|
-            name = val["n"]
+            name = val[:n]
             translated[name] ||= {}
             if translated[name][:start]
-              translated[name][:finish] = val["d"]
+              translated[name][:finish] = val[:d]
             else
-              translated[name][:start] = val["d"]
+              translated[name][:start] = val[:d]
             end
           end
         end
@@ -54,16 +54,17 @@ module Rack
           timings.push(h)
         end
 
-        client_times.keys.find_all{|k| k =~ /start$/ }.each do |k|
+        client_times.keys.find_all{|k| k =~ /_start$/ }.each do |k|
           start = client_times[k].to_i - base_time
-          finish = client_times[k.sub(/start$/, :end)].to_i - base_time
+          end_key = k.to_s.sub(/_start$/, "_end").to_sym
+          finish = client_times[end_key].to_i - base_time
           duration = 0
           duration = finish - start if finish > start
-          name = k.sub(/start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
+          name = k.to_s.split("_").first.capitalize
           timings.push({:name => name, :start => start, :duration => duration}) if start >= 0
         end
 
-        client_times.keys.find_all{|k| !(k =~ /(end|start)$/)}.each do |k|
+        client_times.keys.find_all{|k| !(k =~ /(_end|_start)$/)}.each do |k|
           timings.push(:name => k, :start => client_times[k].to_i - base_time, :duration => -1)
         end
 

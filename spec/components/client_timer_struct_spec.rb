@@ -63,7 +63,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
       describe "navigation" do
         before do
-          @nav = @client[:timings].find {|t| t[:name] == :navigation}
+          @nav = @client[:timings].find {|t| t[:name] == "Navigation"}
         end
 
         it 'has a timing for the navigation' do
@@ -81,7 +81,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
       describe "simple" do
         before do
-          @simple = @client[:timings].find {|t| t[:name] == :simple}
+          @simple = @client[:timings].find {|t| t[:name] == "Simple"}
         end
 
         it 'has a timing for the simple' do
@@ -118,7 +118,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
       describe "weird" do
         before do
-          @weird = @client[:timings].find {|t| t[:name] == :weird}
+          @weird = @client[:timings].find {|t| t[:name] == "Weird"}
         end
 
         it 'has a timing for the weird' do
