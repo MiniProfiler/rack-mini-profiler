@@ -48,7 +48,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
       describe "bob.js" do
         before do
-          @bob = @client[:timings].find {|t| t[:name] == "bob.js"}
+          @bob = @client[:timings].find {|t| t["Name"] == "bob.js"}
         end
 
         it 'has it in the timings' do
@@ -56,14 +56,14 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         end
 
         it 'has the correct duration' do
-          @bob[:duration].should == 6
+          @bob["Duration"].should == 6
         end
 
       end
 
       describe "navigation" do
         before do
-          @nav = @client[:timings].find {|t| t[:name] == "Navigation"}
+          @nav = @client[:timings].find {|t| t["Name"] == "Navigation"}
         end
 
         it 'has a timing for the navigation' do
@@ -71,17 +71,17 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         end
 
         it 'has the correct start' do
-          @nav[:start].should == 0
+          @nav["Start"].should == 0
         end
 
         it 'has the correct duration' do
-          @nav[:duration].should == 16
+          @nav["Duration"].should == 16
         end
       end
 
       describe "simple" do
         before do
-          @simple = @client[:timings].find {|t| t[:name] == "Simple"}
+          @simple = @client[:timings].find {|t| t["Name"] == "Simple"}
         end
 
         it 'has a timing for the simple' do
@@ -89,11 +89,11 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         end
 
         it 'has the correct start' do
-          @simple[:start].should == 1
+          @simple["Start"].should == 1
         end
 
         it 'has the correct duration' do
-          @simple[:duration].should == 10
+          @simple["Duration"].should == 10
         end
       end
 
@@ -113,12 +113,12 @@ describe Rack::MiniProfiler::ClientTimerStruct do
       end
 
       it 'has no timing when the start is before navigation' do
-        @client[:timings].find {|t| t[:name] == :previous}.should be_nil
+        @client[:timings].find {|t| t["Name"] == "Previous"}.should be_nil
       end
 
       describe "weird" do
         before do
-          @weird = @client[:timings].find {|t| t[:name] == "Weird"}
+          @weird = @client[:timings].find {|t| t["Name"] == "Weird"}
         end
 
         it 'has a timing for the weird' do
@@ -126,17 +126,17 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         end
 
         it 'has the correct start' do
-          @weird[:start].should == 11
+          @weird["Start"].should == 11
         end
 
         it 'has a 0 duration because start time is greater than end time' do
-          @weird[:duration].should == 0
+          @weird["Duration"].should == 0
         end
       end
 
       describe "different_format" do
         before do
-          @diff = @client[:timings].find {|t| t[:name] == :different_format}
+          @diff = @client[:timings].find {|t| t["Name"] == "differentFormat"}
         end
 
         it 'has a timing for the different_format' do
@@ -144,11 +144,11 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         end
 
         it 'has the correct start' do
-          @diff[:start].should == 1
+          @diff["Start"].should == 1
         end
 
         it 'has a -1 duration because the format was different' do
-          @diff[:duration].should == -1
+          @diff["Duration"].should == -1
         end
       end
 

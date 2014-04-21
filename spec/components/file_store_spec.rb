@@ -18,12 +18,12 @@ describe Rack::MiniProfiler::FileStore do
 
       it 'can store a PageStruct and retrieve it' do
         page_struct = Rack::MiniProfiler::PageTimerStruct.new({})
-        page_struct['Id'] = "XYZ"
-        page_struct['Random'] = "random"
+        page_struct[:id] = "XYZ"
+        page_struct[:random] = "random"
         @store.save(page_struct)
         page_struct = @store.load("XYZ")
-        page_struct['Random'].should == "random"
-        page_struct['Id'].should == "XYZ"
+        page_struct[:random].should == "random"
+        page_struct[:id].should == "XYZ"
       end    
 
       it 'can list unviewed items for a user' do 
