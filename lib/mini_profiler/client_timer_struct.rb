@@ -25,55 +25,53 @@ module Rack
 
       def self.init_from_form_data(env, page_struct)
         timings = []
-        client_times, client_perf, base_time = nil
+        clientTimes, clientPerf, baseTime = nil
         form = env['rack.request.form_hash']
 
-        client_perf = form[:client_performance] if form
-        client_times = client_perf[:timing] if client_perf
+        clientPerf = form['clientPerformance'] if form
+        clientTimes = clientPerf['timing'] if clientPerf
 
-        base_time = client_times[:navigation_start].to_i if client_times
-        return unless client_times && base_time
+        baseTime = clientTimes['navigationStart'].to_i if clientTimes
+        return unless clientTimes && baseTime
 
-        probes = form[:client_probes]
+        probes = form['clientProbes']
         translated = {}
         if probes && !["null", ""].include?(probes)
           probes.each do |id, val|
-            name = val[:n]
+            name = val["n"]
             translated[name] ||= {}
             if translated[name][:start]
-              translated[name][:finish] = val[:d]
+              translated[name][:finish] = val["d"]
             else
-              translated[name][:start] = val[:d]
+              translated[name][:start] = val["d"]
             end
           end
         end
 
         translated.each do |name, data|
-          h = {:name => name, :start => data[:start].to_i - base_time}
-          h[:duration] = data[:finish].to_i - data[:start].to_i if data[:finish]
+          h = {"Name" => name, "Start" => data[:start].to_i - baseTime}
+          h["Duration"] = data[:finish].to_i - data[:start].to_i if data[:finish]
           timings.push(h)
         end
 
-        client_times.keys.find_all{|k| k =~ /_start$/ }.each do |k|
-          start = client_times[k].to_i - base_time
-          end_key = k.to_s.sub(/_start$/, "_end").to_sym
-          finish = client_times[end_key].to_i - base_time
+        clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
+          start = clientTimes[k].to_i - baseTime
+          finish = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
           duration = 0
           duration = finish - start if finish > start
-          name = k.to_s.split("_").first.capitalize
-          timings.push({:name => name, :start => start, :duration => duration}) if start >= 0
+          name = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
+          timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
         end
 
-        client_times.keys.find_all{|k| !(k =~ /(_end|_start)$/)}.each do |k|
-          timings.push(:name => k, :start => client_times[k].to_i - base_time, :duration => -1)
+        clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
+          timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
         end
 
         rval = self.new
-        rval[:redirect_count] = env['rack.request.form_hash'][:client_performance][:navigation][:redirect_count]
+        rval[:redirect_count] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirectCount']
         rval[:timings] = timings
         rval
       end
     end
-
   end
 end

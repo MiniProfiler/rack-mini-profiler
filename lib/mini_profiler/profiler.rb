@@ -527,21 +527,21 @@ module Rack
        :path => "#{env['SCRIPT_NAME']}#{@config.base_url_path}",
        :version => MiniProfiler::VERSION,
        :position => @config.position,
-       :show_trivial => false,
-       :show_children => false,
-       :max_traces_to_show => 10,
-       :show_controls => false,
+       :showTrivial => false,
+       :showChildren => false,
+       :maxTracesToShow => 10,
+       :showControls => false,
        :authorized => true,
-       :toggle_shortcut => @config.toggle_shortcut,
-       :start_hidden => @config.start_hidden
+       :toggleShortcut => @config.toggle_shortcut,
+       :startHidden => @config.start_hidden
       }
 
       if current && current.page_struct
         settings[:ids] = ids_comma_separated(env)
-        settings[:current_id] = current.page_struct[:id]
+        settings[:currentId] = current.page_struct[:id]
       else
         settings[:ids] = []
-        settings[:current_id] = ""
+        settings[:currentId] = ""
       end
 
       # TODO : cache this snippet
