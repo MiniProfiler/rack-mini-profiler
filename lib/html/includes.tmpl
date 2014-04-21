@@ -51,7 +51,7 @@
             {{/if}}
             {{each custom_timing_names}}
               <td colspan="2" class="profiler-number profiler-percentage-in-sql" title="${custom_timing_stats[$value].count} ${$value.toLowerCase()} invocations spent ${MiniProfiler.formatDuration(custom_timing_stats[$value].duration)} ms of total request time">
-                ${MiniProfiler.formatDuration(custom_timing_stats[$value].Duration / duration_milliseconds * 100)}
+                ${MiniProfiler.formatDuration(custom_timing_stats[$value].duration / duration_milliseconds * 100)}
                 <span class="profiler-unit">% in ${$value.toLowerCase()}</span>
               </td>
             {{/each}}
@@ -69,7 +69,7 @@
           </thead>
           <tbody>
             {{each MiniProfiler.getClientTimings(client_timings)}}
-            <tr class="{{if $value.is_trivial }}profiler-trivial{{/if}}">
+            <tr class="{{if $value.isTrivial }}profiler-trivial{{/if}}">
               <td class="profiler-label">${$value.name}</td>
               <td class="profiler-duration">
                 {{if $value.duration >= 0}}
