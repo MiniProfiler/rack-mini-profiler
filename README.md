@@ -49,7 +49,7 @@ Or you want to execute some code before rack_mini_profiler required.
 ```ruby
 gem 'rack-mini-profiler', require: false
 ```
-Note the `require: false` part - if omitted, it will cause the Railtie for the mino-profiler to
+Note the `require: false` part - if omitted, it will cause the Railtie for the mini-profiler to
 be loaded outright, and an attempt to re-initialize it manually will raise an exception.
 
 Then put initialize code in file like `config/initializers/rack_profiler.rb`
