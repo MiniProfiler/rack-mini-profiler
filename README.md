@@ -169,6 +169,7 @@ The available configuration options are:
 * position - Can either be 'right' or 'left'. Default is 'left'.
 * skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
 * auto_inject (default true) - when false the miniprofiler script is not injected in the page
+* inject_into (default body) - Can be either 'body' or 'head'. Should be set to head in cases where the body contents could be removed before initialization. e.g. an AngularJS app.
 * backtrace_filter - a regex you can use to filter out unwanted lines from the backtraces
 * toggle_shortcut (default Alt+P) - a jquery.hotkeys.js-style keyboard shortcut, used to toggle the mini_profiler's visibility. See http://code.google.com/p/js-hotkeys/ for more info.
 * start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
