@@ -22,6 +22,8 @@ describe Rack::MiniProfiler do
       it 'allows us to set configuration settings' do
         Rack::MiniProfiler.config.auto_inject = false
         Rack::MiniProfiler.config.auto_inject.should == false
+        Rack::MiniProfiler.config.inject_into = 'body'
+        Rack::MiniProfiler.config.inject_into.should == 'body'
       end
 
       it 'allows us to start the profiler disabled' do
