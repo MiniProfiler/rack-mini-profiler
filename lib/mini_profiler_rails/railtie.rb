@@ -24,7 +24,7 @@ module Rack::MiniProfilerRails
       c.skip_schema_queries = true
     end
 
-    if Rails.env.production?
+    unless Rails.env.development? || Rails.env.test?
       c.authorization_mode = :whitelist
     end
 
@@ -43,7 +43,7 @@ module Rack::MiniProfilerRails
     # Quiet the SQL stack traces
     c.backtrace_remove = Rails.root.to_s + "/"
     c.backtrace_includes =  [/^\/?(app|config|lib|test)/]
-    c.skip_schema_queries =  Rails.env != 'production'
+    c.skip_schema_queries = (Rails.env.development? || Rails.env.test?)
 
     # Install the Middleware
     app.middleware.insert(0, Rack::MiniProfiler)
