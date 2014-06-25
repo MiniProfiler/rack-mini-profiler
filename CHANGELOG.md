@@ -1,4 +1,10 @@
 # CHANGELOG
+## 0.9.2 - 2014-06-26 (Sam Saffron)
+- [CHANGE] staging and other environments behave like production (Cedric Felizard)
+- [DOC] CHANGELOG reorg (Olivier Lacan)
+- [FIXED] Double calls to Rack::MiniProfilerRails.initialize! now raise an exception (Julik Tarkhanov)
+- [FIXED] Add no-store header (George Mendoza)
+
 ## 0.9.1 - 2014-03-13 (Sam Saffron)
 - [ADDED] Added back Ruby 1.8 support (thanks Malet)
 - [IMPROVED] Amended Railstie so MiniProfiler can be launched with action view or action controller (Thanks Akira)
