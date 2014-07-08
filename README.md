@@ -87,7 +87,7 @@ end
 
 To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler):
 
-* add the **flamegraph** gem to your Gemfile
+* add the [**flamegraph**](https://github.com/SamSaffron/flamegraph) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
 Flamegraph generation is supported in MRI 2.0 and 2.1 only.
