@@ -48,7 +48,7 @@ module Rack
         attribs = @attributes.merge(
           "Started" => '/Date(%d)/' % @attributes['Started'],
           "DurationMilliseconds" => @attributes['Root']['DurationMilliseconds'],
-          "CustomTimingNames" => @attributes['CustomTimingStats'].keys.sort
+          "CustomTimingNames" =>  @attributes['CustomTimingStats'].nil? ? [] : @attributes['CustomTimingStats'].keys.sort 
         )
         ::JSON.generate(attribs, :max_nesting => 100)
       end
