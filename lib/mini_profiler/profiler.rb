@@ -272,8 +272,10 @@ module Rack
 
         # Strip all the caching headers so we don't get 304s back
         #  This solves a very annoying bug where rack mini profiler never shows up
-        env['HTTP_IF_MODIFIED_SINCE'] = ''
-        env['HTTP_IF_NONE_MATCH'] = ''
+        if config.disable_caching
+          env['HTTP_IF_MODIFIED_SINCE'] = ''
+          env['HTTP_IF_NONE_MATCH'] = ''
+        end
 
         if query_string =~ /pp=flamegraph/
           unless defined?(Flamegraph) && Flamegraph.respond_to?(:generate)
@@ -373,9 +375,12 @@ module Rack
       # Rack::ETag has already inserted some nonesense in the chain
       content_type = headers['Content-Type']
 
-      headers.delete('ETag')
-      headers.delete('Date')
-      headers['Cache-Control'] = 'no-store, must-revalidate, private, max-age=0'
+      if config.disable_caching
+        headers.delete('ETag')
+        headers.delete('Date')
+      end
+
+      headers['Cache-Control'] = "#{"no-store, " if config.disable_caching}must-revalidate, private, max-age=0"
 
       # inject header
       if headers.is_a? Hash
