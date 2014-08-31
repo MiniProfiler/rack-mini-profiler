@@ -112,6 +112,19 @@ Various aspects of rack-mini-profiler's behavior can be configured when your app
 For example in a Rails app, this should be done in an initializer:
 **config/initializers/mini_profiler.rb**
 
+### Caching behavior
+To fix some nasty bugs with rack-mini-profiler showing the wrong data, the middleware
+will remove headers relating to caching (Date & Etag on responses, If-Modified-Since & If-None-Match on requests).
+This probably won't ever break your application, but it can cause some unexpected behavior. For
+example, in a Rails app, calls to `stale?` will always return true.
+
+To disable this behavior, use the following config setting:
+
+```ruby
+# Do not let rack-mini-profiler disable caching
+Rack::MiniProfiler.config.disable_caching = false # defaults to true 
+```
+
 ### Storage
 
 rack-mini-profiler stores its results so they can be shared later and aren't lost at the end of the request.
