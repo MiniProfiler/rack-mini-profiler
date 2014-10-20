@@ -8,6 +8,13 @@ module Rack
         c.current_timer.add_sql(query, elapsed_ms, c.page_struct, c.skip_backtrace, c.full_backtrace) if (c && c.current_timer)
       end
 
+      def record_web_service(name, request, response, elapsed_ms)
+        c = current
+        return unless c
+
+        c.current_timer.add_web_service(name, request, response, elapsed_ms, c.page_struct, c.skip_backtrace, c.full_backtrace) if c.current_timer
+      end
+
       def start_step(name)
         if current
           parent_timer = current.current_timer

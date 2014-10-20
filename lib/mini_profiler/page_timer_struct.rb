@@ -7,6 +7,7 @@ module Rack
     #   Root: RequestTimer
     #     :has_many RequestTimer children
     #     :has_many SqlTimer children
+    #     :has_many WebServiceTimer children
     #     :has_many CustomTimer children
     class PageTimerStruct < TimerStruct
       def initialize(env)
@@ -24,8 +25,11 @@ module Rack
               "TrivialDurationThresholdMilliseconds" => 2,
               "Head" => nil,
               "DurationMillisecondsInSql" => 0,
+              "DurationMillisecondsInWebService" => 0,
               "HasSqlTimings" => true,
+              "HasWebServiceTimings" => true,
               "HasDuplicateSqlTimings" => false,
+              "HasDuplicateWebServiceTimings" => false,
               "ExecutedReaders" => 0,
               "ExecutedScalars" => 0,
               "ExecutedNonQueries" => 0,
