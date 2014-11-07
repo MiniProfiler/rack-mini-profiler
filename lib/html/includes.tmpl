@@ -27,6 +27,9 @@
             {{if HasSqlTimings}}
               <th colspan="2">query time (ms)</th>
             {{/if}}
+            {{if HasWebServiceTimings}}
+              <th colspan="2">query time (ms)</th>
+            {{/if}}
             {{each CustomTimingNames}}
               <th colspan="2">${$value.toLowerCase()} (ms)</th>
             {{/each}}
@@ -47,6 +50,12 @@
               <td colspan="2" class="profiler-number profiler-percent-in-sql" title="${MiniProfiler.getSqlTimingsCount(Root)} queries spent ${MiniProfiler.formatDuration(DurationMillisecondsInSql)} ms of total request time">
                 ${MiniProfiler.formatDuration(DurationMillisecondsInSql / DurationMilliseconds * 100)}
                 <span class="profiler-unit">% in sql</span>
+              </td>
+            {{/if}}
+            {{if HasWebServiceTimings}}
+              <td colspan="2" class="profiler-number profiler-percent-in-webservice" title="${MiniProfiler.getWebServiceTimingsCount(Root)} queries spent ${MiniProfiler.formatDuration(DurationMillisecondsInWebService)} ms of total request time">
+                ${MiniProfiler.formatDuration(DurationMillisecondsInWebService / DurationMilliseconds * 100)}
+                <span class="profiler-unit">% in web services</span>
               </td>
             {{/if}}
             {{each CustomTimingNames}}
@@ -117,6 +126,24 @@
     </div>
   {{/if}}
 
+  {{if HasWebServiceTimings}}
+    <div class="profiler-queries">
+      <table>
+      <thead>
+        <tr>
+          <th style="text-align:right">step<br />time from start<br />query type<br />duration</th>
+          <th style="text-align:left">call stack<br />query</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{each(i, s) MiniProfiler.getWebServiceTimings(Root)}}
+          {{tmpl({ i:i, s:s }) "#webServiceTimingTemplate"}}
+        {{/each}}
+      </tbody>
+      </table>
+    </div>
+  {{/if}}
+
   </div>
 
 </script>
@@ -158,6 +185,19 @@
     </td>
     <td class="profiler-duration" title="aggregate duration of all queries in this step (excludes children)">
       ${MiniProfiler.formatDuration(timing.SqlTimingsDurationMilliseconds)}
+    </td>
+  {{else}}
+    <td colspan="2"></td>
+  {{/if}}
+
+  {{if timing.HasWebServiceTimings}}
+    <td class="profiler-duration">
+      <a class="profiler-queries-show">
+        ${timing.WebServiceTimings.length} <span class="profiler-unit">web services</span>
+      </a>
+    </td>
+    <td class="profiler-duration" title="aggregate duration of all queries in this step (excludes children)">
+      ${MiniProfiler.formatDuration(timing.WebServiceTimingsDurationMilliseconds)}
     </td>
   {{else}}
     <td colspan="2"></td>
@@ -220,3 +260,25 @@
   </tr>
 
 </script>
+
+<script id="webServiceTimingTemplate" type="text/x-jquery-tmpl">
+
+  <tr class="{{if i % 2 == 1}}profiler-odd{{/if}}" data-timing-id="${s.ParentTimingId}">
+    <td class="profiler-info">
+      <div>${s.ParentTimingName}</div>
+      <div class="profiler-number"><span class="profiler-unit">T+</span>${MiniProfiler.formatDuration(s.StartMilliseconds)} <span class="profiler-unit">ms</span></div>
+      <div>
+        ${MiniProfiler.renderExecuteType(s.ExecuteType)}
+      </div>
+      <div title="{{if s.ExecuteType == 3}}first result fetched: ${s.FirstFetchDurationMilliseconds}ms{{/if}}">${MiniProfiler.formatDuration(s.DurationMilliseconds)} <span class="profiler-unit">ms</span></div>
+    </td>
+    <td>
+      <div class="query">
+        <pre class="profiler-stack-trace">${s.StackTraceSnippet}</pre>
+        <pre class="prettyprint lang-xml"><code>${s.FormattedCommandString}   </code></pre>
+      </div>
+    </td>
+  </tr>
+
+</script>
+

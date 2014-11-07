@@ -24,10 +24,13 @@ module Rack
               "HasChildren"=> false,
               "KeyValues" => nil,
               "HasSqlTimings"=> false,
+              "HasWebServiceTimings"=> false,
               "HasDuplicateSqlTimings"=> false,
               "TrivialDurationThresholdMilliseconds" => 2,
               "SqlTimings" => [],
+              "WebServiceTimings" => [],
               "SqlTimingsDurationMilliseconds"=> 0,
+              "WebServiceTimingsDurationMilliseconds"=> 0,
               "IsTrivial"=> false,
               "IsRoot"=> false,
               "Depth"=> parent ? parent.depth + 1 : 0,
@@ -78,6 +81,16 @@ module Rack
         self['HasSqlTimings'] = true
         self['SqlTimingsDurationMilliseconds'] += elapsed_ms
         page['DurationMillisecondsInSql'] += elapsed_ms
+        timer
+      end
+
+      def add_web_service(name, request, response, elapsed_ms, page, skip_backtrace = false, full_backtrace = false)
+        timer = WebServiceTimerStruct.new(name, request, response, elapsed_ms, page, self)
+        timer['ParentTimingId'] = self['Id']
+        self['WebServiceTimings'].push(timer)
+        self['HasWebServiceTimings'] = true
+        self['WebServiceTimingsDurationMilliseconds'] += elapsed_ms
+        page['DurationMillisecondsInWebService'] += elapsed_ms
         timer
       end
 
