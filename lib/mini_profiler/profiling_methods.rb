@@ -68,6 +68,7 @@ module Rack
         clean = clean_method_name(method)
 
         with_profiling =  ("#{clean}_with_mini_profiler").intern
+        real_with_profiling =  ("__real__#{clean}_with_mini_profiler").intern
         without_profiling = ("#{clean}_without_mini_profiler").intern
 
         if klass.send :method_defined?, with_profiling
@@ -75,7 +76,7 @@ module Rack
         end
 
         klass.send :alias_method, without_profiling, method
-        klass.send :define_method, with_profiling do |*args, &orig|
+        klass.send :define_method, real_with_profiling do |orig, *args|
           return self.send without_profiling, *args, &orig unless Rack::MiniProfiler.current
 
           name = default_name
@@ -114,6 +115,17 @@ module Rack
 
           result
         end
+        
+        workaround_method_code_string  =  <<-EOM
+          def #{with_profiling} (*args, &orig)
+              #{real_with_profiling}(orig, *args)
+          end
+        EOM
+        
+        klass.class_eval do
+          eval(workaround_method_code_string)
+        end
+        
         klass.send :alias_method, method, with_profiling
       end
 
