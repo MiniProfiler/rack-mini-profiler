@@ -35,4 +35,21 @@ describe Rack::MiniProfiler::MemoryStore do
 
   end
 
+
+  context 'cleanup_cache' do
+    before do
+      @fast_expiring_store = Rack::MiniProfiler::MemoryStore.new(expires_in: 1)
+    end
+
+    it "cleans up expired values" do
+      old_page_struct = {'Id' => "XYZ", 'Random' => "random", 'Started' => ((Time.now.to_f - 2) * 1000).to_i }
+      @fast_expiring_store.save(old_page_struct)
+      old_page_struct = @fast_expiring_store.load("XYZ")
+      old_page_struct['Id'].should == "XYZ"
+      @fast_expiring_store.cleanup_cache
+      page_struct = @fast_expiring_store.load("XYZ")
+      expect(page_struct).to eq(nil)
+    end
+  end
+
 end

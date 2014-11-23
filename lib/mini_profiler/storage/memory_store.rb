@@ -11,17 +11,24 @@ module Rack
       def initialize(args = nil)
         args ||= {}
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
-        @timer_struct_lock  = Mutex.new
-        @timer_struct_cache = {}
-        @user_view_lock     = Mutex.new
-        @user_view_cache    = {}
+        initialize_locks
+        initialize_cleanup_thread
+      end
 
+      def initialize_locks
+        @timer_struct_lock  = Mutex.new
+        @user_view_lock     = Mutex.new
+        @timer_struct_cache = {}
+        @user_view_cache    = {}
+      end
+
+      def initialize_cleanup_thread
         # TODO: fix it to use weak ref, trouble is may be broken in 1.9 so need to use the 'ref' gem
         me = self
         t = CacheCleanupThread.new do
-          interval = 10
+          interval            = 10
           cleanup_cache_cycle = 3600
-          cycle_count = 1
+          cycle_count         = 1
 
           until Thread.current[:should_exit] do
             # We don't want to hit the filesystem every 10s to clean up the cache so we need to do a bit of
@@ -37,10 +44,7 @@ module Rack
             cycle_count += 1
           end
         end
-
         at_exit { t[:should_exit] = true }
-
-        t
       end
 
       def save(page_struct)
