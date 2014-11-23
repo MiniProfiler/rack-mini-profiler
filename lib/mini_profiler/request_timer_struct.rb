@@ -6,40 +6,44 @@ module Rack
     class RequestTimerStruct < TimerStruct
 
       def self.createRoot(name, page)
-        rt = RequestTimerStruct.new(name, page, nil)
-        rt["IsRoot"]= true
-        rt
+        RequestTimerStruct.new(name, page, nil).tap do |timer|
+          timer["IsRoot"] = true
+        end
       end
 
       attr_accessor :children_duration
 
       def initialize(name, page, parent)
-        super("Id" => MiniProfiler.generate_id,
-              "Name" => name,
-              "DurationMilliseconds" => 0,
-              "DurationWithoutChildrenMilliseconds"=> 0,
-              "StartMilliseconds" => (Time.now.to_f * 1000).to_i - page['Started'],
-              "ParentTimingId" => nil,
-              "Children" => [],
-              "HasChildren"=> false,
-              "KeyValues" => nil,
-              "HasSqlTimings"=> false,
-              "HasDuplicateSqlTimings"=> false,
-              "TrivialDurationThresholdMilliseconds" => 2,
-              "SqlTimings" => [],
-              "SqlTimingsDurationMilliseconds"=> 0,
-              "IsTrivial"=> false,
-              "IsRoot"=> false,
-              "Depth"=> parent ? parent.depth + 1 : 0,
-              "ExecutedReaders"=> 0,
-              "ExecutedScalars"=> 0,
-              "ExecutedNonQueries"=> 0,
-              "CustomTimingStats" => {},
-              "CustomTimings" => {})
+        start_millis = (Time.now.to_f * 1000).to_i - page['Started']
+        depth        = parent ? parent.depth + 1 : 0
+        super(
+          "Id"                                   => MiniProfiler.generate_id,
+          "Name"                                 => name,
+          "DurationMilliseconds"                 => 0,
+          "DurationWithoutChildrenMilliseconds"  => 0,
+          "StartMilliseconds"                    => start_millis,
+          "ParentTimingId"                       => nil,
+          "Children"                             => [],
+          "HasChildren"                          => false,
+          "KeyValues"                            => nil,
+          "HasSqlTimings"                        => false,
+          "HasDuplicateSqlTimings"               => false,
+          "TrivialDurationThresholdMilliseconds" => 2,
+          "SqlTimings"                           => [],
+          "SqlTimingsDurationMilliseconds"       => 0,
+          "IsTrivial"                            => false,
+          "IsRoot"                               => false,
+          "Depth"                                => depth,
+          "ExecutedReaders"                      => 0,
+          "ExecutedScalars"                      => 0,
+          "ExecutedNonQueries"                   => 0,
+          "CustomTimingStats"                    => {},
+          "CustomTimings"                        => {}
+        )
         @children_duration = 0
-        @start = Time.now
-        @parent = parent
-        @page = page
+        @start             = Time.now
+        @parent            = parent
+        @page              = page
       end
 
       def duration_ms
@@ -63,45 +67,45 @@ module Rack
       end
 
       def add_child(name)
-        request_timer =  RequestTimerStruct.new(name, @page, self)
-        self['Children'].push(request_timer)
-        self['HasChildren'] = true
-        request_timer['ParentTimingId'] = self['Id']
-        request_timer['Depth'] = self['Depth'] + 1
-        request_timer
+        RequestTimerStruct.new(name, @page, self).tap do |timer|
+          self['Children'].push(timer)
+          self['HasChildren']     = true
+          timer['ParentTimingId'] = self['Id']
+          timer['Depth']          = self['Depth'] + 1
+        end
       end
 
       def add_sql(query, elapsed_ms, page, skip_backtrace = false, full_backtrace = false)
-        timer = SqlTimerStruct.new(query, elapsed_ms, page, self , skip_backtrace, full_backtrace)
-        timer['ParentTimingId'] = self['Id']
-        self['SqlTimings'].push(timer)
-        self['HasSqlTimings'] = true
-        self['SqlTimingsDurationMilliseconds'] += elapsed_ms
-        page['DurationMillisecondsInSql'] += elapsed_ms
-        timer
+        SqlTimerStruct.new(query, elapsed_ms, page, self , skip_backtrace, full_backtrace).tap do |timer|
+          self['SqlTimings'].push(timer)
+          timer['ParentTimingId'] = self['Id']
+          self['HasSqlTimings']   = true
+          self['SqlTimingsDurationMilliseconds'] += elapsed_ms
+          page['DurationMillisecondsInSql']      += elapsed_ms
+        end
       end
 
       def add_custom(type, elapsed_ms, page)
-        timer = CustomTimerStruct.new(type, elapsed_ms, page, self)
-        timer['ParentTimingId'] = self['Id']
-        self['CustomTimings'][type] ||= []
-        self['CustomTimings'][type].push(timer)
+        CustomTimerStruct.new(type, elapsed_ms, page, self).tap do |timer|
+          timer['ParentTimingId'] = self['Id']
 
-        self['CustomTimingStats'][type] ||= {"Count" => 0, "Duration" => 0.0}
-        self['CustomTimingStats'][type]['Count'] += 1
-        self['CustomTimingStats'][type]['Duration'] += elapsed_ms
+          self['CustomTimings'][type] ||= []
+          self['CustomTimings'][type].push(timer)
 
-        page['CustomTimingStats'][type] ||= {"Count" => 0, "Duration" => 0.0}
-        page['CustomTimingStats'][type]['Count'] += 1
-        page['CustomTimingStats'][type]['Duration'] += elapsed_ms
+          self['CustomTimingStats'][type] ||= {"Count" => 0, "Duration" => 0.0}
+          self['CustomTimingStats'][type]['Count']    += 1
+          self['CustomTimingStats'][type]['Duration'] += elapsed_ms
 
-        timer
+          page['CustomTimingStats'][type] ||= {"Count" => 0, "Duration" => 0.0}
+          page['CustomTimingStats'][type]['Count']    += 1
+          page['CustomTimingStats'][type]['Duration'] += elapsed_ms
+        end
       end
 
       def record_time(milliseconds = nil)
         milliseconds ||= (Time.now - @start) * 1000
-        self['DurationMilliseconds'] = milliseconds
-        self['IsTrivial'] = true if milliseconds < self["TrivialDurationThresholdMilliseconds"]
+        self['DurationMilliseconds']                = milliseconds
+        self['IsTrivial']                           = true if milliseconds < self["TrivialDurationThresholdMilliseconds"]
         self['DurationWithoutChildrenMilliseconds'] = milliseconds - @children_duration
 
         if @parent
