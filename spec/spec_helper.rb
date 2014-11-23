@@ -4,12 +4,14 @@ RSpec.configure do |config|
   config.color_enabled = true
 end
 
+require 'rack-mini-profiler'
+
 class Time
-  class << self 
+  class << self
     unless method_defined? :old_new
       alias_method :old_new, :new
       alias_method :old_now, :now
-    
+
       def new
         @now || old_new
       end

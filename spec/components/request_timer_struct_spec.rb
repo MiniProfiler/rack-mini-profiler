@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
 
 describe Rack::MiniProfiler::RequestTimerStruct do
 
@@ -45,7 +44,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
   end
 
   it 'has no sql timings at first' do
-    @request['SqlTimings'].should be_empty    
+    @request['SqlTimings'].should be_empty
   end
 
   it 'has a 0 for SqlTimingsDurationMilliseconds' do
@@ -64,7 +63,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
     end
 
     it 'has the SqlTiming object' do
-      @request['SqlTimings'].should_not be_empty  
+      @request['SqlTimings'].should_not be_empty
     end
 
     it 'has a child with the ParentTimingId of the request' do
@@ -87,7 +86,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
 
       before do
         @child = @request.add_child('child')
-        @child.record_time(1111)        
+        @child.record_time(1111)
       end
 
       it 'has a IsRoot value of false' do
@@ -100,7 +99,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
 
       it 'has the child in the Children attribute' do
         @request['Children'].should == [@child]
-      end      
+      end
 
       it 'assigns its Id to the child' do
         @child['ParentTimingId'].should == @request['Id']
@@ -119,7 +118,7 @@ describe Rack::MiniProfiler::RequestTimerStruct do
         @request['IsTrivial'].should be_true
       end
 
-      
+
       describe 'record time on parent' do
         before do
           @request.record_time(1234)
@@ -132,9 +131,9 @@ describe Rack::MiniProfiler::RequestTimerStruct do
         it 'has stores the recorded time in DurationMilliseconds' do
           @request['DurationMilliseconds'].should == 1234
         end
-        
+
         it 'calculates DurationWithoutChildrenMilliseconds without the children timings' do
-          @request['DurationWithoutChildrenMilliseconds'].should == 123      
+          @request['DurationWithoutChildrenMilliseconds'].should == 123
         end
 
       end

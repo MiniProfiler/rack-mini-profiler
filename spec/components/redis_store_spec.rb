@@ -1,8 +1,4 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
-require 'mini_profiler/page_timer_struct'
-require 'mini_profiler/storage/abstract_store'
-require 'mini_profiler/storage/redis_store'
 
 describe Rack::MiniProfiler::RedisStore do
 

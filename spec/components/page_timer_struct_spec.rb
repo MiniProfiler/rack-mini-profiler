@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
 
 describe Rack::MiniProfiler::PageTimerStruct do
 
@@ -29,5 +28,5 @@ describe Rack::MiniProfiler::PageTimerStruct do
       @deserialized['DurationMilliseconds'].should_not be_nil
     end
   end
-  
+
 end

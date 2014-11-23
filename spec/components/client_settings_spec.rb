@@ -1,7 +1,4 @@
 require 'spec_helper'
-require 'mini_profiler/client_settings'
-require 'uri'
-require 'rack'
 
 describe Rack::MiniProfiler::ClientSettings do
 
@@ -12,18 +9,18 @@ describe Rack::MiniProfiler::ClientSettings do
     end
 
     it 'has the cookies' do
-      @settings.has_cookie?.should be_true 
+      @settings.has_cookie?.should be_true
     end
 
-    it 'has profiling disabled' do 
+    it 'has profiling disabled' do
       @settings.disable_profiling?.should be_true
     end
 
-    it 'has backtrace set to full' do 
+    it 'has backtrace set to full' do
       @settings.backtrace_full?.should be_true
     end
 
-    it 'should not write cookie changes if no change' do 
+    it 'should not write cookie changes if no change' do
       hash = {}
       @settings.write!(hash)
       hash.should == {}
@@ -37,7 +34,7 @@ describe Rack::MiniProfiler::ClientSettings do
     end
   end
 
-  it "should not have settings by default" do 
+  it "should not have settings by default" do
     Rack::MiniProfiler::ClientSettings.new({}).has_cookie?.should == false
   end
 

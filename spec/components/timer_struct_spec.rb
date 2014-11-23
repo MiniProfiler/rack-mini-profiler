@@ -1,7 +1,4 @@
 require 'spec_helper'
-require 'mini_profiler/timer_struct'
-
-require 'json'
 
 describe Rack::MiniProfiler::TimerStruct do
 
