@@ -64,6 +64,10 @@ module Rack
           self['Children']
         end
 
+        def custom_timings
+          self['CustomTimings']
+        end
+
         def add_child(name)
           TimerStruct::Request.new(name, @page, self).tap do |timer|
             self['Children'].push(timer)

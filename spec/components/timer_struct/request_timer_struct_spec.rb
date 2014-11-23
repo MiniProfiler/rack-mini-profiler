@@ -39,6 +39,10 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     @request['Depth'].should == 0
   end
 
+  it "has start time" do
+    expect(@request.start).not_to be(0)
+  end
+
   it 'has a false HasSqlTimings attribute' do
     @request['HasSqlTimings'].should be_false
   end
@@ -78,6 +82,17 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       @page['DurationMillisecondsInSql'].should == 77
     end
 
+  end
+
+  describe 'add Custom' do
+    before do
+      @page = new_page
+      @request.add_custom("a", 77, @page)
+    end
+    it "will be added to custom timings" do
+      expect(@request.custom_timings.size).to eq(1)
+      expect(@request.custom_timings.first[0]).to eq('a')
+    end
   end
 
   describe 'record time' do
