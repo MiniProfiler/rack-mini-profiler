@@ -12,7 +12,7 @@ module Rack
       def initialize(env)
         timer_id     = MiniProfiler.generate_id
         page_name    = env['PATH_INFO']
-        started_at   = (Time.now.to_f * 1000).to_i,
+        started_at   = (Time.now.to_f * 1000).to_i
         machine_name = env['SERVER_NAME']
         super(
           "Id"                                   => timer_id,
