@@ -48,7 +48,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
     describe 'with a simple request' do
       before do
-        @client = Rack::MiniProfiler::TimerStruct::Client.init_from_form_data(fixture(:simple_client_request), new_page)
+        @client = described.init_from_form_data(fixture(:simple_client_request), new_page)
       end
 
       it 'has the correct RedirectCount' do
@@ -114,7 +114,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
     describe 'with some odd values' do
       before do
-        @client = Rack::MiniProfiler::TimerStruct::Client.init_from_form_data(fixture(:weird_client_request), new_page)
+        @client = described.init_from_form_data(fixture(:weird_client_request), new_page)
       end
 
       it 'has the correct RedirectCount' do
