@@ -36,7 +36,7 @@ describe Rack::MiniProfiler::MemoryStore do
   end
 
 
-  context 'cleanup_cache' do
+  describe 'cleanup_cache' do
     before do
       @fast_expiring_store = Rack::MiniProfiler::MemoryStore.new(expires_in: 1)
     end
@@ -52,4 +52,57 @@ describe Rack::MiniProfiler::MemoryStore do
     end
   end
 
+
+  describe 'cache cleanup thread' do
+    let(:described){Rack::MiniProfiler::MemoryStore::CacheCleanupThread}
+    before do
+      store = double()
+      store.stub(:cleanup_cache)
+      @cleaner = described.new(1, 2, store) do
+        self.sleepy_run
+      end
+    end
+
+    it "just run on start" do
+      expect(@cleaner.should_cleanup?).to eq(false)
+    end
+
+    it "when number of runs * interval gets bigger than cycle, it should cleanup" do
+      @cleaner.increment_cycle
+      expect(@cleaner.should_cleanup?).to eq(true)
+    end
+
+    describe 'cleanup' do
+      before do
+        store = double()
+        expect(store).to receive(:cleanup_cache) { true }
+        @cleaner = described.new(1, 2, store) do
+          self.sleepy_run
+        end
+      end
+      it "calls store" do
+        @cleaner.cleanup
+      end
+
+      it "resets counter" do
+        @cleaner.increment_cycle
+        expect(@cleaner.cycle_count).to eq(2)
+        @cleaner.cleanup
+        expect(@cleaner.cycle_count).to eq(1)
+      end
+    end
+
+    describe 'sleepy_run' do
+      before do
+        store = double()
+        store.stub(:cleanup_cache)
+        @cleaner = described.new(0, 0, store) do
+          self.sleepy_run
+        end
+      end
+      it "works" do
+        @cleaner.sleepy_run
+      end
+    end
+  end
 end
