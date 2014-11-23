@@ -11,10 +11,10 @@ module Rack
       def initialize(args = nil)
         args ||= {}
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
-        @timer_struct_lock = Mutex.new
+        @timer_struct_lock  = Mutex.new
         @timer_struct_cache = {}
-        @user_view_lock = Mutex.new
-        @user_view_cache = {}
+        @user_view_lock     = Mutex.new
+        @user_view_cache    = {}
 
         # TODO: fix it to use weak ref, trouble is may be broken in 1.9 so need to use the 'ref' gem
         me = self

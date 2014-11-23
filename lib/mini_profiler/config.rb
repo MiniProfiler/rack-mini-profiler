@@ -22,20 +22,20 @@ module Rack
 
       def self.default
         new.instance_eval {
-          @auto_inject = true # automatically inject on every html page
-          @base_url_path = "/mini-profiler-resources/"
-          @disable_caching = true
+          @auto_inject      = true # automatically inject on every html page
+          @base_url_path    = "/mini-profiler-resources/"
+          @disable_caching  = true
           # called prior to rack chain, to ensure we are allowed to profile
           @pre_authorize_cb = lambda {|env| true}
 
           # called after rack chain, to ensure we are REALLY allowed to profile
-          @position = 'left'  # Where it is displayed
-          @skip_schema_queries = false
-          @storage = MiniProfiler::MemoryStore
-          @user_provider = Proc.new{|env| Rack::Request.new(env).ip}
-          @authorization_mode = :allow_all
-          @toggle_shortcut = 'Alt+P'
-          @start_hidden = false
+          @position               = 'left'  # Where it is displayed
+          @skip_schema_queries    = false
+          @storage                = MiniProfiler::MemoryStore
+          @user_provider          = Proc.new{|env| Rack::Request.new(env).ip}
+          @authorization_mode     = :allow_all
+          @toggle_shortcut        = 'Alt+P'
+          @start_hidden           = false
           @backtrace_threshold_ms = 0
           @flamegraph_sample_rate = 0.5
           @storage_failure = Proc.new do |exception|

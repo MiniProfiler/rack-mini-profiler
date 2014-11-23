@@ -10,7 +10,7 @@ module Rack
 
       def start_step(name)
         if current
-          parent_timer = current.current_timer
+          parent_timer          = current.current_timer
           current.current_timer = current_timer = current.current_timer.add_child(name)
           [current_timer,parent_timer]
         end
@@ -27,8 +27,8 @@ module Rack
       # perform a profiling step on given block
       def step(name, opts = nil)
         if current
-          parent_timer = current.current_timer
-          result = nil
+          parent_timer          = current.current_timer
+          result                = nil
           current.current_timer = current_timer = current.current_timer.add_child(name)
           begin
             result = yield if block_given?
@@ -65,9 +65,9 @@ module Rack
 
       def profile_method(klass, method, type = :profile, &blk)
         default_name = type==:counter ? method.to_s  : klass.to_s + " " + method.to_s
-        clean = clean_method_name(method)
+        clean        = clean_method_name(method)
 
-        with_profiling =  ("#{clean}_with_mini_profiler").intern
+        with_profiling    = ("#{clean}_with_mini_profiler").intern
         without_profiling = ("#{clean}_without_mini_profiler").intern
 
         if klass.send :method_defined?, with_profiling
@@ -131,8 +131,8 @@ module Rack
       def counter(type, duration_ms=nil)
         result = nil
         if block_given?
-          start = Time.now
-          result = yield
+          start       = Time.now
+          result      = yield
           duration_ms = (Time.now - start).to_f * 1000
         end
         return result if current.nil? || !request_authorized?
