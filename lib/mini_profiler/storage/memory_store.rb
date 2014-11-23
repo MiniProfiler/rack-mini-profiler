@@ -7,12 +7,14 @@ module Rack
       end
 
       EXPIRES_IN_SECONDS = 60 * 60 * 24
+      CLEANUP_INTERVAL   = 10
+      CLEANUP_CYCLE      = 3600
 
       def initialize(args = nil)
         args ||= {}
-        @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
+        @expires_in_seconds = args.fetch(:expires_in) { EXPIRES_IN_SECONDS }
         initialize_locks
-        initialize_cleanup_thread
+        initialize_cleanup_thread(args)
       end
 
       def initialize_locks
@@ -22,25 +24,24 @@ module Rack
         @user_view_cache    = {}
       end
 
-      def initialize_cleanup_thread
-        # TODO: fix it to use weak ref, trouble is may be broken in 1.9 so need to use the 'ref' gem
-        me = self
+      #FIXME: use weak ref, trouble it may be broken in 1.9 so need to use the 'ref' gem
+      def initialize_cleanup_thread(args={})
+        me               = self
+        cleanup_interval = args.fetch(:cleanup_interval) { CLEANUP_INTERVAL }
+        cleanup_cycle    = args.fetch(:cleanup_cycle)    { CLEANUP_CYCLE }
+        cycle_count      = 1
         t = CacheCleanupThread.new do
-          interval            = 10
-          cleanup_cache_cycle = 3600
-          cycle_count         = 1
-
           until Thread.current[:should_exit] do
             # We don't want to hit the filesystem every 10s to clean up the cache so we need to do a bit of
             # accounting to avoid sleeping that entire time.  We don't want to sleep for the entire period because
             # it means the thread will stay live in hot deployment scenarios, keeping a potentially large memory
             # graph from being garbage collected upon undeploy.
-            if cycle_count * interval >= cleanup_cache_cycle
+            if cycle_count * cleanup_interval >= cleanup_cycle
               cycle_count = 1
               me.cleanup_cache
             end
 
-            sleep(interval)
+            sleep(cleanup_interval)
             cycle_count += 1
           end
         end
