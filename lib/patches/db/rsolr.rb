@@ -5,8 +5,8 @@ if SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0" #  
       current = ::Rack::MiniProfiler.current
       return execute_without_profiling(client, request_context) unless current && current.measure
 
-      start = Time.now
-      result = execute_without_profiling(client, request_context)
+      start        = Time.now
+      result       = execute_without_profiling(client, request_context)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
 
       data = "#{request_context[:method].upcase} #{request_context[:uri]}"

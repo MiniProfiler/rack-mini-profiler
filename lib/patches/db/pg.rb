@@ -8,8 +8,8 @@ if SqlPatches.class_exists? "PG::Result"
     def values(*args, &blk)
       return values_without_profiling(*args, &blk) unless @miniprofiler_sql_id
 
-      start = Time.now
-      result = values_without_profiling(*args,&blk)
+      start        = Time.now
+      result       = values_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
 
       @miniprofiler_sql_id.report_reader_duration(elapsed_time)
@@ -19,8 +19,8 @@ if SqlPatches.class_exists? "PG::Result"
     def each(*args, &blk)
       return each_without_profiling(*args, &blk) unless @miniprofiler_sql_id
 
-      start = Time.now
-      result = each_without_profiling(*args,&blk)
+      start        = Time.now
+      result       = each_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
 
       @miniprofiler_sql_id.report_reader_duration(elapsed_time)
@@ -54,10 +54,10 @@ if SqlPatches.class_exists? "PG::Result"
       current = ::Rack::MiniProfiler.current
       return exec_without_profiling(*args,&blk) unless current && current.measure
 
-      start = Time.now
-      result = exec_without_profiling(*args,&blk)
+      start        = Time.now
+      result       = exec_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      record = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
@@ -67,12 +67,12 @@ if SqlPatches.class_exists? "PG::Result"
       current = ::Rack::MiniProfiler.current
       return exec_prepared_without_profiling(*args,&blk) unless current && current.measure
 
-      start = Time.now
-      result = exec_prepared_without_profiling(*args,&blk)
+      start        = Time.now
+      result       = exec_prepared_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      mapped = args[0]
-      mapped = @prepare_map[mapped] || args[0] if @prepare_map
-      record = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+      mapped       = args[0]
+      mapped       = @prepare_map[mapped] || args[0] if @prepare_map
+      record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
@@ -82,13 +82,12 @@ if SqlPatches.class_exists? "PG::Result"
       current = ::Rack::MiniProfiler.current
       return send_query_prepared_without_profiling(*args,&blk) unless current && current.measure
 
-      start = Time.now
-      result = send_query_prepared_without_profiling(*args,&blk)
-
+      start        = Time.now
+      result       = send_query_prepared_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      mapped = args[0]
-      mapped = @prepare_map[mapped] || args[0] if @prepare_map
-      record = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+      mapped       = args[0]
+      mapped       = @prepare_map[mapped] || args[0] if @prepare_map
+      record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
@@ -98,10 +97,10 @@ if SqlPatches.class_exists? "PG::Result"
       current = ::Rack::MiniProfiler.current
       return exec_without_profiling(*args,&blk) unless current && current.measure
 
-      start = Time.now
-      result = exec_without_profiling(*args,&blk)
+      start        = Time.now
+      result       = exec_without_profiling(*args,&blk)
       elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      record = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result

@@ -19,13 +19,13 @@ if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
           return log_without_miniprofiler(*args, &block) unless current && current.measure
 
           sql, name, binds = args
-          t0 = Time.now
-          rval = log_without_miniprofiler(*args, &block)
+          start            = Time.now
+          rval             = log_without_miniprofiler(*args, &block)
 
           # Don't log schema queries if the option is set
           return rval if Rack::MiniProfiler.config.skip_schema_queries and name =~ /SCHEMA/
 
-          elapsed_time = ((Time.now - t0).to_f * 1000).round(1)
+          elapsed_time = ((Time.now - start).to_f * 1000).round(1)
           Rack::MiniProfiler.record_sql(sql, elapsed_time)
           rval
         end
