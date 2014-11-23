@@ -1,18 +1,18 @@
 require 'spec_helper'
 require 'yaml'
 
-describe Rack::MiniProfiler::ClientTimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Client do
 
   def new_page
-    Rack::MiniProfiler::PageTimerStruct.new({})
+    Rack::MiniProfiler::TimerStruct::Page.new({})
   end
 
   def fixture(name)
-    YAML.load(File.open(File.dirname(__FILE__) + "/../fixtures/#{name}.yml"))
+    YAML.load(File.open(File.dirname(__FILE__) + "/../../fixtures/#{name}.yml"))
   end
 
   before do
-    @client = Rack::MiniProfiler::ClientTimerStruct.new
+    @client = Rack::MiniProfiler::TimerStruct::Client.new
   end
 
   it 'defaults to no attributes' do
@@ -23,7 +23,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
     describe 'without a form' do
       before do
-        @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data({}, new_page)
+        @client = Rack::MiniProfiler::TimerStruct::Client.init_from_form_data({}, new_page)
       end
 
       it 'is null' do
@@ -34,7 +34,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
     describe 'with a simple request' do
       before do
-        @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data(fixture(:simple_client_request), new_page)
+        @client = Rack::MiniProfiler::TimerStruct::Client.init_from_form_data(fixture(:simple_client_request), new_page)
       end
 
       it 'has the correct RedirectCount' do
@@ -100,7 +100,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
     describe 'with some odd values' do
       before do
-        @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data(fixture(:weird_client_request), new_page)
+        @client = Rack::MiniProfiler::TimerStruct::Client.init_from_form_data(fixture(:weird_client_request), new_page)
       end
 
       it 'has the correct RedirectCount' do

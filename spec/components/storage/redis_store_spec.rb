@@ -9,7 +9,7 @@ describe Rack::MiniProfiler::RedisStore do
 
     describe "connection" do
       it 'can still store the resulting value' do
-        page_struct = Rack::MiniProfiler::PageTimerStruct.new({})
+        page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
         page_struct['Id'] = "XYZ"
         page_struct['Random'] = "random"
         @store.save(page_struct)
@@ -46,7 +46,7 @@ describe Rack::MiniProfiler::RedisStore do
     describe 'storage' do
 
       it 'can store a PageStruct and retrieve it' do
-        page_struct = Rack::MiniProfiler::PageTimerStruct.new({})
+        page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
         page_struct['Id'] = "XYZ"
         page_struct['Random'] = "random"
         @store.save(page_struct)

@@ -39,7 +39,7 @@ module Rack
         # profiling the request
         self.current               = Context.new
         self.current.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-        self.current.page_struct   = PageTimerStruct.new(env)
+        self.current.page_struct   = TimerStruct::Page.new(env)
         self.current.current_timer = current.page_struct['Root']
       end
 
@@ -86,7 +86,7 @@ module Rack
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
       unless page_struct['HasUserViewed']
-        page_struct['ClientTimings'] = ClientTimerStruct.init_from_form_data(env, page_struct)
+        page_struct['ClientTimings'] = TimerStruct::Client.init_from_form_data(env, page_struct)
         page_struct['HasUserViewed'] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)

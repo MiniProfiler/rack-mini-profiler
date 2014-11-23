@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe Rack::MiniProfiler::RequestTimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Request do
 
   def new_page
-    Rack::MiniProfiler::PageTimerStruct.new({})
+    Rack::MiniProfiler::TimerStruct::Page.new({})
   end
 
   before do
     @name = 'cool request'
-    @request = Rack::MiniProfiler::RequestTimerStruct.createRoot(@name, new_page)
+    @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, new_page)
   end
 
   it 'sets IsRoot to true' do

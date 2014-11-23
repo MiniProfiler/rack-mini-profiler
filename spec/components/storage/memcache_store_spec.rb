@@ -1,18 +1,16 @@
 require 'spec_helper'
-describe Rack::MiniProfiler::FileStore do
+describe Rack::MiniProfiler::MemcacheStore do
 
   context 'page struct' do
 
     before do
-      tmp = File.expand_path(__FILE__ + "/../../../tmp")
-      Dir::mkdir(tmp) unless File.exists?(tmp)
-      @store = Rack::MiniProfiler::FileStore.new(:path => tmp)
+      @store = Rack::MiniProfiler::MemcacheStore.new
     end
 
     describe 'storage' do
 
       it 'can store a PageStruct and retrieve it' do
-        page_struct = Rack::MiniProfiler::PageTimerStruct.new({})
+        page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
         page_struct['Id'] = "XYZ"
         page_struct['Random'] = "random"
         @store.save(page_struct)
@@ -24,7 +22,9 @@ describe Rack::MiniProfiler::FileStore do
       it 'can list unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
-        @store.get_unviewed_ids('a').sort.to_a.should == ['XYZ', 'ABC'].sort.to_a
+        @store.get_unviewed_ids('a').length.should == 2
+        @store.get_unviewed_ids('a').include?('XYZ').should be_true
+        @store.get_unviewed_ids('a').include?('ABC').should be_true
       end
 
       it 'can set an item to viewed once it is unviewed' do
@@ -36,6 +36,19 @@ describe Rack::MiniProfiler::FileStore do
 
     end
 
+  end
+
+  context 'passing in a Memcache client' do
+    describe 'client' do
+      it 'uses the passed in object rather than creating a new one' do
+        client = double("memcache-client")
+        store = Rack::MiniProfiler::MemcacheStore.new(:client => client)
+
+        client.should_receive(:get)
+        Dalli::Client.should_not_receive(:new)
+        store.load("XYZ")
+      end
+    end
   end
 
 end

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Rack::MiniProfiler::PageTimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Page do
 
   before do
-    @page = Rack::MiniProfiler::PageTimerStruct.new({})
+    @page = Rack::MiniProfiler::TimerStruct::Page.new({})
   end
 
   it 'has an Id' do
