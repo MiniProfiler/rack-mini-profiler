@@ -3,6 +3,8 @@ require 'yaml'
 
 describe Rack::MiniProfiler::TimerStruct::Client do
 
+  let(:described){ Rack::MiniProfiler::TimerStruct::Client }
+
   def new_page
     Rack::MiniProfiler::TimerStruct::Page.new({})
   end
@@ -12,7 +14,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
   end
 
   before do
-    @client = Rack::MiniProfiler::TimerStruct::Client.new
+    @client = described.new
   end
 
   it 'defaults to no attributes' do
@@ -23,13 +25,25 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
     describe 'without a form' do
       before do
-        @client = Rack::MiniProfiler::TimerStruct::Client.init_from_form_data({}, new_page)
+        @client = described.init_from_form_data({}, new_page)
       end
 
       it 'is null' do
         @client.should be_nil
       end
+    end
 
+    describe 'init_instrumentation' do
+      it "returns the body of mPt js function" do
+        expect(described.init_instrumentation).to match(/mPt/)
+      end
+    end
+
+    describe 'instrument' do
+      it "works" do
+        expected = "<script>mPt.probe('a')</script>b<script>mPt.probe('a')</script>b"
+        expect(described.instrument('a', 'b')).to eq(expected)
+      end
     end
 
     describe 'with a simple request' do

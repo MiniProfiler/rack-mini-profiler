@@ -6,10 +6,15 @@ module Rack
       class Client < TimerStruct::Base
 
         def self.init_instrumentation
-          "<script type=\"text/javascript\">mPt=function(){var t=[];return{t:t,probe:function(n){t.push({d:new Date(),n:n})}}}()</script>"
+          %Q{
+            <script type="text/javascript">
+              mPt=function(){var t=[];return{t:t,probe:function(n){t.push({d:new Date(),n:n})}}}()
+            </script>
+          }
         end
 
-        def self.instrument(name,orig)
+        # used by Railtie to instrument asset_tag for JS / CSS
+        def self.instrument(name, orig)
           probe = "<script>mPt.probe('#{name}')</script>"
           wrapped = probe
           wrapped << orig
