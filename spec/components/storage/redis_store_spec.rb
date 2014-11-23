@@ -72,4 +72,16 @@ describe Rack::MiniProfiler::RedisStore do
 
   end
 
+
+  describe 'diagnostics' do
+    before do
+      @store = Rack::MiniProfiler::RedisStore.new(:db=>2)
+    end
+    it "returns useful info" do
+      res = @store.diagnostics('a')
+      expected = "Redis prefix: MPRedisStore\nRedis location: 127.0.0.1:6379 db: 2\nunviewed_ids: []\n"
+      expect(res).to eq(expected)
+    end
+  end
+
 end
