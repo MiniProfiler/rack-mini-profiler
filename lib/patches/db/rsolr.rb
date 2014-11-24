@@ -7,7 +7,7 @@ if SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0" #  
 
       start        = Time.now
       result       = execute_without_profiling(client, request_context)
-      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
+      elapsed_time = SqlPatches.elapsed_time(start)
 
       data = "#{request_context[:method].upcase} #{request_context[:uri]}"
       if request_context[:method] == :post and request_context[:data]

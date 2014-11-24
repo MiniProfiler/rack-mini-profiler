@@ -33,7 +33,7 @@ if SqlPatches.class_exists?("Plucky::Query")
 
       start        = Time.now
       result       = self.send("#{method.id2name}_without_profiling", *args, &blk)
-      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
+      elapsed_time = SqlPatches.elapsed_time(start)
 
       query_message = "#{@collection.name}.#{method.id2name} => #{message}"
       ::Rack::MiniProfiler.record_sql(query_message, elapsed_time)

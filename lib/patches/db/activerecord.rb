@@ -25,7 +25,7 @@ if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
           # Don't log schema queries if the option is set
           return rval if Rack::MiniProfiler.config.skip_schema_queries and name =~ /SCHEMA/
 
-          elapsed_time = ((Time.now - start).to_f * 1000).round(1)
+          elapsed_time = SqlPatches.elapsed_time(start)
           Rack::MiniProfiler.record_sql(sql, elapsed_time)
           rval
         end

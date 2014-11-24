@@ -8,7 +8,7 @@ if SqlPatches.class_exists? "Mysql2::Client"
 
       start        = Time.now
       result       = each_without_profiling(*args,&blk)
-      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
+      elapsed_time = SqlPatches.elapsed_time(start)
 
       @miniprofiler_sql_id.report_reader_duration(elapsed_time)
       result
@@ -18,15 +18,12 @@ if SqlPatches.class_exists? "Mysql2::Client"
   class Mysql2::Client
     alias_method :query_without_profiling, :query
     def query(*args,&blk)
-      current = ::Rack::MiniProfiler.current
-      return query_without_profiling(*args,&blk) unless current && current.measure
+      return query_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
-      start        = Time.now
-      result       = query_without_profiling(*args,&blk)
-      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      result, record = SqlPatches.record_sql( args[0] ) do
+        query_without_profiling(*args,&blk)
+      end
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
-
       result
     end
   end

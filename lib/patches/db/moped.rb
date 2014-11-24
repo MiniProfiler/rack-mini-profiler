@@ -6,12 +6,10 @@ if SqlPatches.class_exists?("Moped::Node")
       current = ::Rack::MiniProfiler.current
       return process_without_profiling(*args,&blk) unless current && current.measure
 
-      start        = Time.now
-      result       = process_without_profiling(*args,&blk)
-      elapsed_time = ((Time.now - start).to_f * 1000).round(1)
-      ::Rack::MiniProfiler.record_sql(args[0].log_inspect, elapsed_time)
-
-      result
+      result, record = SqlPatches.record_sql(args[0].log_inspect) do
+        process_without_profiling(*args, &blk)
+      end
+      return result
     end
   end
 end
