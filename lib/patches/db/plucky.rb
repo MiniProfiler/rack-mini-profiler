@@ -26,10 +26,7 @@ if SqlPatches.class_exists?("Plucky::Query")
     private
 
     def profile_database_operation(method, message, *args, &blk)
-      current = ::Rack::MiniProfiler.current
-      unless current && current.measure
-        return self.send("#{method.id2name}_without_profiling", *args, &blk)
-      end
+      return self.send("#{method.id2name}_without_profiling", *args, &blk) unless SqlPatches.should_measure?
 
       start        = Time.now
       result       = self.send("#{method.id2name}_without_profiling", *args, &blk)

@@ -44,15 +44,12 @@ if SqlPatches.class_exists? "PG::Result"
       # dont leak more than 10k ever
       @prepare_map = {} if @prepare_map.length > 1000
 
-      current = ::Rack::MiniProfiler.current
-      return prepare_without_profiling(*args,&blk) unless current && current.measure
-
+      return prepare_without_profiling(*args,&blk) unless SqlPatches.should_measure?
       prepare_without_profiling(*args,&blk)
     end
 
     def exec(*args,&blk)
-      current = ::Rack::MiniProfiler.current
-      return exec_without_profiling(*args,&blk) unless current && current.measure
+      return exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
       start        = Time.now
       result       = exec_without_profiling(*args,&blk)
@@ -64,8 +61,7 @@ if SqlPatches.class_exists? "PG::Result"
     end
 
     def exec_prepared(*args,&blk)
-      current = ::Rack::MiniProfiler.current
-      return exec_prepared_without_profiling(*args,&blk) unless current && current.measure
+      return exec_prepared_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
       start        = Time.now
       result       = exec_prepared_without_profiling(*args,&blk)
@@ -79,8 +75,7 @@ if SqlPatches.class_exists? "PG::Result"
     end
 
     def send_query_prepared(*args,&blk)
-      current = ::Rack::MiniProfiler.current
-      return send_query_prepared_without_profiling(*args,&blk) unless current && current.measure
+      return send_query_prepared_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
       start        = Time.now
       result       = send_query_prepared_without_profiling(*args,&blk)
@@ -94,8 +89,7 @@ if SqlPatches.class_exists? "PG::Result"
     end
 
     def async_exec(*args,&blk)
-      current = ::Rack::MiniProfiler.current
-      return exec_without_profiling(*args,&blk) unless current && current.measure
+      return exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
       start        = Time.now
       result       = exec_without_profiling(*args,&blk)

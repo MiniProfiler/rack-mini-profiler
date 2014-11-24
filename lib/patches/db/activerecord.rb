@@ -15,8 +15,7 @@ if SqlPatches.module_exists?('ActiveRecord') && !SqlPatches.patched?
         end
 
         def log_with_miniprofiler(*args, &block)
-          current = ::Rack::MiniProfiler.current
-          return log_without_miniprofiler(*args, &block) unless current && current.measure
+          return log_without_miniprofiler(*args, &block) unless SqlPatches.should_measure?
 
           sql, name, binds = args
           start            = Time.now

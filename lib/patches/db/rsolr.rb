@@ -2,8 +2,7 @@ if SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0" #  
   class RSolr::Connection
     alias_method :execute_without_profiling, :execute
     def execute_with_profiling(client, request_context)
-      current = ::Rack::MiniProfiler.current
-      return execute_without_profiling(client, request_context) unless current && current.measure
+      return execute_without_profiling(client, request_context) unless SqlPatches.should_measure?
 
       start        = Time.now
       result       = execute_without_profiling(client, request_context)
