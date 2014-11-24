@@ -1,17 +1,16 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
 
-describe Rack::MiniProfiler::PageTimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Page do
 
   before do
-    @page = Rack::MiniProfiler::PageTimerStruct.new({})
+    @page = Rack::MiniProfiler::TimerStruct::Page.new({})
   end
 
-  it 'has an id' do
+  it 'has an Id' do
     @page[:id].should_not be_nil
   end
 
-  it 'has a root' do
+  it 'has a Root' do
     @page[:root].should_not be_nil
   end
 
@@ -21,13 +20,13 @@ describe Rack::MiniProfiler::PageTimerStruct do
       @deserialized = ::JSON.parse(@json)
     end
 
-    it 'has a started element' do
+    it 'has a Started element' do
       @deserialized['started'].should_not be_nil
     end
 
-    it 'has a duration_milliseconds element' do
+    it 'has a DurationMilliseconds element' do
       @deserialized['duration_milliseconds'].should_not be_nil
     end
   end
-  
+
 end

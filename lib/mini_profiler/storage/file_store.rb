@@ -39,9 +39,9 @@ module Rack
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
         raise ArgumentError.new :path unless @path
         @timer_struct_cache = FileCache.new(@path, "mp_timers")
-        @timer_struct_lock = Mutex.new
-        @user_view_cache = FileCache.new(@path, "mp_views")
-        @user_view_lock = Mutex.new
+        @timer_struct_lock  = Mutex.new
+        @user_view_cache    = FileCache.new(@path, "mp_views")
+        @user_view_lock     = Mutex.new
 
         me = self
         t = CacheCleanupThread.new do

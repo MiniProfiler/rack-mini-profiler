@@ -1,10 +1,10 @@
---- 
+---
 rack.request.form_hash:
   clientProbes: ''
-  clientPerformance: 
+  clientPerformance:
     navigation:
-      redirectCount: 99
-    timing: 
+      redirect_count: 99
+    timing:
       navigationStart: 1334245954
       navigationEnd: 1334245970
       weirdStart: 1334245965
