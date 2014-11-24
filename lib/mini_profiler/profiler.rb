@@ -63,7 +63,7 @@ module Rack
     def initialize(app, config = nil)
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config
-      @app = app
+      @app    = app
       @config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
       unless @config.storage_instance
         @config.storage_instance = @config.storage.new(@config.storage_options)
