@@ -3,10 +3,10 @@ module Rack
     module TimerStruct
 
       # TimerStruct::Page
-      #   Root: RequestTimer
-      #     :has_many RequestTimer children
-      #     :has_many SqlTimer children
-      #     :has_many CustomTimer children
+      #   Root: TimerStruct::Request
+      #     :has_many TimerStruct::Request children
+      #     :has_many TimerStruct::Sql children
+      #     :has_many TimerStruct::Custom children
       class Page < TimerStruct::Base
         def initialize(env)
           timer_id     = MiniProfiler.generate_id
