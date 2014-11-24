@@ -3,25 +3,23 @@ module Rack
     module ProfilingMethods
 
       def record_sql(query, elapsed_ms)
+        return unless current
         c = current
-        return unless c
         c.current_timer.add_sql(query, elapsed_ms, c.page_struct, c.skip_backtrace, c.full_backtrace) if (c && c.current_timer)
       end
 
       def start_step(name)
-        if current
-          parent_timer          = current.current_timer
-          current.current_timer = current_timer = current.current_timer.add_child(name)
-          [current_timer,parent_timer]
-        end
+        return unless current
+        parent_timer          = current.current_timer
+        current.current_timer = current_timer = current.current_timer.add_child(name)
+        [current_timer,parent_timer]
       end
 
       def finish_step(obj)
-        if obj && current
-          current_timer, parent_timer = obj
-          current_timer.record_time
-          current.current_timer = parent_timer
-        end
+        return unless obj && current
+        current_timer, parent_timer = obj
+        current_timer.record_time
+        current.current_timer = parent_timer
       end
 
       # perform a profiling step on given block
