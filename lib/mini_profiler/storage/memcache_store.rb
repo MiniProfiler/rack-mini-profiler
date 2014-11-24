@@ -14,7 +14,7 @@ module Rack
       end
 
       def save(page_struct)
-        @client.set("#{@prefix}#{page_struct['Id']}", Marshal::dump(page_struct), @expires_in_seconds)
+        @client.set("#{@prefix}#{page_struct[:id]}", Marshal::dump(page_struct), @expires_in_seconds)
       end
 
       def load(id)
