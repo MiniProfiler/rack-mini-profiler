@@ -1,12 +1,9 @@
 require 'spec_helper'
-require 'mini_profiler/timer_struct'
 
-require 'json'
-
-describe Rack::MiniProfiler::TimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Base do
 
   before do
-    @timer = Rack::MiniProfiler::TimerStruct.new('Mini' => 'Profiler')
+    @timer = Rack::MiniProfiler::TimerStruct::Base.new('Mini' => 'Profiler')
   end
 
   it 'has the the Mini attribute' do

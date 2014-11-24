@@ -1,19 +1,20 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
 require 'yaml'
 
-describe Rack::MiniProfiler::ClientTimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Client do
+
+  let(:described){ Rack::MiniProfiler::TimerStruct::Client }
 
   def new_page
-    Rack::MiniProfiler::PageTimerStruct.new({})
+    Rack::MiniProfiler::TimerStruct::Page.new({})
   end
 
   def fixture(name)
-    YAML.load(File.open(File.dirname(__FILE__) + "/../fixtures/#{name}.yml"))
+    YAML.load(File.open(File.dirname(__FILE__) + "/../../fixtures/#{name}.yml"))
   end
 
   before do
-    @client = Rack::MiniProfiler::ClientTimerStruct.new
+    @client = described.new
   end
 
   it 'defaults to no attributes' do
@@ -24,18 +25,30 @@ describe Rack::MiniProfiler::ClientTimerStruct do
 
     describe 'without a form' do
       before do
-        @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data({}, new_page)
+        @client = described.init_from_form_data({}, new_page)
       end
-      
+
       it 'is null' do
         @client.should be_nil
       end
+    end
 
+    describe 'init_instrumentation' do
+      it "returns the body of mPt js function" do
+        expect(described.init_instrumentation).to match(/mPt/)
+      end
+    end
+
+    describe 'instrument' do
+      it "works" do
+        expected = "<script>mPt.probe('a')</script>b<script>mPt.probe('a')</script>b"
+        expect(described.instrument('a', 'b')).to eq(expected)
+      end
     end
 
     describe 'with a simple request' do
       before do
-        @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data(fixture(:simple_client_request), new_page)
+        @client = described.init_from_form_data(fixture(:simple_client_request), new_page)
       end
 
       it 'has the correct RedirectCount' do
@@ -45,20 +58,20 @@ describe Rack::MiniProfiler::ClientTimerStruct do
       it 'has Timings' do
         @client['Timings'].should_not be_empty
       end
-      
+
       describe "bob.js" do
         before do
           @bob = @client['Timings'].find {|t| t["Name"] == "bob.js"}
         end
 
-        it 'has it in the timings' do 
+        it 'has it in the timings' do
           @bob.should_not be_nil
         end
 
-        it 'has the correct duration' do 
+        it 'has the correct duration' do
           @bob["Duration"].should == 6
         end
-        
+
       end
 
       describe "Navigation" do
@@ -66,7 +79,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
           @nav = @client['Timings'].find {|t| t["Name"] == "Navigation"}
         end
 
-        it 'has a Timing for the Navigation' do          
+        it 'has a Timing for the Navigation' do
           @nav.should_not be_nil
         end
 
@@ -74,7 +87,7 @@ describe Rack::MiniProfiler::ClientTimerStruct do
           @nav['Start'].should == 0
         end
 
-        it 'has the correct duration' do     
+        it 'has the correct duration' do
           @nav['Duration'].should == 16
         end
       end
@@ -84,24 +97,24 @@ describe Rack::MiniProfiler::ClientTimerStruct do
           @simple = @client['Timings'].find {|t| t["Name"] == "Simple"}
         end
 
-        it 'has a Timing for the Simple' do          
+        it 'has a Timing for the Simple' do
           @simple.should_not be_nil
         end
 
-        it 'has the correct start' do          
+        it 'has the correct start' do
           @simple['Start'].should == 1
         end
 
-        it 'has the correct duration' do          
+        it 'has the correct duration' do
           @simple['Duration'].should == 10
         end
-      end      
+      end
 
     end
 
     describe 'with some odd values' do
       before do
-        @client = Rack::MiniProfiler::ClientTimerStruct.init_from_form_data(fixture(:weird_client_request), new_page)        
+        @client = described.init_from_form_data(fixture(:weird_client_request), new_page)
       end
 
       it 'has the correct RedirectCount' do
@@ -112,51 +125,45 @@ describe Rack::MiniProfiler::ClientTimerStruct do
         @client['Timings'].should_not be_empty
       end
 
-      it 'has no timing when the start is before Navigation' do          
+      it 'has no timing when the start is before Navigation' do
         @client['Timings'].find {|t| t["Name"] == "Previous"}.should be_nil
       end
-  
+
       describe "weird" do
         before do
           @weird = @client['Timings'].find {|t| t["Name"] == "Weird"}
         end
 
-        it 'has a Timing for the Weird' do          
+        it 'has a Timing for the Weird' do
           @weird.should_not be_nil
         end
 
-        it 'has the correct start' do          
+        it 'has the correct start' do
           @weird['Start'].should == 11
         end
 
-        it 'has a 0 duration because start time is greater than end time' do          
+        it 'has a 0 duration because start time is greater than end time' do
           @weird['Duration'].should == 0
         end
-      end      
+      end
 
       describe "differentFormat" do
         before do
           @diff = @client['Timings'].find {|t| t["Name"] == "differentFormat"}
         end
 
-        it 'has a Timing for the differentFormat' do          
+        it 'has a Timing for the differentFormat' do
           @diff.should_not be_nil
         end
 
-        it 'has the correct start' do          
+        it 'has the correct start' do
           @diff['Start'].should == 1
         end
 
-        it 'has a -1 duration because the format was different' do          
+        it 'has a -1 duration because the format was different' do
           @diff['Duration'].should == -1
         end
       end
-
     end
-
-
-
   end
-
-
 end
