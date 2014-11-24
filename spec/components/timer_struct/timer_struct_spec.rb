@@ -1,12 +1,9 @@
 require 'spec_helper'
-require 'mini_profiler/timer_struct'
 
-require 'json'
-
-describe Rack::MiniProfiler::TimerStruct do
+describe Rack::MiniProfiler::TimerStruct::Base do
 
   before do
-    @timer = Rack::MiniProfiler::TimerStruct.new('Mini' => 'Profiler')
+    @timer = Rack::MiniProfiler::TimerStruct::Base.new('Mini' => 'Profiler')
   end
 
   it 'has the the Mini attribute' do
@@ -14,14 +11,14 @@ describe Rack::MiniProfiler::TimerStruct do
   end
 
   it 'allows us to set any attribute we want' do
-    @timer['Hello'] = 'World'
-    @timer['Hello'].should == 'World'
+    @timer[:hello] = 'World'
+    @timer[:hello].should == 'World'
   end
 
   describe 'to_json' do
 
     before do
-      @timer['IceIce'] = 'Baby'
+      @timer[:ice_ice] = 'Baby'
       @json = @timer.to_json
     end
 
@@ -45,7 +42,7 @@ describe Rack::MiniProfiler::TimerStruct do
       end
 
       it 'has the element we added' do
-        @deserialized['IceIce'].should == 'Baby'
+        @deserialized['ice_ice'].should == 'Baby'
       end
     end
 

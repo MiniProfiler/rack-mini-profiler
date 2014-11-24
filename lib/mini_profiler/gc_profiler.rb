@@ -37,7 +37,7 @@ class Rack::MiniProfiler::GCProfiler
     result
   end
 
-  def diff_object_stats(before,after)
+  def diff_object_stats(before, after)
     diff = {}
     after.each do |k,v|
       diff[k] = v - (before[k] || 0)
@@ -49,7 +49,7 @@ class Rack::MiniProfiler::GCProfiler
     diff
   end
 
-  def analyze_strings(ids_before,ids_after)
+  def analyze_strings(ids_before, ids_after)
     result = {}
     ids_after.each do |id,_|
       obj = ObjectSpace._id2ref(id)
@@ -92,13 +92,13 @@ class Rack::MiniProfiler::GCProfiler
     [objects,memory_allocated]
   end
 
-  def profile_gc_time(app,env)
+  def profile_gc_time(app, env)
     body = []
 
     begin
       GC::Profiler.clear
       prev_profiler_state = GC::Profiler.enabled?
-      prev_gc_state = GC.enable
+      prev_gc_state       = GC.enable
       GC::Profiler.enable
       b = app.call(env)[2]
       b.close if b.respond_to? :close
@@ -112,7 +112,7 @@ class Rack::MiniProfiler::GCProfiler
     return [200, {'Content-Type' => 'text/plain'}, body]
   end
 
-  def profile_gc(app,env)
+  def profile_gc(app, env)
 
     # for memsize_of
     require 'objspace'
@@ -124,17 +124,17 @@ class Rack::MiniProfiler::GCProfiler
 
     # clean up before
     GC.start
-    stat = GC.stat
+    stat          = GC.stat
     prev_gc_state = GC.disable
-    stat_before = object_space_stats
-    b = app.call(env)[2]
+    stat_before   = object_space_stats
+    b             = app.call(env)[2]
     b.close if b.respond_to? :close
     stat_after = object_space_stats
     # so we don't blow out on memory
     prev_gc_state ? GC.disable : GC.enable
 
-    diff = diff_object_stats(stat_before[:stats],stat_after[:stats])
-    string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
+    diff                          = diff_object_stats(stat_before[:stats],stat_after[:stats])
+    string_analysis               = analyze_strings(stat_before[:ids], stat_after[:ids])
     new_objects, memory_allocated = analyze_growth(stat_before[:ids], stat_after[:ids])
     objects_before, memory_before = analyze_initial_state(stat_before[:ids])
 

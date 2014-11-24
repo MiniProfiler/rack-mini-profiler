@@ -1,30 +1,5 @@
-require 'json'
-require 'timeout'
-require 'thread'
-
-require 'mini_profiler/version'
-require 'mini_profiler/page_timer_struct'
-require 'mini_profiler/sql_timer_struct'
-require 'mini_profiler/custom_timer_struct'
-require 'mini_profiler/client_timer_struct'
-require 'mini_profiler/request_timer_struct'
-require 'mini_profiler/storage/abstract_store'
-require 'mini_profiler/storage/memcache_store'
-require 'mini_profiler/storage/memory_store'
-require 'mini_profiler/storage/redis_store'
-require 'mini_profiler/storage/file_store'
-require 'mini_profiler/config'
-require 'mini_profiler/profiling_methods'
-require 'mini_profiler/context'
-require 'mini_profiler/client_settings'
-require 'mini_profiler/gc_profiler'
-# TODO
-# require 'mini_profiler/gc_profiler_ruby_head' if Gem::Version.new('2.1.0') <= Gem::Version.new(RUBY_VERSION)
-
 module Rack
-
   class MiniProfiler
-
     class << self
 
       include Rack::MiniProfiler::ProfilingMethods
@@ -43,8 +18,7 @@ module Rack
       end
 
       def share_template
-        return @share_template unless @share_template.nil?
-        @share_template = ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+        @share_template ||= ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
       end
 
       def current
@@ -53,7 +27,7 @@ module Rack
 
       def current=(c)
         # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
-        Thread.current[:mini_profiler_private]= c
+        Thread.current[:mini_profiler_private] = c
       end
 
       # discard existing results, don't track this request
@@ -63,9 +37,9 @@ module Rack
 
       def create_current(env={}, options={})
         # profiling the request
-        self.current = Context.new
-        self.current.inject_js = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-        self.current.page_struct = PageTimerStruct.new(env)
+        self.current               = Context.new
+        self.current.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+        self.current.page_struct   = TimerStruct::Page.new(env)
         self.current.current_timer = current.page_struct[:root]
       end
 
@@ -89,7 +63,7 @@ module Rack
     def initialize(app, config = nil)
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config
-      @app = app
+      @app    = app
       @config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
       unless @config.storage_instance
         @config.storage_instance = @config.storage.new(@config.storage_options)
@@ -102,17 +76,17 @@ module Rack
     end
 
     def serve_results(env)
-      request = Rack::Request.new(env)
-      id = request[:id]
+      request     = Rack::Request.new(env)
+      id          = request[:id]
       page_struct = @storage.load(id)
       unless page_struct
         @storage.set_viewed(user(env), id)
-        id = ERB::Util.html_escape(request[:id])
+        id        = ERB::Util.html_escape(request['id'])
         user_info = ERB::Util.html_escape(user(env))
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
       unless page_struct[:has_user_viewed]
-        page_struct[:client_timings] = ClientTimerStruct.init_from_form_data(env, page_struct)
+        page_struct[:client_timings]  = TimerStruct::Client.init_from_form_data(env, page_struct)
         page_struct[:has_user_viewed] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)
@@ -145,7 +119,7 @@ module Rack
 
       full_path = ::File.expand_path("../html/#{file_name}", ::File.dirname(__FILE__))
       return [404, {}, ["Not found"]] unless ::File.exists? full_path
-      f = Rack::File.new nil
+      f      = Rack::File.new nil
       f.path = full_path
 
       begin
@@ -166,7 +140,7 @@ module Rack
     end
 
     def current=(c)
-      MiniProfiler.current=c
+      MiniProfiler.current = c
     end
 
 
@@ -181,7 +155,7 @@ module Rack
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
-      path = env['PATH_INFO']
+      path         = env['PATH_INFO']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
@@ -262,7 +236,7 @@ module Rack
 
       if trace_exceptions
         exceptions = []
-        trace = TracePoint.new(:raise) do |tp|
+        trace      = TracePoint.new(:raise) do |tp|
           exceptions << tp.raised_exception
         end
         trace.enable
@@ -274,7 +248,7 @@ module Rack
         #  This solves a very annoying bug where rack mini profiler never shows up
         if config.disable_caching
           env['HTTP_IF_MODIFIED_SINCE'] = ''
-          env['HTTP_IF_NONE_MATCH'] = ''
+          env['HTTP_IF_NONE_MATCH']     = ''
         end
 
         if query_string =~ /pp=flamegraph/
@@ -285,7 +259,7 @@ module Rack
           else
             # do not sully our profile with mini profiler timings
             current.measure = false
-            match_data = query_string.match(/flamegraph_sample_rate=([\d\.]+)/)
+            match_data      = query_string.match(/flamegraph_sample_rate=([\d\.]+)/)
 
             mode = query_string =~ /mode=c/ ? :c : :ruby
 
@@ -389,7 +363,7 @@ module Rack
 
       if current.inject_js && content_type =~ /text\/html/
         response = Rack::Response.new([], status, headers)
-        script = self.get_profile_script(env)
+        script   = self.get_profile_script(env)
 
         if String === body
           response.write inject(body,script)
@@ -442,7 +416,7 @@ module Rack
 
     def dump_exceptions(exceptions)
       headers = {'Content-Type' => 'text/plain'}
-      body = "Exceptions (#{exceptions.length} raised during request)\n\n"
+      body    = "Exceptions (#{exceptions.length} raised during request)\n\n"
       exceptions.each do |e|
         body << "#{e.class} #{e.message}\n#{e.backtrace.join("\n")}\n\n\n\n"
       end
@@ -527,25 +501,26 @@ module Rack
     # * you have disabled auto append behaviour throught :auto_inject => false flag
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
+      path     = "#{env['SCRIPT_NAME']}#{@config.base_url_path}"
 
       settings = {
-       :path => "#{env['SCRIPT_NAME']}#{@config.base_url_path}",
-       :version => MiniProfiler::VERSION,
-       :position => @config.position,
-       :showTrivial => false,
-       :showChildren => false,
+       :path            => path,
+       :version         => MiniProfiler::VERSION,
+       :position        => @config.position,
+       :showTrivial     => false,
+       :showChildren    => false,
        :maxTracesToShow => 10,
-       :showControls => false,
-       :authorized => true,
-       :toggleShortcut => @config.toggle_shortcut,
-       :startHidden => @config.start_hidden
+       :showControls    => false,
+       :authorized      => true,
+       :toggleShortcut  => @config.toggle_shortcut,
+       :startHidden     => @config.start_hidden
       }
 
       if current && current.page_struct
-        settings[:ids] = ids_comma_separated(env)
+        settings[:ids]       = ids_comma_separated(env)
         settings[:currentId] = current.page_struct[:id]
       else
-        settings[:ids] = []
+        settings[:ids]       = []
         settings[:currentId] = ""
       end
 
@@ -567,6 +542,4 @@ module Rack
     end
 
   end
-
 end
-

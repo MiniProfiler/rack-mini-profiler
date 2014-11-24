@@ -1,9 +1,9 @@
---- 
+---
 rack.request.form_hash:
-  clientPerformance: 
+  clientPerformance:
     navigation:
-      redirectCount: 1
-    timing: 
+      redirect_count: 1
+    timing:
       navigationStart: 1334245954
       navigationEnd: 1334245970
       simpleStart: 1334245955
