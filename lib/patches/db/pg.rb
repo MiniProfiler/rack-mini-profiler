@@ -17,7 +17,7 @@ class PG::Result
     end
   end
 
-  def mp_report_sql(statement, &block)
+  def mp_report_sql(&block)
     start        = Time.now
     result       = yield
     elapsed_time = SqlPatches.elapsed_time(start)
