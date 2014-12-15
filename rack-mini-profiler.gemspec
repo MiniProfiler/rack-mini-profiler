@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'ZenTest'
   s.add_development_dependency 'autotest'
   s.add_development_dependency 'redis'
+  s.add_development_dependency 'connection_pool'
   s.add_development_dependency 'therubyracer'
   s.add_development_dependency 'less'
   s.add_development_dependency 'flamegraph'
