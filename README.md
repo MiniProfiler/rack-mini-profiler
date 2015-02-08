@@ -23,7 +23,7 @@ We have decided to restructure our repository so there is a central UI repo and 
 
 - Setting up a build that reuses https://github.com/MiniProfiler/ui
 - Migrating the internal data structures [per the spec](https://github.com/MiniProfiler/ui)
-- Cleaning up the [horrendous class structure that is using strings as keys and crazy non-objects](https://github.com/MiniProfiler/rack-mini-profiler/blob/master/lib/mini_profiler/sql_timer_struct.rb#L36-L44)
+- Cleaning up the [horrendous class structure that is using strings as keys and crazy non-objects](https://github.com/MiniProfiler/rack-mini-profiler/blob/master/lib/mini_profiler/timer_struct/sql.rb#L36-L44)
 
 If you feel like taking on any of this start an issue and update us on your progress.
 
