@@ -16,12 +16,21 @@ module Rack
       end
 
       def load(id)
-        raw = redis.get "#{@prefix}#{id}"
-        Marshal::load(raw) if raw
+        key = "#{@prefix}#{id}"
+        raw = redis.get key
+        begin
+          Marshal::load(raw) if raw
+        rescue
+          # bad format, junk old data
+          redis.del key
+          nil
+        end
       end
 
       def set_unviewed(user, id)
-        redis.sadd "#{@prefix}-#{user}-v", id
+        key = "#{@prefix}-#{user}-v"
+        redis.sadd key, id
+        redis.expire key, @expires_in_seconds
       end
 
       def set_viewed(user, id)
