@@ -1,5 +1,5 @@
 module Rack
   class MiniProfiler
-    VERSION = 'e33cb2aa161e93d6484ff5fd2cd89a07'.freeze
+    VERSION = 'd73ef466bcbe6e9cac357d6cdd883c80'.freeze
   end
 end

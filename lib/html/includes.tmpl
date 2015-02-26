@@ -188,7 +188,7 @@
 
 <script id="sqlTimingTemplate" type="text/x-jquery-tmpl">
 
-  <tr class="{{if i % 2 == 1}}profiler-odd{{/if}}" data-timing-id="${s.parent_timing_id}">
+  <tr class="${s.row_class}" data-timing-id="${s.parent_timing_id}">
     <td class="profiler-info">
       <div>${s.parent_timing_name}</div>
       <div class="profiler-number"><span class="profiler-unit">T+</span>${MiniProfiler.formatDuration(s.start_milliseconds)} <span class="profiler-unit">ms</span></div>
