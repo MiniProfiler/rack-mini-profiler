@@ -3,6 +3,7 @@ require 'timeout'
 require 'thread'
 
 require 'mini_profiler/version'
+require 'mini_profiler/asset_version'
 
 require 'mini_profiler/timer_struct/base'
 require 'mini_profiler/timer_struct/page'

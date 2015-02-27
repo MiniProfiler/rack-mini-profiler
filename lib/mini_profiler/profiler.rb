@@ -101,7 +101,7 @@ module Rack
         # Otherwise give the HTML back
         html = MiniProfiler.share_template.dup
         html.gsub!(/\{path\}/, "#{env['SCRIPT_NAME']}#{@config.base_url_path}")
-        html.gsub!(/\{version\}/, MiniProfiler::VERSION)
+        html.gsub!(/\{version\}/, MiniProfiler::ASSET_VERSION)
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
         html.gsub!(/\{name\}/, page_struct[:name])
@@ -505,7 +505,7 @@ module Rack
 
       settings = {
        :path            => path,
-       :version         => MiniProfiler::VERSION,
+       :version         => MiniProfiler::ASSET_VERSION,
        :position        => @config.position,
        :showTrivial     => false,
        :showChildren    => false,
