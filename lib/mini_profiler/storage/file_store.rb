@@ -39,9 +39,9 @@ module Rack
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
         raise ArgumentError.new :path unless @path
         @timer_struct_cache = FileCache.new(@path, "mp_timers")
-        @timer_struct_lock = Mutex.new
-        @user_view_cache = FileCache.new(@path, "mp_views")
-        @user_view_lock = Mutex.new
+        @timer_struct_lock  = Mutex.new
+        @user_view_cache    = FileCache.new(@path, "mp_views")
+        @user_view_lock     = Mutex.new
 
         me = self
         t = CacheCleanupThread.new do
@@ -77,7 +77,7 @@ module Rack
 
       def save(page_struct)
         @timer_struct_lock.synchronize {
-          @timer_struct_cache[page_struct['Id']] = page_struct
+          @timer_struct_cache[page_struct[:id]] = page_struct
         }
       end
 

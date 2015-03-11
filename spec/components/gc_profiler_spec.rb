@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
-require 'mini_profiler/gc_profiler'
 
 describe Rack::MiniProfiler::GCProfiler do
   before :each do

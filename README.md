@@ -1,6 +1,6 @@
 # rack-mini-profiler
 
-[![Code Climate](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler.png)](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler) [![Build Status](https://travis-ci.org/MiniProfiler/rack-mini-profiler.png)](https://travis-ci.org/MiniProfiler/rack-mini-profiler)
+[![Code Climate](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler/badges/gpa.svg)](https://codeclimate.com/github/MiniProfiler/rack-mini-profiler) [![Build Status](https://travis-ci.org/MiniProfiler/rack-mini-profiler.svg)](https://travis-ci.org/MiniProfiler/rack-mini-profiler)
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
@@ -23,7 +23,7 @@ We have decided to restructure our repository so there is a central UI repo and 
 
 - Setting up a build that reuses https://github.com/MiniProfiler/ui
 - Migrating the internal data structures [per the spec](https://github.com/MiniProfiler/ui)
-- Cleaning up the [horrendous class structure that is using strings as keys and crazy non-objects](https://github.com/MiniProfiler/rack-mini-profiler/blob/master/lib/mini_profiler/sql_timer_struct.rb#L36-L44)
+- Cleaning up the [horrendous class structure that is using strings as keys and crazy non-objects](https://github.com/MiniProfiler/rack-mini-profiler/blob/master/lib/mini_profiler/timer_struct/sql.rb#L36-L44)
 
 If you feel like taking on any of this start an issue and update us on your progress.
 
@@ -87,7 +87,7 @@ end
 
 To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler):
 
-* add the **flamegraph** gem to your Gemfile
+* add the [**flamegraph**](https://github.com/SamSaffron/flamegraph) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
 Flamegraph generation is supported in MRI 2.0 and 2.1 only.
@@ -111,6 +111,19 @@ end
 Various aspects of rack-mini-profiler's behavior can be configured when your app boots.
 For example in a Rails app, this should be done in an initializer:
 **config/initializers/mini_profiler.rb**
+
+### Caching behavior
+To fix some nasty bugs with rack-mini-profiler showing the wrong data, the middleware
+will remove headers relating to caching (Date & Etag on responses, If-Modified-Since & If-None-Match on requests).
+This probably won't ever break your application, but it can cause some unexpected behavior. For
+example, in a Rails app, calls to `stale?` will always return true.
+
+To disable this behavior, use the following config setting:
+
+```ruby
+# Do not let rack-mini-profiler disable caching
+Rack::MiniProfiler.config.disable_caching = false # defaults to true 
+```
 
 ### Storage
 
@@ -167,6 +180,7 @@ The available configuration options are:
 
 * pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
 * position - Can either be 'right' or 'left'. Default is 'left'.
+* skip_paths - Specifies path list that can be skipped.
 * skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
 * auto_inject (default true) - when false the miniprofiler script is not injected in the page
 * inject_into (default body) - Can be either 'body' or 'head'. Should be set to head in cases where the body contents could be removed before initialization. e.g. an AngularJS app.
