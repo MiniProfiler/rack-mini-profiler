@@ -3,25 +3,23 @@ module Rack
     class MemcacheStore < AbstractStore
 
       EXPIRES_IN_SECONDS = 60 * 60 * 24
-      MAX_RETRIES = 10
+      MAX_RETRIES        = 10
 
       def initialize(args = nil)
         require 'dalli' unless defined? Dalli
         args ||= {}
-        @prefix = args[:prefix] || "MPMemcacheStore"
-        @client = args[:client] || Dalli::Client.new
+        @prefix             = args[:prefix]     || "MPMemcacheStore"
+        @client             = args[:client]     || Dalli::Client.new
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
       end
 
       def save(page_struct)
-        @client.set("#{@prefix}#{page_struct['Id']}", Marshal::dump(page_struct), @expires_in_seconds)
+        @client.set("#{@prefix}#{page_struct[:id]}", Marshal::dump(page_struct), @expires_in_seconds)
       end
 
       def load(id)
         raw = @client.get("#{@prefix}#{id}")
-        if raw
-          Marshal::load raw
-        end
+        Marshal::load(raw) if raw
       end
 
       def set_unviewed(user, id)

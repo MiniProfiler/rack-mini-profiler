@@ -14,6 +14,16 @@ describe Rack::MiniProfiler do
       map '/path1/a' do
         run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>path2</h1>'] }
       end
+      map '/cached-resource' do
+        run lambda { |env|
+          ims = env['HTTP_IF_MODIFIED_SINCE'] || ""
+          if ims.size > 0
+            [304, {'Content-Type' => 'application/json'}, '']
+          else
+            [200, {'Content-Type' => 'application/json'}, '{"name": "Ryan"}']
+          end
+        }
+      end
       map '/post' do
         run lambda { |env| [302, {'Content-Type' => 'text/html'}, '<h1>POST</h1>'] }
       end
@@ -132,6 +142,35 @@ describe Rack::MiniProfiler do
   end
 
   describe 'configuration' do
+    it "should remove caching headers by default" do
+      get '/cached-resource'
+      last_response.headers['Cache-Control'].should include('no-store')
+    end
+
+    it "should strip if-modified-since on the way in" do
+      old_time = 1409326086
+      get '/cached-resource', {}, {'HTTP_IF_MODIFIED_SINCE' => old_time}
+      last_response.status.should equal(200)
+    end
+
+    describe 'with caching re-enabled' do
+      before :each do
+        Rack::MiniProfiler.config.disable_caching = false
+      end
+
+      it "should strip if-modified-since on the way in" do
+        old_time = 1409326086
+        get '/cached-resource', {}, {'HTTP_IF_MODIFIED_SINCE' => old_time}
+        last_response.status.should equal(304)
+      end
+
+
+      it "should be able to re-enable caching" do
+        get '/cached-resource'
+        last_response.headers['Cache-Control'].should_not include('no-store')
+      end
+    end
+
     it "doesn't add MiniProfiler if the callback fails" do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda {|env| false }
       get '/html'
@@ -163,7 +202,7 @@ describe Rack::MiniProfiler do
     it "omits db backtrace if requested" do
       get '/db?pp=no-backtrace'
       prof = load_prof(last_response)
-      stack = prof["Root"]["SqlTimings"][0]["StackTraceSnippet"]
+      stack = prof[:root][:sql_timings][0][:stack_trace_snippet]
       stack.should be_nil
     end
 

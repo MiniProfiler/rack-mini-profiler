@@ -1,8 +1,6 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
 
 describe Rack::MiniProfiler do
-
   describe 'unique id' do
 
     before do
@@ -130,4 +128,3 @@ describe Rack::MiniProfiler do
   end
 
 end
-

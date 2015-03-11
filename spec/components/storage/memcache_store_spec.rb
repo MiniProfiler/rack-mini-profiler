@@ -1,9 +1,4 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
-require 'mini_profiler/page_timer_struct'
-require 'mini_profiler/storage/abstract_store'
-require 'mini_profiler/storage/memcache_store'
-
 describe Rack::MiniProfiler::MemcacheStore do
 
   context 'page struct' do
@@ -15,13 +10,13 @@ describe Rack::MiniProfiler::MemcacheStore do
     describe 'storage' do
 
       it 'can store a PageStruct and retrieve it' do
-        page_struct = Rack::MiniProfiler::PageTimerStruct.new({})
-        page_struct['Id'] = "XYZ"
-        page_struct['Random'] = "random"
+        page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
+        page_struct[:id] = "XYZ"
+        page_struct[:random] = "random"
         @store.save(page_struct)
         page_struct = @store.load("XYZ")
-        page_struct['Random'].should == "random"
-        page_struct['Id'].should == "XYZ"
+        page_struct[:random].should == "random"
+        page_struct[:id].should == "XYZ"
       end
 
       it 'can list unviewed items for a user' do

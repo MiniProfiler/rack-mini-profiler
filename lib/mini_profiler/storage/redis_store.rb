@@ -5,25 +5,32 @@ module Rack
       EXPIRES_IN_SECONDS = 60 * 60 * 24
 
       def initialize(args = nil)
-        @args = args || {}
-        @prefix = @args.delete(:prefix) || 'MPRedisStore'
-        @redis_connection = @args.delete(:connection)
+        @args               = args || {}
+        @prefix             = @args.delete(:prefix)     || 'MPRedisStore'
+        @redis_connection   = @args.delete(:connection)
         @expires_in_seconds = @args.delete(:expires_in) || EXPIRES_IN_SECONDS
       end
 
       def save(page_struct)
-        redis.setex "#{@prefix}#{page_struct['Id']}", @expires_in_seconds, Marshal::dump(page_struct)
+        redis.setex "#{@prefix}#{page_struct[:id]}", @expires_in_seconds, Marshal::dump(page_struct)
       end
 
       def load(id)
-        raw = redis.get "#{@prefix}#{id}"
-        if raw
-          Marshal::load raw
+        key = "#{@prefix}#{id}"
+        raw = redis.get key
+        begin
+          Marshal::load(raw) if raw
+        rescue
+          # bad format, junk old data
+          redis.del key
+          nil
         end
       end
 
       def set_unviewed(user, id)
-        redis.sadd "#{@prefix}-#{user}-v", id
+        key = "#{@prefix}-#{user}-v"
+        redis.sadd key, id
+        redis.expire key, @expires_in_seconds
       end
 
       def set_viewed(user, id)
@@ -44,9 +51,10 @@ unviewed_ids: #{get_unviewed_ids(user)}
       private
 
       def redis
-        return @redis_connection if @redis_connection
-        require 'redis' unless defined? Redis
-        @redis_connection ||= Redis.new @args
+        @redis_connection ||= begin
+          require 'redis' unless defined? Redis
+          Redis.new(@args)
+        end
       end
 
     end

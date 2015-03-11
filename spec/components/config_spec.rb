@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'rack-mini-profiler'
 
 module Rack
   describe MiniProfiler::Config do

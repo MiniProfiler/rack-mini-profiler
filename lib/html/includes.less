@@ -157,6 +157,27 @@
         .profiler-stack-trace {
             margin-bottom:15px;
         }
+
+        tbody tr {
+          border-bottom: 1px solid #f1f1f1;
+        }
+
+        tr {
+          background-color: #FFF;
+        }
+
+        tr.slow {
+          background-color: #FEE;
+        }
+
+        tr.very-slow {
+          background-color: #FDD;
+        }
+
+        tr.very-very-slow {
+          background-color: #FCC;
+        }
+
         pre {
             font-family:@codeFonts;
             white-space:pre-wrap;
@@ -173,15 +194,10 @@
         td {
             padding:15px;
             text-align:left;
-            background-color:#fff;
 
             &:last-child {
                 padding-right:25px; // compensate for scrollbars
             }
-        }
-
-        .profiler-odd td {
-            background-color:#e5e5e5;
         }
 
         .profiler-since-start, .profiler-duration {

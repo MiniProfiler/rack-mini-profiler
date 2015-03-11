@@ -149,6 +149,21 @@
 .profiler-result .profiler-queries .profiler-stack-trace {
   margin-bottom: 15px;
 }
+.profiler-result .profiler-queries tbody tr {
+  border-bottom: 1px solid #f1f1f1;
+}
+.profiler-result .profiler-queries tr {
+  background-color: #FFF;
+}
+.profiler-result .profiler-queries tr.slow {
+  background-color: #FEE;
+}
+.profiler-result .profiler-queries tr.very-slow {
+  background-color: #FDD;
+}
+.profiler-result .profiler-queries tr.very-very-slow {
+  background-color: #FCC;
+}
 .profiler-result .profiler-queries pre {
   font-family: Consolas, monospace, serif;
   white-space: pre-wrap;
@@ -163,13 +178,9 @@
 .profiler-result .profiler-queries td {
   padding: 15px;
   text-align: left;
-  background-color: #fff;
 }
 .profiler-result .profiler-queries td:last-child {
   padding-right: 25px;
-}
-.profiler-result .profiler-queries .profiler-odd td {
-  background-color: #e5e5e5;
 }
 .profiler-result .profiler-queries .profiler-since-start,
 .profiler-result .profiler-queries .profiler-duration {
