@@ -23,7 +23,7 @@ module Rack
       def self.default
         new.instance_eval {
           @auto_inject      = true # automatically inject on every html page
-          @inject_into      = 'body'
+          @inject_into      = :body
           @base_url_path    = "/mini-profiler-resources/"
           @disable_caching  = true
           # called prior to rack chain, to ensure we are allowed to profile

@@ -379,12 +379,12 @@ module Rack
     end
 
     def inject(fragment, script)
-      if config.inject_into == 'head' && fragment.match(/<\/head>/i)
+      if config.inject_into == :head && fragment.match(/<\/head>/i)
         # explicit </head>
 
         regex = /<\/head>/i
         close_tag = '</head>'
-      elsif config.inject_into == 'body' && fragment.match(/<\/body>/i)
+      elsif config.inject_into == :body && fragment.match(/<\/body>/i)
         # explicit </body>
 
         regex = /<\/body>/i
