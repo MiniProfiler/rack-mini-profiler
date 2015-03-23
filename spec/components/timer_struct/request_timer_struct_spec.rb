@@ -16,11 +16,11 @@ describe Rack::MiniProfiler::TimerStruct::Request do
   end
 
   it 'has an Id' do
-    @request[:id].should_not be_nil
+    @request[:Id].should_not be_nil
   end
 
   it 'has a Root' do
-    @request[:name].should == @name
+    @request[:Name].should == @name
   end
 
   it 'begins with a children duration of 0' do
@@ -113,11 +113,11 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       end
 
       it 'has the child in the Children attribute' do
-        @request[:children].should == [@child]
+        @request[:Children].should == [@child]
       end
 
       it 'assigns its Id to the child' do
-        @child[:parent_timing_id].should == @request[:id]
+        @child[:parent_timing_id].should == @request[:Id]
       end
 
       it 'assigns a depth of 1 to the child' do

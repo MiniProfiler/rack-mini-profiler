@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'activerecord', '~> 3.0'
   s.add_development_dependency 'dalli'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', ['~> 2.0', '< 2.99.0']
   s.add_development_dependency 'ZenTest'
   s.add_development_dependency 'autotest'
   s.add_development_dependency 'redis'

@@ -1,9 +1,0 @@
-tbody tr:nth-child(odd)    { background-color:#eee; }
-tbody tr:nth-child(even)    { background-color:#fff; }
-table { border: 0; border-spacing:0;}
-tr {border: 0;}
-.date {font-size: 11px; color: #666;}
-td {padding: 8px;}
-.time {text-align:center;}
-thead tr {background-color: #bbb; color: #444; font-size: 12px;}
-thead tr th { padding: 5px 15px;}

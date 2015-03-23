@@ -14,17 +14,15 @@ module Rack
           started_at   = (Time.now.to_f * 1000).to_i
           machine_name = env['SERVER_NAME']
           super(
-            :id                                      => timer_id,
-            :name                                    => page_name,
-            :started                                 => started_at,
-            :machine_name                            => machine_name,
-            :level                                   => 0,
-            :user                                    => "unknown user",
+            :Id                                      => timer_id,
+            :Name                                    => page_name,
+            :Started                                 => started_at,
+            :MachineName                             => machine_name,
+            :User                                    => "unknown user",
             :has_user_viewed                         => false,
-            :client_timings                          => nil,
-            :duration_milliseconds                   => 0,
-            :has_trivial_timings                     => true,
-            :has_all_trivial_timings                 => false,
+            :ClientTimings                           => nil,
+            :DurationMilliseconds                    => 0,
+            :HasTrivialTimings                       => true,
             :trivial_duration_threshold_milliseconds => 2,
             :head                                    => nil,
             :duration_milliseconds_in_sql            => 0,
@@ -37,21 +35,21 @@ module Rack
             :custom_timing_stats                     => {}
           )
           name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
-          self[:root] = TimerStruct::Request.createRoot(name, self)
+          self[:Root] = TimerStruct::Request.createRoot(name, self)
         end
 
         def duration_ms
-          @attributes[:root][:duration_milliseconds]
+          root[:DurationMilliseconds]
         end
 
         def root
-          @attributes[:root]
+          @attributes[:Root]
         end
 
         def to_json(*a)
           attribs = @attributes.merge(
-            :started               => '/Date(%d)/' % @attributes[:started],
-            :duration_milliseconds => @attributes[:root][:duration_milliseconds],
+            :Started               => '/Date(%d)/' % @attributes[:Started],
+            :DurationMilliseconds => duration_ms,
             :custom_timing_names   => @attributes[:custom_timing_stats].keys.sort
           )
           ::JSON.generate(attribs, :max_nesting => 100)
