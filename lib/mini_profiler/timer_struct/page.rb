@@ -19,7 +19,6 @@ module Rack
             :Started                                 => started_at,
             :MachineName                             => machine_name,
             :User                                    => "unknown user",
-            :has_user_viewed                         => false,
             :ClientTimings                           => nil,
             :DurationMilliseconds                    => 0,
             :HasTrivialTimings                       => true,
@@ -28,11 +27,7 @@ module Rack
             :duration_milliseconds_in_sql            => 0,
             :has_sql_timings                         => true,
             :has_duplicate_sql_timings               => false,
-            :executed_readers                        => 0,
-            :executed_scalars                        => 0,
-            :executed_non_queries                    => 0,
-            :custom_timing_names                     => [],
-            :custom_timing_stats                     => {}
+            :has_user_viewed                         => false
           )
           name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           self[:Root] = TimerStruct::Request.createRoot(name, self)
@@ -49,8 +44,7 @@ module Rack
         def to_json(*a)
           attribs = @attributes.merge(
             :Started               => '/Date(%d)/' % @attributes[:Started],
-            :DurationMilliseconds => duration_ms,
-            :custom_timing_names   => @attributes[:custom_timing_stats].keys.sort
+            :DurationMilliseconds => duration_ms
           )
           ::JSON.generate(attribs, :max_nesting => 100)
         end

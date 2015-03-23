@@ -12,8 +12,7 @@ module Rack
           super(
             :type                  => type,
             :start_milliseconds    => start_millis,
-            :duration_milliseconds => duration_ms,
-            :parent_timing_id      => nil
+            :duration_milliseconds => duration_ms
           )
         end
       end

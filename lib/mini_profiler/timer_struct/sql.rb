@@ -40,7 +40,6 @@ module Rack
             :duration_milliseconds             => duration_ms,
             :first_fetch_duration_milliseconds => duration_ms,
             :parameters                        => nil,
-            :parent_timing_id                  => nil,
             :is_duplicate                      => false
           )
         end

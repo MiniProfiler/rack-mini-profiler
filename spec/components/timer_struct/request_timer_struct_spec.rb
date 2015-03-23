@@ -23,10 +23,6 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     @request[:Name].should == @name
   end
 
-  it 'begins with a children duration of 0' do
-    @request.children_duration.should == 0
-  end
-
   it 'has a false HasChildren attribute' do
     @request[:has_children].should be_false
   end
@@ -116,16 +112,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
         @request[:Children].should == [@child]
       end
 
-      it 'assigns its Id to the child' do
-        @child[:parent_timing_id].should == @request[:Id]
-      end
-
       it 'assigns a depth of 1 to the child' do
         @child[:depth].should == 1
-      end
-
-      it 'increases the children duration' do
-        @request.children_duration.should == 1111
       end
 
       it 'marks short timings as trivial' do
@@ -146,11 +134,6 @@ describe Rack::MiniProfiler::TimerStruct::Request do
         it 'has stores the recorded time in DurationMilliseconds' do
           @request.duration_ms.should == 1234
         end
-
-        it 'calculates DurationWithoutChildrenMilliseconds without the children timings' do
-          @request[:duration_without_children_milliseconds].should == 123
-        end
-
       end
     end
   end

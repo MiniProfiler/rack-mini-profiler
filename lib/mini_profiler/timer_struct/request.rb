@@ -9,8 +9,6 @@ module Rack
           end
         end
 
-        attr_accessor :children_duration
-
         def initialize(name, page, parent)
           start_millis = (Time.now.to_f * 1000).to_i - page[:Started]
           depth        = parent ? parent.depth + 1 : 0
@@ -18,9 +16,8 @@ module Rack
             :Id                                      => MiniProfiler.generate_id,
             :Name                                    => name,
             :DurationMilliseconds                    => 0,
-            :duration_without_children_milliseconds  => 0,
             :StartMilliseconds                       => start_millis,
-            :parent_timing_id                        => nil,
+            :CustomTimings                           => {},
             :Children                                => [],
             :has_children                            => false,
             :key_values                              => nil,
@@ -31,14 +28,8 @@ module Rack
             :sql_timings_duration_milliseconds       => 0,
             :is_trivial                              => false,
             :is_root                                 => false,
-            :depth                                   => depth,
-            :executed_readers                        => 0,
-            :executed_scalars                        => 0,
-            :executed_non_queries                    => 0,
-            :custom_timing_stats                     => {},
-            :custom_timings                          => {}
+            :depth                                   => depth
           )
-          @children_duration = 0
           @start             = Time.now
           @parent            = parent
           @page              = page
@@ -65,7 +56,7 @@ module Rack
         end
 
         def custom_timings
-          self[:custom_timings]
+          self[:CustomTimings]
         end
 
         def sql_timings
@@ -76,7 +67,6 @@ module Rack
           TimerStruct::Request.new(name, @page, self).tap do |timer|
             children.push(timer)
             self[:has_children]      = true
-            timer[:parent_timing_id] = self[:Id]
             timer[:depth]            = self[:depth] + 1
           end
         end
@@ -84,7 +74,6 @@ module Rack
         def add_sql(query, elapsed_ms, page, skip_backtrace = false, full_backtrace = false)
           TimerStruct::Sql.new(query, elapsed_ms, page, self , skip_backtrace, full_backtrace).tap do |timer|
             self[:sql_timings].push(timer)
-            timer[:parent_timing_id] = self[:Id]
             self[:has_sql_timings]   = true
             self[:sql_timings_duration_milliseconds] += elapsed_ms
             page[:duration_milliseconds_in_sql]      += elapsed_ms
@@ -93,18 +82,8 @@ module Rack
 
         def add_custom(type, elapsed_ms, page)
           TimerStruct::Custom.new(type, elapsed_ms, page, self).tap do |timer|
-            timer[:parent_timing_id] = self[:Id]
-
-            self[:custom_timings][type] ||= []
-            self[:custom_timings][type].push(timer)
-
-            self[:custom_timing_stats][type] ||= {:count => 0, :duration => 0.0}
-            self[:custom_timing_stats][type][:count]    += 1
-            self[:custom_timing_stats][type][:duration] += elapsed_ms
-
-            page[:custom_timing_stats][type] ||= {:count => 0, :duration => 0.0}
-            page[:custom_timing_stats][type][:count]    += 1
-            page[:custom_timing_stats][type][:duration] += elapsed_ms
+            self.custom_timings[type] ||= []
+            self.custom_timings[type].push(timer)
           end
         end
 
@@ -112,12 +91,6 @@ module Rack
           milliseconds ||= (Time.now - @start) * 1000
           self[:DurationMilliseconds]                   = milliseconds
           self[:is_trivial]                             = true if milliseconds < self[:trivial_duration_threshold_milliseconds]
-          self[:duration_without_children_milliseconds] = milliseconds - @children_duration
-
-          if @parent
-            @parent.children_duration += milliseconds
-          end
-
         end
 
       end
