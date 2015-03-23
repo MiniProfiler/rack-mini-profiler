@@ -1,0 +1,3 @@
+[submodule "lib/ui"]
+	path = lib/ui
+	url = https://github.com/MiniProfiler/ui
