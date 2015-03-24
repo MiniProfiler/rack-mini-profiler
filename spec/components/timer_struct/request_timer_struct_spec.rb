@@ -39,16 +39,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     expect(@request.start).not_to be(0)
   end
 
-  it 'has a false HasSqlTimings attribute' do
-    @request[:has_sql_timings].should be_false
-  end
-
   it 'has no sql timings at first' do
-    @request[:sql_timings].should be_empty
-  end
-
-  it 'has a 0 for sql_timings_duration_milliseconds' do
-    @request[:sql_timings_duration_milliseconds].should == 0
+    @request.sql_timings.should be_empty
   end
 
   describe 'add SQL' do
@@ -58,24 +50,12 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       @request.add_sql("SELECT 1 FROM users", 77, @page)
     end
 
-    it 'has a true HasSqlTimings attribute' do
-      @request[:has_sql_timings].should be_true
-    end
-
     it 'has the SqlTiming object' do
       @request.sql_timings.should_not be_empty
     end
 
     it 'has a child with the ParentTimingId of the request' do
       @request.sql_timings[0]['ParentTimingId'].should == @request['Id']
-    end
-
-    it 'increases sql_timings_duration_milliseconds' do
-      @request[:sql_timings_duration_milliseconds].should == 77
-    end
-
-    it "increases the page's " do
-      @page[:duration_milliseconds_in_sql].should == 77
     end
 
   end

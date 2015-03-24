@@ -24,9 +24,6 @@ module Rack
             :HasTrivialTimings                       => true,
             :trivial_duration_threshold_milliseconds => 2,
             :head                                    => nil,
-            :duration_milliseconds_in_sql            => 0,
-            :has_sql_timings                         => true,
-            :has_duplicate_sql_timings               => false,
             :has_user_viewed                         => false
           )
           name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"

@@ -21,11 +21,7 @@ module Rack
             :Children                                => [],
             :has_children                            => false,
             :key_values                              => nil,
-            :has_sql_timings                         => false,
-            :has_duplicate_sql_timings               => false,
             :trivial_duration_threshold_milliseconds => 2,
-            :sql_timings                             => [],
-            :sql_timings_duration_milliseconds       => 0,
             :is_trivial                              => false,
             :is_root                                 => false,
             :depth                                   => depth
@@ -60,7 +56,7 @@ module Rack
         end
 
         def sql_timings
-          self[:sql_timings]
+          custom_timings[:sql] ||= []
         end
 
         def add_child(name)
@@ -73,10 +69,7 @@ module Rack
 
         def add_sql(query, elapsed_ms, page, skip_backtrace = false, full_backtrace = false)
           TimerStruct::Sql.new(query, elapsed_ms, page, self , skip_backtrace, full_backtrace).tap do |timer|
-            self[:sql_timings].push(timer)
-            self[:has_sql_timings]   = true
-            self[:sql_timings_duration_milliseconds] += elapsed_ms
-            page[:duration_milliseconds_in_sql]      += elapsed_ms
+            sql_timings.push(timer)
           end
         end
 
