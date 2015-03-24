@@ -5,19 +5,15 @@ describe Rack::MiniProfiler::TimerStruct::Custom do
     @name = 'cool request'
     @page    = Rack::MiniProfiler::TimerStruct::Page.new({})
     @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, @page)
-    @custom  = Rack::MiniProfiler::TimerStruct::Custom.new('a', 0.2, @page, @request)
-  end
-
-  it 'has an type' do
-    @custom[:type].should_not be_nil
+    @custom  = Rack::MiniProfiler::TimerStruct::Custom.new(0.2, @page, @request)
   end
 
   it 'has a dur milliseconds' do
-    @custom[:duration_milliseconds].should_not be_nil
+    @custom[:DurationMilliseconds].should_not be_nil
   end
 
   it 'has a start_milliseconds' do
-    @custom[:start_milliseconds].should_not be_nil
+    @custom[:StartMilliseconds].should_not be_nil
   end
 
   describe 'to_json' do
@@ -27,7 +23,7 @@ describe Rack::MiniProfiler::TimerStruct::Custom do
     end
 
     it 'has a DurationMilliseconds element' do
-      @deserialized['duration_milliseconds'].should_not be_nil
+      @deserialized['DurationMilliseconds'].should_not be_nil
     end
   end
 

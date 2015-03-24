@@ -52,7 +52,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
       end
 
       it 'has the correct RedirectCount' do
-        @client[:redirect_count].should == 1
+        @client[:RedirectCount].should == 1
       end
 
       it 'has Timings' do

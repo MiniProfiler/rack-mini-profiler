@@ -28,11 +28,11 @@ module Rack
         end
 
         def redirect_count
-          self[:redirect_count]
+          self[:RedirectCount]
         end
 
         def timings
-          self[:timings]
+          self[:Timings]
         end
 
         def self.init_from_form_data(env, page_struct)
@@ -79,8 +79,8 @@ module Rack
           end
 
           TimerStruct::Client.new.tap do |rval|
-            rval[:redirect_count] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirect_count']
-            rval[:timings]        = timings
+            rval[:RedirectCount] = env['rack.request.form_hash']['clientPerformance']['navigation']['redirect_count']
+            rval[:Timings]       = timings
           end
         end
       end

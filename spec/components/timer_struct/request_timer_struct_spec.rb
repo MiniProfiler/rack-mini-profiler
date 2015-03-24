@@ -11,10 +11,6 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, new_page)
   end
 
-  it 'sets IsRoot to true' do
-    @request[:is_root].should be_true
-  end
-
   it 'has an Id' do
     @request[:Id].should_not be_nil
   end
@@ -23,16 +19,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     @request[:Name].should == @name
   end
 
-  it 'has a false HasChildren attribute' do
-    @request[:has_children].should be_false
-  end
-
   it 'has an empty Children attribute' do
     @request.children.should be_empty
-  end
-
-  it 'has a depth of 0' do
-    @request.depth.should == 0
   end
 
   it "has start time" do
@@ -80,35 +68,13 @@ describe Rack::MiniProfiler::TimerStruct::Request do
         @child.record_time(1111)
       end
 
-      it 'has a is_root value of false' do
-        @child[:is_root].should be_false
-      end
-
-      it 'has a true HasChildren attribute' do
-        @request[:has_children].should be_true
-      end
-
       it 'has the child in the Children attribute' do
         @request[:Children].should == [@child]
       end
 
-      it 'assigns a depth of 1 to the child' do
-        @child[:depth].should == 1
-      end
-
-      it 'marks short timings as trivial' do
-        @request.record_time(1)
-        @request[:is_trivial].should be_true
-      end
-
-
       describe 'record time on parent' do
         before do
           @request.record_time(1234)
-        end
-
-        it "is not a trivial query" do
-          @request[:is_trivial].should be_false
         end
 
         it 'has stores the recorded time in DurationMilliseconds' do

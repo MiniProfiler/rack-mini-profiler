@@ -14,17 +14,14 @@ module Rack
           started_at   = (Time.now.to_f * 1000).to_i
           machine_name = env['SERVER_NAME']
           super(
-            :Id                                      => timer_id,
-            :Name                                    => page_name,
-            :Started                                 => started_at,
-            :MachineName                             => machine_name,
-            :User                                    => "unknown user",
-            :ClientTimings                           => nil,
-            :DurationMilliseconds                    => 0,
-            :HasTrivialTimings                       => true,
-            :trivial_duration_threshold_milliseconds => 2,
-            :head                                    => nil,
-            :has_user_viewed                         => false
+            :Id                    => timer_id,
+            :Name                  => page_name,
+            :Started               => started_at,
+            :DurationMilliseconds  => 0,
+            :MachineName           => machine_name,
+            :ClientTimings         => nil,
+            :User                  => "unknown user",
+            :has_user_viewed       => false
           )
           name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           self[:Root] = TimerStruct::Request.createRoot(name, self)

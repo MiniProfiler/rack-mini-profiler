@@ -86,7 +86,7 @@ module Rack
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
       unless page_struct[:has_user_viewed]
-        page_struct[:client_timings]  = TimerStruct::Client.init_from_form_data(env, page_struct)
+        page_struct[:ClientTimings] = TimerStruct::Client.init_from_form_data(env, page_struct)
         page_struct[:has_user_viewed] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)
