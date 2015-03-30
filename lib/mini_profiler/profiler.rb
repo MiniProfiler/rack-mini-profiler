@@ -100,7 +100,7 @@ module Rack
 
         # Otherwise give the HTML back
         html = MiniProfiler.share_template.dup
-        html.gsub!(/\{path\}/, "#{env['SCRIPT_NAME']}#{@config.base_url_path}")
+        html.gsub!(/\{path\}/, "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
         html.gsub!(/\{version\}/, MiniProfiler::ASSET_VERSION)
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
@@ -156,6 +156,9 @@ module Rack
       status = headers = body = nil
       query_string = env['QUERY_STRING']
       path         = env['PATH_INFO']
+
+      # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
+      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
@@ -501,7 +504,7 @@ module Rack
     # * you have disabled auto append behaviour throught :auto_inject => false flag
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
-      path     = "#{env['SCRIPT_NAME']}#{@config.base_url_path}"
+      path     = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
 
       settings = {
        :path            => path,
