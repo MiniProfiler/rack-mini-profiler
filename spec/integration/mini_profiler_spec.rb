@@ -54,6 +54,12 @@ describe Rack::MiniProfiler do
           [200, {'Content-Type' => 'text/html'}, '<h1>path1</h1>']
         }
       end
+      map '/rails_engine' do
+        run lambda { |env|
+          env['SCRIPT_NAME'] = '/rails_engine'  # Rails engines do that
+          [200, {'Content-Type' => 'text/html'}, '<html><h1>Hi</h1></html>']
+        }
+      end
     }.to_app
   end
 
@@ -140,6 +146,21 @@ describe Rack::MiniProfiler do
     end
 
   end
+
+
+  describe 'within a rails engine' do
+
+    before do
+      get '/rails_engine'
+    end
+
+    it 'include the correct JS in the body' do
+      last_response.body.include?('/rails_engine/mini-profiler-resources/includes.js').should_not be_true
+      last_response.body.include?('src="/mini-profiler-resources/includes.js').should be_true
+    end
+
+  end
+
 
   describe 'configuration' do
     it "should remove caching headers by default" do
