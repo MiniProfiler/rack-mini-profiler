@@ -31,26 +31,21 @@ module Rack
 
           @parent      = parent
           @page        = page
-          start_millis = ((Time.now.to_f * 1000).to_i - page[:started]) - duration_ms
+          start_millis = ((Time.now.to_f * 1000).to_i - page[:Started]) - duration_ms
           super(
-            :execute_type                      => 3, # TODO
-            :formatted_command_string          => query,
-            :stack_trace_snippet               => stack_trace,
-            :start_milliseconds                => start_millis,
-            :duration_milliseconds             => duration_ms,
-            :first_fetch_duration_milliseconds => duration_ms,
-            :parameters                        => nil,
-            :parent_timing_id                  => nil,
-            :is_duplicate                      => false
+            :ExecuteType                    => 3, # TODO
+            :CommandString                  => query,
+            :StackTraceSnippet              => stack_trace,
+            :StartMilliseconds              => start_millis,
+            :DurationMilliseconds           => duration_ms,
+            :FirstFetchDurationMilliseconds => duration_ms
           )
         end
 
         def report_reader_duration(elapsed_ms)
           return if @reported
           @reported = true
-          self[:duration_milliseconds]                += elapsed_ms
-          @parent[:sql_timings_duration_milliseconds] += elapsed_ms
-          @page[:duration_milliseconds_in_sql]        += elapsed_ms
+          self[:DurationMilliseconds] += elapsed_ms
         end
 
       end

@@ -223,7 +223,7 @@ describe Rack::MiniProfiler do
     it "omits db backtrace if requested" do
       get '/db?pp=no-backtrace'
       prof = load_prof(last_response)
-      stack = prof[:root][:sql_timings][0][:stack_trace_snippet]
+      stack = prof[:Root].sql_timings[0][:stack_trace_snippet]
       stack.should be_nil
     end
 

@@ -11,10 +11,10 @@ describe Rack::MiniProfiler::MemoryStore do
     describe 'storage' do
 
       it 'can store a PageStruct and retrieve it' do
-        page_struct = {:id => "XYZ", :random => "random"}
+        page_struct = {:Id => "XYZ", :random => "random"}
         @store.save(page_struct)
         page_struct = @store.load("XYZ")
-        page_struct[:id].should == "XYZ"
+        page_struct[:Id].should == "XYZ"
         page_struct[:random].should == "random"
       end
 
@@ -42,10 +42,10 @@ describe Rack::MiniProfiler::MemoryStore do
     end
 
     it "cleans up expired values" do
-      old_page_struct = {:id => "XYZ", :random => "random", :started => ((Time.now.to_f - 2) * 1000).to_i }
+      old_page_struct = {:Id => "XYZ", :random => "random", :started => ((Time.now.to_f - 2) * 1000).to_i }
       @fast_expiring_store.save(old_page_struct)
       old_page_struct = @fast_expiring_store.load("XYZ")
-      old_page_struct[:id].should == "XYZ"
+      old_page_struct[:Id].should == "XYZ"
       @fast_expiring_store.cleanup_cache
       page_struct = @fast_expiring_store.load("XYZ")
       expect(page_struct).to eq(nil)

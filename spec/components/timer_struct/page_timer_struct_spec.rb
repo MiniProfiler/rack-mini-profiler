@@ -7,11 +7,11 @@ describe Rack::MiniProfiler::TimerStruct::Page do
   end
 
   it 'has an Id' do
-    @page[:id].should_not be_nil
+    @page[:Id].should_not be_nil
   end
 
   it 'has a Root' do
-    @page[:root].should_not be_nil
+    @page[:Root].should_not be_nil
   end
 
   describe 'to_json' do
@@ -21,11 +21,11 @@ describe Rack::MiniProfiler::TimerStruct::Page do
     end
 
     it 'has a Started element' do
-      @deserialized['started'].should_not be_nil
+      @deserialized['Started'].should_not be_nil
     end
 
     it 'has a DurationMilliseconds element' do
-      @deserialized['duration_milliseconds'].should_not be_nil
+      @deserialized['DurationMilliseconds'].should_not be_nil
     end
   end
 

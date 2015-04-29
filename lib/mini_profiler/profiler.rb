@@ -18,7 +18,7 @@ module Rack
       end
 
       def share_template
-        @share_template ||= ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+        @share_template ||= ::File.read(::File.expand_path("../ui/share.html", ::File.dirname(__FILE__)))
       end
 
       def current
@@ -40,7 +40,7 @@ module Rack
         self.current               = Context.new
         self.current.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
         self.current.page_struct   = TimerStruct::Page.new(env)
-        self.current.current_timer = current.page_struct[:root]
+        self.current.current_timer = current.page_struct[:Root]
       end
 
       def authorize_request
@@ -86,7 +86,7 @@ module Rack
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
       unless page_struct[:has_user_viewed]
-        page_struct[:client_timings]  = TimerStruct::Client.init_from_form_data(env, page_struct)
+        page_struct[:ClientTimings] = TimerStruct::Client.init_from_form_data(env, page_struct)
         page_struct[:has_user_viewed] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)
@@ -104,7 +104,7 @@ module Rack
         html.gsub!(/\{version\}/, MiniProfiler::ASSET_VERSION)
         html.gsub!(/\{json\}/, result_json)
         html.gsub!(/\{includes\}/, get_profile_script(env))
-        html.gsub!(/\{name\}/, page_struct[:name])
+        html.gsub!(/\{name\}/, page_struct[:Name])
         html.gsub!(/\{duration\}/, "%.1f" % page_struct.duration_ms)
 
         [200, {'Content-Type' => 'text/html'}, [html]]
@@ -117,7 +117,7 @@ module Rack
 
       return serve_results(env) if file_name.eql?('results')
 
-      full_path = ::File.expand_path("../html/#{file_name}", ::File.dirname(__FILE__))
+      full_path = ::File.expand_path("../ui/#{file_name}", ::File.dirname(__FILE__))
       return [404, {}, ["Not found"]] unless ::File.exists? full_path
       f      = Rack::File.new nil
       f.path = full_path
@@ -313,8 +313,8 @@ module Rack
       end
 
       page_struct = current.page_struct
-      page_struct[:user] = user(env)
-      page_struct[:root].record_time((Time.now - start) * 1000)
+      page_struct[:User] = user(env)
+      page_struct[:Root].record_time((Time.now - start) * 1000)
 
       if flamegraph
         body.close if body.respond_to? :close
@@ -324,7 +324,7 @@ module Rack
 
       begin
         # no matter what it is, it should be unviewed, otherwise we will miss POST
-        @storage.set_unviewed(page_struct[:user], page_struct[:id])
+        @storage.set_unviewed(page_struct[:User], page_struct[:Id])
         @storage.save(page_struct)
 
         # inject headers, script
@@ -486,7 +486,7 @@ module Rack
 
     def ids(env)
       # cap at 10 ids, otherwise there is a chance you can blow the header
-      ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
+      ([current.page_struct[:Id]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
     end
 
     def ids_json(env)
@@ -521,7 +521,7 @@ module Rack
 
       if current && current.page_struct
         settings[:ids]       = ids_comma_separated(env)
-        settings[:currentId] = current.page_struct[:id]
+        settings[:currentId] = current.page_struct[:Id]
       else
         settings[:ids]       = []
         settings[:currentId] = ""
