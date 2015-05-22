@@ -9,7 +9,12 @@ module Rack::MiniProfilerRails
       
     c = Rack::MiniProfiler.config
 
-    # By default, only show the MiniProfiler in development mode, in production allow profiling if post_authorize_cb is set
+    # By default, only show the MiniProfiler in development mode.
+    # To use the MiniProfiler in production, call Rack::MiniProfiler.authorize_request
+    # from a hook in your ApplicationController
+    #
+    # Example:
+    #   before_action { Rack::MiniProfiler.authorize_request if current_user.is_admin? }
     #
     # NOTE: this must be set here with = and not ||=
     #  The out of the box default is "true"
