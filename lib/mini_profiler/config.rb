@@ -12,9 +12,9 @@ module Rack
       @attributes
     end
 
-    attr_accessor :authorization_mode, :auto_inject, :backtrace_ignores, :backtrace_includes, :backtrace_remove,
-      :backtrace_threshold_ms, :base_url_path, :disable_caching, :enabled, :flamegraph_sample_rate, :logger, :position,
-      :pre_authorize_cb, :skip_paths, :skip_schema_queries, :start_hidden, :storage, :storage_failure,
+    attr_accessor :authorization_mode, :auto_inject, :inject_into, :backtrace_ignores, :backtrace_includes,
+      :backtrace_remove, :backtrace_threshold_ms, :base_url_path, :disable_caching, :enabled, :flamegraph_sample_rate,
+      :logger, :position, :pre_authorize_cb, :skip_paths, :skip_schema_queries, :start_hidden, :storage, :storage_failure,
       :storage_instance, :storage_options, :toggle_shortcut, :user_provider
 
     # Deprecated options
@@ -23,6 +23,7 @@ module Rack
       def self.default
         new.instance_eval {
           @auto_inject      = true # automatically inject on every html page
+          @inject_into      = :body
           @base_url_path    = "/mini-profiler-resources/"
           @disable_caching  = true
           # called prior to rack chain, to ensure we are allowed to profile

@@ -60,6 +60,7 @@ module Rack
     #
     # options:
     # :auto_inject - should script be automatically injected on every html page (not xhr)
+    # :inject_into - body or head
     def initialize(app, config = nil)
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config
@@ -381,7 +382,12 @@ module Rack
     end
 
     def inject(fragment, script)
-      if fragment.match(/<\/body>/i)
+      if config.inject_into == :head && fragment.match(/<\/head>/i)
+        # explicit </head>
+
+        regex = /<\/head>/i
+        close_tag = '</head>'
+      elsif config.inject_into == :body && fragment.match(/<\/body>/i)
         # explicit </body>
 
         regex = /<\/body>/i

@@ -1,4 +1,22 @@
 # CHANGELOG
+## 0.9.4
+- [ADDED] inject_into [head|body] (Nathan Tsoi)
+
+## 0.9.3 - 2015-02-27 (Sam Saffron)
+- [IMPROVED] Clean up class structure that uses string as keys and crazy non-objects (Eileen M. Uchitelle)
+- [ADDED] Add link to flamegraph gem (Eyal Levin)
+- [CHANGE] jquery.hotkeys load order changed (Simon Jesenko)
+- [ADDED] Added simple support for mongo_mapper sql queries (Srdjan Grubor)
+- [ADDED] Add config setting to disable default cache-busting (Ryan Angilly)
+- [ADDED] Add ability to cleanup event listeners (Useful with Turbolinks and single page apps) (Jason Mitchell)
+- [IMPROVED] Don't load jquery hotkeys when it's already loaded (Alexis Reigel)
+- [IMPROVED] Refactor (Roman Heinrich)
+- [FIXED] PG Patches (Ivan Vega)
+- [DOC] skip_paths (yachibit)
+- [ADDED] test with ruby 2.2 (Anton Cherepanov)
+- [ADDED] highlight slow queries (Sam Saffron)
+- [FIXED] compensate for corrupt redis storage (Sam Saffron)
+
 ## 0.9.2 - 2014-06-26 (Sam Saffron)
 - [CHANGE] staging and other environments behave like production (Cedric Felizard)
 - [DOC] CHANGELOG reorg (Olivier Lacan)
