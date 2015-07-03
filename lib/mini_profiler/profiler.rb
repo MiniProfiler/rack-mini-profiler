@@ -161,7 +161,7 @@ module Rack
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
-                (@config.skip_paths && @config.skip_paths.any?{ |p| path[0,p.length] == p}) ||
+                (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
                 query_string =~ /pp=skip/
 
       has_profiling_cookie = client_settings.has_cookie?
