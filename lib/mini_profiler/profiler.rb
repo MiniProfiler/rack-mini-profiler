@@ -463,23 +463,50 @@ module Rack
     def analyze_memory
       require 'objspace'
 
+      utf8 = "utf-8"
+
+      GC.start
+
+      trunc = lambda do |str|
+        str.length > 200 ? str : str[0..200]
+
+        if str.encoding != Encoding::UTF_8
+          str = str.dup
+          str.force_encoding(utf8)
+
+          unless str.valid_encoding?
+            # work around bust string with a double conversion
+            str.encode!("utf-16","utf-8",:invalid => :replace)
+            str.encode!("utf-8","utf-16")
+          end
+        end
+
+        str
+      end
+
       body = "ObjectSpace stats:\n\n"
 
-      body << ObjectSpace.count_objects
+      counts = ObjectSpace.count_objects
+      total_strings = counts[:T_STRING]
+
+      body << counts
         .sort{|a,b| b[1] <=> a[1]}
         .map{|k,v| "#{k}: #{v}"}
         .join("\n")
 
-      body << "\n\n\n1000 Largest strings:\n\n"
-
       strings = []
+      string_counts = Hash.new(0)
+      sample_strings = []
+
       max_size = 1000
+      sample_every = total_strings / max_size
 
-      GC.start
-      GC.start
-
+      i = 0
       ObjectSpace.each_object(String) do |str|
-        strings << [str[0..200], str.length]
+        i += 1
+        string_counts[str] += 1
+        strings << [trunc.call(str), str.length]
+        sample_strings << [trunc.call(str), str.length] if i % sample_every == 0
         if strings.length > max_size * 2
           trim_strings(strings, max_size)
         end
@@ -487,7 +514,14 @@ module Rack
 
       trim_strings(strings, max_size)
 
-      body << strings.map{|s,len| "#{s}\n(#{len})\n\n"}.join("\n")
+      body << "\n\n\n1000 Largest strings:\n\n"
+      body << strings.map{|s,len| "#{s}\n(len: #{len})\n\n"}.join("\n")
+
+      body << "\n\n\n1000 Sample strings:\n\n"
+      body << sample_strings.map{|s,len| "#{s}\n(len: #{len})\n\n"}.join("\n")
+
+      body << "\n\n\n1000 Most common strings:\n\n"
+      body << string_counts.sort{|a,b| b[1] <=> a[1]}[0..max_size].map{|s,len| "#{trunc.call(s)}\n(x #{len})\n\n"}.join("\n")
 
       text_result(body)
     end
