@@ -1,5 +1,5 @@
 module Rack
   class MiniProfiler
-    ASSET_VERSION = '2da0113f545f785d377e9281a2d3cf40'.freeze
+    ASSET_VERSION = 'e0e50f551fa464f9d95c2e082bb2d45b'.freeze
   end
 end

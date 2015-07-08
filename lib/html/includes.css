@@ -395,6 +395,9 @@
   padding: 0px;
   margin: 0px;
 }
+.profiler-results .profiler-more-actions {
+  float: left;
+}
 .profiler-queries-bg {
   z-index: 2147483642;
   display: none;

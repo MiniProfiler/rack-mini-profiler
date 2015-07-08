@@ -1,4 +1,9 @@
 # CHANGELOG
+## 0.9.4 - 2014-07-08 (Sam Saffron)
+- [UX] added a link to "more" actions in profiler
+- [FEATURE] pp=help now displays links
+- [FEATURE] simple memory report with pp=analyze-memory
+
 ## 0.9.2 - 2014-06-26 (Sam Saffron)
 - [CHANGE] staging and other environments behave like production (Cedric Felizard)
 - [DOC] CHANGELOG reorg (Olivier Lacan)
