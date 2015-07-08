@@ -468,7 +468,7 @@ module Rack
       GC.start
 
       trunc = lambda do |str|
-        str.length > 200 ? str : str[0..200]
+        str = str.length > 200 ? str : str[0..200]
 
         if str.encoding != Encoding::UTF_8
           str = str.dup

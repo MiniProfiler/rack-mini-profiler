@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.9.6 - 2014-07-08 (Sam Saffron)
+
+- [FIX] incorrect truncation in pp=analyze-memory
+
 ## 0.9.5 - 2014-07-08 (Sam Saffron)
 
 - [FEATURE] improve pp=analyze-memory
