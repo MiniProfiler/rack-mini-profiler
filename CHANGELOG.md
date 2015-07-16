@@ -1,14 +1,14 @@
 # CHANGELOG
 
-## 0.9.6 - 2014-07-08 (Sam Saffron)
+## 0.9.6 - 2015-07-08 (Sam Saffron)
 
 - [FIX] incorrect truncation in pp=analyze-memory
 
-## 0.9.5 - 2014-07-08 (Sam Saffron)
+## 0.9.5 - 2015-07-08 (Sam Saffron)
 
 - [FEATURE] improve pp=analyze-memory
 
-## 0.9.4 - 2014-07-08 (Sam Saffron)
+## 0.9.4 - 2015-07-08 (Sam Saffron)
 - [UX] added a link to "more" actions in profiler
 - [FEATURE] pp=help now displays links
 - [FEATURE] simple memory report with pp=analyze-memory
