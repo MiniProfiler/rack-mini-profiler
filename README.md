@@ -121,7 +121,7 @@ To disable this behavior, use the following config setting:
 
 ```ruby
 # Do not let rack-mini-profiler disable caching
-Rack::MiniProfiler.config.disable_caching = false # defaults to true 
+Rack::MiniProfiler.config.disable_caching = false # defaults to true
 ```
 
 ### Storage
@@ -182,7 +182,9 @@ The available configuration options are:
 * skip_paths - Specifies path list that can be skipped.
 * skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
 * auto_inject (default true) - when false the miniprofiler script is not injected in the page
-* backtrace_filter - a regex you can use to filter out unwanted lines from the backtraces
+* backtrace_ignores (default nil) - an array of regexes you can use to filter out unwanted lines from the backtraces
+* backtrace_includes (default nil, or [/^\/?(app|config|lib|test)/] in rails) - an array of regexes you can use to keep lines in the backtrace
+* backtrace_remove (default nil, or Rails.root in rails) - A string or regex to remove part of each line in the backtrace
 * toggle_shortcut (default Alt+P) - a jquery.hotkeys.js-style keyboard shortcut, used to toggle the mini_profiler's visibility. See https://github.com/jeresig/jquery.hotkeys for more info.
 * start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
 * backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
