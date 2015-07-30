@@ -92,26 +92,6 @@ class Rack::MiniProfiler::GCProfiler
     [objects,memory_allocated]
   end
 
-  def profile_gc_time(app, env)
-    body = []
-
-    begin
-      GC::Profiler.clear
-      prev_profiler_state = GC::Profiler.enabled?
-      prev_gc_state       = GC.enable
-      GC::Profiler.enable
-      b = app.call(env)[2]
-      b.close if b.respond_to? :close
-      body << "GC Profiler ran during this request, if it fired you will see the cost below:\n\n"
-      body << GC::Profiler.result
-    ensure
-      prev_gc_state ? GC.disable : GC.enable
-      GC::Profiler.disable unless prev_profiler_state
-    end
-
-    return [200, {'Content-Type' => 'text/plain'}, body]
-  end
-
   def profile_gc(app, env)
 
     # for memsize_of
