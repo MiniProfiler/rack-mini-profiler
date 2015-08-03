@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.9.7 - 2015-08-03 (Sam Saffron)
+
+- [FEATURE] remove confusing pp=profile-gc-time (Nate Berkopec)
+- [FEATURE] truncate strings in pp=analyze-memory (Nate Berkopec)
+- [FEATURE] rename pp=profile-gc-ruby-head to pp=profile-memory (Nate Berkopec)
+
 ## 0.9.6 - 2015-07-08 (Sam Saffron)
 
 - [FIX] incorrect truncation in pp=analyze-memory
