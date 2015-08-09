@@ -97,12 +97,13 @@ Flamegraph generation is supported in MRI 2.0 and 2.1 only.
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
 ```ruby
-# A hook in your ApplicationController
-def authorize
-  if current_user.is_admin?
-    Rack::MiniProfiler.authorize_request
+  # inside your ApplicationController
+
+  before_action do
+    if current_user && current_user.is_admin?
+      Rack::MiniProfiler.authorize_request
+    end
   end
-end
 ```
 
 ## Configuration
