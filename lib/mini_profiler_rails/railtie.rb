@@ -24,8 +24,9 @@ module Rack::MiniProfilerRails
 
     c.skip_paths ||= []
 
+    c.skip_paths << app.config.assets.prefix if serves_static_assets?(app)
+
     if Rails.env.development?
-      c.skip_paths << app.config.assets.prefix if app.respond_to? :assets
       c.skip_schema_queries = true
     end
 
@@ -62,6 +63,16 @@ module Rack::MiniProfilerRails
     end
     
     @already_initialized = true
+  end
+
+  def self.serves_static_assets?(app)
+    return false if !app.respond_to?(:assets)
+    # Rails 4.2 deprecates serve_static_assets in favor of serve_static_files
+    if app.config.respond_to?(:serve_static_files)
+      app.config.serve_static_files
+    else
+      app.config.serve_static_assets
+    end
   end
 
   class Railtie < ::Rails::Railtie
