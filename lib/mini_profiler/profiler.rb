@@ -552,7 +552,7 @@ Append the following to your query string:
   #{make_link "flamegraph", env} : works best on Ruby 2.0, a graph representing sampled activity (requires the flamegraph gem).
   #{make_link "flamegraph&flamegraph_sample_rate=1", env}: creates a flamegraph with the specified sample rate (in ms). Overrides value set in config
   #{make_link "flamegraph_embed", env} : works best on Ruby 2.0, a graph representing sampled activity (requires the flamegraph gem), embedded resources for use on an intranet.
-  #{make_link "trace-exceptions", env} : requires Ruby 2.0, will return all the spots where your application raises execptions
+  #{make_link "trace-exceptions", env} : requires Ruby 2.0, will return all the spots where your application raises exceptions
   #{make_link "analyze-memory", env} : requires Ruby 2.0, will perform basic memory analysis of heap
 </pre>
 </body>
