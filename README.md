@@ -92,7 +92,7 @@ To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-
 Flamegraph generation is supported in MRI 2.0, 2.1, and 2.2 only.
 
 
-## Access control in production
+## Access control in non-development environments
 
 rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
