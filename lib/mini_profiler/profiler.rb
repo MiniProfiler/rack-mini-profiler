@@ -203,8 +203,14 @@ module Rack
       end
 
       if query_string =~ /pp=profile-memory/
+        query_params = Rack::Utils.parse_nested_query(query_string)
+        options = {
+          :ignore_files => query_params['memory_profiler_ignore_files'],
+          :allow_files => query_params['memory_profiler_allow_files'],
+        }
+        options[:top]= Integer(query_params['memory_profiler_top']) if query_params.key?('memory_profiler_top')
         result = StringIO.new
-        report = MemoryProfiler.report do
+        report = MemoryProfiler.report(options) do
           _,_,body = @app.call(env)
           body.close if body.respond_to? :close
         end
