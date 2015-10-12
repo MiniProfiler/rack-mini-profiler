@@ -40,7 +40,7 @@ GEM
     json (1.8.1)
     less (2.4.0)
       commonjs (~> 0.2.7)
-    libv8 (3.16.14.3)
+    libv8 (3.16.14.11)
     multi_json (1.8.2)
     rack (1.5.2)
     rack-test (0.6.2)
@@ -88,4 +88,4 @@ DEPENDENCIES
   therubyracer
 
 BUNDLED WITH
-   1.10.3
+   1.10.6
