@@ -13,6 +13,8 @@ class ActiveRecord::Result
 end
 
 class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
+  SCHEMA_QUERY_TYPES = ["Sequence", "Primary Key", "Primary Key Trigger", nil].freeze
+
   alias_method :execute_without_profiling, :execute
   def execute(sql, name = nil)
     mp_profile_sql(sql, name) { execute_without_profiling(sql, name) }
@@ -53,8 +55,7 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
   def mp_should_measure?(name)
     return false unless SqlPatches.should_measure?
 
-    schema_query_types = ["Sequence", "Primary Key", "Primary Key Trigger", nil].freeze
-    !(Rack::MiniProfiler.config.skip_schema_queries && schema_query_types.include?(name))
+    !(Rack::MiniProfiler.config.skip_schema_queries && SCHEMA_QUERY_TYPES.include?(name))
   end
 end
 
