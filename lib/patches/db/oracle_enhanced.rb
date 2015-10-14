@@ -44,7 +44,10 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
     result       = yield
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(sql, elapsed_time)
-    result.instance_variable_set("@miniprofiler_sql_id", record) if result
+
+    # Some queries return the row count as a Fixnum and will be frozen, don't save a record
+    # for those.
+    result.instance_variable_set("@miniprofiler_sql_id", record) if (result && !result.frozen?)
 
     result
   end
