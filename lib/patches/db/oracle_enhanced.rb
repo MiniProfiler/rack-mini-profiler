@@ -35,6 +35,11 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
     mp_profile_sql(sql, name) { exec_update_without_profiling(sql, name, binds) }
   end
 
+  # See oracle-enhanced/lib/active_record/connection_adapters/oracle_enhanced_database_statements.rb:183
+  # where the exec delete method is aliased in the same way. We just have to do it again here to make sure
+  # the new exec_delete alias is linked to our profiling-enabled version.
+  alias :exec_delete :exec_update
+
   private
 
   def mp_profile_sql(sql, name, &blk)
