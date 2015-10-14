@@ -14,6 +14,12 @@ class SqlPatches
     false
   end
 
+  def self.correct_version?(required_version, klass)
+    Gem::Dependency.new('', required_version).match?('', klass::VERSION)
+  rescue NameError
+    false
+  end
+
   def self.module_exists?(name)
     eval(name + ".class").to_s.eql?('Module')
   rescue NameError
@@ -37,11 +43,12 @@ class SqlPatches
   end
 end
 
-require 'patches/db/mysql2'         if defined?(Mysql2::Client) && SqlPatches.class_exists?("Mysql2::Client")
-require 'patches/db/pg'             if defined?(PG::Result) && SqlPatches.class_exists?("PG::Result")
-require 'patches/db/mongo'          if defined?(Mongo) &&!SqlPatches.patched? && SqlPatches.module_exists?("Mongo")
-require 'patches/db/moped'          if defined?(Moped::Node) && SqlPatches.class_exists?("Moped::Node")
-require 'patches/db/plucky'         if defined?(Plucky::Query) && SqlPatches.class_exists?("Plucky::Query")
-require 'patches/db/rsolr'          if defined?(RSolr::Connection) && SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0"
-require 'patches/db/sequel'         if defined?(Sequel::Database) && !SqlPatches.patched? && SqlPatches.class_exists?("Sequel::Database")
-require 'patches/db/activerecord'   if defined?(ActiveRecord) &&!SqlPatches.patched? && SqlPatches.module_exists?("ActiveRecord")
+require 'patches/db/mysql2'           if defined?(Mysql2::Client) && SqlPatches.class_exists?("Mysql2::Client")
+require 'patches/db/pg'               if defined?(PG::Result) && SqlPatches.class_exists?("PG::Result")
+require 'patches/db/oracle_enhanced'  if defined?(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter) && SqlPatches.class_exists?("ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter") && SqlPatches.correct_version?('~> 1.5.0', ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter)
+require 'patches/db/mongo'            if defined?(Mongo) &&!SqlPatches.patched? && SqlPatches.module_exists?("Mongo")
+require 'patches/db/moped'            if defined?(Moped::Node) && SqlPatches.class_exists?("Moped::Node")
+require 'patches/db/plucky'           if defined?(Plucky::Query) && SqlPatches.class_exists?("Plucky::Query")
+require 'patches/db/rsolr'            if defined?(RSolr::Connection) && SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0"
+require 'patches/db/sequel'           if defined?(Sequel::Database) && !SqlPatches.patched? && SqlPatches.class_exists?("Sequel::Database")
+require 'patches/db/activerecord'     if defined?(ActiveRecord) &&!SqlPatches.patched? && SqlPatches.module_exists?("ActiveRecord")

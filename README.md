@@ -6,7 +6,7 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 #### Features
 
-* database profiling. Currently supports Mysql2, Postgres, and Mongoid3 (with fallback support to ActiveRecord)
+* database profiling. Currently supports Mysql2, Postgres, Oracle (oracle_enhanced ~> 1.5.0) and Mongoid3 (with fallback support to ActiveRecord)
 
 #### Learn more
 
