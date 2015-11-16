@@ -52,3 +52,4 @@ require 'patches/db/plucky'           if defined?(Plucky::Query) && SqlPatches.c
 require 'patches/db/rsolr'            if defined?(RSolr::Connection) && SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0"
 require 'patches/db/sequel'           if defined?(Sequel::Database) && !SqlPatches.patched? && SqlPatches.class_exists?("Sequel::Database")
 require 'patches/db/activerecord'     if defined?(ActiveRecord) &&!SqlPatches.patched? && SqlPatches.module_exists?("ActiveRecord")
+require 'patches/db/nobrainer'        if defined?(NoBrainer) && SqlPatches.module_exists?("NoBrainer")
