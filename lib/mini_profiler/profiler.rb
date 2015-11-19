@@ -305,7 +305,7 @@ module Rack
         return dump_exceptions exceptions
       end
 
-      if query_string =~ /pp=env/
+      if query_string =~ /pp=env/ && !config.disable_env_dump
         body.close if body.respond_to? :close
         return dump_env env
       end

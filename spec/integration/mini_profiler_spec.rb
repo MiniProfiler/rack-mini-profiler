@@ -271,6 +271,27 @@ describe Rack::MiniProfiler do
         last_response.body.should include('/mini-profiler-resources/includes.js')
       end
     end
+
+    describe 'disable_env_dump config option' do
+      context 'default (not configured' do
+        it 'allows env dump' do
+          get '/html?pp=env'
+
+          last_response.body.should include('QUERY_STRING')
+          last_response.body.should include('CONTENT_LENGTH')
+        end
+      end
+      context 'when enabled' do
+        it 'disables dumping the ENV over the web' do
+          Rack::MiniProfiler.config.disable_env_dump = true
+          get '/html?pp=env'
+
+          # Contains no ENV vars:
+          last_response.body.should_not include('QUERY_STRING')
+          last_response.body.should_not include('CONTENT_LENGTH')
+        end
+      end
+    end
   end
 
   describe 'POST followed by GET' do
