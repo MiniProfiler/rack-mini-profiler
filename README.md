@@ -190,6 +190,7 @@ The available configuration options are:
 * start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
 * backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
 * flamegraph_sample_rate (default 0.5ms) - How often fast_stack should get stack trace info to generate flamegraphs
+* disable_env_dump (default false) - When enabled, disables the `?pp=env` which can be useful when you are concerned about not sending ENV vars out over HTTP.
 
 ### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
 
