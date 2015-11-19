@@ -44,6 +44,7 @@ module Rack
             end
           end
           @enabled = true
+          @disable_env_dump = false
           self
         }
       end
