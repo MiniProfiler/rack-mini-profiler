@@ -291,7 +291,7 @@ module Rack
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
         # this is non-obvious, don't kill the profiling cookie on errors or short requests
         # this ensures that stuff that never reaches the rails stack does not kill profiling
-        if status == 200 && ((Time.now - start) > 0.1)
+        if status >= 200 && status < 300 && ((Time.now - start) > 0.1)
           client_settings.discard_cookie!(headers)
         end
         skip_it = true
@@ -336,7 +336,7 @@ module Rack
         @storage.save(page_struct)
 
         # inject headers, script
-        if headers['Content-Type'] && status == 200
+        if status >= 200 && status < 300
           client_settings.write!(headers)
           result = inject_profiler(env,status,headers,body)
           return result if result
