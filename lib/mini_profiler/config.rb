@@ -12,10 +12,13 @@ module Rack
       @attributes
     end
 
-    attr_accessor :authorization_mode, :auto_inject, :backtrace_ignores, :backtrace_includes, :backtrace_remove,
-      :backtrace_threshold_ms, :base_url_path, :disable_caching, :disable_env_dump, :enabled, :flamegraph_sample_rate, :logger, :position,
-      :pre_authorize_cb, :skip_paths, :skip_schema_queries, :start_hidden, :storage, :storage_failure,
-      :storage_instance, :storage_options, :toggle_shortcut, :user_provider
+    attr_accessor :authorization_mode, :auto_inject, :backtrace_ignores,
+      :backtrace_includes, :backtrace_remove, :backtrace_threshold_ms,
+      :base_url_path, :disable_caching, :disable_env_dump, :enabled,
+      :flamegraph_sample_rate, :logger, :position, :pre_authorize_cb,
+      :skip_paths, :skip_schema_queries, :start_hidden, :storage,
+      :storage_failure, :storage_instance, :storage_options, :toggle_shortcut,
+      :user_provider
 
     # Deprecated options
     attr_accessor :use_existing_jquery
