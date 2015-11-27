@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.9.8 - 2015-11-27 (Sam Saffron)
+
+- [FEATURE] disable_env_dump config setting (@mathias)
+- [FEATURE] set X-MiniProfiler-Ids for all 2XX reqs (@tymagu2)
+- [FEATURE] add support for NoBrainer (rethinkdb) profiling (@niv)
+- [FEATURE] add oracle enhanced adapter profiling (@rrooding)
+- [FEATURE] pp=profile-memory can now parse query params (@dgynn)
+
+
 ## 0.9.7 - 2015-08-03 (Sam Saffron)
 
 - [FEATURE] remove confusing pp=profile-gc-time (Nate Berkopec)
