@@ -97,8 +97,6 @@ module Rack
               parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct )
             end
           else
-            page_struct = Rack::MiniProfiler.current.page_struct
-
             Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
             begin
               self.send without_profiling, *args, &orig
