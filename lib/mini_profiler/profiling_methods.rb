@@ -26,10 +26,9 @@ module Rack
       def step(name, opts = nil)
         if current
           parent_timer          = current.current_timer
-          result                = nil
           current.current_timer = current_timer = current.current_timer.add_child(name)
           begin
-            result = yield if block_given?
+            yield if block_given?
           ensure
             current_timer.record_time
             current.current_timer = parent_timer
@@ -87,13 +86,12 @@ module Rack
               end
           end
 
-          result = nil
           parent_timer = Rack::MiniProfiler.current.current_timer
 
           if type == :counter
             start = Time.now
             begin
-              result = self.send without_profiling, *args, &orig
+              self.send without_profiling, *args, &orig
             ensure
               duration_ms = (Time.now - start).to_f * 1000
               parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct )
@@ -103,14 +101,12 @@ module Rack
 
             Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
             begin
-              result = self.send without_profiling, *args, &orig
+              self.send without_profiling, *args, &orig
             ensure
               current_timer.record_time
               Rack::MiniProfiler.current.current_timer = parent_timer
             end
           end
-
-          result
         end
         klass.send :alias_method, method, with_profiling
       end
