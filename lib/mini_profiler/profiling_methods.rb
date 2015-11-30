@@ -3,9 +3,9 @@ module Rack
     module ProfilingMethods
 
       def record_sql(query, elapsed_ms)
-        return unless current
+        return unless current && current.current_timer
         c = current
-        c.current_timer.add_sql(query, elapsed_ms, c.page_struct, c.skip_backtrace, c.full_backtrace) if (c && c.current_timer)
+        c.current_timer.add_sql(query, elapsed_ms, c.page_struct, c.skip_backtrace, c.full_backtrace)
       end
 
       def start_step(name)
