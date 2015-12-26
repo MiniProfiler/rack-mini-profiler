@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
     "README.md",
     "CHANGELOG.md"
   ]
-  s.add_runtime_dependency 'rack', '>= 1.1.3'
+  s.add_runtime_dependency 'rack', '>= 1.2.0'
   if RUBY_VERSION < "1.9"
     s.add_runtime_dependency 'json', '>= 1.6'
   end

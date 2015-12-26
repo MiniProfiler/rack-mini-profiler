@@ -17,6 +17,10 @@ module Rack
         @config ||= Config.default
       end
 
+      def resources_root
+        @resources_root ||= ::File.expand_path("../../html", __FILE__)
+      end
+
       def share_template
         @share_template ||= ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
       end
@@ -117,21 +121,11 @@ module Rack
 
       return serve_results(env) if file_name.eql?('results')
 
-      full_path = ::File.expand_path("../html/#{file_name}", ::File.dirname(__FILE__))
-      return [404, {}, ["Not found"]] unless ::File.exists? full_path
-      f      = Rack::File.new nil
-      f.path = full_path
+      resources_env = env.dup
+      resources_env['PATH_INFO'] = file_name
 
-      begin
-        f.cache_control = "max-age:86400"
-        f.serving env
-      rescue
-        # old versions of rack have a different api
-        status, headers, body = f.serving
-        headers.merge! 'Cache-Control' => "max-age:86400"
-        [status, headers, body]
-      end
-
+      rack_file = Rack::File.new(MiniProfiler.resources_root, {'Cache-Control' => 'max-age:86400'})
+      rack_file.call(resources_env)
     end
 
 
