@@ -6,18 +6,15 @@ class Rack::MiniProfiler::GCProfiler
   end
 
   def object_space_stats
-    stats = {}
-    ids = {}
+    stats = Hash.new(0).compare_by_identity
+    ids = Hash.new.compare_by_identity
 
     @ignore << stats.__id__
     @ignore << ids.__id__
 
-    i=0
     ObjectSpace.each_object { |o|
       begin
-        i = stats[o.class] || 0
-        i += 1
-        stats[o.class] = i
+        stats[o.class] += 1
         ids[o.__id__] = o if Integer === o.__id__
       rescue NoMethodError
         # protect against BasicObject
@@ -38,12 +35,12 @@ class Rack::MiniProfiler::GCProfiler
   end
 
   def diff_object_stats(before, after)
-    diff = {}
+    diff = {}.compare_by_identity
     after.each do |k,v|
-      diff[k] = v - (before[k] || 0)
+      diff[k] = v - before[k]
     end
     before.each do |k,v|
-      diff[k] = 0 - v unless after[k]
+      diff[k] = 0 - v unless after.has_key?(k)
     end
 
     diff
@@ -97,11 +94,6 @@ class Rack::MiniProfiler::GCProfiler
     # for memsize_of
     require 'objspace'
 
-    body = [];
-
-    stat_before,stat_after,diff,string_analysis,
-      new_objects, memory_allocated, stat, memory_before, objects_before = nil
-
     # clean up before
     GC.start
     stat          = GC.stat
@@ -118,13 +110,17 @@ class Rack::MiniProfiler::GCProfiler
     new_objects, memory_allocated = analyze_growth(stat_before[:ids], stat_after[:ids])
     objects_before, memory_before = analyze_initial_state(stat_before[:ids])
 
+    body = []
 
     body << "
 Overview
-------------------------------------
-Initial state: object count - #{objects_before} , memory allocated outside heap (bytes) #{memory_before}
+--------
+Initial state: object count: #{objects_before}
+Memory allocated outside heap (bytes): #{memory_before}
 
-GC Stats: #{stat.map{|k,v| "#{k} : #{v}" }.join(", ")}
+GC Stats:
+--------
+#{stat.map{|k,v| "#{k} : #{v}" }.sort!.join("\n")}
 
 New bytes allocated outside of Ruby heaps: #{memory_allocated}
 New objects: #{new_objects}
@@ -132,16 +128,16 @@ New objects: #{new_objects}
 
     body << "
 ObjectSpace delta caused by request:
---------------------------------------------\n"
-    diff.to_a.reject{|k,v| v == 0}.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
-      body << "#{k} : #{v}\n" if v != 0
+-----------------------------------\n"
+    diff.to_a.delete_if{|_k, v| v == 0}.sort_by! { |_k, v| v }.reverse_each do |k,v|
+      body << "#{k} : #{v}\n"
     end
 
     body << "\n
 ObjectSpace stats:
 -----------------\n"
 
-    stat_after[:stats].to_a.sort{|x,y| y[1] <=> x[1]}.each do |k,v|
+    stat_after[:stats].to_a.sort_by!{ |_k, v| v }.reverse_each do |k,v|
       body << "#{k} : #{v}\n"
     end
 
@@ -150,7 +146,7 @@ ObjectSpace stats:
 String stats:
 ------------\n"
 
-    string_analysis.to_a.sort{|x,y| y[1] <=> x[1] }.take(1000).each do |string,count|
+    string_analysis.to_a.sort_by!{ |_k, v| -v }.take(1000).each do |string,count|
       body << "#{count} : #{string}\n"
     end
 
