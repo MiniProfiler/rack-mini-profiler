@@ -79,8 +79,8 @@ describe Rack::MiniProfiler do
 
     describe 'typical usage' do
       before(:all) do
-        Rack::MiniProfiler.create_current
         Time.now = Time.new
+        Rack::MiniProfiler.create_current
         Time.now += 1
         Rack::MiniProfiler.step('outer') {
           Time.now +=  2
