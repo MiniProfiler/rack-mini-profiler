@@ -285,7 +285,7 @@ module Rack
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
         # this is non-obvious, don't kill the profiling cookie on errors or short requests
         # this ensures that stuff that never reaches the rails stack does not kill profiling
-        if status >= 200 && status < 300 && ((Time.now - start) > 0.1)
+        if status.to_i >= 200 && status.to_i < 300 && ((Time.now - start) > 0.1)
           client_settings.discard_cookie!(headers)
         end
         skip_it = true
