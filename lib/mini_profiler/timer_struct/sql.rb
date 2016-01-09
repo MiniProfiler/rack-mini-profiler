@@ -17,11 +17,11 @@ module Rack
                     (
                       (
                         Rack::MiniProfiler.config.backtrace_includes.nil? or
-                        Rack::MiniProfiler.config.backtrace_includes.all?{|regex| ln =~ regex}
+                        Rack::MiniProfiler.config.backtrace_includes.any?{|regex| ln =~ regex}
                       ) and
                       (
                         Rack::MiniProfiler.config.backtrace_ignores.nil? or
-                        Rack::MiniProfiler.config.backtrace_ignores.all?{|regex| !(ln =~ regex)}
+                        Rack::MiniProfiler.config.backtrace_ignores.none?{|regex| ln =~ regex}
                       )
                     )
                 stack_trace << ln << "\n"
