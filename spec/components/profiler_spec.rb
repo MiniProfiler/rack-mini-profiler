@@ -56,6 +56,10 @@ describe Rack::MiniProfiler do
         def foo(bar,baz)
           return [bar, baz, yield]
         end
+
+        def self.bar(baz,boo)
+          return [baz, boo, yield]
+        end
       end
     end
 
@@ -63,6 +67,12 @@ describe Rack::MiniProfiler do
       Rack::MiniProfiler.profile_method TestClass, :foo
       TestClass.new.foo("a","b"){"c"}.should == ["a","b","c"]
       Rack::MiniProfiler.unprofile_method TestClass, :foo
+    end
+
+    it 'should not destroy a singleton method' do
+      Rack::MiniProfiler.profile_singleton_method TestClass, :bar
+      TestClass.bar("a", "b"){"c"}.should == ["a","b","c"]
+      Rack::MiniProfiler.unprofile_singleton_method TestClass, :bar
     end
 
   end

@@ -109,6 +109,14 @@ module Rack
         klass.send :alias_method, method, with_profiling
       end
 
+      def profile_singleton_method(klass, method, type = :profile, &blk)
+        profile_method(singleton_class(klass), method, type, &blk)
+      end
+
+      def unprofile_singleton_method(klass, method)
+        unprofile_method(singleton_class(klass), method)
+      end
+
       # Add a custom timing. These are displayed similar to SQL/query time in
       # columns expanding to the right.
       #
@@ -133,6 +141,10 @@ module Rack
       end
 
       private
+
+      def singleton_class(klass)
+        class << klass; self; end
+      end
 
       def clean_method_name(method)
         method.to_s.gsub(/[\?\!]/, "")

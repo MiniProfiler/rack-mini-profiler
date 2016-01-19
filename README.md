@@ -167,6 +167,17 @@ Rack::MiniProfiler.config.user_provider = Proc.new{ |env| CurrentUser.get(env) }
 
 The string this function returns should be unique for each user on the system (for anonymous you may need to fall back to ip address)
 
+### Profiling specific methods
+
+You can increase the granularity of profiling by measuring the performance of specific methods. Add methods of interest to an initializer.
+
+```ruby
+Rails.application.config.to_prepare do
+  ::Rack::MiniProfiler.profile_singleton_method(User, :non_admins) { |a| "executing all_non_admins" }
+  ::Rack::MiniProfiler.profile_method(User, :favorite_post) { |a| "executing favorite_post" }
+end
+```
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
