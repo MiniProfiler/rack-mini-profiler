@@ -145,11 +145,11 @@ if Rails.env.production?
 end
 ```
 
-MemoryStore stores results in a processes heap - something that does not work well in a multi process environment.
-FileStore stores results in the file system - something that may not work well in a multi machine environment.
-RedisStore/MemcacheStore work in multi process and multi machine environments (RedisStore only saves results for up to 24 hours so it won't continue to fill up Redis).
+`MemoryStore` stores results in a processes heap - something that does not work well in a multi process environment.
+`FileStore` stores results in the file system - something that may not work well in a multi machine environment.
+`RedisStore`/`MemcacheStore` work in multi process and multi machine environments (`RedisStore` only saves results for up to 24 hours so it won't continue to fill up Redis).
 
-Additionally you may implement an AbstractStore for your own provider.
+Additionally you may implement an `AbstractStore` for your own provider.
 
 ### User result segregation
 
@@ -178,19 +178,21 @@ Rack::MiniProfiler.config.start_hidden = true
 ```
 The available configuration options are:
 
-* pre_authorize_cb - A lambda callback you can set to determine whether or not mini_profiler should be visible on a given request. Default in a Rails environment is only on in development mode. If in a Rack app, the default is always on.
-* position - Can either be 'right' or 'left'. Default is 'left'.
-* skip_paths - Specifies path list that can be skipped.
-* skip_schema_queries - Whether or not you want to log the queries about the schema of your tables. Default is 'false', 'true' in rails development.
-* auto_inject (default true) - when false the miniprofiler script is not injected in the page
-* backtrace_ignores (default nil) - an array of regexes you can use to filter out unwanted lines from the backtraces
-* backtrace_includes (default nil, or [/^\/?(app|config|lib|test)/] in rails) - an array of regexes you can use to keep lines in the backtrace
-* backtrace_remove (default nil, or Rails.root in rails) - A string or regex to remove part of each line in the backtrace
-* toggle_shortcut (default Alt+P) - a jquery.hotkeys.js-style keyboard shortcut, used to toggle the mini_profiler's visibility. See https://github.com/jeresig/jquery.hotkeys for more info.
-* start_hidden (default false) - Whether or not you want the mini_profiler to be visible when loading a page
-* backtrace_threshold_ms (default zero) - Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
-* flamegraph_sample_rate (default 0.5ms) - How often fast_stack should get stack trace info to generate flamegraphs
-* disable_env_dump (default false) - When enabled, disables the `?pp=env` which can be useful when you are concerned about not sending ENV vars out over HTTP.
+Option|Default|Description
+-------|---|--------
+pre_authorize_cb|Rails: dev only<br>Rack: always on|A lambda callback that returns true to make mini_profiler visible on a given request.
+position|`'left'`|Display mini_profiler on `'right'` or `'left'`.
+skip_paths|`[]`|Paths that skip profiling.
+skip_schema_queries|Rails dev: `'true'`<br>Othwerwise: `'false'`|`'true'` to log schema queries.
+auto_inject|`true`|`true` to inject the miniprofiler script in the page.
+backtrace_ignores|`[]`|Regexes of lines to be removed from backtraces.
+backtrace_includes|Rails: `[/^\/?(app|config|lib|test)/]`<br>Rack: `[]`|Regexes of lines to keep in backtraces.
+backtrace_remove|rails: `Rails.root`<br>Rack: `nil`|A string or regex to remove part of each line in the backtrace.
+toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
+start_hidden|`false`|`false` to make mini_profiler visible on page load.
+backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
+flamegraph_sample_rate|`0.5ms`|How often to capture stack traces for flamegraphs.
+disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV vars over HTTP.
 
 ### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
 
