@@ -191,11 +191,13 @@ module Rack
         client_settings.disable_profiling = false
       end
 
+      # profile gc
       if query_string =~ /pp=profile-gc/
         current.measure = false if current
         return Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env)
       end
 
+      # profile memory
       if query_string =~ /pp=profile-memory/
         query_params = Rack::Utils.parse_nested_query(query_string)
         options = {

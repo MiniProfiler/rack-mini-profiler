@@ -66,11 +66,17 @@ end
 
 ```ruby
 require 'rack-mini-profiler'
+
+home = lambda { |env|
+  [200, {'Content-Type' => 'text/html'}, ["<html><body>hello!</body></html>"]]
+}
+
 builder = Rack::Builder.new do
   use Rack::MiniProfiler
-
-  map('/')    { run get }
+  map('/') { run home }
 end
+
+run builder
 ```
 
 #### Sinatra
