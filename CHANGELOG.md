@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 
+
+- [ADDED] Rack::MiniProfiler.profile_singleton_method (@kbrock)
+
 ## 0.9.8 - 2015-11-27 (Sam Saffron)
 
 - [FEATURE] disable_env_dump config setting (@mathias)
