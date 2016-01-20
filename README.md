@@ -199,6 +199,7 @@ Option|Default|Description
 -------|---|--------
 pre_authorize_cb|Rails: dev only<br>Rack: always on|A lambda callback that returns true to make mini_profiler visible on a given request.
 position|`'left'`|Display mini_profiler on `'right'` or `'left'`.
+skip_hosts|`[]`|Hosts that skip profiling.
 skip_paths|`[]`|Paths that skip profiling.
 skip_schema_queries|Rails dev: `'true'`<br>Othwerwise: `'false'`|`'true'` to log schema queries.
 auto_inject|`true`|`true` to inject the miniprofiler script in the page.

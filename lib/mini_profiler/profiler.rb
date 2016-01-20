@@ -150,12 +150,14 @@ module Rack
       status = headers = body = nil
       query_string = env['QUERY_STRING']
       path         = env['PATH_INFO']
+      host         = (env["HTTP_HOST"] || env["SERVER_NAME"]).gsub(/:\d+\z/, '')
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
-                (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
+                (@config.skip_hosts && @config.skip_hosts.any?{ |skip_host| host == skip_host }) ||
+                (@config.skip_paths && @config.skip_paths.any?{ |skip_path| path.start_with?(skip_path) }) ||
                 query_string =~ /pp=skip/
 
       has_profiling_cookie = client_settings.has_cookie?
