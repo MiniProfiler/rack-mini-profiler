@@ -212,6 +212,14 @@ describe Rack::MiniProfiler do
       last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
     end
 
+    it 'skips hosts listed' do
+      Rack::MiniProfiler.config.skip_hosts = ['skip-host.test']
+      get 'http://skip-host.test:8080/path1/a'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_false
+      get 'http://sample.org/path1/a'
+      last_response.headers.has_key?('X-MiniProfiler-Ids').should be_true
+    end
+
     it "skips paths listed" do
       Rack::MiniProfiler.config.skip_paths = ['/path/', '/path2/']
       get '/path2/a'

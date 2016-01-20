@@ -16,7 +16,7 @@ module Rack
       :backtrace_includes, :backtrace_remove, :backtrace_threshold_ms,
       :base_url_path, :disable_caching, :disable_env_dump, :enabled,
       :flamegraph_sample_rate, :logger, :position, :pre_authorize_cb,
-      :skip_paths, :skip_schema_queries, :start_hidden, :storage,
+      :skip_hosts, :skip_paths, :skip_schema_queries, :start_hidden, :storage,
       :storage_failure, :storage_instance, :storage_options, :toggle_shortcut,
       :user_provider
 
