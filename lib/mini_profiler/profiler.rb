@@ -388,39 +388,17 @@ module Rack
     end
 
     def inject(fragment, script)
-      if fragment.match(/<\/body>/i)
-        # explicit </body>
-
-        regex = /<\/body>/i
-        close_tag = '</body>'
-      elsif fragment.match(/<\/html>/i)
-        # implicit </body>
-
-        regex = /<\/html>/i
-        close_tag = '</html>'
-      else
-        # implicit </body> and </html>. Don't do anything.
-
-        return fragment
-      end
-
-      matches = fragment.scan(regex).length
-      index = 1
-      fragment.gsub(regex) do
-        # though malformed there is an edge case where /body exists earlier in the html, work around
-        if index < matches
-          index += 1
-          close_tag
-        else
-
-          # if for whatever crazy reason we dont get a utf string,
-          #   just force the encoding, no utf in the mp scripts anyway
-          if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
-            (script + close_tag).force_encoding(fragment.encoding)
-          else
-            script + close_tag
-          end
+      # find explicit or implicit body
+      index = fragment.rindex(/<\/body>/i) || fragment.rindex(/<\/html>/i)
+      if index
+        # if for whatever crazy reason we dont get a utf string,
+        #   just force the encoding, no utf in the mp scripts anyway
+        if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
+          script = script.force_encoding(fragment.encoding)
         end
+        fragment.insert(index, script)
+      else
+        fragment
       end
     end
 
