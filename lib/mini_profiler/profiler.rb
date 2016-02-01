@@ -97,24 +97,26 @@ module Rack
         @storage.set_viewed(user(env), id)
       end
 
-      result_json = page_struct.to_json
       # If we're an XMLHttpRequest, serve up the contents as JSON
       if request.xhr?
+        result_json = page_struct.to_json
         [200, { 'Content-Type' => 'application/json'}, [result_json]]
       else
-
         # Otherwise give the HTML back
-        html = MiniProfiler.share_template.dup
-        html.gsub!(/\{path\}/, "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
-        html.gsub!(/\{version\}/, MiniProfiler::ASSET_VERSION)
-        html.gsub!(/\{json\}/, result_json)
-        html.gsub!(/\{includes\}/, get_profile_script(env))
-        html.gsub!(/\{name\}/, page_struct[:name])
-        html.gsub!(/\{duration\}/, "%.1f" % page_struct.duration_ms)
-
+        html = generate_html(page_struct, env)
         [200, {'Content-Type' => 'text/html'}, [html]]
       end
+    end
 
+    def generate_html(page_struct, env, result_json = page_struct.to_json)
+        html = MiniProfiler.share_template.dup
+        html.sub!('{path}', "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
+        html.sub!('{version}', MiniProfiler::ASSET_VERSION)
+        html.sub!('{json}', result_json)
+        html.sub!('{includes}', get_profile_script(env))
+        html.sub!('{name}', page_struct[:name])
+        html.sub!('{duration}', page_struct.duration_ms.round(1).to_s)
+        html
     end
 
     def serve_html(env)
