@@ -41,10 +41,11 @@ module Rack
 
       def create_current(env={}, options={})
         # profiling the request
-        self.current               = Context.new
-        self.current.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-        self.current.page_struct   = TimerStruct::Page.new(env)
-        self.current.current_timer = current.page_struct[:root]
+        context               = Context.new
+        context.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+        context.page_struct   = TimerStruct::Page.new(env)
+        context.current_timer = context.page_struct[:root]
+        self.current          = context
       end
 
       def authorize_request
