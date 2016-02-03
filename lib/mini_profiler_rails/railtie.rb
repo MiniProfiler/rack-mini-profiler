@@ -67,11 +67,13 @@ module Rack::MiniProfilerRails
 
   def self.serves_static_assets?(app)
     return false if !app.respond_to?(:assets)
-    # Rails 4.2 deprecates serve_static_assets in favor of serve_static_files
-    if app.config.respond_to?(:serve_static_files)
-      app.config.serve_static_files
+
+    if ::Rails.version >= "5.0.0"
+      ::Rails.configuration.public_file_server.enabled
+    elsif ::Rails.version >= "4.2.0"
+      ::Rails.configuration.serve_static_files
     else
-      app.config.serve_static_assets
+      ::Rails.configuration.serve_static_assets
     end
   end
 
