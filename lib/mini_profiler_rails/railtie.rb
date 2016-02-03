@@ -24,7 +24,12 @@ module Rack::MiniProfilerRails
 
     c.skip_paths ||= []
 
-    c.skip_paths << app.config.assets.prefix if serves_static_assets?(app)
+    begin
+      c.skip_paths << app.config.assets.prefix if serves_static_assets?(app)
+    rescue
+      # app.config did not repond_to? :assets
+    end
+
 
     if Rails.env.development?
       c.skip_schema_queries = true
