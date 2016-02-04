@@ -41,10 +41,11 @@ module Rack
 
       def create_current(env={}, options={})
         # profiling the request
-        self.current               = Context.new
-        self.current.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
-        self.current.page_struct   = TimerStruct::Page.new(env)
-        self.current.current_timer = current.page_struct[:root]
+        context               = Context.new
+        context.inject_js     = config.auto_inject && (!env['HTTP_X_REQUESTED_WITH'].eql? 'XMLHttpRequest')
+        context.page_struct   = TimerStruct::Page.new(env)
+        context.current_timer = context.page_struct[:root]
+        self.current          = context
       end
 
       def authorize_request
@@ -96,24 +97,26 @@ module Rack
         @storage.set_viewed(user(env), id)
       end
 
-      result_json = page_struct.to_json
       # If we're an XMLHttpRequest, serve up the contents as JSON
       if request.xhr?
+        result_json = page_struct.to_json
         [200, { 'Content-Type' => 'application/json'}, [result_json]]
       else
-
         # Otherwise give the HTML back
-        html = MiniProfiler.share_template.dup
-        html.gsub!(/\{path\}/, "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
-        html.gsub!(/\{version\}/, MiniProfiler::ASSET_VERSION)
-        html.gsub!(/\{json\}/, result_json)
-        html.gsub!(/\{includes\}/, get_profile_script(env))
-        html.gsub!(/\{name\}/, page_struct[:name])
-        html.gsub!(/\{duration\}/, "%.1f" % page_struct.duration_ms)
-
+        html = generate_html(page_struct, env)
         [200, {'Content-Type' => 'text/html'}, [html]]
       end
+    end
 
+    def generate_html(page_struct, env, result_json = page_struct.to_json)
+        html = MiniProfiler.share_template.dup
+        html.sub!('{path}', "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
+        html.sub!('{version}', MiniProfiler::ASSET_VERSION)
+        html.sub!('{json}', result_json)
+        html.sub!('{includes}', get_profile_script(env))
+        html.sub!('{name}', page_struct[:name])
+        html.sub!('{duration}', page_struct.duration_ms.round(1).to_s)
+        html
     end
 
     def serve_html(env)
@@ -385,39 +388,17 @@ module Rack
     end
 
     def inject(fragment, script)
-      if fragment.match(/<\/body>/i)
-        # explicit </body>
-
-        regex = /<\/body>/i
-        close_tag = '</body>'
-      elsif fragment.match(/<\/html>/i)
-        # implicit </body>
-
-        regex = /<\/html>/i
-        close_tag = '</html>'
-      else
-        # implicit </body> and </html>. Don't do anything.
-
-        return fragment
-      end
-
-      matches = fragment.scan(regex).length
-      index = 1
-      fragment.gsub(regex) do
-        # though malformed there is an edge case where /body exists earlier in the html, work around
-        if index < matches
-          index += 1
-          close_tag
-        else
-
-          # if for whatever crazy reason we dont get a utf string,
-          #   just force the encoding, no utf in the mp scripts anyway
-          if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
-            (script + close_tag).force_encoding(fragment.encoding)
-          else
-            script + close_tag
-          end
+      # find explicit or implicit body
+      index = fragment.rindex(/<\/body>/i) || fragment.rindex(/<\/html>/i)
+      if index
+        # if for whatever crazy reason we dont get a utf string,
+        #   just force the encoding, no utf in the mp scripts anyway
+        if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
+          script = script.force_encoding(fragment.encoding)
         end
+        fragment.insert(index, script)
+      else
+        fragment
       end
     end
 
