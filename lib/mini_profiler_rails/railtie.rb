@@ -4,9 +4,9 @@ module Rack::MiniProfilerRails
 
   # call direct if needed to do a defer init
   def self.initialize!(app)
-    
+
     raise "MiniProfilerRails initialized twice. Set `require: false' for rack-mini-profiler in your Gemfile" if @already_initialized
-      
+
     c = Rack::MiniProfiler.config
 
     # By default, only show the MiniProfiler in development mode.
@@ -24,12 +24,9 @@ module Rack::MiniProfilerRails
 
     c.skip_paths ||= []
 
-    begin
-      c.skip_paths << app.config.assets.prefix if serves_static_assets?(app)
-    rescue
-      # app.config did not repond_to? :assets
+    if serves_static_assets?(app)
+      c.skip_paths << app.config.assets.prefix
     end
-
 
     if Rails.env.development?
       c.skip_schema_queries = true
@@ -66,12 +63,16 @@ module Rack::MiniProfilerRails
     ActiveSupport.on_load(:action_view) do
       ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
     end
-    
+
     @already_initialized = true
   end
 
   def self.serves_static_assets?(app)
-    return false if !app.respond_to?(:assets)
+    config = app.config
+
+    if !config.respond_to?(:assets) || !config.assets.respond_to?(:prefix)
+      return false
+    end
 
     if ::Rails.version >= "5.0.0"
       ::Rails.configuration.public_file_server.enabled
