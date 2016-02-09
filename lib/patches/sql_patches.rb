@@ -17,10 +17,10 @@ class SqlPatches
     false
   end
 
-  def self.record_sql(statement, &block)
+  def self.record_sql(statement, parameters = nil, &block)
     start  = Time.now
     result = yield
-    record = ::Rack::MiniProfiler.record_sql( statement, elapsed_time(start) )
+    record = ::Rack::MiniProfiler.record_sql(statement, elapsed_time(start), parameters)
     return result, record
   end
 

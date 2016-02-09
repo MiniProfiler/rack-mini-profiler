@@ -13,10 +13,15 @@ module Rack
         end
       end
 
+      def binds_to_params(binds)
+        return if binds.nil?
+        binds.map { |c| c.kind_of?(Array) ? [c.first, c.last] : [c.name, c.value] }
+      end
+
       def log_with_miniprofiler(*args, &block)
         return log_without_miniprofiler(*args, &block) unless SqlPatches.should_measure?
 
-        sql, name, _binds = args
+        sql, name, binds = args
         start            = Time.now
         rval             = log_without_miniprofiler(*args, &block)
 
@@ -24,7 +29,7 @@ module Rack
         return rval if Rack::MiniProfiler.config.skip_schema_queries and name =~ /SCHEMA/
 
         elapsed_time = SqlPatches.elapsed_time(start)
-        Rack::MiniProfiler.record_sql(sql, elapsed_time)
+        Rack::MiniProfiler.record_sql(sql, elapsed_time, binds_to_params(binds))
         rval
       end
     end

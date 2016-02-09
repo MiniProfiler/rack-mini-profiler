@@ -4,7 +4,7 @@ module Rack
     # Timing system for a SQL query
     module TimerStruct
       class Sql < TimerStruct::Base
-        def initialize(query, duration_ms, page, parent, skip_backtrace = false, full_backtrace = false)
+        def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false)
 
           stack_trace = nil
           unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
@@ -39,7 +39,7 @@ module Rack
             :start_milliseconds                => start_millis,
             :duration_milliseconds             => duration_ms,
             :first_fetch_duration_milliseconds => duration_ms,
-            :parameters                        => nil,
+            :parameters                        => params,
             :parent_timing_id                  => nil,
             :is_duplicate                      => false
           )
