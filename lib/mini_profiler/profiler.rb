@@ -581,7 +581,7 @@ Append the following to your query string:
       end
 
       if path.nil?
-        path = @config.base_url_path
+        path = @config.base_url_path.nil? ? '/mini-profiler-resources/' : @config.base_url_path
       end
 
       settings = {
