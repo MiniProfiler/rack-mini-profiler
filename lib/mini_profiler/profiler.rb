@@ -580,6 +580,10 @@ Append the following to your query string:
         "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
       end
 
+      if path.nil?
+        path = @config.base_url_path
+      end
+
       settings = {
        :path            => path,
        :version         => MiniProfiler::ASSET_VERSION,
