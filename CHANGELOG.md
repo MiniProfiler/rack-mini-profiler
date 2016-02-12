@@ -3,6 +3,7 @@
 ## 
 
 - [ADDED] Rack::MiniProfiler.profile_singleton_method (@kbrock)
+- [CHANGE] Added Rack 2.0 support (and dropped support for Rack 1.1) (@dgynn)
 
 ## 0.9.8 - 2015-11-27 (Sam Saffron)
 
