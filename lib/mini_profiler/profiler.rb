@@ -574,10 +574,8 @@ Append the following to your query string:
       path = if ENV["PASSENGER_BASE_URI"] then
         # added because the SCRIPT_NAME workaround below then
         # breaks running under a prefix as permitted by Passenger. 
-                # PASSENGER_BASE_URI
         "#{ENV['PASSENGER_BASE_URI']}#{@config.base_url_path}"
-      elsif env["action_controller.instance"] then
-        raise "hello #{env.keys.select { |k| k =~ /BASE_URI/ }.join(', ')}"
+      elsif env["action_controller.instance"]
         # Rails engines break SCRIPT_NAME; the following appears to discard SCRIPT_NAME
         # since url_for appears documented to return any String argument unmodified
         env["action_controller.instance"].url_for("#{@config.base_url_path}")
