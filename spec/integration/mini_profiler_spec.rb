@@ -60,6 +60,13 @@ describe Rack::MiniProfiler do
           [200, {'Content-Type' => 'text/html'}, '<html><h1>Hi</h1></html>']
         }
       end
+      map '/under_passenger' do
+        run lambda { |env|
+          env['SCRIPT_NAME'] = '/under_passenger'
+          env['PASSENGER_BASE_URI'] = '/under_passenger'
+          [200, {'Content-Type' => 'text/html'}, '<html><h1>and I ride and I ride</h1></html>']
+        }
+      end
     }.to_app
   end
 
@@ -171,6 +178,18 @@ describe Rack::MiniProfiler do
     it 'include the correct JS in the body' do
       last_response.body.include?('/rails_engine/mini-profiler-resources/includes.js').should_not be_true
       last_response.body.include?('src="/mini-profiler-resources/includes.js').should be_true
+    end
+
+  end
+
+  describe 'under passenger' do
+
+    before do
+      get '/under_passenger'
+    end
+
+    it 'include the correct JS in the body' do
+      last_response.body.include?('src="/under_passenger/mini-profiler-resources/includes.js').should be_true
     end
 
   end
