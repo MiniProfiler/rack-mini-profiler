@@ -43,6 +43,10 @@ module Rack
         end
       end
 
+      def set_all_unviewed(user, ids)
+        @client.set("#{@prefix}-#{user}-v", ids, @expires_in_seconds)
+      end
+
       def get_unviewed_ids(user)
         @client.get("#{@prefix}-#{user}-v") || []
       end

@@ -18,6 +18,10 @@ module Rack
         raise NotImplementedError.new("set_viewed is not implemented")
       end
 
+      def set_all_unviewed(user, ids)
+        raise NotImplementedError.new("set_all_unviewed is not implemented")
+      end
+
       def get_unviewed_ids(user)
         raise NotImplementedError.new("get_unviewed_ids is not implemented")
       end
