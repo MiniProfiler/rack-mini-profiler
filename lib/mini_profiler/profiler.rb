@@ -553,7 +553,12 @@ Append the following to your query string:
 
     def ids(env)
       # cap at 10 ids, otherwise there is a chance you can blow the header
-      ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
+      all = ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])).uniq
+      if all.size > 10
+        all = all[0...10]
+        @storage.set_all_unviewed_ids(user(env), all)
+      end
+      all
     end
 
     def ids_json(env)
