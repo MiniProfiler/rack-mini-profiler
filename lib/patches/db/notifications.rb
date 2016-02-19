@@ -6,6 +6,8 @@ module Rack
           elapsed_time = ((finish_time.to_f - start_time.to_f) * 1000).round(1)
           if name == "sql.active_record"
             Rack::MiniProfiler.record_sql(payload[:sql], elapsed_time, binds_to_params(payload[:binds]))
+          elsif name == 'instantiation.active_record'
+            Rack::MiniProfiler.report_reader_duration(elapsed_time, payload[:record_count], payload[:class_name])
           end
         end
       end
@@ -35,7 +37,7 @@ module Rack
 
     def self.subscribe_sql_notifications
       logger = ::Rack::MiniProfiler::ActiveRecordLogger.new
-      %w(sql.active_record).each do |event|
+      %w(sql.active_record instantiation.active_record).each do |event|
         ActiveSupport::Notifications.subscribe(event, logger)
       end
     end

@@ -99,6 +99,13 @@ module Rack
           end
         end
 
+        # If possible, use instead: SqlTiming#report_reader_duration
+        def report_reader_duration(elapsed_ms, row_count = nil, class_name = nil)
+          last_time = self[:sql_timings] && self[:sql_timings].last
+          return unless last_time
+          last_time.report_reader_duration(elapsed_ms, row_count, class_name)
+        end
+
         def add_custom(type, elapsed_ms, page)
           TimerStruct::Custom.new(type, elapsed_ms, page, self).tap do |timer|
             timer[:parent_timing_id] = self[:id]
