@@ -570,7 +570,7 @@ Append the following to your query string:
     def get_profile_script(env)
       path = if ENV["PASSENGER_BASE_URI"] then
         # added because the SCRIPT_NAME workaround below then
-        # breaks running under a prefix as permitted by Passenger. 
+        # breaks running under a prefix as permitted by Passenger.
         "#{ENV['PASSENGER_BASE_URI']}#{@config.base_url_path}"
       elsif env["action_controller.instance"]
         # Rails engines break SCRIPT_NAME; the following appears to discard SCRIPT_NAME
