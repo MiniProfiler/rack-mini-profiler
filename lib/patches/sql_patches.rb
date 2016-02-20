@@ -53,5 +53,5 @@ require 'patches/db/rsolr'            if defined?(RSolr::Connection) && SqlPatch
 require 'patches/db/sequel'           if defined?(Sequel::Database) && !SqlPatches.patched? && SqlPatches.class_exists?("Sequel::Database")
 require 'patches/db/activerecord'     if defined?(ActiveRecord) &&!SqlPatches.patched? && SqlPatches.module_exists?("ActiveRecord")
 require 'patches/db/nobrainer'        if defined?(NoBrainer) && SqlPatches.module_exists?("NoBrainer")
-require 'patches/db/riak'             if defined?(Riak) && !SqlPatches.patched? && SqlPatches.module_exists?("Riak")
+require 'patches/db/riak'             if defined?(Riak) && SqlPatches.module_exists?("Riak")
 require 'patches/db/neo4j'            if defined?(Neo4j::Core) && SqlPatches.class_exists?("Neo4j::Core::Query")
