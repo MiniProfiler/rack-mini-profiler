@@ -43,7 +43,6 @@ module Rack::MiniProfilerRails
     # The file store is just so much less flaky
     base_path = Rails.application.config.paths['tmp'].first rescue "#{Rails.root}/tmp"
     tmp       = base_path + '/miniprofiler'
-    FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
 
     c.storage_options = {:path => tmp}
     c.storage = Rack::MiniProfiler::FileStore
