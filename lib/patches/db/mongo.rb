@@ -8,5 +8,9 @@ class Mongo::Server::Connection
     end
     return result
   end
-  alias_method_chain :dispatch, :timing
+
+  # TODO: change to Module#prepend as soon as Ruby 1.9.3 support is dropped
+  alias_method :dispatch_without_timing, :dispatch
+  alias_method :dispatch, :dispatch_with_timing
+
 end
