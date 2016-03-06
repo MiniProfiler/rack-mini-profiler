@@ -247,7 +247,7 @@
 }
 
 // ajaxed-in results will be appended to this
-.profiler-results 
+.profiler-results
 {
     z-index:@zindex + 3;
     position:fixed;
@@ -258,7 +258,7 @@
     &.profiler-left {
         left:0px;
 
-        &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
+        &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
             -webkit-border-bottom-right-radius: @radius;
             -moz-border-radius-bottomright: @radius;
             border-bottom-right-radius: @radius;
@@ -272,7 +272,7 @@
     &.profiler-right {
         right:0px;
 
-        &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
+        &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
             -webkit-border-bottom-left-radius: @radius;
             -moz-border-radius-bottomleft: @radius;
             border-bottom-left-radius: @radius;
@@ -304,6 +304,20 @@
                 font-weight:normal;
             }
         }
+    }
+
+
+    .profiler-totals {
+      .profiler-reqs {
+        font-family: @codeFonts;
+        font-size: 10px;
+        margin-left: 6px;
+        &:before {
+          font-family: @codeFonts;
+          content: "×";
+          margin-right: 1px;
+        }
+      }
     }
 
     .profiler-controls {

@@ -593,7 +593,8 @@ Append the following to your query string:
        :showControls    => false,
        :authorized      => true,
        :toggleShortcut  => @config.toggle_shortcut,
-       :startHidden     => @config.start_hidden
+       :startHidden     => @config.start_hidden,
+       :collapseResults => @config.collapse_results
       }
 
       if current && current.page_struct
