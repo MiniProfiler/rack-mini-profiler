@@ -184,6 +184,18 @@ Rails.application.config.to_prepare do
 end
 ```
 
+### Using in SPA applications
+
+Single page applications built using Ember, Angular or other frameworks need some special care, as routes often change without a full page load.
+
+On route transition always call:
+
+```
+window.MiniProfiler.pageTransition();
+```
+
+This method will remove profiling information that was related to previous page and clear aggregate statistics.
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.

@@ -2,6 +2,10 @@
 
 ## 
 
+## 0.9.9.1 2016-03-06
+
+- [FEATURE] expost MiniProfiler.pageTransition() for use by SPA web apps (@sam)
+
 ## 0.9.9 2016-03-06
 
 - [FIX] removes alias_method_chain in favor of alias_method until Ruby 1.9.3 (@ayfredlund)
