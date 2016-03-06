@@ -589,7 +589,7 @@ Append the following to your query string:
        :position        => @config.position,
        :showTrivial     => false,
        :showChildren    => false,
-       :maxTracesToShow => 10,
+       :maxTracesToShow => @config.max_traces_to_show,
        :showControls    => false,
        :authorized      => true,
        :toggleShortcut  => @config.toggle_shortcut,
