@@ -2,6 +2,18 @@
 
 ## 
 
+## 0.9.9 2016-03-06
+
+- [FIX] removes alias_method_chain in favor of alias_method until Ruby 1.9.3 (@ayfredlund)
+- [FIX] Dont block mongo when already patched for another db (@rrooding @kbrock)
+- [FIX] get_profile_script when running under passenger configured with RailsBaseURI (@nspring)
+- [FEATURE] Add support for neo4j (@ProGM)
+- [FIX] ArgumentError: comparison of String with 200 failed (@paweljw)
+- [FEATURE] Add support for Riak (@janx)
+- [PERF] GC profiler much faster (@dgynn)
+- [FIX] If local storage is disabled don't bomb out (@elia)
+- [FIX] Create tmp directory when actually using it (@kbrock)
+- [ADDED] Default collapse_results setting that collapses multiple timings on same page to a single one (@sam)
 - [ADDED] Rack::MiniProfiler.profile_singleton_method (@kbrock)
 - [CHANGE] Added Rack 2.0 support (and dropped support for Rack 1.1) (@dgynn)
 

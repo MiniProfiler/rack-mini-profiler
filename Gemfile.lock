@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rack-mini-profiler (0.9.8)
+    rack-mini-profiler (0.9.9)
       rack (>= 1.2.0)
 
 GEM
@@ -88,4 +88,4 @@ DEPENDENCIES
   therubyracer
 
 BUNDLED WITH
-   1.10.6
+   1.11.2
