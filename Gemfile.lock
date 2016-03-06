@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rack-mini-profiler (0.9.9)
+    rack-mini-profiler (0.9.9.1)
       rack (>= 1.2.0)
 
 GEM
