@@ -19,15 +19,13 @@ Gem::Specification.new do |s|
     "CHANGELOG.md"
   ]
   s.add_runtime_dependency 'rack', '>= 1.2.0'
-  if RUBY_VERSION < "1.9"
-    s.add_runtime_dependency 'json', '>= 1.6'
-  end
+  s.required_ruby_version = '>= 1.9.3'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'activerecord', '~> 3.0'
   s.add_development_dependency 'dalli'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', '~> 2.14.1'
   s.add_development_dependency 'ZenTest'
   s.add_development_dependency 'autotest'
   s.add_development_dependency 'redis'
