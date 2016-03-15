@@ -556,7 +556,7 @@ Append the following to your query string:
       all = ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])).uniq
       if all.size > 10
         all = all[0...10]
-        @storage.set_all_unviewed_ids(user(env), all)
+        @storage.set_all_unviewed(user(env), all)
       end
       all
     end
