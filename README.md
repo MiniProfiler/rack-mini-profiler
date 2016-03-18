@@ -220,7 +220,7 @@ backtrace_remove|rails: `Rails.root`<br>Rack: `nil`|A string or regex to remove 
 toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
 start_hidden|`false`|`false` to make mini_profiler visible on page load.
 backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
-flamegraph_sample_rate|`0.5ms`|How often to capture stack traces for flamegraphs.
+flamegraph_sample_rate|`0.5`|How often to capture stack traces for flamegraphs.
 disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV vars over HTTP.
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
 collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
