@@ -114,6 +114,12 @@ module Rack
         }
       end
 
+      def set_all_unviewed(user, ids)
+        @user_view_lock.synchronize {
+          @user_view_cache[user] = ids.uniq
+        }
+      end
+
       def get_unviewed_ids(user)
         @user_view_lock.synchronize {
           @user_view_cache[user]
