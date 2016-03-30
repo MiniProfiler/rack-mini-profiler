@@ -44,8 +44,16 @@ module Rack
           @page              = page
         end
 
+        def name
+          @attributes[:name]
+        end
+
         def duration_ms
           self[:duration_milliseconds]
+        end
+
+        def duration_ms_in_sql
+          @attributes[:duration_milliseconds_in_sql]
         end
 
         def start_ms

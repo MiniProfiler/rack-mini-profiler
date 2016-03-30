@@ -44,6 +44,8 @@ module Rack
         @path = args[:path]
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
         raise ArgumentError.new :path unless @path
+        FileUtils.mkdir_p(@path) unless ::File.exists?(@path)
+
         @timer_struct_cache = FileCache.new(@path, "mp_timers")
         @timer_struct_lock  = Mutex.new
         @user_view_cache    = FileCache.new(@path, "mp_views")
@@ -109,6 +111,12 @@ module Rack
           current = [] unless Array === current
           current.delete(id)
           @user_view_cache[user] = current.uniq
+        }
+      end
+
+      def set_all_unviewed(user, ids)
+        @user_view_lock.synchronize {
+          @user_view_cache[user] = ids.uniq
         }
       end
 

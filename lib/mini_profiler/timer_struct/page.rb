@@ -40,8 +40,16 @@ module Rack
           self[:root] = TimerStruct::Request.createRoot(name, self)
         end
 
+        def name
+          @attributes[:name]
+        end
+
         def duration_ms
           @attributes[:root][:duration_milliseconds]
+        end
+
+        def duration_ms_in_sql
+          @attributes[:duration_milliseconds_in_sql]
         end
 
         def root

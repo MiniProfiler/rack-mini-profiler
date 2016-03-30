@@ -267,6 +267,7 @@
 .profiler-results.profiler-left {
   left: 0px;
 }
+.profiler-results.profiler-left.profiler-no-controls .profiler-totals,
 .profiler-results.profiler-left.profiler-no-controls .profiler-result:last-child .profiler-button,
 .profiler-results.profiler-left .profiler-controls {
   -webkit-border-bottom-right-radius: 10px;
@@ -280,6 +281,7 @@
 .profiler-results.profiler-right {
   right: 0px;
 }
+.profiler-results.profiler-right.profiler-no-controls .profiler-totals,
 .profiler-results.profiler-right.profiler-no-controls .profiler-result:last-child .profiler-button,
 .profiler-results.profiler-right .profiler-controls {
   -webkit-border-bottom-left-radius: 10px;
@@ -315,6 +317,16 @@
 .profiler-results .profiler-controls.profiler-button-active .profiler-unit {
   color: #fff;
   font-weight: normal;
+}
+.profiler-results .profiler-totals .profiler-reqs {
+  font-family: Consolas, monospace, serif;
+  font-size: 10px;
+  margin-left: 6px;
+}
+.profiler-results .profiler-totals .profiler-reqs:before {
+  font-family: Consolas, monospace, serif;
+  content: "×";
+  margin-right: 1px;
 }
 .profiler-results .profiler-controls {
   display: block;

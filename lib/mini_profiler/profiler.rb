@@ -552,8 +552,12 @@ Append the following to your query string:
     end
 
     def ids(env)
-      # cap at 10 ids, otherwise there is a chance you can blow the header
-      ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])[0..8]).uniq
+      all = ([current.page_struct[:id]] + (@storage.get_unviewed_ids(user(env)) || [])).uniq
+      if all.size > @config.max_traces_to_show
+        all = all[0...@config.max_traces_to_show]
+        @storage.set_all_unviewed(user(env), all)
+      end
+      all
     end
 
     def ids_json(env)
@@ -593,11 +597,12 @@ Append the following to your query string:
        :position        => @config.position,
        :showTrivial     => false,
        :showChildren    => false,
-       :maxTracesToShow => 10,
+       :maxTracesToShow => @config.max_traces_to_show,
        :showControls    => false,
        :authorized      => true,
        :toggleShortcut  => @config.toggle_shortcut,
-       :startHidden     => @config.start_hidden
+       :startHidden     => @config.start_hidden,
+       :collapseResults => @config.collapse_results
       }
 
       if current && current.page_struct

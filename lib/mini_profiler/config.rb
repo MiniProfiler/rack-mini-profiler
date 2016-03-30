@@ -18,7 +18,7 @@ module Rack
       :flamegraph_sample_rate, :logger, :position, :pre_authorize_cb,
       :skip_paths, :skip_schema_queries, :start_hidden, :storage,
       :storage_failure, :storage_instance, :storage_options, :toggle_shortcut,
-      :user_provider
+      :user_provider, :collapse_results, :max_traces_to_show
 
     # Deprecated options
     attr_accessor :use_existing_jquery
@@ -48,6 +48,8 @@ module Rack
           end
           @enabled = true
           @disable_env_dump = false
+          @collapse_results = true
+          @max_traces_to_show = 20
           self
         }
       end

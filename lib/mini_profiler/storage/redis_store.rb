@@ -33,6 +33,13 @@ module Rack
         redis.expire key, @expires_in_seconds
       end
 
+      def set_all_unviewed(user, ids)
+        key = "#{@prefix}-#{user}-v"
+        redis.del key
+        ids.each { |id| redis.sadd(key, id) }
+        redis.expire key, @expires_in_seconds
+      end
+
       def set_viewed(user, id)
         redis.srem "#{@prefix}-#{user}-v", id
       end
