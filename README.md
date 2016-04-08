@@ -203,6 +203,8 @@ You need to inject the following in your SPA to load MiniProfiler's speed badge 
  <script async type="text/javascript" id="mini-profiler" src="/mini-profiler-resources/includes.js?v=12b4b45a3c42e6e15503d7a03810ff33" data-version="12b4b45a3c42e6e15503d7a03810ff33" data-path="/mini-profiler-resources/" data-current-id="redo66j4g1077kto8uh3" data-ids="redo66j4g1077kto8uh3" data-position="left" data-trivial="false" data-children="false" data-max-traces="10" data-controls="false" data-authorized="true" data-toggle-shortcut="Alt+P" data-start-hidden="false" data-collapse-results="true"></script>
 ```
 
+_Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will change with each release of `rack_mini_profiler`. The MiniProfiler's speed badge will continue to work, although you will have to change the GUID to expire the script to fetch the most recent version.
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
