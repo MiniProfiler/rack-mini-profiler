@@ -1,5 +1,9 @@
 class SqlPatches
 
+  def self.unpatched?
+    !patched?
+  end
+
   def self.patched?
     @patched
   end
@@ -50,8 +54,8 @@ require 'patches/db/mongo'            if SqlPatches.module_exists?("Mongo")
 require 'patches/db/moped'            if SqlPatches.class_exists?("Moped::Node")
 require 'patches/db/plucky'           if SqlPatches.class_exists?("Plucky::Query")
 require 'patches/db/rsolr'            if SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0"
-require 'patches/db/sequel'           if !SqlPatches.patched? && SqlPatches.class_exists?("Sequel::Database")
-require 'patches/db/activerecord'     if !SqlPatches.patched? && SqlPatches.module_exists?("ActiveRecord")
+require 'patches/db/sequel'           if SqlPatches.unpatched? && SqlPatches.class_exists?("Sequel::Database")
+require 'patches/db/activerecord'     if SqlPatches.unpatched? && SqlPatches.module_exists?("ActiveRecord")
 require 'patches/db/nobrainer'        if SqlPatches.module_exists?("NoBrainer")
 require 'patches/db/riak'             if SqlPatches.module_exists?("Riak")
 require 'patches/db/neo4j'            if SqlPatches.class_exists?("Neo4j::Core::Query")
