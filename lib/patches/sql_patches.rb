@@ -1,4 +1,7 @@
 class SqlPatches
+  def self.unpatched?
+    !patched?
+  end
 
   def self.patched?
     @patched
@@ -50,8 +53,8 @@ require 'patches/db/mongo'            if defined?(Mongo) && SqlPatches.module_ex
 require 'patches/db/moped'            if defined?(Moped::Node) && SqlPatches.class_exists?("Moped::Node")
 require 'patches/db/plucky'           if defined?(Plucky::Query) && SqlPatches.class_exists?("Plucky::Query")
 require 'patches/db/rsolr'            if defined?(RSolr::Connection) && SqlPatches.class_exists?("RSolr::Connection") && RSolr::VERSION[0] != "0"
-require 'patches/db/sequel'           if defined?(Sequel::Database) && !SqlPatches.patched? && SqlPatches.class_exists?("Sequel::Database")
-require 'patches/db/activerecord'     if defined?(ActiveRecord) &&!SqlPatches.patched? && SqlPatches.module_exists?("ActiveRecord")
+require 'patches/db/sequel'           if defined?(Sequel::Database) && SqlPatches.unpatched? && SqlPatches.class_exists?("Sequel::Database")
+require 'patches/db/activerecord'     if defined?(ActiveRecord) && SqlPatches.unpatched? && SqlPatches.module_exists?("ActiveRecord")
 require 'patches/db/nobrainer'        if defined?(NoBrainer) && SqlPatches.module_exists?("NoBrainer")
 require 'patches/db/riak'             if defined?(Riak) && SqlPatches.module_exists?("Riak")
 require 'patches/db/neo4j'            if defined?(Neo4j::Core) && SqlPatches.class_exists?("Neo4j::Core::Query")
