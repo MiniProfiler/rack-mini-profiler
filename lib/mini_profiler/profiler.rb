@@ -170,6 +170,8 @@ module Rack
         :enable
       elsif query_string =~ /pp=disable/ || client_settings.disable_profiling?
         :disable
+      elsif query_string =~ /pp=profile-gc/
+        :profile_gc
       end
     end
 
@@ -202,9 +204,7 @@ module Rack
       end
       client_settings.disable_profiling = false
 
-
-      # profile gc
-      if query_string =~ /pp=profile-gc/
+      if action == :profile_gc
         current.measure = false if current
         return Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env)
       end
