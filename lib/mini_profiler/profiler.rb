@@ -195,7 +195,10 @@ module Rack
         skip_it = false
         config.enabled = true
       elsif action == :disable || !config.enabled
-        skip_it = true
+        status,headers,body = @app.call(env)
+        client_settings.disable_profiling = true
+        client_settings.write!(headers)
+        return [status,headers,body]
       end
 
       if skip_it || !config.enabled
