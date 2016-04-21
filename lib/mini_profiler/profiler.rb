@@ -145,63 +145,71 @@ module Rack
       @config
     end
 
+    def fetch_settings(env)
+      # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
+      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
+      ClientSettings.new(env)
+    end
+
+    # @return :skip_it if this requst should be skipped
+    def determine_action(client_settings, env)
+      query_string = env['QUERY_STRING']
+      path         = env['PATH_INFO']
+      has_profiling_cookie = client_settings.has_cookie?
+      whitelist = @config.authorization_mode == :whitelist
+
+      if (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
+         (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
+          query_string =~ /pp=skip/
+        :skip_it
+      elsif (whitelist && !has_profiling_cookie)
+        :cookie_authorization
+      elsif path.start_with? @config.base_url_path
+        :static
+      elsif query_string =~ /pp=enable/ && (!whitelist || MiniProfiler.request_authorized?)
+        :enable
+      elsif query_string =~ /pp=disable/ || client_settings.disable_profiling?
+        :disable
+      elsif query_string =~ /pp=profile-gc/
+        :profile_gc
+      elsif query_string =~ /pp=profile-memory/
+        :profile_memory
+      end
+    end
 
     def call(env)
-
-      client_settings = ClientSettings.new(env)
+      client_settings = fetch_settings(env)
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
-      path         = env['PATH_INFO']
 
-      # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
-      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
+      action = determine_action(client_settings, env)
+      skip_it = (action == :skip_it)
 
-      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
-                (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
-                query_string =~ /pp=skip/
-
-      has_profiling_cookie = client_settings.has_cookie?
-
-      if skip_it || (@config.authorization_mode == :whitelist && !has_profiling_cookie)
+      if action == :skip_it
+        return @app.call(env)
+      elsif action == :cookie_authorization
         status,headers,body = @app.call(env)
-        if !skip_it && @config.authorization_mode == :whitelist && !has_profiling_cookie && MiniProfiler.request_authorized?
-          client_settings.write!(headers)
-        end
+        client_settings.write!(headers) if MiniProfiler.request_authorized?
         return [status,headers,body]
-      end
-
-      # handle all /mini-profiler requests here
-      return serve_html(env) if path.start_with? @config.base_url_path
-
-      has_disable_cookie = client_settings.disable_profiling?
-      # manual session disable / enable
-      if query_string =~ /pp=disable/ || has_disable_cookie
-        skip_it = true
-      end
-
-      if query_string =~ /pp=enable/ && (@config.authorization_mode != :whitelist || MiniProfiler.request_authorized?)
+      elsif action == :static
+        # handle all /mini-profiler requests here
+        return serve_html(env)
+      elsif action == :enable
         skip_it = false
         config.enabled = true
-      end
-
-      if skip_it || !config.enabled
+      elsif action == :disable || !config.enabled
         status,headers,body = @app.call(env)
         client_settings.disable_profiling = true
         client_settings.write!(headers)
         return [status,headers,body]
-      else
-        client_settings.disable_profiling = false
       end
+      client_settings.disable_profiling = false
 
-      # profile gc
-      if query_string =~ /pp=profile-gc/
+      if action == :profile_gc
         current.measure = false if current
         return Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env)
-      end
-
-      # profile memory
-      if query_string =~ /pp=profile-memory/
+      elsif action == :profile_memory
         query_params = Rack::Utils.parse_nested_query(query_string)
         options = {
           :ignore_files => query_params['memory_profiler_ignore_files'],
