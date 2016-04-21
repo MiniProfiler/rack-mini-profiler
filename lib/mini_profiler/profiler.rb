@@ -172,6 +172,8 @@ module Rack
         :disable
       elsif query_string =~ /pp=profile-gc/
         :profile_gc
+      elsif query_string =~ /pp=profile-memory/
+        :profile_memory
       end
     end
 
@@ -207,10 +209,7 @@ module Rack
       if action == :profile_gc
         current.measure = false if current
         return Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env)
-      end
-
-      # profile memory
-      if query_string =~ /pp=profile-memory/
+      elsif action == :profile_memory
         query_params = Rack::Utils.parse_nested_query(query_string)
         options = {
           :ignore_files => query_params['memory_profiler_ignore_files'],
