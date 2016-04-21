@@ -156,15 +156,18 @@ module Rack
       query_string = env['QUERY_STRING']
       path         = env['PATH_INFO']
       has_profiling_cookie = client_settings.has_cookie?
+      whitelist = @config.authorization_mode == :whitelist
 
       if (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
          (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
           query_string =~ /pp=skip/
         :skip_it
-      elsif (@config.authorization_mode == :whitelist && !has_profiling_cookie)
+      elsif (whitelist && !has_profiling_cookie)
         :cookie_authorization
       elsif path.start_with? @config.base_url_path
         :static
+      elsif query_string =~ /pp=enable/ && (!whitelist || MiniProfiler.request_authorized?)
+        :enable
       elsif query_string =~ /pp=disable/ || client_settings.disable_profiling?
         :disable
       end
@@ -188,13 +191,11 @@ module Rack
       elsif action == :static
         # handle all /mini-profiler requests here
         return serve_html(env)
-      elsif action == :disable
-        skip_it = true
-      end
-
-      if query_string =~ /pp=enable/ && (@config.authorization_mode != :whitelist || MiniProfiler.request_authorized?)
+      elsif action == :enable
         skip_it = false
         config.enabled = true
+      elsif action == :disable || !config.enabled
+        skip_it = true
       end
 
       if skip_it || !config.enabled
