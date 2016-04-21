@@ -163,6 +163,8 @@ module Rack
         :skip_it
       elsif (@config.authorization_mode == :whitelist && !has_profiling_cookie)
         :cookie_authorization
+      elsif path.start_with? @config.base_url_path
+        :static
       end
     end
 
@@ -171,7 +173,6 @@ module Rack
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
-      path         = env['PATH_INFO']
 
       action = determine_action(client_settings, env)
       skip_it = (action == :skip_it)
@@ -182,10 +183,10 @@ module Rack
         status,headers,body = @app.call(env)
         client_settings.write!(headers) if MiniProfiler.request_authorized?
         return [status,headers,body]
+      elsif action == :static
+        # handle all /mini-profiler requests here
+        return serve_html(env)
       end
-
-      # handle all /mini-profiler requests here
-      return serve_html(env) if path.start_with? @config.base_url_path
 
       has_disable_cookie = client_settings.disable_profiling?
       # manual session disable / enable
