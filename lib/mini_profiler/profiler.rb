@@ -145,17 +145,18 @@ module Rack
       @config
     end
 
+    def fetch_settings(env)
+      # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
+      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
+      ClientSettings.new(env)
+    end
 
     def call(env)
-
-      client_settings = ClientSettings.new(env)
+      client_settings = fetch_settings(env)
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
       path         = env['PATH_INFO']
-
-      # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
-      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
