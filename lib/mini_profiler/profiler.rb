@@ -200,15 +200,8 @@ module Rack
         client_settings.write!(headers)
         return [status,headers,body]
       end
+      client_settings.disable_profiling = false
 
-      if skip_it || !config.enabled
-        status,headers,body = @app.call(env)
-        client_settings.disable_profiling = true
-        client_settings.write!(headers)
-        return [status,headers,body]
-      else
-        client_settings.disable_profiling = false
-      end
 
       # profile gc
       if query_string =~ /pp=profile-gc/
