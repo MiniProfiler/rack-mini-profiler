@@ -151,6 +151,18 @@ module Rack
       ClientSettings.new(env)
     end
 
+    # @return :skip_it if this requst should be skipped
+    def determine_action(client_settings, env)
+      query_string = env['QUERY_STRING']
+      path         = env['PATH_INFO']
+
+      if (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
+         (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
+          query_string =~ /pp=skip/
+        :skip_it
+      end
+    end
+
     def call(env)
       client_settings = fetch_settings(env)
 
@@ -158,17 +170,16 @@ module Rack
       query_string = env['QUERY_STRING']
       path         = env['PATH_INFO']
 
-      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
-                (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
-                query_string =~ /pp=skip/
+      action = determine_action(client_settings, env)
+      skip_it = (action == :skip_it)
 
       has_profiling_cookie = client_settings.has_cookie?
 
-      if skip_it || (@config.authorization_mode == :whitelist && !has_profiling_cookie)
+      if action == :skip_it
+        return @app.call(env)
+      elsif (@config.authorization_mode == :whitelist && !has_profiling_cookie)
         status,headers,body = @app.call(env)
-        if !skip_it && @config.authorization_mode == :whitelist && !has_profiling_cookie && MiniProfiler.request_authorized?
-          client_settings.write!(headers)
-        end
+        client_settings.write!(headers) if MiniProfiler.request_authorized?
         return [status,headers,body]
       end
 
