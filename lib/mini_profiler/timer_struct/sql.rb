@@ -39,7 +39,7 @@ module Rack
             :start_milliseconds                => start_millis,
             :duration_milliseconds             => duration_ms,
             :first_fetch_duration_milliseconds => duration_ms,
-            :parameters                        => params,
+            :parameters                        => trim_binds(params),
             :parent_timing_id                  => nil,
             :is_duplicate                      => false
           )
@@ -53,6 +53,22 @@ module Rack
           @page[:duration_milliseconds_in_sql]        += elapsed_ms
         end
 
+        def trim_binds(binds)
+          max_len = Rack::MiniProfiler.config.max_sql_param_length
+          return if binds.nil? || max_len == 0
+          return binds if max_len.nil?
+          binds.map do |(name, val)|
+            val ||= name
+            if val.nil? || val == true || val == false || val.kind_of?(Numeric)
+              # keep these parameters as is
+            elsif val.kind_of?(String)
+              val = val[0...max_len] if max_len
+            else
+              val = val.class.name
+            end
+            [name, val]
+          end
+        end
       end
     end
   end

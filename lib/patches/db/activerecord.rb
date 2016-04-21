@@ -14,8 +14,14 @@ module Rack
       end
 
       def binds_to_params(binds)
-        return if binds.nil?
-        binds.map { |c| c.kind_of?(Array) ? [c.first, c.last] : [c.name, c.value] }
+        return if binds.nil? || Rack::MiniProfiler.config.max_sql_param_length == 0
+        # map ActiveRecord::Relation::QueryAttribute to [name, value]
+        params = binds.map { |c| c.kind_of?(Array) ? [c.first, c.last] : [c.name, c.value] }
+        if (skip = Rack::MiniProfiler.config.skip_sql_param_names)
+          params.map { |(n,v)| n =~ skip ? [n, nil] : [n, v] }
+        else
+          params
+        end
       end
 
       def log_with_miniprofiler(*args, &block)
