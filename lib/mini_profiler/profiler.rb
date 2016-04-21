@@ -165,6 +165,8 @@ module Rack
         :cookie_authorization
       elsif path.start_with? @config.base_url_path
         :static
+      elsif query_string =~ /pp=disable/ || client_settings.disable_profiling?
+        :disable
       end
     end
 
@@ -186,11 +188,7 @@ module Rack
       elsif action == :static
         # handle all /mini-profiler requests here
         return serve_html(env)
-      end
-
-      has_disable_cookie = client_settings.disable_profiling?
-      # manual session disable / enable
-      if query_string =~ /pp=disable/ || has_disable_cookie
+      elsif action == :disable
         skip_it = true
       end
 
