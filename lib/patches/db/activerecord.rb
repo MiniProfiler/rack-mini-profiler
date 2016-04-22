@@ -21,8 +21,6 @@ module Rack
         rval             = log_without_miniprofiler(*args, &block)
 
         # Don't log schema queries if the option is set
-#        return rval unless sql =~ /\"vms\"/
-#        return rval unless sql =~ /\"(vms|ext_management_systems)\"/
         return rval if Rack::MiniProfiler.config.skip_schema_queries and name =~ /SCHEMA/
 
         elapsed_time = SqlPatches.elapsed_time(start)
