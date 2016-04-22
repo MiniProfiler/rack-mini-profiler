@@ -120,7 +120,8 @@ module Rack
     end
 
     def serve_html(env)
-      file_name = env['PATH_INFO'][(@config.base_url_path.length)..1000]
+      path      = env['PATH_INFO'].sub('//', '/')
+      file_name = path.sub(@config.base_url_path, '')
 
       return serve_results(env) if file_name.eql?('results')
 
@@ -152,7 +153,7 @@ module Rack
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
-      path         = env['PATH_INFO']
+      path         = env['PATH_INFO'].sub('//', '/')
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
