@@ -15,10 +15,14 @@ module Rack
     attr_accessor :authorization_mode, :auto_inject, :backtrace_ignores,
       :backtrace_includes, :backtrace_remove, :backtrace_threshold_ms,
       :base_url_path, :disable_caching, :disable_env_dump, :enabled,
-      :flamegraph_sample_rate, :logger, :position, :pre_authorize_cb,
-      :skip_paths, :skip_schema_queries, :start_hidden, :storage,
-      :storage_failure, :storage_instance, :storage_options, :toggle_shortcut,
-      :user_provider, :collapse_results, :max_traces_to_show
+      :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
+      :skip_schema_queries, :storage, :storage_failure, :storage_instance,
+      :storage_options, :user_provider
+
+    # ui accessors
+    attr_accessor :collapse_results, :max_traces_to_show, :position,
+      :show_children, :show_controls, :show_trivial, :start_hidden,
+      :toggle_shortcut
 
     # Deprecated options
     attr_accessor :use_existing_jquery
@@ -32,13 +36,10 @@ module Rack
           @pre_authorize_cb = lambda {|env| true}
 
           # called after rack chain, to ensure we are REALLY allowed to profile
-          @position               = 'left'  # Where it is displayed
           @skip_schema_queries    = false
           @storage                = MiniProfiler::MemoryStore
           @user_provider          = Proc.new{|env| Rack::Request.new(env).ip}
           @authorization_mode     = :allow_all
-          @toggle_shortcut        = 'Alt+P'
-          @start_hidden           = false
           @backtrace_threshold_ms = 0
           @flamegraph_sample_rate = 0.5
           @storage_failure = Proc.new do |exception|
@@ -48,8 +49,18 @@ module Rack
           end
           @enabled = true
           @disable_env_dump = false
-          @collapse_results = true
+
+          # ui parameters
+          @autorized          = true
+          @collapse_results   = true
           @max_traces_to_show = 20
+          @position           = 'left'  # Where it is displayed
+          @show_children      = false
+          @show_controls      = false
+          @show_trivial       = false
+          @start_hidden       = false
+          @toggle_shortcut    = 'Alt+P'
+
           self
         }
       end
