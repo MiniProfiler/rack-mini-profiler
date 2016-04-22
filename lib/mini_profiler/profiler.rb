@@ -576,10 +576,10 @@ Append the following to your query string:
     # * you have disabled auto append behaviour throught :auto_inject => false flag
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
-      path = if ENV["PASSENGER_BASE_URI"] then
+      path = if env["PASSENGER_BASE_URI"] then
         # added because the SCRIPT_NAME workaround below then
         # breaks running under a prefix as permitted by Passenger. 
-        "#{ENV['PASSENGER_BASE_URI']}#{@config.base_url_path}"
+        "#{env['PASSENGER_BASE_URI']}#{@config.base_url_path}"
       elsif env["action_controller.instance"]
         # Rails engines break SCRIPT_NAME; the following appears to discard SCRIPT_NAME
         # since url_for appears documented to return any String argument unmodified

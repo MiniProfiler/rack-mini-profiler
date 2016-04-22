@@ -63,7 +63,7 @@ describe Rack::MiniProfiler do
       map '/under_passenger' do
         run lambda { |env|
           env['SCRIPT_NAME'] = '/under_passenger'
-          ENV['PASSENGER_BASE_URI'] = '/under_passenger'
+          env['PASSENGER_BASE_URI'] = '/under_passenger'
           [200, {'Content-Type' => 'text/html'}, '<html><h1>and I ride and I ride</h1></html>']
         }
       end
