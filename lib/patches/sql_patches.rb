@@ -45,4 +45,4 @@ require 'patches/db/sequel'           if SqlPatches.unpatched? && defined?(Seque
 require 'patches/db/activerecord'     if SqlPatches.unpatched? && defined?(ActiveRecord) && ActiveRecord.class == Module
 require 'patches/db/nobrainer'        if defined?(NoBrainer) && NoBrainer.class == Module
 require 'patches/db/riak'             if defined?(Riak) && Riak.class == Module
-require 'patches/db/neo4j'            if defined?(Neo4j::Core) && Neo4j::Core::Query.class == ClassQuery
+require 'patches/db/neo4j'            if defined?(Neo4j::Core) && Neo4j::Core::Query.class == Class
