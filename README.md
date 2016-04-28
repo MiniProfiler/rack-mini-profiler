@@ -112,6 +112,12 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
   end
 ```
 
+To make request authorization work, you have to add the following to your the rack-mini-profiler initializer file:
+
+```ruby
+Rack::MiniProfiler.config.authorization_mode = :whitelist
+```
+
 ## Configuration
 
 Various aspects of rack-mini-profiler's behavior can be configured when your app boots.
