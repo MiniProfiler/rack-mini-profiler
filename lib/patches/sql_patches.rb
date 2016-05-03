@@ -37,7 +37,7 @@ end
 require 'patches/db/mysql2'           if defined?(Mysql2::Client) && Mysql2::Client.class == Class
 require 'patches/db/pg'               if defined?(PG::Result) && PG::Result.class == Class
 require 'patches/db/oracle_enhanced'  if defined?(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter) && ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter.class == Class && SqlPatches.correct_version?('~> 1.5.0', ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter)
-require 'patches/db/mongo'            if defined?(Mongo) && Mongo.class == Module
+require 'patches/db/mongo'            if defined?(Mongo::Server::Connection) && Mongo.class == Module
 require 'patches/db/moped'            if defined?(Moped::Node) && Moped::Node.class == Class
 require 'patches/db/plucky'           if defined?(Plucky::Query) && Plucky::Query.class == Class
 require 'patches/db/rsolr'            if defined?(RSolr::Connection) && RSolr::Connection.class == Class && RSolr::VERSION[0] != "0"
