@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## 
+## 0.10.1 2016-05-18
+
+- [FEATURE] push forward the security checks so no work is ever done if a valid production
+    cookie is not available (@sam)
 
 ## 0.9.9.2 2016-03-06
 
