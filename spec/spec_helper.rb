@@ -22,6 +22,13 @@ class Time
       alias_method :old_new, :new
       alias_method :old_now, :now
 
+      def travel(to)
+        @now = to
+        yield
+      ensure
+        @now = nil
+      end
+
       def new
         @now || old_new
       end

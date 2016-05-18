@@ -12,38 +12,89 @@ module Rack
       attr_accessor :backtrace_level
 
 
-      def initialize(env)
+      def initialize(env, store, start)
         request = ::Rack::Request.new(env)
         @cookie = request.cookies[COOKIE_NAME]
+        @store = store
+        @start = start
+
+        @allowed_tokens, @orig_auth_tokens = nil
+
         if @cookie
           @cookie.split(",").map{|pair| pair.split("=")}.each do |k,v|
             @orig_disable_profiling = @disable_profiling = (v=='t') if k == "dp"
             @backtrace_level = v.to_i if k == "bt"
+            @orig_auth_tokens = v.to_s.split("|") if k == "a"
           end
         end
 
-        @backtrace_level = nil if !@backtrace_level.nil? && (@backtrace_level == 0 || @backtrace_level > BACKTRACE_NONE)
+        if !@backtrace_level.nil? && (@backtrace_level == 0 || @backtrace_level > BACKTRACE_NONE)
+          @backtrace_level = nil
+        end
+
         @orig_backtrace_level = @backtrace_level
 
       end
 
+      def handle_cookie(result)
+        status,headers,_body = result
+
+        if (MiniProfiler.config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
+          # this is non-obvious, don't kill the profiling cookie on errors or short requests
+          # this ensures that stuff that never reaches the rails stack does not kill profiling
+          if status.to_i >= 200 && status.to_i < 300 && ((Time.now - @start) > 0.1)
+            discard_cookie!(headers)
+          end
+        else
+          write!(headers)
+        end
+
+        result
+      end
+
       def write!(headers)
-        if @orig_disable_profiling != @disable_profiling || @orig_backtrace_level != @backtrace_level || @cookie.nil?
+
+        tokens_changed = false
+
+        if MiniProfiler.request_authorized? && MiniProfiler.config.authorization_mode == :whitelist
+          @allowed_tokens ||= @store.allowed_tokens
+          tokens_changed = !@orig_auth_tokens || ((@allowed_tokens - @orig_auth_tokens).length > 0)
+        end
+
+        if  @orig_disable_profiling != @disable_profiling ||
+            @orig_backtrace_level != @backtrace_level ||
+            @cookie.nil? ||
+            tokens_changed
+
           settings = {"p" =>  "t" }
-          settings["dp"] = "t"              if @disable_profiling
-          settings["bt"] = @backtrace_level if @backtrace_level
+          settings["dp"] = "t"                  if @disable_profiling
+          settings["bt"] = @backtrace_level     if @backtrace_level
+          settings["a"] = @allowed_tokens.join("|") if @allowed_tokens && MiniProfiler.request_authorized?
+
           settings_string = settings.map{|k,v| "#{k}=#{v}"}.join(",")
           Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, :value => settings_string, :path => '/')
         end
       end
 
       def discard_cookie!(headers)
-        Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, :path => '/')
+        if @cookie
+          Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, :path => '/')
+        end
       end
 
-      def has_cookie?
-        !@cookie.nil?
+      def has_valid_cookie?
+        valid_cookie = !@cookie.nil?
+
+        if (MiniProfiler.config.authorization_mode == :whitelist)
+          @allowed_tokens ||= @store.allowed_tokens
+
+          valid_cookie = (Array === @orig_auth_tokens) &&
+            ((@allowed_tokens & @orig_auth_tokens).length > 0)
+        end
+
+        valid_cookie
       end
+
 
       def disable_profiling?
         @disable_profiling

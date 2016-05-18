@@ -49,11 +49,15 @@ module Rack
       def initialize(args = nil)
         args ||= {}
         @expires_in_seconds = args.fetch(:expires_in) { EXPIRES_IN_SECONDS }
+
+        @token1, @token2, @cycle_tokens_at = nil
+
         initialize_locks
         initialize_cleanup_thread(args)
       end
 
       def initialize_locks
+        @token_lock = Mutex.new
         @timer_struct_lock  = Mutex.new
         @user_view_lock     = Mutex.new
         @timer_struct_cache = {}
@@ -115,6 +119,20 @@ module Rack
         @timer_struct_lock.synchronize {
           @timer_struct_cache.delete_if { |k, v| v[:started] < expire_older_than }
         }
+      end
+
+      def allowed_tokens
+        @token_lock.synchronize do
+
+          unless @cycle_at && (@cycle_at > Time.now)
+            @token2 = @token1
+            @token1 = SecureRandom.hex
+            @cycle_at = Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
+          end
+
+          [@token1, @token2].compact
+
+        end
       end
     end
   end

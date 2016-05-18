@@ -1,6 +1,7 @@
 require 'json'
 require 'timeout'
 require 'thread'
+require 'securerandom'
 
 require 'mini_profiler/version'
 require 'mini_profiler/asset_version'

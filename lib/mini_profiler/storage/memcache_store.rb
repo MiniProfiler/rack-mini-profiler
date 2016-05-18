@@ -51,6 +51,39 @@ module Rack
         @client.get("#{@prefix}-#{user}-v") || []
       end
 
+      def flush_tokens
+        @client.set("#{@prefix}-tokens", nil)
+      end
+
+      def allowed_tokens
+
+        token_info = @client.get("#{@prefix}-tokens")
+        key1, key2, cycle_at = nil
+
+
+        if token_info
+           key1, key2, cycle_at = Marshal::load(token_info)
+
+           key1 = nil unless key1 && key1.length == 32
+           key2 = nil unless key2 && key2.length == 32
+
+           if key1 && cycle_at && (cycle_at > Time.now)
+              return [key1,key2].compact
+           end
+        end
+
+        timeout = Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
+
+        # cycle keys
+        key2 = key1
+        key1 = SecureRandom.hex
+        cycle_at = Time.now + timeout
+
+        @client.set("#{@prefix}-tokens", Marshal::dump([key1, key2, cycle_at]))
+
+        [key1, key2].compact
+      end
+
     end
   end
 end

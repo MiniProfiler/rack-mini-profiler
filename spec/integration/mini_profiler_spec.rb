@@ -30,6 +30,12 @@ describe Rack::MiniProfiler do
       map '/html' do
         run lambda { |env| [200, {'Content-Type' => 'text/html'}, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
       end
+      map '/whitelisted-html' do
+        run lambda { |env|
+          Rack::MiniProfiler.authorize_request
+          [200, {'Content-Type' => 'text/html'}, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
+        }
+      end
       map '/implicitbody' do
         run lambda { |env| [200, {'Content-Type' => 'text/html'}, "<html><h1>Hi</h1></html>"] }
       end
@@ -107,7 +113,7 @@ describe Rack::MiniProfiler do
 
     it 'avoids xss attacks' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      id = ::JSON.parse(h)[0]
+      _id = ::JSON.parse(h)[0]
       get "/mini-profiler-resources/results?id=%22%3E%3Cqss%3E"
       last_response.should_not be_ok
       last_response.body.should_not =~ /<qss>/
@@ -280,13 +286,14 @@ describe Rack::MiniProfiler do
       it "does not re-enable functionality if not whitelisted" do
         Rack::MiniProfiler.config.authorization_mode = :whitelist
         get '/html?pp=enable'
+        get '/html?pp=enable'
         last_response.body.should_not include('/mini-profiler-resources/includes.js')
       end
 
       it "re-enabled functionality if whitelisted" do
         Rack::MiniProfiler.config.authorization_mode = :whitelist
-        expect(Rack::MiniProfiler).to receive(:request_authorized?) { true }.twice
-        get '/html?pp=enable'
+        get '/whitelisted-html?pp=enable'
+        get '/whitelisted-html?pp=enable'
         last_response.body.should include('/mini-profiler-resources/includes.js')
       end
     end
@@ -334,7 +341,9 @@ describe Rack::MiniProfiler do
     end
 
     it "should allow requests that are whitelisted" do
-      set_cookie("__profilin=stylin")
+      get '/whitelisted'
+      # second time will ensure cookie is set
+      # first time around there is no cookie, so no profiling
       get '/whitelisted'
       last_response.headers['X-MiniProfiler-Ids'].should_not be_nil
     end
