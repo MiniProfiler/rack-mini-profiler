@@ -14,6 +14,14 @@ describe Rack::MiniProfiler::TimerStruct::Page do
     @page[:root].should_not be_nil
   end
 
+  it 'has host name' do
+    @page[:host_name].should_not be_nil
+  end
+
+  it 'has process id' do
+    @page[:process_id].should_not be_nil
+  end
+
   describe 'to_json' do
     before do
       @json = @page.to_json

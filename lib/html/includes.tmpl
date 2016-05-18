@@ -14,7 +14,7 @@
         <span class="profiler-name">
           ${name} <span class="profiler-overall-duration">(${MiniProfiler.formatDuration(duration_milliseconds)} ms)</span>
         </span>
-        <span class="profiler-server-time">${machine_name} on ${MiniProfiler.renderDate(started)}</span>
+        <span class="profiler-server-time">${machine_name} on ${host_name} (${process_id}) at ${MiniProfiler.renderDate(started)}</span>
       </div>
       <div class="profiler-output">
         <table class="profiler-timings">
