@@ -30,8 +30,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'therubyracer'
   s.add_development_dependency 'less'
   s.add_development_dependency 'flamegraph'
-  s.add_development_dependency 'guard'
-  s.add_development_dependency 'guard-rspec'
 
   s.require_paths = ["lib"]
 end
