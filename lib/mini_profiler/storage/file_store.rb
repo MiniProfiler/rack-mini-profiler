@@ -44,7 +44,7 @@ module Rack
         @path = args[:path]
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
         raise ArgumentError.new :path unless @path
-        FileUtils.mkdir_p(@path) unless ::File.exists?(@path)
+        FileUtils.mkdir_p(@path) unless ::File.exist?(@path)
 
         @timer_struct_cache = FileCache.new(@path, "mp_timers")
         @timer_struct_lock  = Mutex.new
