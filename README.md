@@ -153,7 +153,7 @@ end
 
 `MemoryStore` stores results in a processes heap - something that does not work well in a multi process environment.
 `FileStore` stores results in the file system - something that may not work well in a multi machine environment.
-`RedisStore`/`MemcacheStore` work in multi process and multi machine environments (`RedisStore` only saves results for up to 24 hours so it won't continue to fill up Redis).
+`RedisStore`/`MemcacheStore` work in multi process and multi machine environments (`RedisStore` only saves results for up to 24 hours so it won't continue to fill up Redis). You will need to add `gem redis`/`gem dalli` respectively to your `Gemfile` to use these stores.
 
 Additionally you may implement an `AbstractStore` for your own provider.
 
