@@ -39,15 +39,13 @@ module Rack
         rval
       end
     end
-  end
 
-  def self.insert_instrumentation
-    ActiveRecord::ConnectionAdapters::AbstractAdapter.module_eval do
-      include ::Rack::MiniProfiler::ActiveRecordInstrumentation
+    def self.insert_ar_instrumentation
+      ActiveRecord::ConnectionAdapters::AbstractAdapter.module_eval do
+        include ::Rack::MiniProfiler::ActiveRecordInstrumentation
+      end
     end
   end
-
-  if defined?(::Rails) && !SqlPatches.patched?
-    insert_instrumentation
-  end
 end
+
+::Rack::MiniProfiler.insert_ar_instrumentation

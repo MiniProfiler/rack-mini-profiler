@@ -42,7 +42,7 @@ require 'patches/db/moped'            if defined?(Moped::Node) && Moped::Node.cl
 require 'patches/db/plucky'           if defined?(Plucky::Query) && Plucky::Query.class == Class
 require 'patches/db/rsolr'            if defined?(RSolr::Connection) && RSolr::Connection.class == Class && RSolr::VERSION[0] != "0"
 require 'patches/db/sequel'           if SqlPatches.unpatched? && defined?(Sequel::Database) && Sequel::Database.class == Class
-require 'patches/db/activerecord'     if SqlPatches.unpatched? && defined?(ActiveRecord) && ActiveRecord.class == Module
+require 'patches/db/activerecord'     if SqlPatches.unpatched? && defined?(ActiveRecord) && defined?(::Rails) && ActiveRecord.class == Module
 require 'patches/db/nobrainer'        if defined?(NoBrainer) && NoBrainer.class == Module
 require 'patches/db/riak'             if defined?(Riak) && Riak.class == Module
 require 'patches/db/neo4j'            if defined?(Neo4j::Core) && Neo4j::Core::Query.class == Class
