@@ -26,5 +26,3 @@ class Mysql2::Client
     result
   end
 end
-
-SqlPatches.patched = true

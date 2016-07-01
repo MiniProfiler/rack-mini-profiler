@@ -47,7 +47,7 @@ module Rack
     end
   end
 
-  if defined?(::Rails) && !SqlPatches.patched?
+  if defined?(::Rails)
     insert_instrumentation
   end
 end

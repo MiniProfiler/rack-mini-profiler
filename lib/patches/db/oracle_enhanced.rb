@@ -66,5 +66,3 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
     !(Rack::MiniProfiler.config.skip_schema_queries && SCHEMA_QUERY_TYPES.include?(name))
   end
 end
-
-SqlPatches.patched = true
