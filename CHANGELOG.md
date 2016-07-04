@@ -92,7 +92,7 @@
 - [ADDED] Implemented exception tracing using TracePoint see pp=trace-exceptions
 - [FIXED] SOLR patching had an incorrect monkey patch
 
-## 1.28 - 2012-07-18
+## 1.28 - 2013-07-30
 - [FIXED] Diagnostics in abstract storage was raising not implemented killing
   ?pp=env and others
 - [FIXED] SOLR xml unescaped by mistake
@@ -127,7 +127,7 @@
 ## 1.22 - 2012-09-20
 - [FIXED] Permission issue in the gem
 
-## 17-September-2012
+## 2012-09-17
 - [IMPROVED] Allow rack-mini-profiler to be sourced from github
 - [IMPROVED] Extracted the pp=profile-gc-time out, the object space profiler needs to disable gc
 
