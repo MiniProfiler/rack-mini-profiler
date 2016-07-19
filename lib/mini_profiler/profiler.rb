@@ -253,6 +253,10 @@ module Rack
           env['HTTP_IF_NONE_MATCH']     = ''
         end
 
+        orig_accept_encoding = env['HTTP_ACCEPT_ENCODING']
+        # Prevent response body from being compressed
+        env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
+
         if query_string =~ /pp=flamegraph/
           unless defined?(Flamegraph) && Flamegraph.respond_to?(:generate)
 
@@ -279,6 +283,7 @@ module Rack
         end
       ensure
         trace.disable if trace
+        env['HTTP_ACCEPT_ENCODING'] = orig_accept_encoding if config.suppress_encoding
       end
 
       skip_it = current.discard

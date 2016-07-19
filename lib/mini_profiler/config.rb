@@ -18,7 +18,7 @@ module Rack
       :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
       :skip_schema_queries, :storage, :storage_failure, :storage_instance,
       :storage_options, :user_provider
-    attr_accessor :skip_sql_param_names, :max_sql_param_length
+    attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
 
     # ui accessors
     attr_accessor :collapse_results, :max_traces_to_show, :position,
