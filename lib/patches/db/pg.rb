@@ -100,5 +100,3 @@ class PG::Connection
 
   alias_method :query, :exec
 end
-
-SqlPatches.patched = true
