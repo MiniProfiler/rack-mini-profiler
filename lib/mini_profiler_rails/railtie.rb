@@ -90,7 +90,7 @@ module Rack::MiniProfilerRails
 
     # Suppress compression when Rack::Deflater is lower in the middleware
     # stack than Rack::MiniProfiler
-    initializer "rack_mini_profiler.after_build_middleware", :after => :build_middleware_stack do |app|
+    config.after_initialize do |app|
       middlewares = app.middleware.middlewares
       if Rack::MiniProfiler.config.suppress_encoding.nil? &&
           middlewares.include?(Rack::Deflater) &&
