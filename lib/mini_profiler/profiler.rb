@@ -570,7 +570,7 @@ Append the following to your query string:
     def get_profile_script(env)
       path = if ENV["PASSENGER_BASE_URI"] then
         # added because the SCRIPT_NAME workaround below then
-        # breaks running under a prefix as permitted by Passenger. 
+        # breaks running under a prefix as permitted by Passenger.
         "#{ENV['PASSENGER_BASE_URI']}#{@config.base_url_path}"
       elsif env["action_controller.instance"]
         # Rails engines break SCRIPT_NAME; the following appears to discard SCRIPT_NAME
@@ -578,6 +578,10 @@ Append the following to your query string:
         env["action_controller.instance"].url_for("#{@config.base_url_path}")
       else
         "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+      end
+
+      if path.nil?
+        path = @config.base_url_path.nil? ? '/mini-profiler-resources/' : @config.base_url_path
       end
 
       settings = {
