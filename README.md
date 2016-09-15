@@ -54,7 +54,7 @@ be loaded outright, and an attempt to re-initialize it manually will raise an ex
 Then put initialize code in file like `config/initializers/rack_profiler.rb`
 
 ```ruby
-if Rails.env == 'development'
+if Rails.env.development?
   require 'rack-mini-profiler'
 
   # initialization is skipped so trigger it
