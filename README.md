@@ -6,7 +6,9 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 #### Features
 
-* database profiling. Currently supports Mysql2, Postgres, Oracle (oracle_enhanced ~> 1.5.0) and Mongoid3 (with fallback support to ActiveRecord)
+* Database profiling - Currently supports Mysql2, Postgres, Oracle (oracle_enhanced ~> 1.5.0) and Mongoid3 (with fallback support to ActiveRecord)
+* Call-stack profiling - Flame graphs showing time spent by gem
+* Memory profiling - Per-request memory usage, GC stats, and global allocation metrics
 
 #### Learn more
 
@@ -35,6 +37,17 @@ gem 'rack-mini-profiler'
 ```
 
 NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in your Gemfile. rack_mini_profiler will identify these gems if they are loaded to insert instrumentation. If included too early no SQL will show up.
+
+You can also include optional libraries to enable additional features.
+```ruby
+# For memory profiling (requires Ruby MRI 2.1+)
+gem 'memory_profiler'
+
+# For call-stack profiling flamegraphs (requires Ruby MRI 2.0.0+)
+gem 'flamegraph'
+gem 'stackprof'     # For Ruby MRI 2.1+
+gem 'fast_stack'    # For Ruby MRI 2.0
+```
 
 #### Rails
 
@@ -118,8 +131,30 @@ To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-
 * add the [**flamegraph**](https://github.com/SamSaffron/flamegraph) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
-Flamegraph generation is supported in MRI 2.0, 2.1, and 2.2 only.
+Flamegraph generation is supported in Ruby MRI 2.0+
 
+### Memory Profiling
+
+Memory allocations can be measured (using the [memory_profiler](https://github.com/SamSaffron/memory_profiler) gem)
+which will show allocations broken down by gem, file location, and class and will also highlight `String` allocations.
+(Requires Ruby MRI 2.1.0+)
+
+Add `?pp=profile-memory` to the URL of any request while Rack::MiniProfiler is enabled to generate the report.
+
+Additional query parameters can be used to filter the results.
+
+* `memory_profiler_allow_files` - filename pattern to include (default is all files)
+* `memory_profiler_ignore_files` - filename pattern to exclude (default is no exclusions)
+* `memory_profiler_top` - number of results per section (defaults to 50)
+
+The allow/ignore patterns will be treated as regular expressions.
+
+Example: `?pp=profile-memory&memory_profiler_allow_files=active_record|app`
+
+There are two additional `pp` options that can be used to analyze memory which do not require the `memory_profiler` gem
+
+* Use `?pp=profile-gc` to report on Garbage Collection statistics (requires Ruby MRI 1.9.3+)
+* Use `?pp=analyze-memory` to report on ObjectSpace statistics (requires Ruby 2.0.0+)
 
 ## Access control in non-development environments
 
