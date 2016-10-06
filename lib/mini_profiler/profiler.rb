@@ -297,6 +297,14 @@ module Rack
       # we must do this here, otherwise current[:discard] is not being properly treated
       if trace_exceptions
         body.close if body.respond_to? :close
+
+        query_params = Rack::Utils.parse_nested_query(query_string)
+        trace_exceptions_filter = query_params['trace_exceptions_filter']
+        if trace_exceptions_filter
+          trace_exceptions_regex = Regexp.new(trace_exceptions_filter)
+          exceptions.reject! { |ex| ex.class.name =~ trace_exceptions_regex }
+        end
+
         return client_settings.handle_cookie(dump_exceptions exceptions)
       end
 
@@ -397,13 +405,21 @@ module Rack
     end
 
     def dump_exceptions(exceptions)
-      headers = {'Content-Type' => 'text/plain'}
-      body    = "Exceptions (#{exceptions.length} raised during request)\n\n"
-      exceptions.each do |e|
-        body << "#{e.class} #{e.message}\n#{e.backtrace.join("\n")}\n\n\n\n"
-      end
+      body = "Exceptions raised during request\n\n"
+      if exceptions.empty?
+        body << "No exceptions raised"
+      else
+        body << "Exceptions: (#{exceptions.size} total)\n"
+        exceptions.group_by(&:class).each do |klass, exceptions|
+          body << "  #{klass.name} (#{exceptions.size})\n"
+        end
 
-      [200, headers, [body]]
+        body << "\nBacktraces\n"
+        exceptions.each_with_index do |e, i|
+          body << "##{i+1}: #{e.class} - \"#{e.message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
+        end
+      end
+      text_result(body)
     end
 
     def dump_env(env)
