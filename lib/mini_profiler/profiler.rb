@@ -109,14 +109,15 @@ module Rack
     end
 
     def generate_html(page_struct, env, result_json = page_struct.to_json)
-        html = MiniProfiler.share_template.dup
-        html.sub!('{path}', "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
-        html.sub!('{version}', MiniProfiler::ASSET_VERSION)
-        html.sub!('{json}', result_json)
-        html.sub!('{includes}', get_profile_script(env))
-        html.sub!('{name}', page_struct[:name])
-        html.sub!('{duration}', page_struct.duration_ms.round(1).to_s)
-        html
+      path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+      version = MiniProfiler::ASSET_VERSION
+      json = result_json
+      includes = get_profile_script(env)
+      name = page_struct[:name]
+      duration = page_struct.duration_ms.round(1).to_s
+
+      template = MiniProfiler.share_template.dup
+      ERB.new(template).result(binding)
     end
 
     def serve_html(env)
@@ -586,7 +587,7 @@ Append the following to your query string:
     def get_profile_script(env)
       path = if ENV["PASSENGER_BASE_URI"] then
         # added because the SCRIPT_NAME workaround below then
-        # breaks running under a prefix as permitted by Passenger. 
+        # breaks running under a prefix as permitted by Passenger.
         "#{ENV['PASSENGER_BASE_URI']}#{@config.base_url_path}"
       elsif env["action_controller.instance"]
         # Rails engines break SCRIPT_NAME; the following appears to discard SCRIPT_NAME
