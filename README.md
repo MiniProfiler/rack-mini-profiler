@@ -51,7 +51,7 @@ gem 'fast_stack'    # For Ruby MRI 2.0
 
 #### Rails
 
-All you have to do is include the Gem and you're good to go in development. See notes below for use in production.
+All you have to do is to include the Gem and you're good to go in development. See notes below for use in production.
 
 #### Rails and manual initialization
 
