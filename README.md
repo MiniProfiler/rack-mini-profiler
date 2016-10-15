@@ -55,8 +55,7 @@ All you have to do is include the Gem and you're good to go in development. See 
 
 #### Rails and manual initialization
 
-In case you need to make sure rack_mini_profiler initialized after all other gems.
-Or you want to execute some code before rack_mini_profiler required.
+In case you need to make sure rack_mini_profiler initialized is after all other gems, or you want to execute some code before rack_mini_profiler required:
 
 ```ruby
 gem 'rack-mini-profiler', require: false
