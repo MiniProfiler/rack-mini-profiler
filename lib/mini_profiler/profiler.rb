@@ -116,7 +116,7 @@ module Rack
       name = page_struct[:name]
       duration = page_struct.duration_ms.round(1).to_s
 
-      template = MiniProfiler.share_template.dup
+      template = MiniProfiler.share_template
       ERB.new(template).result(binding)
     end
 
