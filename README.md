@@ -338,7 +338,7 @@ c.pre_authorize_cb = lambda { |env|
   Rails.env.development? || Rails.env.production?
 }
 tmp = Rails.root.to_s + "/tmp/miniprofiler"
-FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
+FileUtils.mkdir_p(tmp) unless File.exist?(tmp)
 c.storage_options = {:path => tmp}
 c.storage = ::Rack::MiniProfiler::FileStore
 config.middleware.use(::Rack::MiniProfiler)
