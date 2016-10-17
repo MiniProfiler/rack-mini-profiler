@@ -22,7 +22,7 @@ module Rack
       end
 
       def share_template
-        @share_template ||= ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+        @share_template ||= ERB.new(::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__))))
       end
 
       def current
@@ -116,8 +116,7 @@ module Rack
       name = page_struct[:name]
       duration = page_struct.duration_ms.round(1).to_s
 
-      template = MiniProfiler.share_template
-      ERB.new(template).result(binding)
+      MiniProfiler.share_template.result(binding)
     end
 
     def serve_html(env)
