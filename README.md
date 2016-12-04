@@ -241,6 +241,16 @@ Rails.application.config.to_prepare do
 end
 ```
 
+### Profiling arbitrary block of code
+
+It is also possible to profile any arbitrary block of code by passing a block to `Rack::MiniProfiler.step(name, opts=nil)`.
+
+```ruby
+Rack::MiniProfiler.step('Adding two elements') do
+  result = 1 + 2
+end
+```
+
 ### Using in SPA applications
 
 Single page applications built using Ember, Angular or other frameworks need some special care, as routes often change without a full page load.
