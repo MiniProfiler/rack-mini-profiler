@@ -23,7 +23,7 @@ module Rack
     # ui accessors
     attr_accessor :collapse_results, :max_traces_to_show, :position,
       :show_children, :show_controls, :show_trivial, :start_hidden,
-      :toggle_shortcut
+      :toggle_shortcut, :html_container
 
     # Deprecated options
     attr_accessor :use_existing_jquery
@@ -63,6 +63,7 @@ module Rack
           @show_trivial       = false
           @start_hidden       = false
           @toggle_shortcut    = 'Alt+P'
+          @html_container     = 'body'
 
           self
         }

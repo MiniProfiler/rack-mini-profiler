@@ -301,6 +301,7 @@ disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV v
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
 collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
 max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page
+html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
 
 ### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
 

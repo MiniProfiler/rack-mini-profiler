@@ -607,7 +607,8 @@ Append the following to your query string:
        :authorized      => true,
        :toggleShortcut  => @config.toggle_shortcut,
        :startHidden     => @config.start_hidden,
-       :collapseResults => @config.collapse_results
+       :collapseResults => @config.collapse_results,
+       :htmlContainer   => @config.html_container
       }
 
       if current && current.page_struct
