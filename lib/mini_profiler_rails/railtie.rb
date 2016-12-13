@@ -28,10 +28,6 @@ module Rack::MiniProfilerRails
       c.skip_paths << app.config.assets.prefix
     end
 
-    if Rails.env.development?
-      c.skip_schema_queries = true
-    end
-
     unless Rails.env.development? || Rails.env.test?
       c.authorization_mode = :whitelist
     end
