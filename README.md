@@ -100,6 +100,17 @@ class MyApp < Sinatra::Base
 end
 ```
 
+#### Hanami
+For working with hanami, you need to use rack integration. Also, you need to add `Hanami::View::Rendering::Partial#render` method for profile:
+
+```ruby
+# config.ru
+require 'rack-mini-profiler'
+Rack::MiniProfiler.profile_method(Hanami::View::Rendering::Partial, :render) { "Render partial #{@options[:partial]}" }
+
+use Rack::MiniProfiler
+```
+
 #### Patching ActiveRecord
 
 A typical web application spends a lot of time querying the database. rack_mini_profiler will detect the ORM that is available
