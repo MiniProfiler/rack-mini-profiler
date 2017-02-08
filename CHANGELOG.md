@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.10.1 2017-02-08
+
+- [FIX] improve turbolinks support
+- [FEATURE] make location of mini_profiler injection customizable
+
 ## 0.10.1 2016-05-18
 
 - [FEATURE] push forward the security checks so no work is ever done if a valid production
