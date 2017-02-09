@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.10.1 2017-02-08
+## 0.10.2 2017-02-08
 
 - [FIX] improve turbolinks support
 - [FEATURE] make location of mini_profiler injection customizable
