@@ -3,7 +3,7 @@
 class Mysql2::Result
   alias_method :each_without_profiling, :each
   def each(*args, &blk)
-    return each_without_profiling(*args, &blk) unless @miniprofiler_sql_id
+    return each_without_profiling(*args, &blk) unless defined?(@miniprofiler_sql_id)
 
     start        = Time.now
     result       = each_without_profiling(*args,&blk)

@@ -4,14 +4,14 @@ class PG::Result
   alias_method :values_without_profiling, :values
 
   def values(*args, &blk)
-    return values_without_profiling(*args, &blk) unless @miniprofiler_sql_id
+    return values_without_profiling(*args, &blk) unless defined?(@miniprofiler_sql_id)
     mp_report_sql do
       values_without_profiling(*args ,&blk)
     end
   end
 
   def each(*args, &blk)
-    return each_without_profiling(*args, &blk) unless @miniprofiler_sql_id
+    return each_without_profiling(*args, &blk) unless defined?(@miniprofiler_sql_id)
     mp_report_sql do
       each_without_profiling(*args, &blk)
     end
