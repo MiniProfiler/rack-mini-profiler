@@ -1,7 +1,7 @@
 class ActiveRecord::Result
   alias_method :each_without_profiling, :each
   def each(&blk)
-    return each_without_profiling(&blk) unless @miniprofiler_sql_id
+    return each_without_profiling(&blk) unless defined?(@miniprofiler_sql_id)
 
     start        = Time.now
     result       = each_without_profiling(&blk)
