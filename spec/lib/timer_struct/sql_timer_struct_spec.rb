@@ -95,7 +95,7 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
     it "truncates string parameters" do
       Rack::MiniProfiler.config.max_sql_param_length = 6
       sql = sql_with_params(sample_params)
-      sql[:parameters].should eq [["name", "admin"], ["value", "string"], ["limit", 1]]
+      sql[:parameters].should eq [["name", "admin"], ["value", "string..."], ["limit", 1]]
     end
 
     def sql_with_params(params)

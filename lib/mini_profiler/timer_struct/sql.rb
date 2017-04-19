@@ -56,15 +56,18 @@ module Rack
         def trim_binds(binds)
           max_len = Rack::MiniProfiler.config.max_sql_param_length
           return if binds.nil? || max_len == 0
-          return binds if max_len.nil?
+          return binds.map{|(name, val)| [name, val]} if max_len.nil?
           binds.map do |(name, val)|
             val ||= name
             if val.nil? || val == true || val == false || val.kind_of?(Numeric)
               # keep these parameters as is
             elsif val.kind_of?(String)
-              val = val[0...max_len] if max_len
+              val = val[0...max_len]+(max_len < val.length ? '...' : '') if max_len
             else
               val = val.class.name
+            end
+            if name.kind_of?(String)
+              name = name[0...max_len]+(max_len < name.length ? '...' : '') if max_len
             end
             [name, val]
           end
