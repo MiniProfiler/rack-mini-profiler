@@ -1,6 +1,14 @@
 # CHANGELOG
 
-## 
+## 0.10.2 2017-02-08
+
+- [FIX] improve turbolinks support
+- [FEATURE] make location of mini_profiler injection customizable
+
+## 0.10.1 2016-05-18
+
+- [FEATURE] push forward the security checks so no work is ever done if a valid production
+    cookie is not available (@sam)
 
 ## 0.9.9.2 2016-03-06
 
@@ -81,31 +89,31 @@
 - [REMOVED] Ripped out flamegraph so it can be isolated into a gem
 - [REMOVED] Ripped out pp=sample it just was never really used
 
-## 1.30 - 2013-08-30
+## 0.1.30 - 2013-08-30
 - [ADDED] Rack::MiniProfiler.counter_method(klass,name) for injecting counters
 - [FIXED] Counters were not shifting the table correctly
 
-## 1.29 - 2013-08-20
+## 0.1.29 - 2013-08-20
 - [ADDED] Implemented exception tracing using TracePoint see pp=trace-exceptions
 - [FIXED] SOLR patching had an incorrect monkey patch
 
-## 1.28 - 2012-07-18
+## 0.1.28 - 2013-07-30
 - [FIXED] Diagnostics in abstract storage was raising not implemented killing
   ?pp=env and others
 - [FIXED] SOLR xml unescaped by mistake
 
-## 1.27 - 2013-06-26
+## 0.1.27 - 2013-06-26
 - [ADDED] Rack::MiniProfiler.config.backtrace_threshold_ms
 - [ADDED] jQuery 2.0 support
 - [FIXED] Disabled global ajax handlers on MP requests @JP
 
-## 1.26 - 2013-04-11
+## 0.1.26 - 2013-04-11
 - [IMPROVED] Allow Rack::MiniProfilerRails.initialize!(Rails.application), for post config intialization
 
-## 1.25 - 2013-04-08
+## 0.1.25 - 2013-04-08
 - [FIXED] Missed flamegraph.html from build
 
-## 1.24 - 2013-04-08
+## 0.1.24 - 2013-04-08
 - [ADDED] Flame Graph Support see: http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler
 - [ADDED] New toggle_shortcut and start_hidden options
 - [ADDED] Mongoid support
@@ -121,36 +129,36 @@
 - [FIXED] HTML5 implicit <body> tags
 - [FIXED] pp=enable
 
-## 1.22 - 2012-09-20
+## 0.1.22 - 2012-09-20
 - [FIXED] Permission issue in the gem
 
-## 17-September-2012
+## 2012-09-17
 - [IMPROVED] Allow rack-mini-profiler to be sourced from github
 - [IMPROVED] Extracted the pp=profile-gc-time out, the object space profiler needs to disable gc
 
-## 1.21 - 2012-09-17
+## 0.1.21 - 2012-09-17
 - [ADDED] New MemchacedStore
 - [ADDED] Rails 4 support
 
 ## 2012-09-12 (Sam Saffron)
 - [ADDED] pp=profile-gc: allows you to profile the GC in Ruby 1.9.3
 
-## 1.19 - 2012-09-10 (Sam Saffron)
+## 0.1.19 - 2012-09-10 (Sam Saffron)
 - [FIXED] Compatibility issue with Ruby 1.8.7
 
-## 1.17 - 2012-09-09 (Sam Saffron)
+## 0.1.17 - 2012-09-09 (Sam Saffron)
 - [FIXED] pp=sample was bust unless stacktrace was installed
 
-## 1.16 - 2012-09-05 (Sam Saffron)
+## 0.1.16 - 2012-09-05 (Sam Saffron)
 - [IMPROVED] Implemented stacktrace properly
 - [FIXED] Long standing problem specs (issue with memory store)
 - [FIXED] Issue where profiler would be dumped when you got a 404 in production (and any time rails is bypassed)
 
-## 1.15.pre - 2012-09-04 (Sam Saffron)
+## 0.1.15.pre - 2012-09-04 (Sam Saffron)
 - [FIXED] Annoying bug where client settings were not sticking
 - [FIXED] Long standing issue with Rack::ConditionalGet stopping MiniProfiler from working properly
 
-## 1.13.pre - 2012-09-03 (Sam Saffron)
+## 0.1.13.pre - 2012-09-03 (Sam Saffron)
 - [ADDED] Setting: config.backtrace_ignores = [] - an array of regexes that match on caller lines that get ignored
 - [ADDED] Setting: config.backtrace_includes = [] - an array of regexes that get included in the trace by default
 - [ADDED] pp=normal-backtrace to clear the "sticky" state
@@ -159,7 +167,7 @@
 - [IMPROVED] Changed "pp=sample" to work with "caller" no need for stack trace gem
 - [FIXED] pg gem prepared statements were not being logged correctly
 
-## 1.12.pre - 2012-08-20 (Sam Saffron)
+## 0.1.12.pre - 2012-08-20 (Sam Saffron)
 - [IMPROVED] Cap X-MiniProfiler-Ids at 10, otherwise the header can get killed
 
 ## 2012-08-10 (Sam Saffron)

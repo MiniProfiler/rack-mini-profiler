@@ -4,7 +4,7 @@ module Rack
     # Timing system for a SQL query
     module TimerStruct
       class Sql < TimerStruct::Base
-        def initialize(query, duration_ms, page, parent, skip_backtrace = false, full_backtrace = false)
+        def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false)
 
           stack_trace = nil
           unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
@@ -39,7 +39,7 @@ module Rack
             :start_milliseconds                => start_millis,
             :duration_milliseconds             => duration_ms,
             :first_fetch_duration_milliseconds => duration_ms,
-            :parameters                        => nil,
+            :parameters                        => trim_binds(params),
             :parent_timing_id                  => nil,
             :is_duplicate                      => false
           )
@@ -53,6 +53,25 @@ module Rack
           @page[:duration_milliseconds_in_sql]        += elapsed_ms
         end
 
+        def trim_binds(binds)
+          max_len = Rack::MiniProfiler.config.max_sql_param_length
+          return if binds.nil? || max_len == 0
+          return binds.map{|(name, val)| [name, val]} if max_len.nil?
+          binds.map do |(name, val)|
+            val ||= name
+            if val.nil? || val == true || val == false || val.kind_of?(Numeric)
+              # keep these parameters as is
+            elsif val.kind_of?(String)
+              val = val[0...max_len]+(max_len < val.length ? '...' : '') if max_len
+            else
+              val = val.class.name
+            end
+            if name.kind_of?(String)
+              name = name[0...max_len]+(max_len < name.length ? '...' : '') if max_len
+            end
+            [name, val]
+          end
+        end
       end
     end
   end

@@ -202,7 +202,7 @@
     <td>
       <div class="query">
         <pre class="profiler-stack-trace">${s.stack_trace_snippet}</pre>
-        <pre class="prettyprint lang-sql"><code>${s.formatted_command_string}   </code></pre>
+        <pre class="prettyprint lang-sql"><code>${s.formatted_command_string}; ${MiniProfiler.formatParameters(s.parameters)}</code></pre>
       </div>
     </td>
   </tr>

@@ -6,7 +6,9 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 #### Features
 
-* database profiling. Currently supports Mysql2, Postgres, Oracle (oracle_enhanced ~> 1.5.0) and Mongoid3 (with fallback support to ActiveRecord)
+* Database profiling - Currently supports Mysql2, Postgres, Oracle (oracle_enhanced ~> 1.5.0) and Mongoid3 (with fallback support to ActiveRecord)
+* Call-stack profiling - Flame graphs showing time spent by gem
+* Memory profiling - Per-request memory usage, GC stats, and global allocation metrics
 
 #### Learn more
 
@@ -36,14 +38,24 @@ gem 'rack-mini-profiler'
 
 NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in your Gemfile. rack_mini_profiler will identify these gems if they are loaded to insert instrumentation. If included too early no SQL will show up.
 
+You can also include optional libraries to enable additional features.
+```ruby
+# For memory profiling (requires Ruby MRI 2.1+)
+gem 'memory_profiler'
+
+# For call-stack profiling flamegraphs (requires Ruby MRI 2.0.0+)
+gem 'flamegraph'
+gem 'stackprof'     # For Ruby MRI 2.1+
+gem 'fast_stack'    # For Ruby MRI 2.0
+```
+
 #### Rails
 
-All you have to do is include the Gem and you're good to go in development. See notes below for use in production.
+All you have to do is to include the Gem and you're good to go in development. See notes below for use in production.
 
 #### Rails and manual initialization
 
-In case you need to make sure rack_mini_profiler initialized after all other gems.
-Or you want to execute some code before rack_mini_profiler required.
+In case you need to make sure rack_mini_profiler initialized is after all other gems, or you want to execute some code before rack_mini_profiler required:
 
 ```ruby
 gem 'rack-mini-profiler', require: false
@@ -88,6 +100,40 @@ class MyApp < Sinatra::Base
 end
 ```
 
+#### Hanami
+For working with hanami, you need to use rack integration. Also, you need to add `Hanami::View::Rendering::Partial#render` method for profile:
+
+```ruby
+# config.ru
+require 'rack-mini-profiler'
+Rack::MiniProfiler.profile_method(Hanami::View::Rendering::Partial, :render) { "Render partial #{@options[:partial]}" }
+
+use Rack::MiniProfiler
+```
+
+#### Patching ActiveRecord
+
+A typical web application spends a lot of time querying the database. rack_mini_profiler will detect the ORM that is available
+and apply patches to properly collect query statistics.
+
+To make this work, declare the orm's gem before declaring `rack-mini-profiler` in the `Gemfile`:
+
+```ruby
+gem 'pg'
+gem 'mongoid'
+gem 'rack-mini-profiler'
+
+```
+
+If you wish to override this behavior, the environment variable `RACK_MINI_PROFILER_PATCH` is available.
+
+```bash
+export RACK_MINI_PROFILER_PATCH="pg,mongoid"
+# or
+export RACK_MINI_PROFILER_PATCH="false"
+# initializers/rack_profiler.rb: SqlPatches.patch %w(mongo)
+```
+
 ### Flamegraphs
 
 To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler):
@@ -95,8 +141,30 @@ To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-
 * add the [**flamegraph**](https://github.com/SamSaffron/flamegraph) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
-Flamegraph generation is supported in MRI 2.0, 2.1, and 2.2 only.
+Flamegraph generation is supported in Ruby MRI 2.0+
 
+### Memory Profiling
+
+Memory allocations can be measured (using the [memory_profiler](https://github.com/SamSaffron/memory_profiler) gem)
+which will show allocations broken down by gem, file location, and class and will also highlight `String` allocations.
+(Requires Ruby MRI 2.1.0+)
+
+Add `?pp=profile-memory` to the URL of any request while Rack::MiniProfiler is enabled to generate the report.
+
+Additional query parameters can be used to filter the results.
+
+* `memory_profiler_allow_files` - filename pattern to include (default is all files)
+* `memory_profiler_ignore_files` - filename pattern to exclude (default is no exclusions)
+* `memory_profiler_top` - number of results per section (defaults to 50)
+
+The allow/ignore patterns will be treated as regular expressions.
+
+Example: `?pp=profile-memory&memory_profiler_allow_files=active_record|app`
+
+There are two additional `pp` options that can be used to analyze memory which do not require the `memory_profiler` gem
+
+* Use `?pp=profile-gc` to report on Garbage Collection statistics (requires Ruby MRI 1.9.3+)
+* Use `?pp=analyze-memory` to report on ObjectSpace statistics (requires Ruby 2.0.0+)
 
 ## Access control in non-development environments
 
@@ -153,7 +221,7 @@ end
 
 `MemoryStore` stores results in a processes heap - something that does not work well in a multi process environment.
 `FileStore` stores results in the file system - something that may not work well in a multi machine environment.
-`RedisStore`/`MemcacheStore` work in multi process and multi machine environments (`RedisStore` only saves results for up to 24 hours so it won't continue to fill up Redis).
+`RedisStore`/`MemcacheStore` work in multi process and multi machine environments (`RedisStore` only saves results for up to 24 hours so it won't continue to fill up Redis). You will need to add `gem redis`/`gem dalli` respectively to your `Gemfile` to use these stores.
 
 Additionally you may implement an `AbstractStore` for your own provider.
 
@@ -184,6 +252,16 @@ Rails.application.config.to_prepare do
 end
 ```
 
+### Profiling arbitrary block of code
+
+It is also possible to profile any arbitrary block of code by passing a block to `Rack::MiniProfiler.step(name, opts=nil)`.
+
+```ruby
+Rack::MiniProfiler.step('Adding two elements') do
+  result = 1 + 2
+end
+```
+
 ### Using in SPA applications
 
 Single page applications built using Ember, Angular or other frameworks need some special care, as routes often change without a full page load.
@@ -195,6 +273,15 @@ window.MiniProfiler.pageTransition();
 ```
 
 This method will remove profiling information that was related to previous page and clear aggregate statistics.
+
+#### MiniProfiler's speed badge on pages that are not generated via Rails
+You need to inject the following in your SPA to load MiniProfiler's speed badge ([extra details surrounding this script](https://github.com/MiniProfiler/rack-mini-profiler/issues/139#issuecomment-192880706)):
+
+```html
+ <script async type="text/javascript" id="mini-profiler" src="/mini-profiler-resources/includes.js?v=12b4b45a3c42e6e15503d7a03810ff33" data-version="12b4b45a3c42e6e15503d7a03810ff33" data-path="/mini-profiler-resources/" data-current-id="redo66j4g1077kto8uh3" data-ids="redo66j4g1077kto8uh3" data-position="left" data-trivial="false" data-children="false" data-max-traces="10" data-controls="false" data-authorized="true" data-toggle-shortcut="Alt+P" data-start-hidden="false" data-collapse-results="true"></script>
+```
+
+_Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will change with each release of `rack_mini_profiler`. The MiniProfiler's speed badge will continue to work, although you will have to change the GUID to expire the script to fetch the most recent version.
 
 ### Configuration Options
 
@@ -225,6 +312,7 @@ disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV v
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
 collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
 max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page
+html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
 
 ### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
 
@@ -272,7 +360,7 @@ c.pre_authorize_cb = lambda { |env|
   Rails.env.development? || Rails.env.production?
 }
 tmp = Rails.root.to_s + "/tmp/miniprofiler"
-FileUtils.mkdir_p(tmp) unless File.exists?(tmp)
+FileUtils.mkdir_p(tmp) unless File.exist?(tmp)
 c.storage_options = {:path => tmp}
 c.storage = ::Rack::MiniProfiler::FileStore
 config.middleware.use(::Rack::MiniProfiler)

@@ -22,7 +22,7 @@ module Rack
       end
 
       def share_template
-        @share_template ||= ::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__)))
+        @share_template ||= ERB.new(::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__))))
       end
 
       def current
@@ -109,18 +109,19 @@ module Rack
     end
 
     def generate_html(page_struct, env, result_json = page_struct.to_json)
-        html = MiniProfiler.share_template.dup
-        html.sub!('{path}', "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}")
-        html.sub!('{version}', MiniProfiler::ASSET_VERSION)
-        html.sub!('{json}', result_json)
-        html.sub!('{includes}', get_profile_script(env))
-        html.sub!('{name}', page_struct[:name])
-        html.sub!('{duration}', page_struct.duration_ms.round(1).to_s)
-        html
+      path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+      version = MiniProfiler::ASSET_VERSION
+      json = result_json
+      includes = get_profile_script(env)
+      name = page_struct[:name]
+      duration = page_struct.duration_ms.round(1).to_s
+
+      MiniProfiler.share_template.result(binding)
     end
 
     def serve_html(env)
-      file_name = env['PATH_INFO'][(@config.base_url_path.length)..1000]
+      path      = env['PATH_INFO'].sub('//', '/')
+      file_name = path.sub(@config.base_url_path, '')
 
       return serve_results(env) if file_name.eql?('results')
 
@@ -148,11 +149,13 @@ module Rack
 
     def call(env)
 
-      client_settings = ClientSettings.new(env)
+      start = Time.now
+      client_settings = ClientSettings.new(env, @storage, start)
+      MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
-      path         = env['PATH_INFO']
+      path         = env['PATH_INFO'].sub('//', '/')
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
@@ -161,18 +164,15 @@ module Rack
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
                 query_string =~ /pp=skip/
 
-      has_profiling_cookie = client_settings.has_cookie?
-
-      if skip_it || (@config.authorization_mode == :whitelist && !has_profiling_cookie)
-        status,headers,body = @app.call(env)
-        if !skip_it && @config.authorization_mode == :whitelist && !has_profiling_cookie && MiniProfiler.request_authorized?
-          client_settings.write!(headers)
-        end
-        return [status,headers,body]
+      if skip_it || (
+        @config.authorization_mode == :whitelist &&
+        !client_settings.has_valid_cookie?
+      )
+        return client_settings.handle_cookie(@app.call(env))
       end
 
       # handle all /mini-profiler requests here
-      return serve_html(env) if path.start_with? @config.base_url_path
+      return client_settings.handle_cookie(serve_html(env)) if path.start_with? @config.base_url_path
 
       has_disable_cookie = client_settings.disable_profiling?
       # manual session disable / enable
@@ -180,7 +180,7 @@ module Rack
         skip_it = true
       end
 
-      if query_string =~ /pp=enable/ && (@config.authorization_mode != :whitelist || MiniProfiler.request_authorized?)
+      if query_string =~ /pp=enable/
         skip_it = false
         config.enabled = true
       end
@@ -188,8 +188,7 @@ module Rack
       if skip_it || !config.enabled
         status,headers,body = @app.call(env)
         client_settings.disable_profiling = true
-        client_settings.write!(headers)
-        return [status,headers,body]
+        return client_settings.handle_cookie([status,headers,body])
       else
         client_settings.disable_profiling = false
       end
@@ -197,7 +196,7 @@ module Rack
       # profile gc
       if query_string =~ /pp=profile-gc/
         current.measure = false if current
-        return Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env)
+        return client_settings.handle_cookie(Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env))
       end
 
       # profile memory
@@ -214,11 +213,10 @@ module Rack
           body.close if body.respond_to? :close
         end
         report.pretty_print(result)
-        return text_result(result.string)
+        return client_settings.handle_cookie(text_result(result.string))
       end
 
       MiniProfiler.create_current(env, @config)
-      MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
 
       if query_string =~ /pp=normal-backtrace/
         client_settings.backtrace_level = ClientSettings::BACKTRACE_DEFAULT
@@ -237,7 +235,6 @@ module Rack
       trace_exceptions = query_string =~ /pp=trace-exceptions/ && defined? TracePoint
       status, headers, body, exceptions,trace = nil
 
-      start = Time.now
 
       if trace_exceptions
         exceptions = []
@@ -255,6 +252,10 @@ module Rack
           env['HTTP_IF_MODIFIED_SINCE'] = ''
           env['HTTP_IF_NONE_MATCH']     = ''
         end
+
+        orig_accept_encoding = env['HTTP_ACCEPT_ENCODING']
+        # Prevent response body from being compressed
+        env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
         if query_string =~ /pp=flamegraph/
           unless defined?(Flamegraph) && Flamegraph.respond_to?(:generate)
@@ -280,43 +281,46 @@ module Rack
         else
           status,headers,body = @app.call(env)
         end
-        client_settings.write!(headers)
       ensure
         trace.disable if trace
+        env['HTTP_ACCEPT_ENCODING'] = orig_accept_encoding if config.suppress_encoding
       end
 
       skip_it = current.discard
 
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
-        # this is non-obvious, don't kill the profiling cookie on errors or short requests
-        # this ensures that stuff that never reaches the rails stack does not kill profiling
-        if status.to_i >= 200 && status.to_i < 300 && ((Time.now - start) > 0.1)
-          client_settings.discard_cookie!(headers)
-        end
         skip_it = true
       end
 
-      return [status,headers,body] if skip_it
+      return client_settings.handle_cookie([status,headers,body]) if skip_it
 
       # we must do this here, otherwise current[:discard] is not being properly treated
       if trace_exceptions
         body.close if body.respond_to? :close
-        return dump_exceptions exceptions
+
+        query_params = Rack::Utils.parse_nested_query(query_string)
+        trace_exceptions_filter = query_params['trace_exceptions_filter']
+        if trace_exceptions_filter
+          trace_exceptions_regex = Regexp.new(trace_exceptions_filter)
+          exceptions.reject! { |ex| ex.class.name =~ trace_exceptions_regex }
+        end
+
+        return client_settings.handle_cookie(dump_exceptions exceptions)
       end
 
       if query_string =~ /pp=env/ && !config.disable_env_dump
         body.close if body.respond_to? :close
-        return dump_env env
+        return client_settings.handle_cookie(dump_env env)
       end
 
       if query_string =~ /pp=analyze-memory/
         body.close if body.respond_to? :close
-        return analyze_memory
+        return client_settings.handle_cookie(analyze_memory)
       end
 
       if query_string =~ /pp=help/
         body.close if body.respond_to? :close
-        return help(client_settings, env)
+        return client_settings.handle_cookie(help(client_settings, env))
       end
 
       page_struct = current.page_struct
@@ -325,7 +329,7 @@ module Rack
 
       if flamegraph
         body.close if body.respond_to? :close
-        return self.flamegraph(flamegraph)
+        return client_settings.handle_cookie(self.flamegraph(flamegraph))
       end
 
 
@@ -336,9 +340,8 @@ module Rack
 
         # inject headers, script
         if status >= 200 && status < 300
-          client_settings.write!(headers)
           result = inject_profiler(env,status,headers,body)
-          return result if result
+          return client_settings.handle_cookie(result) if result
         end
       rescue Exception => e
         if @config.storage_failure != nil
@@ -346,8 +349,7 @@ module Rack
         end
       end
 
-      client_settings.write!(headers)
-      [status, headers, body]
+      client_settings.handle_cookie([status, headers, body])
 
     ensure
       # Make sure this always happens
@@ -403,13 +405,21 @@ module Rack
     end
 
     def dump_exceptions(exceptions)
-      headers = {'Content-Type' => 'text/plain'}
-      body    = "Exceptions (#{exceptions.length} raised during request)\n\n"
-      exceptions.each do |e|
-        body << "#{e.class} #{e.message}\n#{e.backtrace.join("\n")}\n\n\n\n"
-      end
+      body = "Exceptions raised during request\n\n"
+      if exceptions.empty?
+        body << "No exceptions raised"
+      else
+        body << "Exceptions: (#{exceptions.size} total)\n"
+        exceptions.group_by(&:class).each do |klass, exceptions|
+          body << "  #{klass.name} (#{exceptions.size})\n"
+        end
 
-      [200, headers, [body]]
+        body << "\nBacktraces\n"
+        exceptions.each_with_index do |e, i|
+          body << "##{i+1}: #{e.class} - \"#{e.message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
+        end
+      end
+      text_result(body)
     end
 
     def dump_env(env)
@@ -542,7 +552,6 @@ Append the following to your query string:
 </html>
 "
 
-      client_settings.write!(headers)
       [200, headers, [body]]
     end
 
@@ -595,14 +604,15 @@ Append the following to your query string:
        :path            => path,
        :version         => MiniProfiler::ASSET_VERSION,
        :position        => @config.position,
-       :showTrivial     => false,
-       :showChildren    => false,
+       :showTrivial     => @config.show_trivial,
+       :showChildren    => @config.show_children,
        :maxTracesToShow => @config.max_traces_to_show,
-       :showControls    => false,
+       :showControls    => @config.show_controls,
        :authorized      => true,
        :toggleShortcut  => @config.toggle_shortcut,
        :startHidden     => @config.start_hidden,
-       :collapseResults => @config.collapse_results
+       :collapseResults => @config.collapse_results,
+       :htmlContainer   => @config.html_container
       }
 
       if current && current.page_struct

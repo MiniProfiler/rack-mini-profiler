@@ -28,10 +28,6 @@ module Rack::MiniProfilerRails
       c.skip_paths << app.config.assets.prefix
     end
 
-    if Rails.env.development?
-      c.skip_schema_queries = true
-    end
-
     unless Rails.env.development? || Rails.env.test?
       c.authorization_mode = :whitelist
     end
@@ -86,6 +82,17 @@ module Rack::MiniProfilerRails
 
     initializer "rack_mini_profiler.configure_rails_initialization" do |app|
       Rack::MiniProfilerRails.initialize!(app)
+    end
+
+    # Suppress compression when Rack::Deflater is lower in the middleware
+    # stack than Rack::MiniProfiler
+    config.after_initialize do |app|
+      middlewares = app.middleware.middlewares
+      if Rack::MiniProfiler.config.suppress_encoding.nil? &&
+          middlewares.include?(Rack::Deflater) &&
+          middlewares.index(Rack::Deflater) > middlewares.index(Rack::MiniProfiler)
+        Rack::MiniProfiler.config.suppress_encoding = true
+      end
     end
 
     # TODO: Implement something better here

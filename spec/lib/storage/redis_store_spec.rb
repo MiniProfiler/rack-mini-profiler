@@ -80,6 +80,27 @@ describe Rack::MiniProfiler::RedisStore do
 
   end
 
+  describe 'allowed_tokens' do
+    before do
+      @store = Rack::MiniProfiler::RedisStore.new(:db=>2)
+    end
+
+    it 'should return tokens' do
+
+      @store.flush_tokens
+
+      tokens = @store.allowed_tokens
+      tokens.length.should == 1
+
+      @store.simulate_expire
+
+      new_tokens = @store.allowed_tokens
+
+      new_tokens.length.should == 2
+      (new_tokens - tokens).length.should == 1
+    end
+  end
+
 
   describe 'diagnostics' do
     before do

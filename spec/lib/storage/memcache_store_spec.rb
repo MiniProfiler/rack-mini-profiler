@@ -46,6 +46,34 @@ describe Rack::MiniProfiler::MemcacheStore do
 
   end
 
+
+  describe 'allowed_tokens' do
+    before do
+      @store = Rack::MiniProfiler::MemcacheStore.new
+    end
+
+    it 'should return tokens' do
+
+      @store.flush_tokens
+
+      tokens = @store.allowed_tokens
+      tokens.length.should == 1
+      tokens.should == @store.allowed_tokens
+
+      Time.travel(Time.now + 1) do
+        new_tokens = @store.allowed_tokens
+        new_tokens.length.should == 1
+        new_tokens.should == tokens
+      end
+
+      Time.travel(Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1) do
+        new_tokens = @store.allowed_tokens
+        new_tokens.length.should == 2
+        (new_tokens - tokens).length.should == 1
+      end
+    end
+  end
+
   context 'passing in a Memcache client' do
     describe 'client' do
       it 'uses the passed in object rather than creating a new one' do

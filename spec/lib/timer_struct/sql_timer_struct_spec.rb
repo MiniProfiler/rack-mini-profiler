@@ -77,4 +77,29 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
     end
   end
 
+  describe "#params" do
+    let(:sample_params) { [["name", "admin"], ["value", "string with more than 20"], ["limit", 1]] }
+    #def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false)
+    it "skips parameters by default" do
+      Rack::MiniProfiler.config.max_sql_param_length = 0
+      sql = sql_with_params(sample_params)
+      sql[:parameters].should be nil
+    end
+
+    it "stores parameters untouched" do
+      Rack::MiniProfiler.config.max_sql_param_length = nil
+      sql = sql_with_params(sample_params)
+      sql[:parameters].should eq sample_params
+    end
+
+    it "truncates string parameters" do
+      Rack::MiniProfiler.config.max_sql_param_length = 6
+      sql = sql_with_params(sample_params)
+      sql[:parameters].should eq [["name", "admin"], ["value", "string..."], ["limit", 1]]
+    end
+
+    def sql_with_params(params)
+      Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil, params)
+    end
+  end
 end

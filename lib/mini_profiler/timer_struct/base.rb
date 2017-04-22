@@ -27,6 +27,9 @@ module Rack
           ::JSON.generate( @attributes, :max_nesting => 100 )
         end
 
+        def as_json(options = nil)
+          @attributes.as_json(options)
+        end
       end
     end
   end

@@ -57,12 +57,19 @@ module Rack
         end
 
         def to_json(*a)
-          attribs = @attributes.merge(
+          ::JSON.generate(@attributes.merge(self.extra_json))
+        end
+
+        def as_json(options = nil)
+          super(options).merge!(extra_json)
+        end
+
+        def extra_json
+          {
             :started               => '/Date(%d)/' % @attributes[:started],
             :duration_milliseconds => @attributes[:root][:duration_milliseconds],
             :custom_timing_names   => @attributes[:custom_timing_stats].keys.sort
-          )
-          ::JSON.generate(attribs, :max_nesting => 100)
+          }
         end
       end
     end
