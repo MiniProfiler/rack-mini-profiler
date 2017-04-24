@@ -298,6 +298,7 @@
   z-index: 2147483640;
   border-bottom: 1px solid #888888;
   background-color: #fff;
+  animation: new-entry 5s 1;
   padding: 4px 7px;
   text-align: right;
   cursor: pointer;
@@ -474,4 +475,13 @@
 .profiler-result-full .profiler-result .profiler-queries .profiler-info div {
   text-align: right;
   margin-bottom: 5px;
+}
+
+@keyframes new-entry {
+  0% {
+    background-color: #FFFAAA;
+  }
+  100% {
+    background-color: #FFF;
+  }
 }
