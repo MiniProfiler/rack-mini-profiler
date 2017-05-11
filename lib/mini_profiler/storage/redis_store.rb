@@ -103,9 +103,13 @@ unviewed_ids: #{get_unviewed_ids(user)}
 
       def remove_expired_ids(user)
         key = user_key(user)
-        redis.smembers(key).each do |id|
-          redis.srem(key, id) unless redis.exists("#{@prefix}#{id}")
-        end
+        redis.eval <<-LUA
+          for _, id in pairs(redis.call('smembers', '#{key}')) do 
+            if 0 == redis.call('exists', '#{@prefix}' .. id) then 
+              redis.call('srem', '#{key}', id) 
+            end 
+          end
+        LUA
       end
 
       def redis
