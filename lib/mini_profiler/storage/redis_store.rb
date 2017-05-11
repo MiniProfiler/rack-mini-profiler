@@ -30,24 +30,25 @@ module Rack
       end
 
       def set_unviewed(user, id)
-        key = "#{@prefix}-#{user}-v"
+        key = user_key(user)
         redis.sadd key, id
         redis.expire key, @expires_in_seconds
       end
 
       def set_all_unviewed(user, ids)
-        key = "#{@prefix}-#{user}-v"
+        key = user_key(user)
         redis.del key
         ids.each { |id| redis.sadd(key, id) }
         redis.expire key, @expires_in_seconds
       end
 
       def set_viewed(user, id)
-        redis.srem "#{@prefix}-#{user}-v", id
+        redis.srem user_key(user), id
       end
 
       def get_unviewed_ids(user)
-        redis.smembers "#{@prefix}-#{user}-v"
+        remove_expired_ids(user)
+        redis.smembers(user_key(user))
       end
 
       def diagnostics(user)
@@ -95,6 +96,17 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       private
+
+      def user_key(user)
+        "#{@prefix}-#{user}-v"
+      end
+
+      def remove_expired_ids(user)
+        key = user_key(user)
+        redis.smembers(key).each do |id|
+          redis.srem(key, id) unless redis.exists("#{@prefix}#{id}")
+        end
+      end
 
       def redis
         @redis_connection ||= begin
