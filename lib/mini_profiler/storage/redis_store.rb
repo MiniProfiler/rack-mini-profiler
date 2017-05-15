@@ -14,11 +14,11 @@ module Rack
       end
 
       def save(page_struct)
-        redis.setex "#{@prefix}#{page_struct[:id]}", @expires_in_seconds, Marshal::dump(page_struct)
+        redis.setex prefixed_id(page_struct[:id]), @expires_in_seconds, Marshal::dump(page_struct)
       end
 
       def load(id)
-        key = "#{@prefix}#{id}"
+        key = prefixed_id(id)
         raw = redis.get key
         begin
           Marshal::load(raw) if raw
@@ -31,24 +31,34 @@ module Rack
 
       def set_unviewed(user, id)
         key = user_key(user)
-        redis.sadd key, id
-        redis.expire key, @expires_in_seconds
+        if redis.exists(prefixed_id(id))
+          expire_at = Time.now.to_i + redis.ttl(prefixed_id(id))
+          redis.zadd(key, expire_at, id)
+        end
+        redis.expire(key, @expires_in_seconds)
       end
 
       def set_all_unviewed(user, ids)
         key = user_key(user)
-        redis.del key
-        ids.each { |id| redis.sadd(key, id) }
-        redis.expire key, @expires_in_seconds
+        redis.del(key)
+        ids.each do |id|
+          if redis.exists(prefixed_id(id))
+            expire_at = Time.now.to_i + redis.ttl(prefixed_id(id))
+            redis.zadd(key, expire_at, id)
+          end
+        end
+        redis.expire(key, @expires_in_seconds)
       end
 
       def set_viewed(user, id)
-        redis.srem user_key(user), id
+        redis.zrem(user_key(user), id)
       end
 
+      # Remove expired ids from the unviewed sorted set and return the remaining ids
       def get_unviewed_ids(user)
-        remove_expired_ids(user)
-        redis.smembers(user_key(user))
+        key = user_key(user)
+        redis.zremrangebyscore(key, '-inf', Time.now.to_i)
+        redis.zrevrangebyscore(key, '+inf', '-inf')
       end
 
       def diagnostics(user)
@@ -101,15 +111,8 @@ unviewed_ids: #{get_unviewed_ids(user)}
         "#{@prefix}-#{user}-v"
       end
 
-      def remove_expired_ids(user)
-        key = user_key(user)
-        redis.eval <<-LUA
-          for _, id in pairs(redis.call('smembers', '#{key}')) do 
-            if 0 == redis.call('exists', '#{@prefix}' .. id) then 
-              redis.call('srem', '#{key}', id) 
-            end 
-          end
-        LUA
+      def prefixed_id(id)
+        "#{@prefix}#{id}"
       end
 
       def redis

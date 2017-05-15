@@ -1,7 +1,9 @@
 require 'spec_helper'
 
 describe Rack::MiniProfiler::RedisStore do
-  let(:store) { Rack::MiniProfiler::RedisStore.new(:db=>2) }
+  let(:store) { Rack::MiniProfiler::RedisStore.new(:db=>2, :expires_in=>4) }
+  let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
+                        Rack::MiniProfiler::TimerStruct::Page.new({})] }
 
   before do
     store.send(:redis).flushdb
@@ -40,9 +42,6 @@ describe Rack::MiniProfiler::RedisStore do
 
   context 'page struct' do
     describe 'storage' do
-      let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
-                            Rack::MiniProfiler::TimerStruct::Page.new({})] }
-
       it 'can store a PageStruct and retrieve it' do
         page_structs.first[:id] = "XYZ"
         page_structs.first[:random] = "random"
@@ -56,8 +55,8 @@ describe Rack::MiniProfiler::RedisStore do
 
       it 'can list unviewed items for a user' do
         page_structs.each do |page_struct|
-          store.set_unviewed('a', page_struct[:id])
           store.save(page_struct)
+          store.set_unviewed('a', page_struct[:id])
         end
 
         store.get_unviewed_ids('a').should =~ page_structs.map { |page_struct| page_struct[:id] }
@@ -74,8 +73,8 @@ describe Rack::MiniProfiler::RedisStore do
 
       it 'can set an item to viewed once it is unviewed' do
         page_structs.each do |page_struct|
-          store.set_unviewed('a', page_struct[:id])
           store.save(page_struct)
+          store.set_unviewed('a', page_struct[:id])
         end
 
         store.set_viewed('a', page_structs.first[:id])
@@ -86,21 +85,25 @@ describe Rack::MiniProfiler::RedisStore do
 
   describe '#get_unviewed_ids' do
     let(:expired_record_key) { 'xyz098' }
-    let(:existing_struct) { Rack::MiniProfiler::TimerStruct::Page.new({}) }
+    let(:user) { 1234 }
 
-    it 'should only return ids for keys that exist' do
-      user = 1234
-      expired_record_id = 'xyz098'
+    it 'should only return ids for keys that are not expired' do
+      # Simulate a record which will expire
+      store.save(page_structs.first)
+      store.set_unviewed(user, page_structs.first[:id])
 
-      # Simulate a valid record
-      store.set_unviewed(user, existing_struct[:id])
-      store.save(existing_struct)
+      # Store has an expiration of 4, so wait a bit before adding the second struct
+      sleep(2)
 
-      # Simluate a record that may have expired, but could remain in the list of ids
-      store.set_unviewed(user, expired_record_id)
+      # Simulate adding a record before the first page struct expires
+      store.save(page_structs.last)
+      store.set_unviewed(user, page_structs.last[:id])
 
-      # Only the PageStruct that still exists should be returned
-      store.get_unviewed_ids(user).should eq([existing_struct[:id]])
+      # Let the first page struct expire
+      sleep(2)
+
+      # By now, the first struct should have expired and should no longer be returned
+      store.get_unviewed_ids(user).should eq([page_structs.last[:id]])
     end
   end
 
