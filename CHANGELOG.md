@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.10.3 2017-05-17
+
+- [FEATURE] log binds for pg @neznauy
+- [FIX] use async exec pg monkey patch instead of exec
+- [FEATURE] nuke less css and use sass instead
+- [FIX] use jQuery on instead of bind
+- [FIX] ensure redis get_unviewed_ids returns only ids that exist
+- [FIX] correctly respect SCRIPT in env if it is sniffed by middleware
+
 ## 0.10.2 2017-02-08
 
 - [FIX] improve turbolinks support
