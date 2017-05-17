@@ -158,7 +158,7 @@ module Rack
       path         = env['PATH_INFO'].sub('//', '/')
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
-      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['SCRIPT_NAME']
+      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
@@ -584,21 +584,7 @@ Append the following to your query string:
     # * you have disabled auto append behaviour throught :auto_inject => false flag
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
-      path = if ENV["PASSENGER_BASE_URI"] then
-        # added because the SCRIPT_NAME workaround below then
-        # breaks running under a prefix as permitted by Passenger. 
-        if env["action_controller.instance"] then
-          "#{ENV['PASSENGER_BASE_URI']}#{env["action_controller.instance"].url_for("#{@config.base_url_path}")}"
-        else
-          "#{ENV['PASSENGER_BASE_URI']}#{@config.base_url_path}"
-        end
-      elsif env["action_controller.instance"]
-        # Rails engines break SCRIPT_NAME; the following appears to discard SCRIPT_NAME
-        # since url_for appears documented to return any String argument unmodified
-        env["action_controller.instance"].url_for("#{@config.base_url_path}")
-      else
-        "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-      end
+      path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
 
       settings = {
        :path            => path,
