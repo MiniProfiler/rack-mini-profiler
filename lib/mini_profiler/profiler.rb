@@ -334,9 +334,9 @@ module Rack
 
 
       begin
+        @storage.save(page_struct)
         # no matter what it is, it should be unviewed, otherwise we will miss POST
         @storage.set_unviewed(page_struct[:user], page_struct[:id])
-        @storage.save(page_struct)
 
         # inject headers, script
         if status >= 200 && status < 300

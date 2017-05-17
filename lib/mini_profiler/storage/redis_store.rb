@@ -14,11 +14,11 @@ module Rack
       end
 
       def save(page_struct)
-        redis.setex "#{@prefix}#{page_struct[:id]}", @expires_in_seconds, Marshal::dump(page_struct)
+        redis.setex prefixed_id(page_struct[:id]), @expires_in_seconds, Marshal::dump(page_struct)
       end
 
       def load(id)
-        key = "#{@prefix}#{id}"
+        key = prefixed_id(id)
         raw = redis.get key
         begin
           Marshal::load(raw) if raw
@@ -30,24 +30,35 @@ module Rack
       end
 
       def set_unviewed(user, id)
-        key = "#{@prefix}-#{user}-v"
-        redis.sadd key, id
-        redis.expire key, @expires_in_seconds
+        key = user_key(user)
+        if redis.exists(prefixed_id(id))
+          expire_at = Time.now.to_i + redis.ttl(prefixed_id(id))
+          redis.zadd(key, expire_at, id)
+        end
+        redis.expire(key, @expires_in_seconds)
       end
 
       def set_all_unviewed(user, ids)
-        key = "#{@prefix}-#{user}-v"
-        redis.del key
-        ids.each { |id| redis.sadd(key, id) }
-        redis.expire key, @expires_in_seconds
+        key = user_key(user)
+        redis.del(key)
+        ids.each do |id|
+          if redis.exists(prefixed_id(id))
+            expire_at = Time.now.to_i + redis.ttl(prefixed_id(id))
+            redis.zadd(key, expire_at, id)
+          end
+        end
+        redis.expire(key, @expires_in_seconds)
       end
 
       def set_viewed(user, id)
-        redis.srem "#{@prefix}-#{user}-v", id
+        redis.zrem(user_key(user), id)
       end
 
+      # Remove expired ids from the unviewed sorted set and return the remaining ids
       def get_unviewed_ids(user)
-        redis.smembers "#{@prefix}-#{user}-v"
+        key = user_key(user)
+        redis.zremrangebyscore(key, '-inf', Time.now.to_i)
+        redis.zrevrangebyscore(key, '+inf', '-inf')
       end
 
       def diagnostics(user)
@@ -95,6 +106,14 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       private
+
+      def user_key(user)
+        "#{@prefix}-#{user}-v"
+      end
+
+      def prefixed_id(id)
+        "#{@prefix}#{id}"
+      end
 
       def redis
         @redis_connection ||= begin
