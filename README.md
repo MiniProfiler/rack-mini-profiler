@@ -180,6 +180,20 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
   end
 ```
 
+Note:
+
+Out-of-the-box we will initialize the autorization_mode to :whitelist in production. However, in some cases we may not be able to do it:
+
+- If you are running in development or test we will not enable whitelist mode
+- If you use `require: false` on rack_mini_profiler we are unlikely to be able to run the railstie
+- If ou are running outside of rails we will not run the railstie
+
+In those cases use:
+
+```
+Rack::MiniProfiler.config.authorization_mode = :whitelist
+```
+
 ## Configuration
 
 Various aspects of rack-mini-profiler's behavior can be configured when your app boots.
