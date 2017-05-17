@@ -87,7 +87,7 @@ class PG::Connection
   end
 
   def async_exec(*args,&blk)
-    return exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+    return async_exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
     start        = Time.now
     result       = exec_without_profiling(*args,&blk)
