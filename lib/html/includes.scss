@@ -1,17 +1,17 @@
-.box-shadow(@dx, @dy, @radius, @color) {
-    -moz-box-shadow: @dx @dy @radius @color;
-    -webkit-box-shadow: @dx @dy @radius @color;
-    box-shadow: @dx @dy @radius @color;
+@mixin box-shadow($dx, $dy, $radius, $color) {
+    -moz-box-shadow: $dx $dy $radius $color;
+    -webkit-box-shadow: $dx $dy $radius $color;
+    box-shadow: $dx $dy $radius $color;
 }
 
-@anchorColor: #0077CC;
-@buttonBorderColor: #888;
-@numberColor: #111;
-@textColor: #555;
-@mutedColor: #aaa;
-@normalFonts: Helvetica, Arial, sans-serif;
-@codeFonts: Consolas, monospace, serif;
-@zindex:2147483640; // near 32bit max 2147483647
+$anchorColor: #0077CC;
+$buttonBorderColor: #888;
+$numberColor: #111;
+$textColor: #555;
+$mutedColor: #aaa;
+$normalFonts: Helvetica, Arial, sans-serif;
+$codeFonts: Consolas, monospace, serif;
+$zindex:2147483640; // near 32bit max 2147483647
 
 // do some resets
 .profiler-result, .profiler-queries {
@@ -36,7 +36,7 @@
     }
     a, a:hover {
         cursor:pointer;
-        color:@anchorColor;
+        color:$anchorColor;
     }
     a {
         text-decoration:none;
@@ -54,37 +54,35 @@
     {
         float: right;
     }
-    
     table.profiler-client-timings
     {
         margin-top: 10px;
     }
-    
-    font-family:@normalFonts;
+    font-family:$normalFonts;
 
     .profiler-label {
-        color:@textColor;
+        color:$textColor;
         overflow:hidden;
         text-overflow: ellipsis;
     }
 
     .profiler-unit {
-        color:@mutedColor;
+        color:$mutedColor;
     }
 
     .profiler-trivial {
         display:none;
         td, td * {
-            color:@mutedColor !important;
+            color:$mutedColor !important;
         }
     }
 
     pre, code, .profiler-number, .profiler-unit {
-        font-family:@codeFonts;
+        font-family:$codeFonts;
     }
 
     .profiler-number {
-        color:@numberColor;
+        color:$numberColor;
     }
 
     .profiler-info {
@@ -96,11 +94,11 @@
             white-space:nowrap;
         }
     }
-    
+
     .profiler-timings {
         th {
             background-color:#fff;
-            color:@mutedColor;
+            color:$mutedColor;
             text-align:right;
         }
         th, td {
@@ -110,7 +108,7 @@
             display:none;
         }
         .profiler-duration {
-            .profiler-number;
+            color:$numberColor;
             text-align:right;
         }
         .profiler-indent {
@@ -118,7 +116,7 @@
         }
         .profiler-queries-show {
             .profiler-number, .profiler-unit {
-                color:@anchorColor;
+                color:$anchorColor;
             }
         }
         .profiler-queries-duration {
@@ -152,7 +150,7 @@
     }
 
     .profiler-queries {
-        font-family:@normalFonts;
+        font-family:$normalFonts;
 
         .profiler-stack-trace {
             margin-bottom:15px;
@@ -179,7 +177,7 @@
         }
 
         pre {
-            font-family:@codeFonts;
+            font-family:$codeFonts;
             white-space:pre-wrap;
         }
 
@@ -240,7 +238,10 @@
     }
 
     .profiler-nuclear {
-        .profiler-warning;
+        color:#f00;
+        &:hover {
+            color:#f00;
+        }
         font-weight:bold;
         padding-right:2px;
     }
@@ -249,23 +250,23 @@
 // ajaxed-in results will be appended to this
 .profiler-results
 {
-    z-index:@zindex + 3;
+    z-index:$zindex + 3;
     position:fixed;
     top:0px;
 
-    @radius:10px;
+    $radius:10px;
 
     &.profiler-left {
         left:0px;
 
         &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
-            -webkit-border-bottom-right-radius: @radius;
-            -moz-border-radius-bottomright: @radius;
-            border-bottom-right-radius: @radius;
+            -webkit-border-bottom-right-radius: $radius;
+            -moz-border-radius-bottomright: $radius;
+            border-bottom-right-radius: $radius;
         }
 
         .profiler-button, .profiler-controls {
-            border-right: 1px solid @buttonBorderColor;
+            border-right: 1px solid $buttonBorderColor;
         }
     }
 
@@ -273,20 +274,20 @@
         right:0px;
 
         &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
-            -webkit-border-bottom-left-radius: @radius;
-            -moz-border-radius-bottomleft: @radius;
-            border-bottom-left-radius: @radius;
+            -webkit-border-bottom-left-radius: $radius;
+            -moz-border-radius-bottomleft: $radius;
+            border-bottom-left-radius: $radius;
         }
 
         .profiler-button, .profiler-controls {
-            border-left: 1px solid @buttonBorderColor;
+            border-left: 1px solid $buttonBorderColor;
         }
     }
 
     .profiler-button, .profiler-controls {
         display:none;
-        z-index:@zindex;
-        border-bottom: 1px solid @buttonBorderColor;
+        z-index:$zindex;
+        border-bottom: 1px solid $buttonBorderColor;
         background-color:#fff;
         padding: 4px 7px;
         text-align:right;
@@ -309,11 +310,11 @@
 
     .profiler-totals {
       .profiler-reqs {
-        font-family: @codeFonts;
+        font-family: $codeFonts;
         font-size: 10px;
         margin-left: 6px;
         &:before {
-          font-family: @codeFonts;
+          font-family: $codeFonts;
           content: "×";
           margin-right: 1px;
         }
@@ -323,12 +324,12 @@
     .profiler-controls {
         display: block;
         font-size:12px;
-        font-family: @codeFonts;
+        font-family: $codeFonts;
         cursor:default;
         text-align: center;
 
         span {
-            border-right: 1px solid @mutedColor;
+            border-right: 1px solid $mutedColor;
             padding-right: 5px;
             margin-right: 5px;
             cursor:pointer;
@@ -341,7 +342,7 @@
 
     .profiler-popup {
         display:none;
-        z-index:@zindex + 1;
+        z-index:$zindex + 1;
         position:absolute;
         background-color:#fff;
         border: 1px solid #aaa;
@@ -350,7 +351,7 @@
         line-height:18px;
         overflow:auto;
 
-        .box-shadow(0px, 1px, 15px, #555);
+        @include box-shadow(0px, 1px, 15px, #555);
 
         .profiler-info {
             margin-bottom:3px;
@@ -389,7 +390,7 @@
 
     .profiler-queries {
         display:none;
-        z-index:@zindex + 3;
+        z-index:$zindex + 3;
         position:absolute;
         overflow-y:auto;
         overflow-x:auto;
@@ -420,7 +421,7 @@
 
 // popup results' queries will be displayed in front of this
 .profiler-queries-bg {
-    z-index:@zindex + 2;
+    z-index:$zindex + 2;
     display:none;
     background:#000;
     opacity:0.7;
@@ -446,7 +447,7 @@
 
             .profiler-info {
                 font-size: 25px;
-                border-bottom:1px solid @mutedColor;
+                border-bottom:1px solid $mutedColor;
                 padding-bottom:3px;
                 margin-bottom:25px;
 

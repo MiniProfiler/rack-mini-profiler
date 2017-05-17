@@ -27,8 +27,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'dalli'
   s.add_development_dependency 'rspec', '~> 2.14.1'
   s.add_development_dependency 'redis'
-  s.add_development_dependency 'therubyracer'
-  s.add_development_dependency 'less'
+  s.add_development_dependency 'sass'
   s.add_development_dependency 'flamegraph'
 
   s.require_paths = ["lib"]

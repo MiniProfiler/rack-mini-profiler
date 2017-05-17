@@ -18,13 +18,13 @@ task :build => :update_asset_version do
   `gem build rack-mini-profiler.gemspec 1>&2`
 end
 
-desc "compile less"
-task :compile_less => :copy_files do
-  `lessc lib/html/includes.less > lib/html/includes.css`
+desc "compile sass"
+task :compile_sass => :copy_files do
+  `sass lib/html/includes.scss > lib/html/includes.css`
 end
 
 desc "update asset version file"
-task :update_asset_version => :compile_less do
+task :update_asset_version => :compile_sass do
   require 'digest/md5'
   h = []
   Dir.glob('lib/html/*.{js,html,css,tmpl}').each do |f|
