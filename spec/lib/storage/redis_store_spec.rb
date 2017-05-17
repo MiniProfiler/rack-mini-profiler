@@ -123,6 +123,30 @@ describe Rack::MiniProfiler::RedisStore do
     end
   end
 
+  describe 'data resilience on upgrade' do
+
+    before do
+      store.send(:redis).sadd("MPRedisStore-bob-v", "test")
+    end
+
+    it "handles set_viewed" do
+      store.set_viewed("bob", "x")
+    end
+
+    it "handles get_unviewed_ids" do
+      store.get_unviewed_ids("bob")
+    end
+
+    it "handles set_unviewed" do
+      page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
+      page_struct[:id] = "XYZ"
+      store.save(page_struct)
+
+      store.set_unviewed("bob", "XYZ")
+    end
+
+  end
+
   describe 'diagnostics' do
     it "returns useful info" do
       res = store.diagnostics('a')

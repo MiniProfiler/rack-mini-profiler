@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.10.3 2017-05-17
+## 0.10.4 2017-05-17
 
 - [FEATURE] log binds for pg @neznauy
 - [FIX] use async exec pg monkey patch instead of exec

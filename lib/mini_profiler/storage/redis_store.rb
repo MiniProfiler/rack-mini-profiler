@@ -108,7 +108,7 @@ unviewed_ids: #{get_unviewed_ids(user)}
       private
 
       def user_key(user)
-        "#{@prefix}-#{user}-v"
+        "#{@prefix}-#{user}-v1"
       end
 
       def prefixed_id(id)
