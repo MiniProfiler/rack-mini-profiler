@@ -158,7 +158,7 @@ module Rack
       path         = env['PATH_INFO'].sub('//', '/')
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
-      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = env['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
+      env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
                 (@config.skip_paths && @config.skip_paths.any?{ |p| path.start_with?(p) }) ||
