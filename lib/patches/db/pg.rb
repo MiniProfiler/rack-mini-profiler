@@ -97,24 +97,31 @@ class PG::Connection
 
     result
   end
-  
+
   def get_binds(*args)
-    return if args[1].nil?
+    params = args[1]
+    return if params.nil? || params.empty?
+
+    sql = args[0]
+
     hh = {}
-    if args[0].match(/\(\$\d/) then
-      arr = args[0].match(/\((\"\w+\",?\s?)+\)/).to_s.gsub!(/[",()]/, '').split #regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
-    end   
-    args[1].each_index do |i|
-      if arr then
-        hh[arr[i]]=args[1][i]
+    arr = nil
+
+    if sql.match(/\(\$\d/)
+      arr = sql.match(/\((\"\w+\",?\s?)+\)/).to_s.gsub!(/[",()]/, '').split #regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
+    end
+
+    params.each_index do |i|
+      if arr
+        hh[arr[i]]=params[i]
       else
-        var = args[0].match(/[^\s\.]+\s?=?\s\$#{i+1}/).to_s.split[0] #regular selects param name from sql query, like for ex. "name1" = $1
+        var = sql.match(/[^\s\.]+\s?=?\s\$#{i+1}/).to_s.split[0] #regular selects param name from sql query, like for ex. "name1" = $1
         var.gsub!(/["]/, '') if var
         hh[var]=args[1][i]
       end
     end
     return hh
   end
-  
+
   alias_method :query, :exec
 end
