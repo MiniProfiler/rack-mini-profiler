@@ -108,7 +108,7 @@ class PG::Connection
     arr = nil
 
     if sql.match(/\(\$\d/)
-      arr = sql.match(/\((\"\w+\",?\s?)+\)/).to_s.gsub!(/[",()]/, '').split #regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
+      arr = sql.match(/\((\"\w+\",?[\s\.]?)+\)/).to_s.gsub!(/[",()]/, '').split #regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
     end
 
     params.each_index do |i|

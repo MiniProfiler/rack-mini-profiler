@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 gemspec
 
 gem 'codecov', :require => false, :group => :test
+gem 'pg'
 
 if RUBY_VERSION < '2.0.0'
   gem 'json', '~>1.8'
