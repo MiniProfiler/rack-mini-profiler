@@ -9,12 +9,14 @@ module Rack
           stack_trace = nil
           unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
             # Allow us to filter the stack trace
-            stack_trace = ""
+            if full_backtrace
+              stack_trace = Kernel.caller.join "\n"
+            else
+              stack_trace = ""
              # Clean up the stack trace if there are options to do so
-            Kernel.caller.each do |ln|
-              ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove and !full_backtrace
-              if    full_backtrace or
-                    (
+              Kernel.caller.each do |ln|
+                ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove
+                if (
                       (
                         Rack::MiniProfiler.config.backtrace_includes.nil? or
                         Rack::MiniProfiler.config.backtrace_includes.any?{|regex| ln =~ regex}
@@ -24,7 +26,8 @@ module Rack
                         Rack::MiniProfiler.config.backtrace_ignores.none?{|regex| ln =~ regex}
                       )
                     )
-                stack_trace << ln << "\n"
+                  stack_trace << ln << "\n"
+                end
               end
             end
           end
