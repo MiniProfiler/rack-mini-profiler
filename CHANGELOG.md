@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.10.5 2017-05-22
+
+- [FIX] revert PG bind sniffing until it is properly tested
+
 ## 0.10.4 2017-05-17
 
 - [FEATURE] log binds for pg @neznauy
