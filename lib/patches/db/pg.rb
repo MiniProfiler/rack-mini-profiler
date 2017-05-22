@@ -52,7 +52,7 @@ class PG::Connection
     start        = Time.now
     result       = exec_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
-    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time, get_binds(*args))
+    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
