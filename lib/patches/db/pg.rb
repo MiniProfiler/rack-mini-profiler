@@ -103,24 +103,23 @@ class PG::Connection
     return if params.nil? || params.empty?
 
     sql = args[0]
-
-    hh = {}
     arr = nil
 
     if sql.match(/\(\$\d/)
-      arr = sql.match(/\((\"\w+\",?\s?)+\)/).to_s.gsub!(/[",()]/, '').split #regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
+      # regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
+      arr = sql.match(/\((\"\w+\",?\s?)+\)/).to_s.gsub!(/[",()]/, '').to_s.split
     end
 
-    params.each_index do |i|
-      if arr
-        hh[arr[i]]=params[i]
-      else
-        var = sql.match(/[^\s\.]+\s?=?\s\$#{i+1}/).to_s.split[0] #regular selects param name from sql query, like for ex. "name1" = $1
-        var.gsub!(/["]/, '') if var
-        hh[var]=args[1][i]
+    if arr.nil? || arr.empty?
+      params.each_with_index.inject({}) do |hash, (param, i)|
+        # regular selects param name from sql query, like for ex. "name1" = $1
+        key = sql.match(/[^\s\.]+\s?=?\s\$#{i+1}/).to_s.split[0]
+        key.gsub!(/["]/, '') if key
+        hash.merge(key => param)
       end
+    else
+      Hash[arr.zip(params)]
     end
-    return hh
   end
 
   alias_method :query, :exec
