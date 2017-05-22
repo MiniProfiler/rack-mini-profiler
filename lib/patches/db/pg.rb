@@ -66,7 +66,7 @@ class PG::Connection
     elapsed_time = SqlPatches.elapsed_time(start)
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
-    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time, get_binds(mapped, args[1]))
+    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
@@ -80,7 +80,7 @@ class PG::Connection
     elapsed_time = SqlPatches.elapsed_time(start)
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
-    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time, get_binds(mapped, args[1]))
+    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
@@ -92,35 +92,10 @@ class PG::Connection
     start        = Time.now
     result       = exec_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
-    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time, get_binds(*args))
+    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
-  end
-
-  def get_binds(*args)
-    params = args[1]
-    return if params.nil? || params.empty?
-
-    sql = args[0]
-
-    hh = {}
-    arr = nil
-
-    if sql.match(/\(\$\d/)
-      arr = sql.match(/\((\"\w+\",?\s?)+\)/).to_s.gsub!(/[",()]/, '').split #regular selects list of names from sql query, for ex. ("name1", "name2", "name3")
-    end
-
-    params.each_index do |i|
-      if arr
-        hh[arr[i]]=params[i]
-      else
-        var = sql.match(/[^\s\.]+\s?=?\s\$#{i+1}/).to_s.split[0] #regular selects param name from sql query, like for ex. "name1" = $1
-        var.gsub!(/["]/, '') if var
-        hh[var]=args[1][i]
-      end
-    end
-    return hh
   end
 
   alias_method :query, :exec
