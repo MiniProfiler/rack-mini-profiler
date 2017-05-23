@@ -168,7 +168,7 @@ There are two additional `pp` options that can be used to analyze memory which d
 
 ## Access control in non-development environments
 
-rack-mini-profiler is designed with production profiling in mind. To enable that just run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
+rack-mini-profiler is designed with production profiling in mind. To enable that run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
 
 ```ruby
   # inside your ApplicationController
@@ -180,17 +180,19 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
   end
 ```
 
+> If your production application is running on more than one server (or more than one dyno) you will need to configure rack mini profiler's storage to use Redis or Memcache. See [storage](#storage) for information on changing the storage backend.
+
 Note:
 
-Out-of-the-box we will initialize the autorization_mode to :whitelist in production. However, in some cases we may not be able to do it:
+Out-of-the-box we will initialize the `autorization_mode` to `:whitelist` in production. However, in some cases we may not be able to do it:
 
 - If you are running in development or test we will not enable whitelist mode
-- If you use `require: false` on rack_mini_profiler we are unlikely to be able to run the railstie
-- If ou are running outside of rails we will not run the railstie
+- If you use `require: false` on rack_mini_profiler we are unlikely to be able to run the railtie
+- If you are running outside of rails we will not run the railtie
 
 In those cases use:
 
-```
+```ruby
 Rack::MiniProfiler.config.authorization_mode = :whitelist
 ```
 
@@ -201,6 +203,7 @@ For example in a Rails app, this should be done in an initializer:
 **config/initializers/mini_profiler.rb**
 
 ### Caching behavior
+
 To fix some nasty bugs with rack-mini-profiler showing the wrong data, the middleware
 will remove headers relating to caching (Date & Etag on responses, If-Modified-Since & If-None-Match on requests).
 This probably won't ever break your application, but it can cause some unexpected behavior. For
