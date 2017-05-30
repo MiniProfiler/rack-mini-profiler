@@ -286,7 +286,7 @@ module Rack
         env['HTTP_ACCEPT_ENCODING'] = orig_accept_encoding if config.suppress_encoding
       end
 
-      skip_it = current.discard
+      skip_it = current.nil? ? true : current.discard
 
       if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
         skip_it = true
