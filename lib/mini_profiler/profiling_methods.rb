@@ -8,6 +8,12 @@ module Rack
         c.current_timer.add_sql(query, elapsed_ms, c.page_struct, params, c.skip_backtrace, c.full_backtrace)
       end
 
+      def report_reader_duration(elapsed_ms, row_count = nil, class_name = nil)
+        return unless current && current.current_timer
+        c = current
+        c.current_timer.report_reader_duration(elapsed_ms, row_count, class_name)
+      end
+
       def start_step(name)
         return unless current
         parent_timer          = current.current_timer
