@@ -587,18 +587,19 @@ Append the following to your query string:
       path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
 
       settings = {
-       :path            => path,
-       :version         => MiniProfiler::ASSET_VERSION,
-       :position        => @config.position,
-       :showTrivial     => @config.show_trivial,
-       :showChildren    => @config.show_children,
-       :maxTracesToShow => @config.max_traces_to_show,
-       :showControls    => @config.show_controls,
-       :authorized      => true,
-       :toggleShortcut  => @config.toggle_shortcut,
-       :startHidden     => @config.start_hidden,
-       :collapseResults => @config.collapse_results,
-       :htmlContainer   => @config.html_container
+       :path               => path,
+       :version            => MiniProfiler::ASSET_VERSION,
+       :verticalPosition   => @config.vertical_position,
+       :horizontalPosition => @config.horizontal_position,
+       :showTrivial        => @config.show_trivial,
+       :showChildren       => @config.show_children,
+       :maxTracesToShow    => @config.max_traces_to_show,
+       :showControls       => @config.show_controls,
+       :authorized         => true,
+       :toggleShortcut     => @config.toggle_shortcut,
+       :startHidden        => @config.start_hidden,
+       :collapseResults    => @config.collapse_results,
+       :htmlContainer      => @config.html_container
       }
 
       if current && current.page_struct

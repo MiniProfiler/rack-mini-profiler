@@ -47,7 +47,7 @@ $zindex:2147483640; // near 32bit max 2147483647
 }
 
 // styles shared between popup view and full view
-.profiler-result 
+.profiler-result
 {
 
     .profiler-toggle-duration-with-children
@@ -252,36 +252,71 @@ $zindex:2147483640; // near 32bit max 2147483647
 {
     z-index:$zindex + 3;
     position:fixed;
-    top:0px;
 
     $radius:10px;
 
-    &.profiler-left {
-        left:0px;
+    &.profiler-top {
+      top:0px;
+      
+      &.profiler-left {
+          left:0px;
 
-        &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
-            -webkit-border-bottom-right-radius: $radius;
-            -moz-border-radius-bottomright: $radius;
-            border-bottom-right-radius: $radius;
-        }
+          &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
+              -webkit-border-bottom-right-radius: $radius;
+              -moz-border-radius-bottomright: $radius;
+              border-bottom-right-radius: $radius;
+          }
 
-        .profiler-button, .profiler-controls {
-            border-right: 1px solid $buttonBorderColor;
-        }
+          .profiler-button, .profiler-controls {
+              border-right: 1px solid $buttonBorderColor;
+          }
+      }
+
+      &.profiler-right {
+          right:0px;
+
+          &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
+              -webkit-border-bottom-left-radius: $radius;
+              -moz-border-radius-bottomleft: $radius;
+              border-bottom-left-radius: $radius;
+          }
+
+          .profiler-button, .profiler-controls {
+              border-left: 1px solid $buttonBorderColor;
+          }
+      }
     }
 
-    &.profiler-right {
-        right:0px;
+    &.profiler-bottom {
+      bottom:0px;
 
-        &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-controls {
-            -webkit-border-bottom-left-radius: $radius;
-            -moz-border-radius-bottomleft: $radius;
-            border-bottom-left-radius: $radius;
-        }
+      &.profiler-left {
+          left:0px;
 
-        .profiler-button, .profiler-controls {
-            border-left: 1px solid $buttonBorderColor;
-        }
+          &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:first-child .profiler-button, .profiler-controls {
+              -webkit-border-top-right-radius: $radius;
+              -moz-border-radius-topright: $radius;
+              border-top-right-radius: $radius;
+          }
+
+          .profiler-button, .profiler-controls {
+              border-right: 1px solid $buttonBorderColor;
+          }
+      }
+
+      &.profiler-right {
+          right:0px;
+
+          &.profiler-no-controls .profiler-totals, &.profiler-no-controls .profiler-result:first-child .profiler-button, .profiler-controls {
+              -webkit-border-bottom-top-radius: $radius;
+              -moz-border-radius-topleft: $radius;
+              border-top-left-radius: $radius;
+          }
+
+          .profiler-button, .profiler-controls {
+              border-left: 1px solid $buttonBorderColor;
+          }
+      }
     }
 
     .profiler-button, .profiler-controls {

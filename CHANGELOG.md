@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## ?
+
+- [FEATURE] Support for vertical positions (top/bottom)
+
 ## 0.10.5 2017-05-22
 
 - [FIX] revert PG bind sniffing until it is properly tested
