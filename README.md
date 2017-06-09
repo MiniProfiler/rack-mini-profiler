@@ -295,7 +295,7 @@ This method will remove profiling information that was related to previous page 
 You need to inject the following in your SPA to load MiniProfiler's speed badge ([extra details surrounding this script](https://github.com/MiniProfiler/rack-mini-profiler/issues/139#issuecomment-192880706)):
 
 ```html
- <script async type="text/javascript" id="mini-profiler" src="/mini-profiler-resources/includes.js?v=12b4b45a3c42e6e15503d7a03810ff33" data-version="12b4b45a3c42e6e15503d7a03810ff33" data-path="/mini-profiler-resources/" data-current-id="redo66j4g1077kto8uh3" data-ids="redo66j4g1077kto8uh3" data-position="left" data-trivial="false" data-children="false" data-max-traces="10" data-controls="false" data-authorized="true" data-toggle-shortcut="Alt+P" data-start-hidden="false" data-collapse-results="true"></script>
+ <script async type="text/javascript" id="mini-profiler" src="/mini-profiler-resources/includes.js?v=12b4b45a3c42e6e15503d7a03810ff33" data-version="12b4b45a3c42e6e15503d7a03810ff33" data-path="/mini-profiler-resources/" data-current-id="redo66j4g1077kto8uh3" data-ids="redo66j4g1077kto8uh3" data-horizontal-position="left" data-vertical-position="top" data-trivial="false" data-children="false" data-max-traces="10" data-controls="false" data-authorized="true" data-toggle-shortcut="Alt+P" data-start-hidden="false" data-collapse-results="true"></script>
 ```
 
 _Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will change with each release of `rack_mini_profiler`. The MiniProfiler's speed badge will continue to work, although you will have to change the GUID to expire the script to fetch the most recent version.
@@ -306,7 +306,7 @@ You can set configuration options using the configuration accessor on `Rack::Min
 For example:
 
 ```ruby
-Rack::MiniProfiler.config.position = 'right'
+Rack::MiniProfiler.config.position = 'bottom-right'
 Rack::MiniProfiler.config.start_hidden = true
 ```
 The available configuration options are:
@@ -314,7 +314,7 @@ The available configuration options are:
 Option|Default|Description
 -------|---|--------
 pre_authorize_cb|Rails: dev only<br>Rack: always on|A lambda callback that returns true to make mini_profiler visible on a given request.
-position|`'left'`|Display mini_profiler on `'right'` or `'left'`.
+position|`'top-left'`|Display mini_profiler on `'top-right'`, `'top-left'`, `'bottom-right'` or `'bottom-left'`.
 skip_paths|`[]`|Paths that skip profiling.
 skip_schema_queries|Rails dev: `'true'`<br>Othwerwise: `'false'`|`'true'` to log schema queries.
 auto_inject|`true`|`true` to inject the miniprofiler script in the page.

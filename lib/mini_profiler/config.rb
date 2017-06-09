@@ -21,7 +21,7 @@ module Rack
     attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
 
     # ui accessors
-    attr_accessor :collapse_results, :max_traces_to_show, :position,
+    attr_accessor :collapse_results, :max_traces_to_show, :position, :vertical_position, :horizontal_position,
       :show_children, :show_controls, :show_trivial, :start_hidden,
       :toggle_shortcut, :html_container
 
@@ -57,7 +57,6 @@ module Rack
           @autorized          = true
           @collapse_results   = true
           @max_traces_to_show = 20
-          @position           = 'left'  # Where it is displayed
           @show_children      = false
           @show_controls      = false
           @show_trivial       = false
@@ -70,17 +69,24 @@ module Rack
       end
 
       def merge!(config)
-        return unless config
-        if Hash === config
-          config.each{|k,v| instance_variable_set "@#{k}",v}
-        else
-          self.class.attributes.each{ |k|
-            v = config.send k
-            instance_variable_set "@#{k}", v if v
-          }
+        if config
+          if Hash === config
+            config.each{|k,v| instance_variable_set "@#{k}",v}
+          else
+            self.class.attributes.each{ |k|
+              v = config.send k
+              instance_variable_set "@#{k}", v if v
+            }
+          end
         end
+        set_positions!
       end
 
+      def set_positions!
+        position = (self.position && self.position.match("-")) ? self.position.split("-") : ["top", "left"]
+        self.vertical_position = position.first
+        self.horizontal_position = position.last
+      end
     end
   end
 end
