@@ -48,6 +48,7 @@ describe Rack::MiniProfiler::ClientSettings do
     end
 
     it 'does nothing on short unauthed requests' do
+      @store.should_not_receive(:allowed_tokens)
       Rack::MiniProfiler.config.authorization_mode = :whitelist
       Rack::MiniProfiler.deauthorize_request
       hash = {}
@@ -68,10 +69,22 @@ describe Rack::MiniProfiler::ClientSettings do
     end
   end
 
-  it "should not have settings by default" do
-    Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Time.now)
-      .has_valid_cookie?.should == false
-  end
+  describe "without a cookie" do
+    before do
+      @store = Rack::MiniProfiler::MemoryStore.new
+      @settings = Rack::MiniProfiler::ClientSettings.new({}, @store, Time.now)
+    end
 
+    it "should not have settings by default" do
+      @settings.has_valid_cookie?.should == false
+    end
+
+    it "should not access storage" do
+      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      Rack::MiniProfiler.deauthorize_request
+      @store.should_not_receive(:allowed_tokens)
+      @settings.has_valid_cookie?.should be_false
+    end
+  end
 
 end

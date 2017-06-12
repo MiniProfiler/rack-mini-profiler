@@ -57,8 +57,7 @@ module Rack
         tokens_changed = false
 
         if MiniProfiler.request_authorized? && MiniProfiler.config.authorization_mode == :whitelist
-          @allowed_tokens ||= @store.allowed_tokens
-          tokens_changed = !@orig_auth_tokens || ((@allowed_tokens - @orig_auth_tokens).length > 0)
+          tokens_changed = !@orig_auth_tokens || ((allowed_tokens - @orig_auth_tokens).length > 0)
         end
 
         if  @orig_disable_profiling != @disable_profiling ||
@@ -69,7 +68,7 @@ module Rack
           settings = {"p" =>  "t" }
           settings["dp"] = "t"                  if @disable_profiling
           settings["bt"] = @backtrace_level     if @backtrace_level
-          settings["a"] = @allowed_tokens.join("|") if @allowed_tokens && MiniProfiler.request_authorized?
+          settings["a"] = allowed_tokens.join("|") if allowed_tokens && MiniProfiler.request_authorized?
 
           settings_string = settings.map{|k,v| "#{k}=#{v}"}.join(",")
           Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, :value => settings_string, :path => '/')
@@ -86,10 +85,8 @@ module Rack
         valid_cookie = !@cookie.nil?
 
         if (MiniProfiler.config.authorization_mode == :whitelist)
-          @allowed_tokens ||= @store.allowed_tokens
-
           valid_cookie = (Array === @orig_auth_tokens) &&
-            ((@allowed_tokens & @orig_auth_tokens).length > 0)
+            ((allowed_tokens & @orig_auth_tokens).length > 0)
         end
 
         valid_cookie
@@ -110,6 +107,12 @@ module Rack
 
       def backtrace_none?
         @backtrace_level == BACKTRACE_NONE
+      end
+
+      private
+
+      def allowed_tokens
+        @allowed_tokens ||= @store.allowed_tokens
       end
     end
   end
