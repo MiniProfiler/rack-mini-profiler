@@ -37,11 +37,14 @@ module Rack::MiniProfilerRails
     end
 
     # The file store is just so much less flaky
-    base_path = Rails.application.config.paths['tmp'].first rescue "#{Rails.root}/tmp"
-    tmp       = base_path + '/miniprofiler'
+    # If the user has not changed from the default memory store then switch to the file store, otherwise keep what the user set
+    if c.storage == Rack::MiniProfiler::MemoryStore && c.storage_options.nil?
+      base_path = Rails.application.config.paths['tmp'].first rescue "#{Rails.root}/tmp"
+      tmp       = base_path + '/miniprofiler'
 
-    c.storage_options = {:path => tmp}
-    c.storage = Rack::MiniProfiler::FileStore
+      c.storage_options = {:path => tmp}
+      c.storage = Rack::MiniProfiler::FileStore
+    end
 
     # Quiet the SQL stack traces
     c.backtrace_remove = Rails.root.to_s + "/"
