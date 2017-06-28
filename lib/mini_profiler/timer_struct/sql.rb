@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Rack
   class MiniProfiler
 
@@ -9,7 +10,7 @@ module Rack
           stack_trace = nil
           unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
             # Allow us to filter the stack trace
-            stack_trace = ""
+            stack_trace = "".dup
              # Clean up the stack trace if there are options to do so
             Kernel.caller.each do |ln|
               ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove and !full_backtrace
