@@ -20,7 +20,7 @@ describe Rack::MiniProfiler do
           if ims.size > 0
             [304, {'Content-Type' => 'application/json'}, '']
           else
-            [200, {'Content-Type' => 'application/json'}, '{"name": "Ryan"}']
+            [200, {'Content-Type' => 'application/json', 'Cache-Control' => 'original-cache-control'}, '{"name": "Ryan"}']
           end
         }
       end
@@ -191,6 +191,7 @@ describe Rack::MiniProfiler do
   describe 'configuration' do
     it "should remove caching headers by default" do
       get '/cached-resource'
+      last_response.headers['X-MiniProfiler-Original-Cache-Control'].should == 'original-cache-control'
       last_response.headers['Cache-Control'].should include('no-store')
     end
 
@@ -214,6 +215,7 @@ describe Rack::MiniProfiler do
 
       it "should be able to re-enable caching" do
         get '/cached-resource'
+        last_response.headers['X-MiniProfiler-Original-Cache-Control'].should == 'original-cache-control'
         last_response.headers['Cache-Control'].should_not include('no-store')
       end
     end
