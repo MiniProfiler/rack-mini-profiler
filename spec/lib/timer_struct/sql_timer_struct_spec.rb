@@ -1,6 +1,3 @@
-require 'spec_helper'
-
-
 describe Rack::MiniProfiler::TimerStruct::Sql do
   before do
     @page = Rack::MiniProfiler::TimerStruct::Page.new({})

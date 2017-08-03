@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::TimerStruct::Request do
 
   def new_page

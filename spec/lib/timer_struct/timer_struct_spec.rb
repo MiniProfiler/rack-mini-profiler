@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::TimerStruct::Base do
 
   before do

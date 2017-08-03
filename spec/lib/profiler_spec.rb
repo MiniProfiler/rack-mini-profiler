@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler do
   describe 'unique id' do
 

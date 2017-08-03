@@ -1,4 +1,3 @@
-require 'spec_helper'
 describe Rack::MiniProfiler::MemcacheStore do
 
   context 'page struct' do

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::MemoryStore do
 
   context 'page struct' do

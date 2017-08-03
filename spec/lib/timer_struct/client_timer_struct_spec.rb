@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'yaml'
 
 describe Rack::MiniProfiler::TimerStruct::Client do

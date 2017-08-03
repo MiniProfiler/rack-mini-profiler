@@ -1,8 +1,6 @@
 # Note: This test is highly dependent on line numbers for backtrace details
 # Take care when changing the structure of this file and update tests accordingly
 
-require 'spec_helper'
-require 'rack-mini-profiler'
 require 'rack/test'
 
 describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.0') do
@@ -52,9 +50,9 @@ describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.
       expect(last_response.body).to include('RuntimeError - "Test RuntimeError Exception"')
       expect(last_response.body).to include('NameError - "Test NameError Exception"')
       expect(last_response.body).to include('NoMethodError - "Test NoMethodError Exception"')
-      expect(last_response.body).to include("  #{__FILE__}:23")
-      expect(last_response.body).to include("  #{__FILE__}:28")
-      expect(last_response.body).to include("  #{__FILE__}:33")
+      expect(last_response.body).to include("  #{__FILE__}:21")
+      expect(last_response.body).to include("  #{__FILE__}:26")
+      expect(last_response.body).to include("  #{__FILE__}:31")
     end
 
     it 'with a single filtered exception' do
@@ -63,9 +61,9 @@ describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.
       expect(last_response.body).not_to include('RuntimeError - "Test RuntimeError Exception"')
       expect(last_response.body).to include('NameError - "Test NameError Exception"')
       expect(last_response.body).to include('NoMethodError - "Test NoMethodError Exception"')
-      expect(last_response.body).not_to include("  #{__FILE__}:23")
-      expect(last_response.body).to include("  #{__FILE__}:28")
-      expect(last_response.body).to include("  #{__FILE__}:33")
+      expect(last_response.body).not_to include("  #{__FILE__}:21")
+      expect(last_response.body).to include("  #{__FILE__}:26")
+      expect(last_response.body).to include("  #{__FILE__}:31")
     end
 
     it 'with a multiple filtered exceptions' do
@@ -74,9 +72,9 @@ describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.
       expect(last_response.body).to include('RuntimeError - "Test RuntimeError Exception"')
       expect(last_response.body).not_to include('NameError - "Test NameError Exception"')
       expect(last_response.body).not_to include('NoMethodError - "Test NoMethodError Exception"')
-      expect(last_response.body).to include("  #{__FILE__}:23")
-      expect(last_response.body).not_to include("  #{__FILE__}:28")
-      expect(last_response.body).not_to include("  #{__FILE__}:33")
+      expect(last_response.body).to include("  #{__FILE__}:21")
+      expect(last_response.body).not_to include("  #{__FILE__}:26")
+      expect(last_response.body).not_to include("  #{__FILE__}:31")
     end
 
   end

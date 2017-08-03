@@ -1,4 +1,3 @@
-require 'spec_helper'
 describe Rack::MiniProfiler::FileStore do
 
   context 'page struct' do

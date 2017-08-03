@@ -1,5 +1,3 @@
-require 'spec_helper'
-require 'rack-mini-profiler'
 require 'rack/test'
 require 'zlib'
 

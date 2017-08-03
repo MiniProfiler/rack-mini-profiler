@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module Rack
   describe MiniProfiler::Config do
 

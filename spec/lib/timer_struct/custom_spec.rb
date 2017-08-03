@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::TimerStruct::Custom do
   before do
     @name = 'cool request'
