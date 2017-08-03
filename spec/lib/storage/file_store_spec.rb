@@ -16,19 +16,19 @@ describe Rack::MiniProfiler::FileStore do
         @store.flush_tokens
 
         tokens = @store.allowed_tokens
-        tokens.length.should == 1
-        tokens.should == @store.allowed_tokens
+        expect(tokens.length).to eq(1)
+        expect(tokens).to eq(@store.allowed_tokens)
 
         Time.travel(Time.now + 1) do
           new_tokens = @store.allowed_tokens
-          new_tokens.length.should == 1
-          new_tokens.should == tokens
+          expect(new_tokens.length).to eq(1)
+          expect(new_tokens).to eq(tokens)
         end
 
         Time.travel(Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1) do
           new_tokens = @store.allowed_tokens
-          new_tokens.length.should == 2
-          (new_tokens - tokens).length.should == 1
+          expect(new_tokens.length).to eq(2)
+          expect((new_tokens - tokens).length).to eq(1)
         end
 
       end
@@ -42,21 +42,21 @@ describe Rack::MiniProfiler::FileStore do
         page_struct[:random] = "random"
         @store.save(page_struct)
         page_struct = @store.load('XYZ')
-        page_struct[:random].should == "random"
-        page_struct[:id].should == "XYZ"
+        expect(page_struct[:random]).to eq("random")
+        expect(page_struct[:id]).to eq("XYZ")
       end
 
       it 'can list unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
-        @store.get_unviewed_ids('a').sort.to_a.should == ['XYZ', 'ABC'].sort.to_a
+        expect(@store.get_unviewed_ids('a').sort.to_a).to eq(['XYZ', 'ABC'].sort.to_a)
       end
 
       it 'can set all unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
         @store.set_all_unviewed('a', %w(111 222))
-        @store.get_unviewed_ids('a').should == ['111', '222']
+        expect(@store.get_unviewed_ids('a')).to eq(['111', '222'])
         @store.set_all_unviewed('a', [])
       end
 
@@ -64,7 +64,7 @@ describe Rack::MiniProfiler::FileStore do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
         @store.set_viewed('a', 'XYZ')
-        @store.get_unviewed_ids('a').should == ['ABC']
+        expect(@store.get_unviewed_ids('a')).to eq(['ABC'])
       end
 
     end

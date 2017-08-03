@@ -14,21 +14,21 @@ describe Rack::MiniProfiler::MemoryStore do
         page_struct = {:id => "XYZ", :random => "random"}
         @store.save(page_struct)
         page_struct = @store.load("XYZ")
-        page_struct[:id].should == "XYZ"
-        page_struct[:random].should == "random"
+        expect(page_struct[:id]).to eq("XYZ")
+        expect(page_struct[:random]).to eq("random")
       end
 
       it 'can list unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
-        @store.get_unviewed_ids('a').should == ['XYZ', 'ABC']
+        expect(@store.get_unviewed_ids('a')).to eq(['XYZ', 'ABC'])
       end
 
       it 'can set all unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
         @store.set_all_unviewed('a', %w(111 222))
-        @store.get_unviewed_ids('a').should == ['111', '222']
+        expect(@store.get_unviewed_ids('a')).to eq(['111', '222'])
         @store.set_all_unviewed('a', [])
       end
 
@@ -36,7 +36,7 @@ describe Rack::MiniProfiler::MemoryStore do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
         @store.set_viewed('a', 'XYZ')
-        @store.get_unviewed_ids('a').should == ['ABC']
+        expect(@store.get_unviewed_ids('a')).to eq(['ABC'])
       end
 
     end
@@ -53,7 +53,7 @@ describe Rack::MiniProfiler::MemoryStore do
       old_page_struct = {:id => "XYZ", :random => "random", :started => ((Time.now.to_f - 2) * 1000).to_i }
       @fast_expiring_store.save(old_page_struct)
       old_page_struct = @fast_expiring_store.load("XYZ")
-      old_page_struct[:id].should == "XYZ"
+      expect(old_page_struct[:id]).to eq("XYZ")
       @fast_expiring_store.cleanup_cache
       page_struct = @fast_expiring_store.load("XYZ")
       expect(page_struct).to eq(nil)
@@ -68,19 +68,19 @@ describe Rack::MiniProfiler::MemoryStore do
     it 'should return tokens' do
 
       tokens = @store.allowed_tokens
-      tokens.length.should == 1
-      tokens.should == @store.allowed_tokens
+      expect(tokens.length).to eq(1)
+      expect(tokens).to eq(@store.allowed_tokens)
 
       Time.travel(Time.now + 1) do
         new_tokens = @store.allowed_tokens
-        new_tokens.length.should == 1
-        new_tokens.should == tokens
+        expect(new_tokens.length).to eq(1)
+        expect(new_tokens).to eq(tokens)
       end
 
       Time.travel(Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1) do
         new_tokens = @store.allowed_tokens
-        new_tokens.length.should == 2
-        (new_tokens - tokens).length.should == 1
+        expect(new_tokens.length).to eq(2)
+        expect((new_tokens - tokens).length).to eq(1)
       end
 
     end
@@ -90,7 +90,7 @@ describe Rack::MiniProfiler::MemoryStore do
     let(:described){Rack::MiniProfiler::MemoryStore::CacheCleanupThread}
     before do
       store = double()
-      store.stub(:cleanup_cache)
+      allow(store).to receive(:cleanup_cache)
       @cleaner = described.new(1, 2, store) do
         self.sleepy_run
       end
@@ -128,7 +128,7 @@ describe Rack::MiniProfiler::MemoryStore do
     describe 'sleepy_run' do
       before do
         store = double()
-        store.stub(:cleanup_cache)
+        allow(store).to receive(:cleanup_cache)
         @cleaner = described.new(0, 0, store) do
           self.sleepy_run
         end

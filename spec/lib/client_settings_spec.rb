@@ -15,28 +15,28 @@ describe Rack::MiniProfiler::ClientSettings do
     end
 
     it 'has the cookies' do
-      @settings.has_valid_cookie?.should be_true
+      expect(@settings.has_valid_cookie?).to be(true)
     end
 
     it 'has profiling disabled' do
-      @settings.disable_profiling?.should be_true
+      expect(@settings.disable_profiling?).to be(true)
     end
 
     it 'has backtrace set to full' do
-      @settings.backtrace_full?.should be_true
+      expect(@settings.backtrace_full?).to be(true)
     end
 
     it 'should not write cookie changes if no change' do
       hash = {}
       @settings.write!(hash)
-      hash.should == {}
+      expect(hash).to eq({})
     end
 
     it 'should correctly write cookie changes if changed' do
       @settings.disable_profiling = false
       hash = {}
       @settings.write!(hash)
-      hash.should_not == {}
+      expect(hash).not_to eq({})
     end
 
     it 'writes auth token for authorized reqs' do
@@ -44,7 +44,7 @@ describe Rack::MiniProfiler::ClientSettings do
       Rack::MiniProfiler.authorize_request
       hash = {}
       @settings.write!(hash)
-      hash["Set-Cookie"].should include(@store.allowed_tokens.join("|"))
+      expect(hash["Set-Cookie"]).to include(@store.allowed_tokens.join("|"))
     end
 
     it 'does nothing on short unauthed requests' do
@@ -53,7 +53,7 @@ describe Rack::MiniProfiler::ClientSettings do
       hash = {}
       @settings.handle_cookie([200, hash, []])
 
-      hash.should == {}
+      expect(hash).to eq({})
     end
 
     it 'discards on long unauthed requests' do
@@ -64,13 +64,13 @@ describe Rack::MiniProfiler::ClientSettings do
         @settings.handle_cookie([200, hash, []])
       end
 
-      hash["Set-Cookie"].should include("max-age=0")
+      expect(hash["Set-Cookie"]).to include("max-age=0")
     end
   end
 
   it "should not have settings by default" do
-    Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Time.now)
-      .has_valid_cookie?.should == false
+    expect(Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Time.now)
+      .has_valid_cookie?).to eq(false)
   end
 
 
