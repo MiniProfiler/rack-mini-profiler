@@ -452,6 +452,9 @@ $zindex:2147483640; // near 32bit max 2147483647
 
     .profiler-more-actions { float: left; }
 
+    @media print {
+      display: none;
+    }
 }
 
 // popup results' queries will be displayed in front of this
