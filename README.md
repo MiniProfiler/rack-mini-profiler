@@ -179,7 +179,7 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
 
 Note:
 
-Out-of-the-box we will initialize the `autorization_mode` to `:whitelist` in production. However, in some cases we may not be able to do it:
+Out-of-the-box we will initialize the `authorization_mode` to `:whitelist` in production. However, in some cases we may not be able to do it:
 
 - If you are running in development or test we will not enable whitelist mode
 - If you use `require: false` on rack_mini_profiler we are unlikely to be able to run the railtie
