@@ -285,6 +285,9 @@
     margin: 0px; }
   .profiler-results .profiler-more-actions {
     float: left; }
+  @media print {
+    .profiler-results {
+      display: none; } }
 
 .profiler-queries-bg {
   z-index: 2147483642;
