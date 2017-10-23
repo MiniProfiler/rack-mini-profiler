@@ -2,10 +2,10 @@ module Rack
   class MiniProfiler
     module ProfilingMethods
 
-      def record_sql(query, elapsed_ms, params = nil)
+      def record_sql(query, elapsed_ms, explain_output = nil, params = nil)
         return unless current && current.current_timer
         c = current
-        c.current_timer.add_sql(query, elapsed_ms, c.page_struct, params, c.skip_backtrace, c.full_backtrace)
+        c.current_timer.add_sql(query, elapsed_ms, c.page_struct, explain_output, params, c.skip_backtrace, c.full_backtrace)
       end
 
       def start_step(name)

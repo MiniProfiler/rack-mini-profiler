@@ -203,6 +203,11 @@
       <div class="query">
         <pre class="profiler-stack-trace">${s.stack_trace_snippet}</pre>
         <pre class="prettyprint lang-sql"><code>${s.formatted_command_string}; ${MiniProfiler.formatParameters(s.parameters)}</code></pre>
+        <br />
+        Query plan, if PG:
+        <br />
+        <br />
+        <pre class="prettyprint lang-sql"><code>${s.explain_output}</code></pre>
       </div>
     </td>
   </tr>

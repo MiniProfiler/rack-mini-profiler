@@ -52,7 +52,11 @@ class PG::Connection
     start        = Time.now
     result       = exec_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
-    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+    #args_copy = args.dup
+    #args_copy[0] = 'EXPLAIN ' + args[0]
+    #explain_output = exec_without_profiling(*args_copy, &blk)
+    #explain_output = 'foo'
+    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time, explain_output(args, &blk))
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
@@ -64,9 +68,13 @@ class PG::Connection
     start        = Time.now
     result       = exec_prepared_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
+    #args_copy = args.dup
+    #args_copy[0] = 'EXPLAIN ' + args[0]
+    #explain_output = exec_prepared_without_profiling(*args_copy, &blk)
+    #explain_output = 'foo'
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
-    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time, explain_output(args, &blk))
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
@@ -78,9 +86,13 @@ class PG::Connection
     start        = Time.now
     result       = send_query_prepared_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
+    #args_copy = args.dup
+    #args_copy[0] = 'EXPLAIN ' + args[0]
+    #explain_output = send_query_prepared_without_profiling(*args_copy, &blk)
+    #explain_output = 'foo'
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
-    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+    record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time, explain_output(args, &blk))
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
@@ -92,10 +104,31 @@ class PG::Connection
     start        = Time.now
     result       = exec_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
-    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+    #explain_output = if /select/i.match(args[0])
+    #                   args_copy = args.dup
+    #                   args_copy[0] = 'EXPLAIN ' + args[0] if /select/i.match(args[0])
+    #                   exec_without_profiling(*args_copy, &blk)[0]['QUERY PLAN']
+    #                 else
+    #                   ''
+    #                 end
+    #explain_output = 'foo'
+
+    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time, explain_output(args, &blk))
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
+  end
+
+  private def explain_output(args, &blk)
+    if /select/i.match(args[0])
+      args_copy = args.dup
+      args_copy[0] = 'EXPLAIN ' + args[0] if /select/i.match(args[0])
+      exec_without_profiling(*args_copy, &blk).map do |r|
+        r['QUERY PLAN']
+      end.join("\n")
+    else
+      ''
+    end
   end
 
   alias_method :query, :exec

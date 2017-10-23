@@ -8,7 +8,7 @@ class SqlPatches
   def self.record_sql(statement, parameters = nil, &block)
     start  = Time.now
     result = yield
-    record = ::Rack::MiniProfiler.record_sql(statement, elapsed_time(start), parameters)
+    record = ::Rack::MiniProfiler.record_sql(statement, elapsed_time(start), nil, parameters)
     return result, record
   end
 
