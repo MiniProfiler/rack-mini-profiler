@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::TimerStruct::Request do
 
   def new_page
@@ -12,31 +10,31 @@ describe Rack::MiniProfiler::TimerStruct::Request do
   end
 
   it 'sets IsRoot to true' do
-    @request[:is_root].should be_true
+    expect(@request[:is_root]).to be(true)
   end
 
   it 'has an Id' do
-    @request[:id].should_not be_nil
+    expect(@request[:id]).not_to be_nil
   end
 
   it 'has a Root' do
-    @request[:name].should == @name
+    expect(@request[:name]).to eq(@name)
   end
 
   it 'begins with a children duration of 0' do
-    @request.children_duration.should == 0
+    expect(@request.children_duration).to eq(0)
   end
 
   it 'has a false HasChildren attribute' do
-    @request[:has_children].should be_false
+    expect(@request[:has_children]).to be(false)
   end
 
   it 'has an empty Children attribute' do
-    @request.children.should be_empty
+    expect(@request.children).to be_empty
   end
 
   it 'has a depth of 0' do
-    @request.depth.should == 0
+    expect(@request.depth).to eq(0)
   end
 
   it "has start time" do
@@ -44,15 +42,15 @@ describe Rack::MiniProfiler::TimerStruct::Request do
   end
 
   it 'has a false HasSqlTimings attribute' do
-    @request[:has_sql_timings].should be_false
+    expect(@request[:has_sql_timings]).to be(false)
   end
 
   it 'has no sql timings at first' do
-    @request[:sql_timings].should be_empty
+    expect(@request[:sql_timings]).to be_empty
   end
 
   it 'has a 0 for sql_timings_duration_milliseconds' do
-    @request[:sql_timings_duration_milliseconds].should == 0
+    expect(@request[:sql_timings_duration_milliseconds]).to eq(0)
   end
 
   describe 'add SQL' do
@@ -63,23 +61,23 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     end
 
     it 'has a true HasSqlTimings attribute' do
-      @request[:has_sql_timings].should be_true
+      expect(@request[:has_sql_timings]).to be(true)
     end
 
     it 'has the SqlTiming object' do
-      @request.sql_timings.should_not be_empty
+      expect(@request.sql_timings).not_to be_empty
     end
 
     it 'has a child with the ParentTimingId of the request' do
-      @request.sql_timings[0]['ParentTimingId'].should == @request['Id']
+      expect(@request.sql_timings[0]['ParentTimingId']).to eq(@request['Id'])
     end
 
     it 'increases sql_timings_duration_milliseconds' do
-      @request[:sql_timings_duration_milliseconds].should == 77
+      expect(@request[:sql_timings_duration_milliseconds]).to eq(77)
     end
 
     it "increases the page's " do
-      @page[:duration_milliseconds_in_sql].should == 77
+      expect(@page[:duration_milliseconds_in_sql]).to eq(77)
     end
 
   end
@@ -105,32 +103,32 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       end
 
       it 'has a is_root value of false' do
-        @child[:is_root].should be_false
+        expect(@child[:is_root]).to be(false)
       end
 
       it 'has a true HasChildren attribute' do
-        @request[:has_children].should be_true
+        expect(@request[:has_children]).to be(true)
       end
 
       it 'has the child in the Children attribute' do
-        @request[:children].should == [@child]
+        expect(@request[:children]).to eq([@child])
       end
 
       it 'assigns its Id to the child' do
-        @child[:parent_timing_id].should == @request[:id]
+        expect(@child[:parent_timing_id]).to eq(@request[:id])
       end
 
       it 'assigns a depth of 1 to the child' do
-        @child[:depth].should == 1
+        expect(@child[:depth]).to eq(1)
       end
 
       it 'increases the children duration' do
-        @request.children_duration.should == 1111
+        expect(@request.children_duration).to eq(1111)
       end
 
       it 'marks short timings as trivial' do
         @request.record_time(1)
-        @request[:is_trivial].should be_true
+        expect(@request[:is_trivial]).to be(true)
       end
 
 
@@ -140,15 +138,15 @@ describe Rack::MiniProfiler::TimerStruct::Request do
         end
 
         it "is not a trivial query" do
-          @request[:is_trivial].should be_false
+          expect(@request[:is_trivial]).to be(false)
         end
 
         it 'has stores the recorded time in DurationMilliseconds' do
-          @request.duration_ms.should == 1234
+          expect(@request.duration_ms).to eq(1234)
         end
 
         it 'calculates DurationWithoutChildrenMilliseconds without the children timings' do
-          @request[:duration_without_children_milliseconds].should == 123
+          expect(@request[:duration_without_children_milliseconds]).to eq(123)
         end
 
       end

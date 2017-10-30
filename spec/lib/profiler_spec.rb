@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler do
   describe 'unique id' do
 
@@ -8,40 +6,40 @@ describe Rack::MiniProfiler do
     end
 
     it 'is not nil' do
-      @unique.should_not be_nil
+      expect(@unique).not_to be_nil
     end
 
     it 'is not empty' do
-      @unique.should_not be_empty
+      expect(@unique).not_to be_empty
     end
 
     describe 'configuration' do
 
       it 'allows us to set configuration settings' do
         Rack::MiniProfiler.config.auto_inject = false
-        Rack::MiniProfiler.config.auto_inject.should == false
+        expect(Rack::MiniProfiler.config.auto_inject).to eq(false)
       end
 
       it 'allows us to start the profiler disabled' do
         Rack::MiniProfiler.config.enabled = false
-        Rack::MiniProfiler.config.enabled.should == false
+        expect(Rack::MiniProfiler.config.enabled).to eq(false)
       end
 
       it 'can reset the settings' do
         Rack::MiniProfiler.config.auto_inject = false
         Rack::MiniProfiler.reset_config
-        Rack::MiniProfiler.config.auto_inject.should be_true
+        expect(Rack::MiniProfiler.config.auto_inject).to be(true)
       end
 
       describe 'base_url_path' do
         it 'adds a trailing slash onto the base_url_path' do
           profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource")
-          profiler.config.base_url_path.should == "/test-resource/"
+          expect(profiler.config.base_url_path).to eq("/test-resource/")
         end
 
         it "doesn't add the trailing slash when it's already there" do
           profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource/")
-          profiler.config.base_url_path.should == "/test-resource/"
+          expect(profiler.config.base_url_path).to eq("/test-resource/")
         end
 
       end
@@ -65,13 +63,13 @@ describe Rack::MiniProfiler do
 
     it 'should not destroy a method' do
       Rack::MiniProfiler.profile_method TestClass, :foo
-      TestClass.new.foo("a","b"){"c"}.should == ["a","b","c"]
+      expect(TestClass.new.foo("a","b"){"c"}).to eq(["a","b","c"])
       Rack::MiniProfiler.unprofile_method TestClass, :foo
     end
 
     it 'should not destroy a singleton method' do
       Rack::MiniProfiler.profile_singleton_method TestClass, :bar
-      TestClass.bar("a", "b"){"c"}.should == ["a","b","c"]
+      expect(TestClass.bar("a", "b"){"c"}).to eq(["a","b","c"])
       Rack::MiniProfiler.unprofile_singleton_method TestClass, :bar
     end
 
@@ -82,7 +80,7 @@ describe Rack::MiniProfiler do
     describe 'basic usage' do
       it 'yields the block given' do
         Rack::MiniProfiler.create_current
-        Rack::MiniProfiler.step('test') { "mini profiler" }.should == "mini profiler"
+        expect(Rack::MiniProfiler.step('test') { "mini profiler" }).to eq("mini profiler")
       end
     end
 
@@ -112,23 +110,23 @@ describe Rack::MiniProfiler do
       end
 
       it 'measures total duration correctly' do
-        @page_struct.duration_ms.to_i.should == 10 * 1000
+        expect(@page_struct.duration_ms.to_i).to eq(10 * 1000)
       end
 
       it 'measures outer start time correctly' do
-        @outer.start_ms.to_i.should == 1 * 1000
+        expect(@outer.start_ms.to_i).to eq(1 * 1000)
       end
 
       it 'measures outer duration correctly' do
-        @outer.duration_ms.to_i.should == 9 * 1000
+        expect(@outer.duration_ms.to_i).to eq(9 * 1000)
       end
 
       it 'measures inner start time correctly' do
-        @inner.start_ms.to_i.should == 3 * 1000
+        expect(@inner.start_ms.to_i).to eq(3 * 1000)
       end
 
       it 'measures inner duration correctly' do
-        @inner.duration_ms.to_i.should == 3 * 1000
+        expect(@inner.duration_ms.to_i).to eq(3 * 1000)
       end
     end
   end

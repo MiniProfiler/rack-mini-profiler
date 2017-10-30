@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'yaml'
 
 describe Rack::MiniProfiler::TimerStruct::Client do
@@ -18,7 +17,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
   end
 
   it 'defaults to no attributes' do
-    ::JSON.parse(@client.to_json).should be_empty
+    expect(::JSON.parse(@client.to_json)).to be_empty
   end
 
   describe 'init_from_form_data' do
@@ -29,7 +28,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
       end
 
       it 'is null' do
-        @client.should be_nil
+        expect(@client).to be_nil
       end
     end
 
@@ -52,11 +51,11 @@ describe Rack::MiniProfiler::TimerStruct::Client do
       end
 
       it 'has the correct RedirectCount' do
-        @client[:redirect_count].should == 1
+        expect(@client[:redirect_count]).to eq(1)
       end
 
       it 'has Timings' do
-        @client.timings.should_not be_empty
+        expect(@client.timings).not_to be_empty
       end
 
       describe "bob.js" do
@@ -65,11 +64,11 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
 
         it 'has it in the timings' do
-          @bob.should_not be_nil
+          expect(@bob).not_to be_nil
         end
 
         it 'has the correct duration' do
-          @bob['Duration'].should == 6
+          expect(@bob['Duration']).to eq(6)
         end
 
       end
@@ -80,15 +79,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
 
         it 'has a Timing for the Navigation' do
-          @nav.should_not be_nil
+          expect(@nav).not_to be_nil
         end
 
         it 'has the correct start' do
-          @nav['Start'].should == 0
+          expect(@nav['Start']).to eq(0)
         end
 
         it 'has the correct duration' do
-          @nav['Duration'].should == 16
+          expect(@nav['Duration']).to eq(16)
         end
       end
 
@@ -98,15 +97,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
 
         it 'has a Timing for the Simple' do
-          @simple.should_not be_nil
+          expect(@simple).not_to be_nil
         end
 
         it 'has the correct start' do
-          @simple['Start'].should == 1
+          expect(@simple['Start']).to eq(1)
         end
 
         it 'has the correct duration' do
-          @simple['Duration'].should == 10
+          expect(@simple['Duration']).to eq(10)
         end
       end
 
@@ -118,15 +117,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
       end
 
       it 'has the correct redirect_count' do
-        @client.redirect_count.should == 99
+        expect(@client.redirect_count).to eq(99)
       end
 
       it 'has Timings' do
-        @client.timings.should_not be_empty
+        expect(@client.timings).not_to be_empty
       end
 
       it 'has no timing when the start is before Navigation' do
-        @client.timings.find {|t| t["Name"] == "Previous"}.should be_nil
+        expect(@client.timings.find {|t| t["Name"] == "Previous"}).to be_nil
       end
 
       describe "weird" do
@@ -135,15 +134,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
 
         it 'has a Timing for the Weird' do
-          @weird.should_not be_nil
+          expect(@weird).not_to be_nil
         end
 
         it 'has the correct start' do
-          @weird['Start'].should == 11
+          expect(@weird['Start']).to eq(11)
         end
 
         it 'has a 0 duration because start time is greater than end time' do
-          @weird['Duration'].should == 0
+          expect(@weird['Duration']).to eq(0)
         end
       end
 
@@ -153,15 +152,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
 
         it 'has a Timing for the differentFormat' do
-          @diff.should_not be_nil
+          expect(@diff).not_to be_nil
         end
 
         it 'has the correct start' do
-          @diff['Start'].should == 1
+          expect(@diff['Start']).to eq(1)
         end
 
         it 'has a -1 duration because the format was different' do
-          @diff['Duration'].should == -1
+          expect(@diff['Duration']).to eq(-1)
         end
       end
     end

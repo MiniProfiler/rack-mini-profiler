@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::RedisStore do
   let(:store) { Rack::MiniProfiler::RedisStore.new(:db=>2, :expires_in=>4) }
   let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
@@ -22,7 +20,7 @@ describe Rack::MiniProfiler::RedisStore do
         # redis is private, and possibly should remain so?
         redis = store.send(:redis)
         client = redis.respond_to?(:_client) ? redis._client : redis.client
-        client.db.should == 2
+        expect(client.db).to eq(2)
       end
     end
   end
@@ -33,8 +31,8 @@ describe Rack::MiniProfiler::RedisStore do
         connection = double("redis-connection")
         store = Rack::MiniProfiler::RedisStore.new(:connection => connection)
 
-        connection.should_receive(:get)
-        Redis.should_not_receive(:new)
+        expect(connection).to receive(:get)
+        expect(Redis).not_to receive(:new)
         store.load("XYZ")
       end
     end
@@ -49,8 +47,8 @@ describe Rack::MiniProfiler::RedisStore do
 
         page_struct = store.load(page_structs.first[:id])
 
-        page_struct[:random].should eq("random")
-        page_struct[:id].should eq("XYZ")
+        expect(page_struct[:random]).to eq("random")
+        expect(page_struct[:id]).to eq("XYZ")
       end
 
       it 'can list unviewed items for a user' do
@@ -59,16 +57,16 @@ describe Rack::MiniProfiler::RedisStore do
           store.set_unviewed('a', page_struct[:id])
         end
 
-        store.get_unviewed_ids('a').should =~ page_structs.map { |page_struct| page_struct[:id] }
+        expect(store.get_unviewed_ids('a')).to match_array(page_structs.map { |page_struct| page_struct[:id] })
       end
 
       it 'can set all unviewed items for a user' do
         page_structs.each { |page_struct| store.save(page_struct) }
-        store.get_unviewed_ids('a').should be_empty
+        expect(store.get_unviewed_ids('a')).to be_empty
 
         store.set_all_unviewed('a', page_structs.map { |page_struct| page_struct[:id] })
 
-        store.get_unviewed_ids('a').should =~ page_structs.map { |page_struct| page_struct[:id] }
+        expect(store.get_unviewed_ids('a')).to match_array(page_structs.map { |page_struct| page_struct[:id] })
       end
 
       it 'can set an item to viewed once it is unviewed' do
@@ -78,7 +76,7 @@ describe Rack::MiniProfiler::RedisStore do
         end
 
         store.set_viewed('a', page_structs.first[:id])
-        store.get_unviewed_ids('a').should =~ page_structs.drop(1).map{ |page_struct| page_struct[:id] }
+        expect(store.get_unviewed_ids('a')).to match_array(page_structs.drop(1).map{ |page_struct| page_struct[:id] })
       end
     end
   end
@@ -103,7 +101,7 @@ describe Rack::MiniProfiler::RedisStore do
       sleep(2)
 
       # By now, the first struct should have expired and should no longer be returned
-      store.get_unviewed_ids(user).should eq([page_structs.last[:id]])
+      expect(store.get_unviewed_ids(user)).to eq([page_structs.last[:id]])
     end
   end
 
@@ -112,13 +110,11 @@ describe Rack::MiniProfiler::RedisStore do
       store.flush_tokens
 
       tokens = store.allowed_tokens
-      expect(tokens.length.should).to eq(1)
-
+      expect(tokens.length).to eq(1)
       store.simulate_expire
 
       new_tokens = store.allowed_tokens
-
-      expect(new_tokens.length.should).to eq(2)
+      expect(new_tokens.length).to eq(2)
       expect((new_tokens - tokens).length).to eq(1)
     end
   end

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::TimerStruct::Base do
 
   before do
@@ -7,12 +5,12 @@ describe Rack::MiniProfiler::TimerStruct::Base do
   end
 
   it 'has the the Mini attribute' do
-    @timer['Mini'].should == 'Profiler'
+    expect(@timer['Mini']).to eq('Profiler')
   end
 
   it 'allows us to set any attribute we want' do
     @timer[:hello] = 'World'
-    @timer[:hello].should == 'World'
+    expect(@timer[:hello]).to eq('World')
   end
 
   describe 'to_json' do
@@ -23,11 +21,11 @@ describe Rack::MiniProfiler::TimerStruct::Base do
     end
 
     it 'has a JSON value' do
-      @json.should_not be_nil
+      expect(@json).not_to be_nil
     end
 
     it 'should not add a second (nil) argument if no arguments were passed' do
-      ::JSON.should_receive( :generate ).once.with( @timer.attributes, :max_nesting => 100 ).and_return( nil )
+      expect(::JSON).to receive( :generate ).once.with( @timer.attributes, :max_nesting => 100 ).and_return( nil )
       @timer.to_json
     end
 
@@ -38,11 +36,11 @@ describe Rack::MiniProfiler::TimerStruct::Base do
       end
 
       it 'produces a hash' do
-        @deserialized.is_a?(Hash).should be_true
+        expect(@deserialized.is_a?(Hash)).to be(true)
       end
 
       it 'has the element we added' do
-        @deserialized['ice_ice'].should == 'Baby'
+        expect(@deserialized['ice_ice']).to eq('Baby')
       end
     end
 

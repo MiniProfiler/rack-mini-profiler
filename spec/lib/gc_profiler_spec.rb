@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe Rack::MiniProfiler::GCProfiler do
   before :each do
     @app = lambda do |env|
