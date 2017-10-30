@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## ?
+## 0.10.6 2017-10-30
 
 - [FEATURE] Support for vertical positions (top/bottom)
+- [FEATURE] Suppress profiler results in print media @Mike Dillon
+- [FIX] toggle shortcut not working @lukesilva
+- [FEATURE] install generator @yhirano
+- [FEATURE] store initial cache control headers in X-MiniProfiler-Original-Cache-Control @mrasu
 
 ## 0.10.5 2017-05-22
 

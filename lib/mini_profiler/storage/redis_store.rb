@@ -62,8 +62,9 @@ module Rack
       end
 
       def diagnostics(user)
+        client = (redis.respond_to? :_client) ? redis._client : redis.client
 "Redis prefix: #{@prefix}
-Redis location: #{redis.client.host}:#{redis.client.port} db: #{redis.client.db}
+Redis location: #{client.host}:#{client.port} db: #{client.db}
 unviewed_ids: #{get_unviewed_ids(user)}
 "
       end
