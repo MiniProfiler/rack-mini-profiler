@@ -20,9 +20,9 @@ describe Rack::MiniProfiler::RedisStore do
 
       it 'uses the correct db' do
         # redis is private, and possibly should remain so?
-        underlying_client = store.send(:redis)._client
-
-        underlying_client.db.should == 2
+        redis = store.send(:redis)
+        client = redis.respond_to?(:_client) ? redis._client : redis.client
+        client.db.should == 2
       end
     end
   end
