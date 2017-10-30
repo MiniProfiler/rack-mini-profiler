@@ -20,7 +20,7 @@ describe Rack::MiniProfiler::RedisStore do
 
       it 'uses the correct db' do
         # redis is private, and possibly should remain so?
-        underlying_client = store.send(:redis).client
+        underlying_client = store.send(:redis)._client
 
         underlying_client.db.should == 2
       end
@@ -112,14 +112,14 @@ describe Rack::MiniProfiler::RedisStore do
       store.flush_tokens
 
       tokens = store.allowed_tokens
-      tokens.length.should == 1
+      expect(tokens.length.should).to eq(1)
 
       store.simulate_expire
 
       new_tokens = store.allowed_tokens
 
-      new_tokens.length.should == 2
-      (new_tokens - tokens).length.should == 1
+      expect(new_tokens.length.should).to eq(2)
+      expect((new_tokens - tokens).length).to eq(1)
     end
   end
 
