@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 if (defined?(Net) && defined?(Net::HTTP))
 
   Net::HTTP.class_eval do

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class ActiveRecord::Result
   alias_method :each_without_profiling, :each
   def each(&blk)

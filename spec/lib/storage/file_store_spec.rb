@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 describe Rack::MiniProfiler::FileStore do
 
   context 'page struct' do
