@@ -506,14 +506,14 @@ module Rack
 
       trim_strings(strings, max_size)
 
-      body << "\n\n\n1000 Largest strings:\n\n"
-      body << strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
+      body += "\n\n\n1000 Largest strings:\n\n"
+      body += strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
 
-      body << "\n\n\n1000 Sample strings:\n\n"
-      body << sample_strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
+      body += "\n\n\n1000 Sample strings:\n\n"
+      body += sample_strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
 
-      body << "\n\n\n1000 Most common strings:\n\n"
-      body << string_counts.sort{|a,b| b[1] <=> a[1]}[0..max_size].map{|s,len| "#{trunc.call(s)}\n(x #{len})\n\n"}.join("\n")
+      body += "\n\n\n1000 Most common strings:\n\n"
+      body += string_counts.sort{|a,b| b[1] <=> a[1]}[0..max_size].map{|s,len| "#{trunc.call(s)}\n(x #{len})\n\n"}.join("\n")
 
       text_result(body)
     end
