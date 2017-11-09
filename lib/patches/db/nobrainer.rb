@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Rack::MiniProfiler::NoBrainerProfiler
 
   def on_query(env)
@@ -9,16 +10,16 @@ class Rack::MiniProfiler::NoBrainerProfiler
       query = ""
 
       # per-model/query database overrides
-      query << "[#{env[:options][:db]}] " if env[:options][:db]
+      query += "[#{env[:options][:db]}] " if env[:options][:db]
 
       # "read", "write" prefix
       # query << "(#{NoBrainer::RQL.type_of(env[:query]).to_s}) "
 
-      query << "NOT USING INDEX: " if not_indexed
-      query << env[:query].inspect.gsub(/\n/, '').gsub(/ +/, ' ') + " "
+      query += "NOT USING INDEX: " if not_indexed
+      query += env[:query].inspect.gsub(/\n/, '').gsub(/ +/, ' ') + " "
 
       if env[:exception]
-        query << "exception: #{env[:exception].class} #{env[:exception].message.split("\n").first} "
+        query += "exception: #{env[:exception].class} #{env[:exception].message.split("\n").first} "
       end
 
       ::Rack::MiniProfiler.record_sql query.strip, env[:duration] * 1000.0

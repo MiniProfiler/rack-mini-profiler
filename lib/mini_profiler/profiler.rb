@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Rack
   class MiniProfiler
     class << self
@@ -69,7 +70,7 @@ module Rack
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config
       @app    = app
-      @config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
+      @config.base_url_path += "/" unless @config.base_url_path.end_with? "/"
       unless @config.storage_instance
         @config.storage_instance = @config.storage.new(@config.storage_options)
       end
@@ -399,7 +400,7 @@ module Rack
         if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
           script = script.force_encoding(fragment.encoding)
         end
-        fragment.insert(index, script)
+        fragement = fragment.dup.insert(index, script)
       else
         fragment
       end
@@ -408,16 +409,16 @@ module Rack
     def dump_exceptions(exceptions)
       body = "Exceptions raised during request\n\n"
       if exceptions.empty?
-        body << "No exceptions raised"
+        body += "No exceptions raised"
       else
-        body << "Exceptions: (#{exceptions.size} total)\n"
+        body += "Exceptions: (#{exceptions.size} total)\n"
         exceptions.group_by(&:class).each do |klass, exceptions|
-          body << "  #{klass.name} (#{exceptions.size})\n"
+          body += "  #{klass.name} (#{exceptions.size})\n"
         end
 
-        body << "\nBacktraces\n"
+        body += "\nBacktraces\n"
         exceptions.each_with_index do |e, i|
-          body << "##{i+1}: #{e.class} - \"#{e.message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
+          body += "##{i+1}: #{e.class} - \"#{e.message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
         end
       end
       text_result(body)
@@ -426,21 +427,21 @@ module Rack
     def dump_env(env)
       body = "Rack Environment\n---------------\n"
       env.each do |k,v|
-        body << "#{k}: #{v}\n"
+        body += "#{k}: #{v}\n"
       end
 
-      body << "\n\nEnvironment\n---------------\n"
+      body += "\n\nEnvironment\n---------------\n"
       ENV.each do |k,v|
-        body << "#{k}: #{v}\n"
+        body += "#{k}: #{v}\n"
       end
 
-      body << "\n\nRuby Version\n---------------\n"
-      body << "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL}\n"
+      body += "\n\nRuby Version\n---------------\n"
+      body += "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL}\n"
 
-      body << "\n\nInternals\n---------------\n"
-      body << "Storage Provider #{config.storage_instance}\n"
-      body << "User #{user(env)}\n"
-      body << config.storage_instance.diagnostics(user(env)) rescue "no diagnostics implemented for storage"
+      body += "\n\nInternals\n---------------\n"
+      body += "Storage Provider #{config.storage_instance}\n"
+      body += "User #{user(env)}\n"
+      body += config.storage_instance.diagnostics(user(env)) rescue "no diagnostics implemented for storage"
 
       text_result(body)
     end
@@ -505,14 +506,14 @@ module Rack
 
       trim_strings(strings, max_size)
 
-      body << "\n\n\n1000 Largest strings:\n\n"
-      body << strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
+      body += "\n\n\n1000 Largest strings:\n\n"
+      body += strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
 
-      body << "\n\n\n1000 Sample strings:\n\n"
-      body << sample_strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
+      body += "\n\n\n1000 Sample strings:\n\n"
+      body += sample_strings.map{|s,len| "#{s[0..1000]}\n(len: #{len})\n\n"}.join("\n")
 
-      body << "\n\n\n1000 Most common strings:\n\n"
-      body << string_counts.sort{|a,b| b[1] <=> a[1]}[0..max_size].map{|s,len| "#{trunc.call(s)}\n(x #{len})\n\n"}.join("\n")
+      body += "\n\n\n1000 Most common strings:\n\n"
+      body += string_counts.sort{|a,b| b[1] <=> a[1]}[0..max_size].map{|s,len| "#{trunc.call(s)}\n(x #{len})\n\n"}.join("\n")
 
       text_result(body)
     end

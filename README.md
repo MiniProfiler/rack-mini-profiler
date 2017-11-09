@@ -8,10 +8,9 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 Well, not exactly mega urgent, but nice to see you are reading this.
 
-There are 2 very simple changes I would like to see ASAP
+There is one very simple change I would like to see ASAP
 
 1. Stop using Time.now EVERYWHERE in rack-mini-profiler and replace with `Process.clock_gettime(Process::CLOCK_MONOTONIC)`
-2. I would like to see `# frozen_string_literal: true` on every file we ship
 
 If you pick up either of these, be sure to amend the README in your PR AND add a Changelog. 
 

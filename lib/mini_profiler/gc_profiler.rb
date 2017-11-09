@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Rack::MiniProfiler::GCProfiler
 
   def initialize

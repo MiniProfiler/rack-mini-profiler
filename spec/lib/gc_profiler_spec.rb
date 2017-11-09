@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 describe Rack::MiniProfiler::GCProfiler do
   before :each do
     @app = lambda do |env|

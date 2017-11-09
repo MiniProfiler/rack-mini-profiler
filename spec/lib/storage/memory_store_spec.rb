@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 describe Rack::MiniProfiler::MemoryStore do
 
   context 'page struct' do
