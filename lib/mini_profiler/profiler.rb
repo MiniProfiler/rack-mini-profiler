@@ -366,7 +366,7 @@ module Rack
         headers.delete('Date')
       end
 
-      headers['X-MiniProfiler-Original-Cache-Control'] = headers['Cache-Control']
+      headers['X-MiniProfiler-Original-Cache-Control'] = headers['Cache-Control'] unless headers['Cache-Control'].nil?
       headers['Cache-Control'] = "#{"no-store, " if config.disable_caching}must-revalidate, private, max-age=0"
 
       # inject header

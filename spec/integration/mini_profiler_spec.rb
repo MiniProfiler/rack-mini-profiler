@@ -193,6 +193,11 @@ describe Rack::MiniProfiler do
       expect(last_response.headers['Cache-Control']).to include('no-store')
     end
 
+    it "should not store the original cache header if not set" do
+      get '/html'
+      last_response.headers.should_not have_key('X-MiniProfiler-Original-Cache-Control')
+    end
+
     it "should strip if-modified-since on the way in" do
       old_time = 1409326086
       get '/cached-resource', {}, {'HTTP_IF_MODIFIED_SINCE' => old_time}
