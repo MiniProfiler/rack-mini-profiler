@@ -87,15 +87,17 @@ describe Rack::MiniProfiler do
 
     describe 'typical usage' do
       before(:all) do
-        Time.now = Time.new
+        start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        clock_set(start)
         Rack::MiniProfiler.create_current
-        Time.now += 1
+        clock_set(start + 1)
+
         Rack::MiniProfiler.step('outer') {
-          Time.now +=  2
+          clock_set(start + 1 + 2)
           Rack::MiniProfiler.step('inner') {
-            Time.now += 3
+            clock_set(start + 1 + 2 + 3)
           }
-          Time.now += 4
+          clock_set(start + 1 + 2 + 3 + 4)
         }
         @page_struct = Rack::MiniProfiler.current.page_struct
         @root = @page_struct.root
@@ -106,7 +108,7 @@ describe Rack::MiniProfiler do
       end
 
       after(:all) do
-        Time.back_to_normal
+        clock_back_to_normal
       end
 
       it 'measures total duration correctly' do

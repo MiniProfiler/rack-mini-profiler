@@ -3,7 +3,7 @@ class RSolr::Connection
   def execute_with_profiling(client, request_context)
     return execute_without_profiling(client, request_context) unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = execute_without_profiling(client, request_context)
     elapsed_time = SqlPatches.elapsed_time(start)
 

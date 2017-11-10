@@ -18,7 +18,7 @@ class PG::Result
   end
 
   def mp_report_sql(&block)
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = yield
     elapsed_time = SqlPatches.elapsed_time(start)
     @miniprofiler_sql_id.report_reader_duration(elapsed_time)
@@ -49,7 +49,7 @@ class PG::Connection
   def exec(*args,&blk)
     return exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
@@ -61,7 +61,7 @@ class PG::Connection
   def exec_prepared(*args,&blk)
     return exec_prepared_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_prepared_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     mapped       = args[0]
@@ -75,7 +75,7 @@ class PG::Connection
   def send_query_prepared(*args,&blk)
     return send_query_prepared_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = send_query_prepared_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     mapped       = args[0]
@@ -89,7 +89,7 @@ class PG::Connection
   def async_exec(*args,&blk)
     return async_exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)

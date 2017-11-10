@@ -139,10 +139,10 @@ module Rack
         @auth_token_lock.synchronize {
           token1, token2, cycle_at = @auth_token_cache[""]
 
-          unless cycle_at && (Time === cycle_at) && (cycle_at > Time.now)
+          unless cycle_at && (Float === cycle_at) && (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
             token2 = token1
             token1 = SecureRandom.hex
-            cycle_at = Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
+            cycle_at = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
           end
 
           @auth_token_cache[""] = [token1, token2, cycle_at]

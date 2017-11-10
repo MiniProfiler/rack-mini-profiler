@@ -89,11 +89,11 @@ module Rack
           parent_timer = Rack::MiniProfiler.current.current_timer
 
           if type == :counter
-            start = Time.now
+            start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             begin
               self.send without_profiling, *args, &orig
             ensure
-              duration_ms = (Time.now - start).to_f * 1000
+              duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
               parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct )
             end
           else
@@ -131,9 +131,9 @@ module Rack
       def counter(type, duration_ms=nil)
         result = nil
         if block_given?
-          start       = Time.now
+          start       = Process.clock_gettime(Process::CLOCK_MONOTONIC)
           result      = yield
-          duration_ms = (Time.now - start).to_f * 1000
+          duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
         end
         return result if current.nil? || !request_authorized?
         current.current_timer.add_custom(type, duration_ms, current.page_struct)

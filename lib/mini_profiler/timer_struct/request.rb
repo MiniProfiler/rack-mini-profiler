@@ -12,7 +12,7 @@ module Rack
         attr_accessor :children_duration
 
         def initialize(name, page, parent)
-          start_millis = (Time.now.to_f * 1000).to_i - page[:started]
+          start_millis = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]
           depth        = parent ? parent.depth + 1 : 0
           super(
             :id                                      => MiniProfiler.generate_id,
@@ -39,7 +39,7 @@ module Rack
             :custom_timings                          => {}
           )
           @children_duration = 0
-          @start             = Time.now
+          @start             = Process.clock_gettime(Process::CLOCK_MONOTONIC)
           @parent            = parent
           @page              = page
         end
@@ -117,7 +117,7 @@ module Rack
         end
 
         def record_time(milliseconds = nil)
-          milliseconds ||= (Time.now - @start) * 1000
+          milliseconds ||= (Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start) * 1000
           self[:duration_milliseconds]                  = milliseconds
           self[:is_trivial]                             = true if milliseconds < self[:trivial_duration_threshold_milliseconds]
           self[:duration_without_children_milliseconds] = milliseconds - @children_duration

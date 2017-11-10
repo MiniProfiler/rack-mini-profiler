@@ -28,7 +28,7 @@ module Rack
         return log_without_miniprofiler(*args, &block) unless SqlPatches.should_measure?
 
         sql, name, binds = args
-        start            = Time.now
+        start            = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         rval             = log_without_miniprofiler(*args, &block)
 
         # Don't log schema queries if the option is set

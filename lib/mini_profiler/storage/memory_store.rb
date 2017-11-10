@@ -115,7 +115,7 @@ module Rack
       end
 
       def cleanup_cache
-        expire_older_than = ((Time.now.to_f - @expires_in_seconds) * 1000).to_i
+        expire_older_than = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - @expires_in_seconds) * 1000).to_i
         @timer_struct_lock.synchronize {
           @timer_struct_cache.delete_if { |k, v| v[:started] < expire_older_than }
         }
@@ -124,10 +124,10 @@ module Rack
       def allowed_tokens
         @token_lock.synchronize do
 
-          unless @cycle_at && (@cycle_at > Time.now)
+          unless @cycle_at && (@cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
             @token2 = @token1
             @token1 = SecureRandom.hex
-            @cycle_at = Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
+            @cycle_at = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
           end
 
           [@token1, @token2].compact
