@@ -30,35 +30,46 @@ end
 
 require 'rack-mini-profiler'
 
-class Time
-  class << self
-    unless method_defined? :old_new
-      alias_method :old_new, :new
-      alias_method :old_now, :now
+module Process
 
-      def travel(to)
-        @now = to
-        yield
-      ensure
-        @now = nil
-      end
-
-      def new
-        @now || old_new
-      end
-
-      def now
-        @now || old_now
-      end
-
-      def now=(v)
-        @now = v
-      end
-
-      def back_to_normal
-        @now = nil
-      end
-
+  unless respond_to? :old_clock_gettime
+    class << self
+      alias_method :old_clock_gettime, :clock_gettime
     end
+
+    def clock_set(to)
+      @now = to
+    end
+    module_function :clock_set
+
+    def clock_travel(to)
+      @now = to
+      yield
+    ensure
+      @now = nil
+    end
+    module_function :clock_travel
+
+    def clock_gettime(*)
+      @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
+    end
+    module_function :clock_gettime
+
+    def back_to_normal
+      @now = nil
+    end
+    module_function :back_to_normal
   end
+end
+
+def clock_set(to)
+  Process.clock_set(to)
+end
+
+def clock_travel(to, &block)
+  Process.clock_travel(to) { yield }
+end
+
+def clock_back_to_normal
+  Process.back_to_normal
 end

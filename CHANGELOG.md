@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Pending
+
+- [FEATURE] Replace Time.now with Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 ## 0.10.6 2017-10-30
 
 - [FEATURE] Support for vertical positions (top/bottom)

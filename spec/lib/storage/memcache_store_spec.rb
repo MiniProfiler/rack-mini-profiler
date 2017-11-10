@@ -59,13 +59,13 @@ describe Rack::MiniProfiler::MemcacheStore do
       expect(tokens.length).to eq(1)
       expect(tokens).to eq(@store.allowed_tokens)
 
-      Time.travel(Time.now + 1) do
+      clock_travel(Process.clock_gettime(Process::CLOCK_MONOTONIC) + 1) do
         new_tokens = @store.allowed_tokens
         expect(new_tokens.length).to eq(1)
         expect(new_tokens).to eq(tokens)
       end
 
-      Time.travel(Time.now + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1) do
+      clock_travel(Process.clock_gettime(Process::CLOCK_MONOTONIC) + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1) do
         new_tokens = @store.allowed_tokens
         expect(new_tokens.length).to eq(2)
         expect((new_tokens - tokens).length).to eq(1)

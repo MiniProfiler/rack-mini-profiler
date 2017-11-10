@@ -32,7 +32,7 @@ module Rack
       def set_unviewed(user, id)
         key = user_key(user)
         if redis.exists(prefixed_id(id))
-          expire_at = Time.now.to_i + redis.ttl(prefixed_id(id))
+          expire_at = Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i + redis.ttl(prefixed_id(id))
           redis.zadd(key, expire_at, id)
         end
         redis.expire(key, @expires_in_seconds)
@@ -43,7 +43,7 @@ module Rack
         redis.del(key)
         ids.each do |id|
           if redis.exists(prefixed_id(id))
-            expire_at = Time.now.to_i + redis.ttl(prefixed_id(id))
+            expire_at = Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i + redis.ttl(prefixed_id(id))
             redis.zadd(key, expire_at, id)
           end
         end
@@ -57,7 +57,7 @@ module Rack
       # Remove expired ids from the unviewed sorted set and return the remaining ids
       def get_unviewed_ids(user)
         key = user_key(user)
-        redis.zremrangebyscore(key, '-inf', Time.now.to_i)
+        redis.zremrangebyscore(key, '-inf', Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i)
         redis.zrevrangebyscore(key, '+inf', '-inf')
       end
 

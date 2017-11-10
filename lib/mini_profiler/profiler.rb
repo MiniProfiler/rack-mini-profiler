@@ -149,7 +149,7 @@ module Rack
 
     def call(env)
 
-      start = Time.now
+      start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       client_settings = ClientSettings.new(env, @storage, start)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
 
@@ -325,7 +325,7 @@ module Rack
 
       page_struct = current.page_struct
       page_struct[:user] = user(env)
-      page_struct[:root].record_time((Time.now - start) * 1000)
+      page_struct[:root].record_time((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000)
 
       if flamegraph
         body.close if body.respond_to? :close

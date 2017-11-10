@@ -6,7 +6,7 @@ class SqlPatches
   end
 
   def self.record_sql(statement, parameters = nil, &block)
-    start  = Time.now
+    start  = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result = yield
     record = ::Rack::MiniProfiler.record_sql(statement, elapsed_time(start), parameters)
     return result, record
@@ -18,7 +18,7 @@ class SqlPatches
   end
 
   def self.elapsed_time(start_time)
-    ((Time.now - start_time).to_f * 1000).round(1)
+    ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time).to_f * 1000).round(1)
   end
 
   def self.sql_patches

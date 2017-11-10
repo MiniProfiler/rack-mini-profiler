@@ -5,7 +5,7 @@ class Mysql2::Result
   def each(*args, &blk)
     return each_without_profiling(*args, &blk) unless defined?(@miniprofiler_sql_id)
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = each_without_profiling(*args,&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
 

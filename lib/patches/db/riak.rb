@@ -5,7 +5,7 @@ class Riak::Multiget
     def get_all(client, fetch_list)
       return get_all_without_profiling(client, fetch_list) unless SqlPatches.should_measure?
 
-      start        = Time.now
+      start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result       = get_all_without_profiling(client, fetch_list)
       elapsed_time = SqlPatches.elapsed_time(start)
       record       = ::Rack::MiniProfiler.record_sql("get_all size=#{fetch_list.size}", elapsed_time)
@@ -92,7 +92,7 @@ class Riak::Client
   def profile(request, &blk)
     return yield unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = yield
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(request, elapsed_time)

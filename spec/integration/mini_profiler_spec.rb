@@ -195,7 +195,7 @@ describe Rack::MiniProfiler do
 
     it "should not store the original cache header if not set" do
       get '/html'
-      last_response.headers.should_not have_key('X-MiniProfiler-Original-Cache-Control')
+      expect(last_response.headers).to_not have_key('X-MiniProfiler-Original-Cache-Control')
     end
 
     it "should strip if-modified-since on the way in" do

@@ -32,7 +32,7 @@ module Rack
 
           @parent      = parent
           @page        = page
-          start_millis = ((Time.now.to_f * 1000).to_i - page[:started]) - duration_ms
+          start_millis = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]) - duration_ms
           super(
             :execute_type                      => 3, # TODO
             :formatted_command_string          => query,

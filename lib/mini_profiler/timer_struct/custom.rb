@@ -8,7 +8,7 @@ module Rack
           @parent      = parent
           @page        = page
           @type        = type
-          start_millis = ((Time.now.to_f * 1000).to_i - page[:started]) - duration_ms
+          start_millis = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]) - duration_ms
           super(
             :type                  => type,
             :start_milliseconds    => start_millis,

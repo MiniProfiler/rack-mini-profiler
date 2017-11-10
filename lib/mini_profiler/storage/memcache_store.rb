@@ -67,7 +67,7 @@ module Rack
            key1 = nil unless key1 && key1.length == 32
            key2 = nil unless key2 && key2.length == 32
 
-           if key1 && cycle_at && (cycle_at > Time.now)
+           if key1 && cycle_at && (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
               return [key1,key2].compact
            end
         end
@@ -77,7 +77,7 @@ module Rack
         # cycle keys
         key2 = key1
         key1 = SecureRandom.hex
-        cycle_at = Time.now + timeout
+        cycle_at = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
 
         @client.set("#{@prefix}-tokens", Marshal::dump([key1, key2, cycle_at]))
 

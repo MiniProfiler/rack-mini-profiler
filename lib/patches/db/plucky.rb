@@ -27,7 +27,7 @@ class Plucky::Query
   def profile_database_operation(method, message, *args, &blk)
     return self.send("#{method.id2name}_without_profiling", *args, &blk) unless SqlPatches.should_measure?
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = self.send("#{method.id2name}_without_profiling", *args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
 

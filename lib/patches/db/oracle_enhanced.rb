@@ -3,7 +3,7 @@ class ActiveRecord::Result
   def each(&blk)
     return each_without_profiling(&blk) unless defined?(@miniprofiler_sql_id)
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = each_without_profiling(&blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     @miniprofiler_sql_id.report_reader_duration(elapsed_time)
@@ -45,7 +45,7 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
   def mp_profile_sql(sql, name, &blk)
     return yield unless mp_should_measure?(name)
 
-    start        = Time.now
+    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = yield
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(sql, elapsed_time)

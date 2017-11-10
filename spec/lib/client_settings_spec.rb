@@ -9,7 +9,7 @@ describe Rack::MiniProfiler::ClientSettings do
       @settings = Rack::MiniProfiler::ClientSettings.new(
         {"HTTP_COOKIE" => "__profilin=#{settings};" },
         @store,
-        Time.now
+        Process.clock_gettime(Process::CLOCK_MONOTONIC)
       )
     end
 
@@ -59,7 +59,7 @@ describe Rack::MiniProfiler::ClientSettings do
       Rack::MiniProfiler.config.authorization_mode = :whitelist
       Rack::MiniProfiler.deauthorize_request
       hash = {}
-      Time.travel(Time.now + 1) do
+      clock_travel(Process.clock_gettime(Process::CLOCK_MONOTONIC) + 1) do
         @settings.handle_cookie([200, hash, []])
       end
 
@@ -68,7 +68,7 @@ describe Rack::MiniProfiler::ClientSettings do
   end
 
   it "should not have settings by default" do
-    expect(Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Time.now)
+    expect(Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Process.clock_gettime(Process::CLOCK_MONOTONIC))
       .has_valid_cookie?).to eq(false)
   end
 
