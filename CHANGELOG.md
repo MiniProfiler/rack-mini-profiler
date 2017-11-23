@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## Pending
+## 0.10.7 2017-11-24
 
 - [FEATURE] Replace Time.now with Process.clock_gettime(Process::CLOCK_MONOTONIC)
+- [FIX] Error with webrick and empty cache control
 
 ## 0.10.6 2017-10-30
 
