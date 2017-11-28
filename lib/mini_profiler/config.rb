@@ -1,32 +1,17 @@
+#frozen_string_literal: true
+
 module Rack
   class MiniProfiler
     class Config
+      def self.attr_accessor(*vars)
+        @attributes ||= []
+        @attributes.concat vars
+        super(*vars)
+      end
 
-    def self.attr_accessor(*vars)
-      @attributes ||= []
-      @attributes.concat vars
-      super(*vars)
-    end
-
-    def self.attributes
-      @attributes
-    end
-
-    attr_accessor :authorization_mode, :auto_inject, :backtrace_ignores,
-      :backtrace_includes, :backtrace_remove, :backtrace_threshold_ms,
-      :base_url_path, :disable_caching, :disable_env_dump, :enabled,
-      :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
-      :skip_schema_queries, :storage, :storage_failure, :storage_instance,
-      :storage_options, :user_provider
-    attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
-
-    # ui accessors
-    attr_accessor :collapse_results, :max_traces_to_show, :position, :vertical_position, :horizontal_position,
-      :show_children, :show_controls, :show_trivial, :start_hidden,
-      :toggle_shortcut, :html_container
-
-    # Deprecated options
-    attr_accessor :use_existing_jquery
+      def self.attributes
+        @attributes
+      end
 
       def self.default
         new.instance_eval {
@@ -54,19 +39,45 @@ module Rack
           @skip_sql_param_names = /password/ # skips parameters with the name password by default
 
           # ui parameters
-          @autorized          = true
-          @collapse_results   = true
-          @max_traces_to_show = 20
-          @show_children      = false
-          @show_controls      = false
-          @show_trivial       = false
-          @start_hidden       = false
-          @toggle_shortcut    = 'Alt+P'
-          @html_container     = 'body'
+          @autorized           = true
+          @collapse_results    = true
+          @max_traces_to_show  = 20
+          @show_children       = false
+          @show_controls       = false
+          @show_trivial        = false
+          @start_hidden        = false
+          @toggle_shortcut     = 'Alt+P'
+          @html_container      = 'body'
+          @position            = "top-left"
 
           self
         }
       end
+
+      attr_accessor :authorization_mode, :auto_inject, :backtrace_ignores,
+        :backtrace_includes, :backtrace_remove, :backtrace_threshold_ms,
+        :base_url_path, :disable_caching, :disable_env_dump, :enabled,
+        :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
+        :skip_schema_queries, :storage, :storage_failure, :storage_instance,
+        :storage_options, :user_provider
+      attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
+
+      # ui accessors
+      attr_accessor :collapse_results, :max_traces_to_show, :position,
+        :show_children, :show_controls, :show_trivial, :start_hidden,
+        :toggle_shortcut, :html_container
+
+      # Deprecated options
+      attr_accessor :use_existing_jquery
+
+      def vertical_position
+        position.include?('bottom') ? 'bottom' : 'top'
+      end
+
+      def horizontal_position
+        position.include?('right') ? 'right' : 'left'
+      end
+
 
       def merge!(config)
         if config
@@ -79,14 +90,8 @@ module Rack
             }
           end
         end
-        set_positions!
       end
 
-      def set_positions!
-        position = (self.position && self.position.match("-")) ? self.position.split("-") : ["top", "left"]
-        self.vertical_position = position.first
-        self.horizontal_position = position.last
-      end
     end
   end
 end
