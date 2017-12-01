@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rack::MiniProfiler::Context
   attr_accessor :inject_js,:current_timer,:page_struct,:skip_backtrace,
                 :full_backtrace,:discard, :mpt_init, :measure

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Rack::MiniProfiler::NoBrainerProfiler
 
   def on_query(env)
@@ -6,7 +8,7 @@ class Rack::MiniProfiler::NoBrainerProfiler
                         !env[:criteria].where_indexed? &&
                         !env[:criteria].model.try(:perf_warnings_disabled)
 
-      query = ""
+      query = "".dup
 
       # per-model/query database overrides
       query << "[#{env[:options][:db]}] " if env[:options][:db]

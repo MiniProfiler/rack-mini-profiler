@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SqlPatches
   def self.correct_version?(required_version, klass)
     Gem::Dependency.new('', required_version).match?('', klass::VERSION)

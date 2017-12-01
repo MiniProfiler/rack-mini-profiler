@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rack
   class MiniProfiler
     module TimerStruct
@@ -15,7 +17,7 @@ module Rack
 
         # used by Railtie to instrument asset_tag for JS / CSS
         def self.instrument(name, orig)
-          probe = "<script>mPt.probe('#{name}')</script>"
+          probe = "<script>mPt.probe('#{name}')</script>".dup
           wrapped = probe
           wrapped << orig
           wrapped << probe

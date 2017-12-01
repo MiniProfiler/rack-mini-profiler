@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Mongoid 3 patches
 class Moped::Node
   alias_method :process_without_profiling, :process

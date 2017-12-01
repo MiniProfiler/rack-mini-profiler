@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Mongo/Mongoid 5 patches
 class Mongo::Server::Connection
   def dispatch_with_timing(*args, &blk)

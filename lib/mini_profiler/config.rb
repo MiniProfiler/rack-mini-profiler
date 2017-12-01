@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 module Rack
   class MiniProfiler
@@ -16,7 +16,7 @@ module Rack
       def self.default
         new.instance_eval {
           @auto_inject      = true # automatically inject on every html page
-          @base_url_path    = "/mini-profiler-resources/"
+          @base_url_path    = "/mini-profiler-resources/".dup
           @disable_caching  = true
           # called prior to rack chain, to ensure we are allowed to profile
           @pre_authorize_cb = lambda {|env| true}
