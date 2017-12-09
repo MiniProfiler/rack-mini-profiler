@@ -22,6 +22,20 @@ describe Rack::MiniProfiler do
     end
   end
 
+  describe 'with analyze-memory query' do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |_env| [200, {'Content-Type' => 'text/html'}, ['<html><body><h1>Hi</h1></body></html>']] }
+      end
+    end
+
+    it 'should return ObjectSpace statistics' do
+      do_get(:pp=>'analyze-memory')
+      expect(last_response.body).to include('Largest strings:')
+    end
+  end
+
   describe 'with Rack::MiniProfiler before Rack::Deflater' do
     def app
       Rack::Builder.new do
