@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 describe Rack::MiniProfiler::TimerStruct::Base do
 
   before do

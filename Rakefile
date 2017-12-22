@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Rakefile
 require 'rubygems'
 require 'bundler'
@@ -45,4 +46,3 @@ desc "copy files from other parts of the tree"
 task :copy_files do
   # TODO grab files from MiniProfiler/UI
 end
-

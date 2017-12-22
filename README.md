@@ -4,14 +4,6 @@
 
 Middleware that displays speed badge for every html page. Designed to work both in production and in development.
 
-# URGENT HELP NEEDED!!!
-
-Well, not exactly mega urgent, but nice to see you are reading this.
-
-There is one very simple change I would like to see ASAP: I would like to see `# frozen_string_literal: true` on every file we ship
-
-If you pick up this task, be sure to amend the README in your PR AND add a Changelog. 
-
 #### Features
 
 * Database profiling - Currently supports Mysql2, Postgres, Oracle (oracle_enhanced ~> 1.5.0) and Mongoid3 (with fallback support to ActiveRecord)
