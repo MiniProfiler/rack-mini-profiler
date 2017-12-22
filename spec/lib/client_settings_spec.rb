@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'rack'
 
 describe Rack::MiniProfiler::ClientSettings do

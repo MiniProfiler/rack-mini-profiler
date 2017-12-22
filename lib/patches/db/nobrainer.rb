@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Rack::MiniProfiler::NoBrainerProfiler
 
   def on_query(env)

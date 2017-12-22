@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Neo4j::Core::Query
   alias_method :response_without_miniprofiler, :response
 

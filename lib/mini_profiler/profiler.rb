@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Rack
   class MiniProfiler
     class << self
@@ -69,7 +70,7 @@ module Rack
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config
       @app    = app
-      @config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
+      @config.base_url_path = @config.base_url_path.dup << "/" unless @config.base_url_path.end_with? "/"
       unless @config.storage_instance
         @config.storage_instance = @config.storage.new(@config.storage_options)
       end
@@ -379,9 +380,9 @@ module Rack
         script   = self.get_profile_script(env)
 
         if String === body
-          response.write inject(body,script)
+          response.write inject(body.dup,script)
         else
-          body.each { |fragment| response.write inject(fragment, script) }
+          body.each { |fragment| response.write inject(fragment.dup, script) }
         end
         body.close if body.respond_to? :close
         response.finish
@@ -406,7 +407,7 @@ module Rack
     end
 
     def dump_exceptions(exceptions)
-      body = "Exceptions raised during request\n\n"
+      body = String.new "Exceptions raised during request\n\n"
       if exceptions.empty?
         body << "No exceptions raised"
       else
@@ -424,7 +425,7 @@ module Rack
     end
 
     def dump_env(env)
-      body = "Rack Environment\n---------------\n"
+      body = String.new "Rack Environment\n---------------\n"
       env.each do |k,v|
         body << "#{k}: #{v}\n"
       end
@@ -475,7 +476,7 @@ module Rack
         str
       end
 
-      body = "ObjectSpace stats:\n\n"
+      body = String.new "ObjectSpace stats:\n\n"
 
       counts = ObjectSpace.count_objects
       total_strings = counts[:T_STRING]
@@ -529,7 +530,7 @@ module Rack
 
     def help(client_settings, env)
       headers = {'Content-Type' => 'text/html'}
-      body = "<html><body>
+      body = String .new"<html><body>
 <pre style='line-height: 30px; font-size: 16px;'>
 Append the following to your query string:
 

@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 #! rackup -
-#\ -w -p 8080 
+#\ -w -p 8080
 require 'active_support/inflector' # see https://code.google.com/p/ruby-sequel/issues/detail?id=329
 require 'sequel'
 require File.expand_path('../lib/rack-mini-profiler', File.dirname(__FILE__))

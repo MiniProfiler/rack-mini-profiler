@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # this enables activerecord, and allows us to test the auto detection logic
 require 'active_record'
 

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.10.8 2017-12-22
+
+- [ADDED] `# frozen_string_literal: true` on every ruby file.
+
 ## 0.10.7 2017-11-24
 
 - [FEATURE] Replace Time.now with Process.clock_gettime(Process::CLOCK_MONOTONIC)
