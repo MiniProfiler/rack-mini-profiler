@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ## based off https://github.com/newrelic/rpm/blob/master/lib/new_relic/agent/instrumentation/active_record.rb
 ## fallback for alls sorts of weird dbs
 module Rack

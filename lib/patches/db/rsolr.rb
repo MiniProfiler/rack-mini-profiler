@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RSolr::Connection
   alias_method :execute_without_profiling, :execute
   def execute_with_profiling(client, request_context)
@@ -7,7 +9,7 @@ class RSolr::Connection
     result       = execute_without_profiling(client, request_context)
     elapsed_time = SqlPatches.elapsed_time(start)
 
-    data = "#{request_context[:method].upcase} #{request_context[:uri]}"
+    data = "#{request_context[:method].upcase} #{request_context[:uri]}".dup
     if request_context[:method] == :post and request_context[:data]
       if request_context[:headers].include?("Content-Type") and request_context[:headers]["Content-Type"] == "text/xml"
         # it's xml, unescaping isn't needed

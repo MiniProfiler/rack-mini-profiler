@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rack
   class MiniProfiler
     class << self
@@ -406,7 +408,7 @@ module Rack
     end
 
     def dump_exceptions(exceptions)
-      body = "Exceptions raised during request\n\n"
+      body = "Exceptions raised during request\n\n".dup
       if exceptions.empty?
         body << "No exceptions raised"
       else
@@ -424,7 +426,7 @@ module Rack
     end
 
     def dump_env(env)
-      body = "Rack Environment\n---------------\n"
+      body = "Rack Environment\n---------------\n".dup
       env.each do |k,v|
         body << "#{k}: #{v}\n"
       end
@@ -475,7 +477,7 @@ module Rack
         str
       end
 
-      body = "ObjectSpace stats:\n\n"
+      body = "ObjectSpace stats:\n\n".dup
 
       counts = ObjectSpace.count_objects
       total_strings = counts[:T_STRING]

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # riak-client 2.2.2 patches
 class Riak::Multiget
   class <<self
