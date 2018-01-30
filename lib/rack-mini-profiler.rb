@@ -27,8 +27,6 @@ require 'mini_profiler/context'
 require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
 require 'mini_profiler/profiler'
-# TODO
-# require 'mini_profiler/gc_profiler_ruby_head' if Gem::Version.new('2.1.0') <= Gem::Version.new(RUBY_VERSION)
 
 require 'patches/sql_patches'
 require 'patches/net_patches'
