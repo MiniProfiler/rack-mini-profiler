@@ -28,37 +28,37 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
 
     it 'includes rspec in the trace (default is no filter)' do
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
-      expect(sql[:stack_trace_snippet]).to match /rspec/
+      expect(sql[:stack_trace_snippet]).to match(/rspec/)
     end
 
     it "doesn't include rspec if we filter for only app" do
       Rack::MiniProfiler.config.backtrace_includes = [/\/app/]
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
-      expect(sql[:stack_trace_snippet]).not_to match /rspec/
+      expect(sql[:stack_trace_snippet]).not_to match(/rspec/)
     end
 
     it "includes rspec if we filter for it" do
       Rack::MiniProfiler.config.backtrace_includes = [/\/(app|rspec)/]
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
-      expect(sql[:stack_trace_snippet]).to match /rspec/
+      expect(sql[:stack_trace_snippet]).to match(/rspec/)
     end
 
     it "includes rspec if we filter for it along with something else" do
       Rack::MiniProfiler.config.backtrace_includes = [/rspec/, /something_else/]
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
-      expect(sql[:stack_trace_snippet]).to match /rspec/
+      expect(sql[:stack_trace_snippet]).to match(/rspec/)
     end
 
     it "ignores rspec if we specifically ignore it" do
       Rack::MiniProfiler.config.backtrace_ignores = [/\/rspec/]
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
-      expect(sql[:stack_trace_snippet]).not_to match /rspec/
+      expect(sql[:stack_trace_snippet]).not_to match(/rspec/)
     end
 
     it "ignores rspec if we specifically ignore it along with something else" do
       Rack::MiniProfiler.config.backtrace_ignores = [/\/rspec/, /something_else/]
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
-      expect(sql[:stack_trace_snippet]).not_to match /rspec/
+      expect(sql[:stack_trace_snippet]).not_to match(/rspec/)
     end
 
     it "should omit the backtrace if the query takes less than the threshold time" do
