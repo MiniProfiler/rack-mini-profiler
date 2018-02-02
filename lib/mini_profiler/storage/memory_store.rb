@@ -52,7 +52,7 @@ module Rack
         args ||= {}
         @expires_in_seconds = args.fetch(:expires_in) { EXPIRES_IN_SECONDS }
 
-        @token1, @token2, @cycle_tokens_at = nil
+        @token1, @token2, @cycle_at = nil
 
         initialize_locks
         initialize_cleanup_thread(args)
