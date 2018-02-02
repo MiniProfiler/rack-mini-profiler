@@ -111,12 +111,13 @@ module Rack
     end
 
     def generate_html(page_struct, env, result_json = page_struct.to_json)
-      path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-      version = MiniProfiler::ASSET_VERSION
-      json = result_json
-      includes = get_profile_script(env)
-      name = page_struct[:name]
-      duration = page_struct.duration_ms.round(1).to_s
+      # double-assigning to suppress "assigned but unused variable" warnings
+      path = path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+      version = version = MiniProfiler::ASSET_VERSION
+      json = json = result_json
+      includes = includes = get_profile_script(env)
+      name = name = page_struct[:name]
+      duration = duration = page_struct.duration_ms.round(1).to_s
 
       MiniProfiler.share_template.result(binding)
     end
