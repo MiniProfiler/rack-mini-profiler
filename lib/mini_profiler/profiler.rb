@@ -414,8 +414,8 @@ module Rack
         body << "No exceptions raised"
       else
         body << "Exceptions: (#{exceptions.size} total)\n"
-        exceptions.group_by(&:class).each do |klass, exceptions|
-          body << "  #{klass.name} (#{exceptions.size})\n"
+        exceptions.group_by(&:class).each do |klass, exceptions_per_class|
+          body << "  #{klass.name} (#{exceptions_per_class.size})\n"
         end
 
         body << "\nBacktraces\n"
