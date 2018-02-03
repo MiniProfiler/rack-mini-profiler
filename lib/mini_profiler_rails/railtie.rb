@@ -7,7 +7,7 @@ module Rack::MiniProfilerRails
   # call direct if needed to do a defer init
   def self.initialize!(app)
 
-    raise "MiniProfilerRails initialized twice. Set `require: false' for rack-mini-profiler in your Gemfile" if @already_initialized
+    raise "MiniProfilerRails initialized twice. Set `require: false' for rack-mini-profiler in your Gemfile" if defined?(@already_initialized) && @already_initialized
 
     c = Rack::MiniProfiler.config
 

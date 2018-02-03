@@ -52,7 +52,7 @@ module Rack
         args ||= {}
         @expires_in_seconds = args.fetch(:expires_in) { EXPIRES_IN_SECONDS }
 
-        @token1, @token2, @cycle_tokens_at = nil
+        @token1, @token2, @cycle_at = nil
 
         initialize_locks
         initialize_cleanup_thread(args)
@@ -70,7 +70,7 @@ module Rack
       def initialize_cleanup_thread(args={})
         cleanup_interval = args.fetch(:cleanup_interval) { CLEANUP_INTERVAL }
         cleanup_cycle    = args.fetch(:cleanup_cycle)    { CLEANUP_CYCLE }
-        t = CacheCleanupThread.new(cleanup_interval, cleanup_cycle, self) do |t|
+        t = CacheCleanupThread.new(cleanup_interval, cleanup_cycle, self) do
           until Thread.current[:should_exit] do
             CacheCleanupThread.current.sleepy_run
           end

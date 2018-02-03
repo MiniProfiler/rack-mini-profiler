@@ -19,6 +19,8 @@ module Rack
         @cookie = request.cookies[COOKIE_NAME]
         @store = store
         @start = start
+        @backtrace_level = nil
+        @orig_disable_profiling = @disable_profiling = nil
 
         @allowed_tokens, @orig_auth_tokens = nil
 
