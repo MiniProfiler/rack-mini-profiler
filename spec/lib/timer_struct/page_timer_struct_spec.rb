@@ -20,6 +20,7 @@ describe Rack::MiniProfiler::TimerStruct::Page do
 
     it 'has a Started element' do
       expect(@deserialized['started']).not_to be_nil
+      expect(@deserialized['started']).to match(/Date\(\d{13}\)/)
     end
 
     it 'has a DurationMilliseconds element' do

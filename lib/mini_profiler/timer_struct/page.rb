@@ -13,12 +13,14 @@ module Rack
         def initialize(env)
           timer_id     = MiniProfiler.generate_id
           page_name    = env['PATH_INFO']
-          started_at   = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
+          started_at   = (Time.now.to_f * 1000).to_i
+          started      = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
           machine_name = env['SERVER_NAME']
           super(
             :id                                      => timer_id,
             :name                                    => page_name,
-            :started                                 => started_at,
+            :started                                 => started,
+            :started_at                              => started_at,
             :machine_name                            => machine_name,
             :level                                   => 0,
             :user                                    => "unknown user",
@@ -68,7 +70,7 @@ module Rack
 
         def extra_json
           {
-            :started               => '/Date(%d)/' % @attributes[:started],
+            :started               => '/Date(%d)/' % @attributes.delete(:started_at),
             :duration_milliseconds => @attributes[:root][:duration_milliseconds],
             :custom_timing_names   => @attributes[:custom_timing_stats].keys.sort
           }
