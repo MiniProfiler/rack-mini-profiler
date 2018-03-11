@@ -30,7 +30,7 @@ If you feel like taking on any of this start an issue and update us on your prog
 
 ## Installation
 
-Install/add to Gemfile
+Install/add to Gemfile in Ruby 2.2+
 
 ```ruby
 gem 'rack-mini-profiler'

@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
     "CHANGELOG.md"
   ]
   s.add_runtime_dependency 'rack', '>= 1.2.0'
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.2.0'
 
   s.metadata = {
     'source_code_uri' => 'https://github.com/MiniProfiler/rack-mini-profiler',
