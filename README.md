@@ -40,13 +40,12 @@ NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in y
 
 You can also include optional libraries to enable additional features.
 ```ruby
-# For memory profiling (requires Ruby MRI 2.1+)
+# For memory profiling
 gem 'memory_profiler'
 
-# For call-stack profiling flamegraphs (requires Ruby MRI 2.0.0+)
+# For call-stack profiling flamegraphs
 gem 'flamegraph'
-gem 'stackprof'     # For Ruby MRI 2.1+
-gem 'fast_stack'    # For Ruby MRI 2.0
+gem 'stackprof'
 ```
 
 #### Rails
@@ -136,13 +135,10 @@ To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-
 * add the [**flamegraph**](https://github.com/SamSaffron/flamegraph) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
-Flamegraph generation is supported in Ruby MRI 2.0+
-
 ### Memory Profiling
 
 Memory allocations can be measured (using the [memory_profiler](https://github.com/SamSaffron/memory_profiler) gem)
 which will show allocations broken down by gem, file location, and class and will also highlight `String` allocations.
-(Requires Ruby MRI 2.1.0+)
 
 Add `?pp=profile-memory` to the URL of any request while Rack::MiniProfiler is enabled to generate the report.
 
@@ -158,8 +154,8 @@ Example: `?pp=profile-memory&memory_profiler_allow_files=active_record|app`
 
 There are two additional `pp` options that can be used to analyze memory which do not require the `memory_profiler` gem
 
-* Use `?pp=profile-gc` to report on Garbage Collection statistics (requires Ruby MRI 1.9.3+)
-* Use `?pp=analyze-memory` to report on ObjectSpace statistics (requires Ruby 2.0.0+)
+* Use `?pp=profile-gc` to report on Garbage Collection statistics
+* Use `?pp=analyze-memory` to report on ObjectSpace statistics
 
 ## Access control in non-development environments
 
@@ -318,7 +314,7 @@ backtrace_includes|Rails: `[/^\/?(app|config|lib|test)/]`<br>Rack: `[]`|Regexes 
 backtrace_remove|rails: `Rails.root`<br>Rack: `nil`|A string or regex to remove part of each line in the backtrace.
 toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
 start_hidden|`false`|`false` to make mini_profiler visible on page load.
-backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded. Backtrace recording can take a couple of milliseconds on rubies earlier than 2.0, impacting performance for very small queries.
+backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded.
 flamegraph_sample_rate|`0.5`|How often to capture stack traces for flamegraphs in milliseconds.
 disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV vars over HTTP.
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
