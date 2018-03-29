@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.0.0 2017-03-29
+
+- [BREAKING CHANGE] Ruby version 2.2.0 or later is required
+- [FEATURE] use new web performance API to avoid warning @MikeRogers0
+- [FEATURE] store hidden pref regarding showing mini profiler in session @MikeRogers0
+- [FIX] correct jQuery 3.0 deprecations @TiSer
+- [FIX] JS in IFRAME @naiyt
+
 ## 0.10.8 2017-12-01
 
 - [FEATURE] Add `# frozen_string_literal: true` to all `lib/**/*.rb` files
