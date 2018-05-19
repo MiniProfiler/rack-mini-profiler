@@ -331,8 +331,12 @@ module Rack
       page_struct[:root].record_time((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000)
 
       if flamegraph
-        body.close if body.respond_to? :close
-        return client_settings.handle_cookie(self.flamegraph(flamegraph))
+        if query_string =~ /save/
+          ::File.write 'flamegraph.html', flamegraph
+        else
+          body.close if body.respond_to? :close
+          return client_settings.handle_cookie(self.flamegraph(flamegraph))
+        end
       end
 
 
