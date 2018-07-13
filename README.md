@@ -291,6 +291,27 @@ You need to inject the following in your SPA to load MiniProfiler's speed badge 
 
 _Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will change with each release of `rack_mini_profiler`. The MiniProfiler's speed badge will continue to work, although you will have to change the GUID to expire the script to fetch the most recent version.
 
+The below example will always use the correct GUID and will serve the badge at `/profiler`.
+
+```ruby
+# config/initializers/mini_profiler.rb
+  Rails.application.routes.append do
+    mini_profiler = Rack::MiniProfiler.new(Rails.application)
+    get '/profiler' => ->(env) {
+      # NOTE: handle any authorization here
+      [200, {}, [<<-BODY.strip_heredoc]]
+      <html>
+      <head>
+      </head>
+      <body>
+      #{mini_profiler.get_profile_script(env)}
+      </body>
+      </html>
+      BODY
+    }
+  end
+``` 
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
