@@ -35,7 +35,7 @@
     overflow: hidden;
     text-overflow: ellipsis; }
   .profiler-result .profiler-unit {
-    color: #aaa; }
+    color: #555; }
   .profiler-result .profiler-trivial {
     display: none; }
     .profiler-result .profiler-trivial td, .profiler-result .profiler-trivial td * {
