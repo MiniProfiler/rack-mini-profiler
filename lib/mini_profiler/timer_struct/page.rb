@@ -71,7 +71,7 @@ module Rack
 
         def extra_json
           {
-            :started               => '/Date(%d)/' % @attributes.delete(:started_at),
+            :started               => '/Date(%d)/' % @attributes[:started_at],
             :duration_milliseconds => @attributes[:root][:duration_milliseconds],
             :custom_timing_names   => @attributes[:custom_timing_stats].keys.sort
           }
