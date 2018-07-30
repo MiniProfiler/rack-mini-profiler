@@ -35,11 +35,11 @@
     overflow: hidden;
     text-overflow: ellipsis; }
   .profiler-result .profiler-unit {
-    color: #aaa; }
+    color: #767676; }
   .profiler-result .profiler-trivial {
     display: none; }
     .profiler-result .profiler-trivial td, .profiler-result .profiler-trivial td * {
-      color: #aaa !important; }
+      color: #767676 !important; }
   .profiler-result pre, .profiler-result code, .profiler-result .profiler-number, .profiler-result .profiler-unit {
     font-family: Consolas, monospace, serif; }
   .profiler-result .profiler-number {
@@ -52,7 +52,7 @@
       white-space: nowrap; }
   .profiler-result .profiler-timings th {
     background-color: #fff;
-    color: #aaa;
+    color: #767676;
     text-align: right; }
   .profiler-result .profiler-timings th, .profiler-result .profiler-timings td {
     white-space: nowrap; }
@@ -228,7 +228,7 @@
     cursor: default;
     text-align: center; }
     .profiler-results .profiler-controls span {
-      border-right: 1px solid #aaa;
+      border-right: 1px solid #767676;
       padding-right: 5px;
       margin-right: 5px;
       cursor: pointer; }
@@ -306,7 +306,7 @@
     display: none; }
   .profiler-result-full .profiler-result .profiler-popup .profiler-info {
     font-size: 25px;
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #767676;
     padding-bottom: 3px;
     margin-bottom: 25px; }
     .profiler-result-full .profiler-result .profiler-popup .profiler-info .profiler-overall-duration {
