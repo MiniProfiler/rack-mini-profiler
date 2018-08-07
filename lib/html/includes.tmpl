@@ -7,6 +7,11 @@
       <span class="profiler-number">
         ${MiniProfiler.formatDuration(duration_milliseconds)} <span class="profiler-unit">ms</span>
       </span>
+      {{if MiniProfiler.showTotalSqlCount()}}
+      <span class="profiler-number">
+        ${sql_count} <span class="profiler-unit">sql</span>
+      </span>
+      {{/if}}
     </div>
 
     <div class="profiler-popup">

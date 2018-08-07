@@ -98,6 +98,7 @@ module Rack
             self[:has_sql_timings]   = true
             self[:sql_timings_duration_milliseconds] += elapsed_ms
             page[:duration_milliseconds_in_sql]      += elapsed_ms
+            page[:sql_count] += 1
           end
         end
 

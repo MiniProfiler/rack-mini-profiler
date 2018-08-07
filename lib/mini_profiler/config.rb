@@ -39,16 +39,17 @@ module Rack
           @skip_sql_param_names = /password/ # skips parameters with the name password by default
 
           # ui parameters
-          @autorized           = true
-          @collapse_results    = true
-          @max_traces_to_show  = 20
-          @show_children       = false
-          @show_controls       = false
-          @show_trivial        = false
-          @start_hidden        = false
-          @toggle_shortcut     = 'Alt+P'
-          @html_container      = 'body'
-          @position            = "top-left"
+          @autorized            = true
+          @collapse_results     = true
+          @max_traces_to_show   = 20
+          @show_children        = false
+          @show_controls        = false
+          @show_trivial         = false
+          @show_total_sql_count = false
+          @start_hidden         = false
+          @toggle_shortcut      = 'Alt+P'
+          @html_container       = 'body'
+          @position             = "top-left"
 
           self
         }
@@ -64,8 +65,8 @@ module Rack
 
       # ui accessors
       attr_accessor :collapse_results, :max_traces_to_show, :position,
-        :show_children, :show_controls, :show_trivial, :start_hidden,
-        :toggle_shortcut, :html_container
+        :show_children, :show_controls, :show_trivial, :show_total_sql_count,
+        :start_hidden, :toggle_shortcut, :html_container
 
       # Deprecated options
       attr_accessor :use_existing_jquery

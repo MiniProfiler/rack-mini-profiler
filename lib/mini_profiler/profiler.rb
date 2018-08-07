@@ -599,6 +599,7 @@ Append the following to your query string:
        :showChildren       => @config.show_children,
        :maxTracesToShow    => @config.max_traces_to_show,
        :showControls       => @config.show_controls,
+       :showTotalSqlCount  => @config.show_total_sql_count,
        :authorized         => true,
        :toggleShortcut     => @config.toggle_shortcut,
        :startHidden        => @config.start_hidden,

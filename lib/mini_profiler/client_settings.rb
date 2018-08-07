@@ -15,8 +15,8 @@ module Rack
 
 
       def initialize(env, store, start)
-        request = ::Rack::Request.new(env)
-        @cookie = request.cookies[COOKIE_NAME]
+        @request = ::Rack::Request.new(env)
+        @cookie = @request.cookies[COOKIE_NAME]
         @store = store
         @start = start
         @backtrace_level = nil
@@ -74,9 +74,10 @@ module Rack
           settings["dp"] = "t"                  if @disable_profiling
           settings["bt"] = @backtrace_level     if @backtrace_level
           settings["a"] = @allowed_tokens.join("|") if @allowed_tokens && MiniProfiler.request_authorized?
-
           settings_string = settings.map{|k,v| "#{k}=#{v}"}.join(",")
-          Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, :value => settings_string, :path => '/')
+          cookie = { :value => settings_string, :path => '/', :httponly => true }
+          cookie[:secure] = true if @request.ssl?
+          Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
         end
       end
 

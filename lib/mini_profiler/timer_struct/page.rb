@@ -31,6 +31,7 @@ module Rack
             :has_all_trivial_timings                 => false,
             :trivial_duration_threshold_milliseconds => 2,
             :head                                    => nil,
+            :sql_count                               => 0,
             :duration_milliseconds_in_sql            => 0,
             :has_sql_timings                         => true,
             :has_duplicate_sql_timings               => false,
@@ -70,7 +71,7 @@ module Rack
 
         def extra_json
           {
-            :started               => '/Date(%d)/' % @attributes.delete(:started_at),
+            :started               => '/Date(%d)/' % @attributes[:started_at],
             :duration_milliseconds => @attributes[:root][:duration_milliseconds],
             :custom_timing_names   => @attributes[:custom_timing_stats].keys.sort
           }
