@@ -17,7 +17,7 @@ class Rack::MiniProfiler::NoBrainerProfiler
       # query << "(#{NoBrainer::RQL.type_of(env[:query]).to_s}) "
 
       query << "NOT USING INDEX: " if not_indexed
-      query << env[:query].inspect.gsub(/\n/, '').gsub(/ +/, ' ') + " "
+      query << env[:query].inspect.delete("\n").gsub(/ +/, ' ') + " "
 
       if env[:exception]
         query << "exception: #{env[:exception].class} #{env[:exception].message.split("\n").first} "
