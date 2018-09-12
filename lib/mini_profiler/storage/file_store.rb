@@ -30,11 +30,11 @@ module Rack
         private
         if RUBY_PLATFORM =~ /mswin(?!ce)|mingw|cygwin|bccwin/
           def path(key)
-            @path + "/" + @prefix  + "_" + key.gsub(/:/, '_')
+            @path.dup << "/" << @prefix  << "_" << key.gsub(/:/, '_')
           end
         else
           def path(key)
-            @path + "/" + @prefix  + "_" + key
+            @path.dup << "/" << @prefix << "_" << key
           end
         end
       end
