@@ -24,7 +24,10 @@ module Rack
         end
 
         def []=(key,val)
-          ::File.open(path(key), "wb+") {|f| f.write Marshal.dump(val)}
+          ::File.open(path(key), "wb+") do |f|
+            f.sync = true
+            f.write Marshal.dump(val)
+          end
         end
 
         private
