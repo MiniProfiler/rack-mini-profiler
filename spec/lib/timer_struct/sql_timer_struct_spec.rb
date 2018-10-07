@@ -10,7 +10,7 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
 
     [
       :execute_type, :formatted_command_string, :stack_trace_snippet, :start_milliseconds, :duration_milliseconds,
-      :first_fetch_duration_milliseconds, :is_duplicate
+      :first_fetch_duration_milliseconds, :is_duplicate, :explain_output
     ].each do |attr_type|
       it "has an #{attr_type}" do
         expect(@sql[attr_type]).not_to be_nil
