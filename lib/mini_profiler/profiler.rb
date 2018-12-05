@@ -277,7 +277,14 @@ module Rack
             else
               sample_rate = config.flamegraph_sample_rate
             end
-            flamegraph = Flamegraph.generate(nil, :fidelity => sample_rate, :embed_resources => query_string =~ /embed/, :mode => mode) do
+            flamegraph =
+              Flamegraph.generate(
+                nil,
+                :fidelity => sample_rate,
+                :embed_resources => query_string =~ /embed/,
+                :mode => mode,
+                :filter_path => config.flamegraph_file_filter
+              ) do
               status,headers,body = @app.call(env)
             end
           end

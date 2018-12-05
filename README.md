@@ -316,6 +316,7 @@ toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility
 start_hidden|`false`|`false` to make mini_profiler visible on page load.
 backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded.
 flamegraph_sample_rate|`0.5`|How often to capture stack traces for flamegraphs in milliseconds.
+flamegraph_file_filter|`nil`|Base file path for stack frames to include in flamegraphs.
 disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV vars over HTTP.
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
 collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
