@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.1 2018-12-10
+
+- [FIX] add support for exec_params instrumentation in PG, this method as of PG 1.1.0 no longer
+ routes calls to exec / async_exec
+
 ## 1.0.0 2017-03-29
 
 - [BREAKING CHANGE] Ruby version 2.2.0 or later is required

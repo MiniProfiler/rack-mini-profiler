@@ -35,6 +35,10 @@ class PG::Connection
   alias_method :send_query_prepared_without_profiling, :send_query_prepared
   alias_method :prepare_without_profiling, :prepare
 
+  if Gem::Version.new(PG::VERSION) >= Gem::Version.new("1.1.0")
+    alias_method:exec_params_without_profiling, :exec_params
+  end
+
   def prepare(*args,&blk)
     # we have no choice but to do this here,
     # if we do the check for profiling first, our cache may miss critical stuff
@@ -58,6 +62,21 @@ class PG::Connection
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
+  end
+
+
+  if Gem::Version.new(PG::VERSION) >= Gem::Version.new("1.1.0")
+    def exec_params(*args,&blk)
+      return exec_params_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+
+      start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      result       = exec_params_without_profiling(*args, &blk)
+      elapsed_time = SqlPatches.elapsed_time(start)
+      record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      result.instance_variable_set("@miniprofiler_sql_id", record) if result
+
+      result
+    end
   end
 
   def exec_prepared(*args,&blk)
