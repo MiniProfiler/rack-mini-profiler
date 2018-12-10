@@ -1,5 +1,5 @@
 describe Rack::MiniProfiler::RedisStore do
-  let(:store) { Rack::MiniProfiler::RedisStore.new(:db=>2, :expires_in=>4) }
+  let(:store) { Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4) }
   let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
                         Rack::MiniProfiler::TimerStruct::Page.new({})] }
 
@@ -29,7 +29,7 @@ describe Rack::MiniProfiler::RedisStore do
     describe 'connection' do
       it 'uses the passed in object rather than creating a new one' do
         connection = double("redis-connection")
-        store = Rack::MiniProfiler::RedisStore.new(:connection => connection)
+        store = Rack::MiniProfiler::RedisStore.new(connection: connection)
 
         expect(connection).to receive(:get)
         expect(Redis).not_to receive(:new)
@@ -76,7 +76,7 @@ describe Rack::MiniProfiler::RedisStore do
         end
 
         store.set_viewed('a', page_structs.first[:id])
-        expect(store.get_unviewed_ids('a')).to match_array(page_structs.drop(1).map{ |page_struct| page_struct[:id] })
+        expect(store.get_unviewed_ids('a')).to match_array(page_structs.drop(1).map { |page_struct| page_struct[:id] })
       end
     end
   end

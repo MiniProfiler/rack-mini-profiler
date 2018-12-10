@@ -24,8 +24,7 @@ module Rack
           wrapped
         end
 
-
-        def initialize(env={})
+        def initialize(env = {})
           super
         end
 
@@ -62,21 +61,21 @@ module Rack
           end
 
           translated.each do |name, data|
-            h = {"Name" => name, "Start" => data[:start].to_i - baseTime}
+            h = { "Name" => name, "Start" => data[:start].to_i - baseTime }
             h["Duration"] = data[:finish].to_i - data[:start].to_i if data[:finish]
             timings.push(h)
           end
 
-          clientTimes.keys.find_all{|k| k =~ /Start$/ }.each do |k|
+          clientTimes.keys.find_all { |k| k =~ /Start$/ }.each do |k|
             start    = clientTimes[k].to_i - baseTime
             finish   = clientTimes[k.sub(/Start$/, "End")].to_i - baseTime
             duration = 0
             duration = finish - start if finish > start
-            name     = k.sub(/Start$/, "").split(/(?=[A-Z])/).map{|s| s.capitalize}.join(' ')
-            timings.push({"Name" => name, "Start" => start, "Duration" => duration}) if start >= 0
+            name     = k.sub(/Start$/, "").split(/(?=[A-Z])/).map { |s| s.capitalize }.join(' ')
+            timings.push("Name" => name, "Start" => start, "Duration" => duration) if start >= 0
           end
 
-          clientTimes.keys.find_all{|k| !(k =~ /(End|Start)$/)}.each do |k|
+          clientTimes.keys.find_all { |k| !(k =~ /(End|Start)$/) }.each do |k|
             timings.push("Name" => k, "Start" => clientTimes[k].to_i - baseTime, "Duration" => -1)
           end
 

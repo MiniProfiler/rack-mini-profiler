@@ -10,8 +10,8 @@ module Rack
       def initialize(args = nil)
         require 'dalli' unless defined? Dalli
         args ||= {}
-        @prefix             = args[:prefix]     || "MPMemcacheStore"
-        @prefix             += "-#{Rack::MiniProfiler::VERSION}"
+        @prefix = args[:prefix] || "MPMemcacheStore"
+        @prefix += "-#{Rack::MiniProfiler::VERSION}"
         @client             = args[:client]     || Dalli::Client.new
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
       end
@@ -62,15 +62,14 @@ module Rack
         token_info = @client.get("#{@prefix}-tokens")
         key1, key2, cycle_at = nil
 
-
         if token_info
-           key1, key2, cycle_at = Marshal::load(token_info)
+          key1, key2, cycle_at = Marshal::load(token_info)
 
            key1 = nil unless key1 && key1.length == 32
            key2 = nil unless key2 && key2.length == 32
 
            if key1 && cycle_at && (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
-              return [key1,key2].compact
+             return [key1, key2].compact
            end
         end
 

@@ -9,7 +9,7 @@ describe Rack::MiniProfiler::MemoryStore do
     describe 'storage' do
 
       it 'can store a PageStruct and retrieve it' do
-        page_struct = {:id => "XYZ", :random => "random"}
+        page_struct = { id: "XYZ", random: "random" }
         @store.save(page_struct)
         page_struct = @store.load("XYZ")
         expect(page_struct[:id]).to eq("XYZ")
@@ -41,14 +41,13 @@ describe Rack::MiniProfiler::MemoryStore do
 
   end
 
-
   describe 'cleanup_cache' do
     before do
       @fast_expiring_store = Rack::MiniProfiler::MemoryStore.new(expires_in: 1)
     end
 
     it "cleans up expired values" do
-      old_page_struct = {:id => "XYZ", :random => "random", :started => ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - 2) * 1000).to_i }
+      old_page_struct = { id: "XYZ", random: "random", started: ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - 2) * 1000).to_i }
       @fast_expiring_store.save(old_page_struct)
       old_page_struct = @fast_expiring_store.load("XYZ")
       expect(old_page_struct[:id]).to eq("XYZ")
@@ -85,7 +84,7 @@ describe Rack::MiniProfiler::MemoryStore do
   end
 
   describe 'cache cleanup thread' do
-    let(:described){Rack::MiniProfiler::MemoryStore::CacheCleanupThread}
+    let(:described) { Rack::MiniProfiler::MemoryStore::CacheCleanupThread }
     before do
       store = double()
       allow(store).to receive(:cleanup_cache)

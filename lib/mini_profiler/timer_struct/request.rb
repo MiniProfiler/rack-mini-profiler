@@ -17,28 +17,28 @@ module Rack
           start_millis = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]
           depth        = parent ? parent.depth + 1 : 0
           super(
-            :id                                      => MiniProfiler.generate_id,
-            :name                                    => name,
-            :duration_milliseconds                   => 0,
-            :duration_without_children_milliseconds  => 0,
-            :start_milliseconds                      => start_millis,
-            :parent_timing_id                        => nil,
-            :children                                => [],
-            :has_children                            => false,
-            :key_values                              => nil,
-            :has_sql_timings                         => false,
-            :has_duplicate_sql_timings               => false,
-            :trivial_duration_threshold_milliseconds => 2,
-            :sql_timings                             => [],
-            :sql_timings_duration_milliseconds       => 0,
-            :is_trivial                              => false,
-            :is_root                                 => false,
-            :depth                                   => depth,
-            :executed_readers                        => 0,
-            :executed_scalars                        => 0,
-            :executed_non_queries                    => 0,
-            :custom_timing_stats                     => {},
-            :custom_timings                          => {}
+            id: MiniProfiler.generate_id,
+            name: name,
+            duration_milliseconds: 0,
+            duration_without_children_milliseconds: 0,
+            start_milliseconds: start_millis,
+            parent_timing_id: nil,
+            children: [],
+            has_children: false,
+            key_values: nil,
+            has_sql_timings: false,
+            has_duplicate_sql_timings: false,
+            trivial_duration_threshold_milliseconds: 2,
+            sql_timings: [],
+            sql_timings_duration_milliseconds: 0,
+            is_trivial: false,
+            is_root: false,
+            depth: depth,
+            executed_readers: 0,
+            executed_scalars: 0,
+            executed_non_queries: 0,
+            custom_timing_stats: {},
+            custom_timings: {}
           )
           @children_duration = 0
           @start             = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -109,11 +109,11 @@ module Rack
             self[:custom_timings][type] ||= []
             self[:custom_timings][type].push(timer)
 
-            self[:custom_timing_stats][type] ||= {:count => 0, :duration => 0.0}
+            self[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
             self[:custom_timing_stats][type][:count]    += 1
             self[:custom_timing_stats][type][:duration] += elapsed_ms
 
-            page[:custom_timing_stats][type] ||= {:count => 0, :duration => 0.0}
+            page[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
             page[:custom_timing_stats][type][:count]    += 1
             page[:custom_timing_stats][type][:duration] += elapsed_ms
           end

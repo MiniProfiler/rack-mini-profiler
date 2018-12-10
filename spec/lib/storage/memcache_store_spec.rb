@@ -45,7 +45,6 @@ describe Rack::MiniProfiler::MemcacheStore do
 
   end
 
-
   describe 'allowed_tokens' do
     before do
       @store = Rack::MiniProfiler::MemcacheStore.new
@@ -77,7 +76,7 @@ describe Rack::MiniProfiler::MemcacheStore do
     describe 'client' do
       it 'uses the passed in object rather than creating a new one' do
         client = double("memcache-client")
-        store = Rack::MiniProfiler::MemcacheStore.new(:client => client)
+        store = Rack::MiniProfiler::MemcacheStore.new(client: client)
 
         expect(client).to receive(:get)
         expect(Dalli::Client).not_to receive(:new)

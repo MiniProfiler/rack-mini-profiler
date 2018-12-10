@@ -8,7 +8,7 @@ class PG::Result
   def values(*args, &blk)
     return values_without_profiling(*args, &blk) unless defined?(@miniprofiler_sql_id)
     mp_report_sql do
-      values_without_profiling(*args ,&blk)
+      values_without_profiling(*args , &blk)
     end
   end
 
@@ -36,10 +36,10 @@ class PG::Connection
   alias_method :prepare_without_profiling, :prepare
 
   if Gem::Version.new(PG::VERSION) >= Gem::Version.new("1.1.0")
-    alias_method:exec_params_without_profiling, :exec_params
+    alias_method :exec_params_without_profiling, :exec_params
   end
 
-  def prepare(*args,&blk)
+  def prepare(*args, &blk)
     # we have no choice but to do this here,
     # if we do the check for profiling first, our cache may miss critical stuff
 
@@ -48,15 +48,15 @@ class PG::Connection
     # dont leak more than 10k ever
     @prepare_map = {} if @prepare_map.length > 1000
 
-    return prepare_without_profiling(*args,&blk) unless SqlPatches.should_measure?
-    prepare_without_profiling(*args,&blk)
+    return prepare_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+    prepare_without_profiling(*args, &blk)
   end
 
-  def exec(*args,&blk)
-    return exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+  def exec(*args, &blk)
+    return exec_without_profiling(*args, &blk) unless SqlPatches.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result       = exec_without_profiling(*args,&blk)
+    result       = exec_without_profiling(*args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
@@ -64,10 +64,9 @@ class PG::Connection
     result
   end
 
-
   if Gem::Version.new(PG::VERSION) >= Gem::Version.new("1.1.0")
-    def exec_params(*args,&blk)
-      return exec_params_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+    def exec_params(*args, &blk)
+      return exec_params_without_profiling(*args, &blk) unless SqlPatches.should_measure?
 
       start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result       = exec_params_without_profiling(*args, &blk)
@@ -79,11 +78,11 @@ class PG::Connection
     end
   end
 
-  def exec_prepared(*args,&blk)
-    return exec_prepared_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+  def exec_prepared(*args, &blk)
+    return exec_prepared_without_profiling(*args, &blk) unless SqlPatches.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result       = exec_prepared_without_profiling(*args,&blk)
+    result       = exec_prepared_without_profiling(*args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
@@ -93,11 +92,11 @@ class PG::Connection
     result
   end
 
-  def send_query_prepared(*args,&blk)
-    return send_query_prepared_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+  def send_query_prepared(*args, &blk)
+    return send_query_prepared_without_profiling(*args, &blk) unless SqlPatches.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result       = send_query_prepared_without_profiling(*args,&blk)
+    result       = send_query_prepared_without_profiling(*args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
@@ -107,11 +106,11 @@ class PG::Connection
     result
   end
 
-  def async_exec(*args,&blk)
-    return async_exec_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+  def async_exec(*args, &blk)
+    return async_exec_without_profiling(*args, &blk) unless SqlPatches.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result       = exec_without_profiling(*args,&blk)
+    result       = exec_without_profiling(*args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result

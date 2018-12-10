@@ -3,7 +3,7 @@
 
 require 'rack/test'
 
-describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.0') do
+describe 'Rack::MiniProfiler - trace_exceptions', unless: (RUBY_VERSION < '2.0') do
   include Rack::Test::Methods
 
   before(:each) { Rack::MiniProfiler.reset_config }
@@ -12,7 +12,7 @@ describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
       map '/no_exceptions' do
-        run lambda { |_env| [200, {'Content-Type' => 'text/html'}, '<h1>Success</h1>'] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, '<h1>Success</h1>'] }
       end
       map '/raise_exceptions' do
         # This route raises 3 exceptions, catches them, and returns a successful response
@@ -32,20 +32,20 @@ describe 'Rack::MiniProfiler - trace_exceptions', :unless => (RUBY_VERSION < '2.
           rescue
             # Ignore the exception
           end
-          [200, {'Content-Type' => 'text/html'}, '<h1>Exception raised but success returned</h1>']
+          [200, { 'Content-Type' => 'text/html' }, '<h1>Exception raised but success returned</h1>']
         }
       end
     }.to_app
   end
 
   it 'with no exceptions' do
-    get '/no_exceptions', :pp => 'trace-exceptions'
+    get '/no_exceptions', pp: 'trace-exceptions'
     expect(last_response.body).to include('No exceptions')
   end
 
   describe 'with exceptions' do
     it 'unfiltered' do
-      get '/raise_exceptions', :pp => 'trace-exceptions'
+      get '/raise_exceptions', pp: 'trace-exceptions'
       expect(last_response.body).to include('Exceptions: (3 total)')
       expect(last_response.body).to include('RuntimeError - "Test RuntimeError Exception"')
       expect(last_response.body).to include('NameError - "Test NameError Exception"')

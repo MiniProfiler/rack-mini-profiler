@@ -33,12 +33,12 @@ describe Rack::MiniProfiler do
 
       describe 'base_url_path' do
         it 'adds a trailing slash onto the base_url_path' do
-          profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource")
+          profiler = Rack::MiniProfiler.new(nil, base_url_path: "/test-resource")
           expect(profiler.config.base_url_path).to eq("/test-resource/")
         end
 
         it "doesn't add the trailing slash when it's already there" do
-          profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource/")
+          profiler = Rack::MiniProfiler.new(nil, base_url_path: "/test-resource/")
           expect(profiler.config.base_url_path).to eq("/test-resource/")
         end
 
@@ -51,11 +51,11 @@ describe Rack::MiniProfiler do
     before do
       Rack::MiniProfiler.create_current
       class TestClass
-        def foo(bar,baz)
+        def foo(bar, baz)
           return [bar, baz, yield]
         end
 
-        def self.bar(baz,boo)
+        def self.bar(baz, boo)
           return [baz, boo, yield]
         end
       end
@@ -63,13 +63,13 @@ describe Rack::MiniProfiler do
 
     it 'should not destroy a method' do
       Rack::MiniProfiler.profile_method TestClass, :foo
-      expect(TestClass.new.foo("a","b"){"c"}).to eq(["a","b","c"])
+      expect(TestClass.new.foo("a", "b") { "c" }).to eq(["a", "b", "c"])
       Rack::MiniProfiler.unprofile_method TestClass, :foo
     end
 
     it 'should not destroy a singleton method' do
       Rack::MiniProfiler.profile_singleton_method TestClass, :bar
-      expect(TestClass.bar("a", "b"){"c"}).to eq(["a","b","c"])
+      expect(TestClass.bar("a", "b") { "c" }).to eq(["a", "b", "c"])
       Rack::MiniProfiler.unprofile_singleton_method TestClass, :bar
     end
 
@@ -83,7 +83,6 @@ describe Rack::MiniProfiler do
         expect(Rack::MiniProfiler.step('test') { "mini profiler" }).to eq("mini profiler")
       end
     end
-
 
     describe 'typical usage' do
       before(:all) do
@@ -135,9 +134,9 @@ describe Rack::MiniProfiler do
 
   describe '#ids' do
     let(:profiler) do
-      Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource",
-                                  :storage       => Rack::MiniProfiler::MemoryStore,
-                                  :user_provider => Proc.new{|env| user_id },
+      Rack::MiniProfiler.new(nil, base_url_path: "/test-resource",
+                                  storage: Rack::MiniProfiler::MemoryStore,
+                                  user_provider: Proc.new { |env| user_id },
                             )
     end
 

@@ -5,9 +5,8 @@ describe Rack::MiniProfiler::FileStore do
     before do
       tmp = File.expand_path(__FILE__ + "/../../../tmp")
       Dir::mkdir(tmp) unless File.exist?(tmp)
-      @store = Rack::MiniProfiler::FileStore.new(:path => tmp)
+      @store = Rack::MiniProfiler::FileStore.new(path: tmp)
     end
-
 
     describe 'allowed_tokens' do
 
