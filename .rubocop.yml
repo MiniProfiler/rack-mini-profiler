@@ -1,8 +1,1 @@
-AllCops:
-  DisabledByDefault: true
-  TargetRubyVersion: 2.2
-  Include:
-    - 'lib/**/*.rb'
-
-Performance:
-  Enabled: true
+inherit_from: https://raw.githubusercontent.com/discourse/discourse/master/.rubocop.yml

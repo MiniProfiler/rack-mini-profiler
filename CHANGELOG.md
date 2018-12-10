@@ -4,6 +4,10 @@
 
 - [FIX] add support for exec_params instrumentation in PG, this method as of PG 1.1.0 no longer
  routes calls to exec / async_exec
+- [FIX] add missing started_at on requests
+- [UX] amend colors so we pass lighthouse
+- [FEATURE] fetch API support
+- [FIX] getEntriesByName is missing in iOS, workaround
 
 ## 1.0.0 2017-03-29
 
