@@ -44,7 +44,7 @@ module Rack::MiniProfilerRails
       base_path = Rails.application.config.paths['tmp'].first rescue "#{Rails.root}/tmp"
       tmp       = base_path + '/miniprofiler'
 
-      c.storage_options = {:path => tmp}
+      c.storage_options = { path: tmp }
       c.storage = Rack::MiniProfiler::FileStore
     end
 
@@ -58,10 +58,10 @@ module Rack::MiniProfilerRails
 
     # Attach to various Rails methods
     ActiveSupport.on_load(:action_controller) do
-      ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
+      ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing action: #{action}" }
     end
     ActiveSupport.on_load(:action_view) do
-      ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{@virtual_path}"}
+      ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) { |x, y| "Rendering: #{@virtual_path}" }
     end
 
     @already_initialized = true

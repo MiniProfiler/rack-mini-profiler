@@ -19,7 +19,6 @@ module Rack
           @cycle_count * @interval >= @cycle
         end
 
-
         # We don't want to hit the filesystem every 10s to clean up the cache so we need to do a bit of
         # accounting to avoid sleeping that entire time.  We don't want to sleep for the entire period because
         # it means the thread will stay live in hot deployment scenarios, keeping a potentially large memory
@@ -67,7 +66,7 @@ module Rack
       end
 
       #FIXME: use weak ref, trouble it may be broken in 1.9 so need to use the 'ref' gem
-      def initialize_cleanup_thread(args={})
+      def initialize_cleanup_thread(args = {})
         cleanup_interval = args.fetch(:cleanup_interval) { CLEANUP_INTERVAL }
         cleanup_cycle    = args.fetch(:cleanup_cycle)    { CLEANUP_CYCLE }
         t = CacheCleanupThread.new(cleanup_interval, cleanup_cycle, self) do

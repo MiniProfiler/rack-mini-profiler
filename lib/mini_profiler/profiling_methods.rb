@@ -14,7 +14,7 @@ module Rack
         return unless current
         parent_timer          = current.current_timer
         current.current_timer = current_timer = current.current_timer.add_child(name)
-        [current_timer,parent_timer]
+        [current_timer, parent_timer]
       end
 
       def finish_step(obj)
@@ -63,7 +63,7 @@ module Rack
       end
 
       def profile_method(klass, method, type = :profile, &blk)
-        default_name = type==:counter ? method.to_s  : klass.to_s + " " + method.to_s
+        default_name = type == :counter ? method.to_s : klass.to_s + " " + method.to_s
         clean        = clean_method_name(method)
 
         with_profiling    = ("#{clean}_with_mini_profiler").intern
@@ -96,7 +96,7 @@ module Rack
               self.send without_profiling, *args, &orig
             ensure
               duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
-              parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct )
+              parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct)
             end
           else
             Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
@@ -130,7 +130,7 @@ module Rack
       # and keeping a record of its run time.
       #
       # Returns the result of the block, or nil when no block is given.
-      def counter(type, duration_ms=nil)
+      def counter(type, duration_ms = nil)
         result = nil
         if block_given?
           start       = Process.clock_gettime(Process::CLOCK_MONOTONIC)

@@ -19,12 +19,12 @@ module Rack
           @base_url_path    = "/mini-profiler-resources/".dup
           @disable_caching  = true
           # called prior to rack chain, to ensure we are allowed to profile
-          @pre_authorize_cb = lambda {|env| true}
+          @pre_authorize_cb = lambda { |env| true }
 
           # called after rack chain, to ensure we are REALLY allowed to profile
           @skip_schema_queries    = false
           @storage                = MiniProfiler::MemoryStore
-          @user_provider          = Proc.new{|env| Rack::Request.new(env).ip}
+          @user_provider          = Proc.new { |env| Rack::Request.new(env).ip }
           @authorization_mode     = :allow_all
           @backtrace_threshold_ms = 0
           @flamegraph_sample_rate = 0.5
@@ -79,13 +79,12 @@ module Rack
         position.include?('right') ? 'right' : 'left'
       end
 
-
       def merge!(config)
         if config
           if Hash === config
-            config.each{|k,v| instance_variable_set "@#{k}",v}
+            config.each { |k, v| instance_variable_set "@#{k}", v }
           else
-            self.class.attributes.each{ |k|
+            self.class.attributes.each { |k|
               v = config.send k
               instance_variable_set "@#{k}", v if v
             }

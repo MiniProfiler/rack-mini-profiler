@@ -131,7 +131,6 @@ describe Rack::MiniProfiler::TimerStruct::Request do
         expect(@request[:is_trivial]).to be(true)
       end
 
-
       describe 'record time on parent' do
         before do
           @request.record_time(1234)

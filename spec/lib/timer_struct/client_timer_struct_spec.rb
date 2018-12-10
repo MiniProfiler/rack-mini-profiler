@@ -2,7 +2,7 @@ require 'yaml'
 
 describe Rack::MiniProfiler::TimerStruct::Client do
 
-  let(:described){ Rack::MiniProfiler::TimerStruct::Client }
+  let(:described) { Rack::MiniProfiler::TimerStruct::Client }
 
   def new_page
     Rack::MiniProfiler::TimerStruct::Page.new({})
@@ -60,7 +60,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
       describe "bob.js" do
         before do
-          @bob = @client.timings.find {|t| t["Name"] == "bob.js"}
+          @bob = @client.timings.find { |t| t["Name"] == "bob.js" }
         end
 
         it 'has it in the timings' do
@@ -75,7 +75,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
       describe "Navigation" do
         before do
-          @nav = @client.timings.find {|t| t["Name"] == "Navigation"}
+          @nav = @client.timings.find { |t| t["Name"] == "Navigation" }
         end
 
         it 'has a Timing for the Navigation' do
@@ -93,7 +93,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
       describe "Simple" do
         before do
-          @simple = @client.timings.find {|t| t["Name"] == "Simple"}
+          @simple = @client.timings.find { |t| t["Name"] == "Simple" }
         end
 
         it 'has a Timing for the Simple' do
@@ -125,12 +125,12 @@ describe Rack::MiniProfiler::TimerStruct::Client do
       end
 
       it 'has no timing when the start is before Navigation' do
-        expect(@client.timings.find {|t| t["Name"] == "Previous"}).to be_nil
+        expect(@client.timings.find { |t| t["Name"] == "Previous" }).to be_nil
       end
 
       describe "weird" do
         before do
-          @weird = @client.timings.find {|t| t["Name"] == "Weird"}
+          @weird = @client.timings.find { |t| t["Name"] == "Weird" }
         end
 
         it 'has a Timing for the Weird' do
@@ -148,7 +148,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
 
       describe "differentFormat" do
         before do
-          @diff = @client.timings.find {|t| t["Name"] == "differentFormat"}
+          @diff = @client.timings.find { |t| t["Name"] == "differentFormat" }
         end
 
         it 'has a Timing for the differentFormat' do

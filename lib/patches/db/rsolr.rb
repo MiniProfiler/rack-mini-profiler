@@ -10,8 +10,8 @@ class RSolr::Connection
     elapsed_time = SqlPatches.elapsed_time(start)
 
     data = "#{request_context[:method].upcase} #{request_context[:uri]}".dup
-    if request_context[:method] == :post and request_context[:data]
-      if request_context[:headers].include?("Content-Type") and request_context[:headers]["Content-Type"] == "text/xml"
+    if (request_context[:method] == :post) && request_context[:data]
+      if request_context[:headers].include?("Content-Type") && (request_context[:headers]["Content-Type"] == "text/xml")
         # it's xml, unescaping isn't needed
         data << "\n#{request_context[:data]}"
       else

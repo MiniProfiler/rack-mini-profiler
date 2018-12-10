@@ -18,8 +18,6 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
     end
   end
 
-
-
   describe 'backtrace' do
     it 'has a snippet' do
       sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)

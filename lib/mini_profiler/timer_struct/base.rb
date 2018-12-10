@@ -6,7 +6,7 @@ module Rack
       # A base class for timing structures
       class Base
 
-        def initialize(attrs={})
+        def initialize(attrs = {})
           @attributes = attrs
         end
 
@@ -26,7 +26,7 @@ module Rack
         def to_json(*a)
           # this does could take in an option hash, but the only interesting there is max_nesting.
           #   if this becomes an option we could increase
-          ::JSON.generate( @attributes, :max_nesting => 100 )
+          ::JSON.generate(@attributes, max_nesting: 100)
         end
 
         def as_json(options = nil)

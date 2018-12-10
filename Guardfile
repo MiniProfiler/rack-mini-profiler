@@ -2,7 +2,7 @@
 # More info at https://github.com/guard/guard#readme
 
 directories %w(lib spec) \
- .select{|d| Dir.exists?(d) ? d : UI.warning("Directory #{d} does not exist")}
+  .select { |d| Dir.exists?(d) ? d : UI.warning("Directory #{d} does not exist") }
 
 ## Note: if you are using the `directories` clause above and you are not
 ## watching the project directory ('.'), then you will want to move
@@ -27,4 +27,3 @@ guard :rspec, cmd: 'bundle exec rspec', failed_mode: :focus do
   watch(%r{^lib/mini_profiler/(.+)\.rb$})     { |m| "spec/lib/#{m[1]}_spec.rb" }
   watch('spec/spec_helper.rb')  { "spec" }
 end
-
