@@ -8,6 +8,7 @@
 - [UX] amend colors so we pass lighthouse
 - [FEATURE] fetch API support
 - [FIX] getEntriesByName is missing in iOS, workaround
+- [FEATURE] drop support for Ruby 2.2.0 we require 2.3.0 and up (EOL Ruby no longer supported)
 
 ## 1.0.0 2017-03-29
 
