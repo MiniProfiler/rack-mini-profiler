@@ -10,7 +10,7 @@
 - [FIX] getEntriesByName is missing in iOS, workaround
 - [FEATURE] drop support for Ruby 2.2.0 we require 2.3.0 and up (EOL Ruby no longer supported)
 
-## 1.0.0 2017-03-29
+## 1.0.0 2018-03-29
 
 - [BREAKING CHANGE] Ruby version 2.2.0 or later is required
 - [FEATURE] use new web performance API to avoid warning @MikeRogers0
