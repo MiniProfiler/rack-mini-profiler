@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.2 2019-02-05
+
+- [FIX] correct script injection to work with Rails 6 and above
+
 ## 1.0.1 2018-12-10
 
 - [FIX] add support for exec_params instrumentation in PG, this method as of PG 1.1.0 no longer
