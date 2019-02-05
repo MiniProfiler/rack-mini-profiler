@@ -40,7 +40,7 @@ task update_asset_version: :compile_sass do
   class MiniProfiler
     ASSET_VERSION = '#{Digest::MD5.hexdigest(h.sort.join(''))}'.freeze
   end
-end"
+end\n"
   end
 end
 
