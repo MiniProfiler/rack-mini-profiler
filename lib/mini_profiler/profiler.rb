@@ -397,7 +397,13 @@ module Rack
         if script.respond_to?(:encoding) && script.respond_to?(:force_encoding)
           script = script.force_encoding(fragment.encoding)
         end
-        fragment.insert(index, script)
+
+        safe_script = script
+        if script.respond_to?(:html_safe)
+          safe_script = script.html_safe
+        end
+
+        fragment.insert(index, safe_script)
       else
         fragment
       end
