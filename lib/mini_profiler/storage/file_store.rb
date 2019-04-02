@@ -31,7 +31,7 @@ module Rack
         end
 
         private
-	if Gem.win_platform?
+        if Gem.win_platform?
           def path(key)
             @path.dup << "/" << @prefix << "_" << key.gsub(/:/, '_')
           end
