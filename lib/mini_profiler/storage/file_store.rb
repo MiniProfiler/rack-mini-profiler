@@ -31,7 +31,7 @@ module Rack
         end
 
         private
-        if RUBY_PLATFORM =~ /mswin(?!ce)|mingw|cygwin|bccwin/
+	if Gem.win_platform?
           def path(key)
             @path.dup << "/" << @prefix << "_" << key.gsub(/:/, '_')
           end
