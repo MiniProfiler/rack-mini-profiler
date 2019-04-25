@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'dalli'
   s.add_development_dependency 'rspec', '~> 3.6.0'
   s.add_development_dependency 'redis'
-  s.add_development_dependency 'sass'
+  s.add_development_dependency 'sassc'
   s.add_development_dependency 'flamegraph'
   s.add_development_dependency 'rubocop'
 
