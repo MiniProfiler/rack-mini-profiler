@@ -310,7 +310,7 @@ skip_paths|`[]`|Paths that skip profiling.
 skip_schema_queries|Rails dev: `'true'`<br>Othwerwise: `'false'`|`'true'` to log schema queries.
 auto_inject|`true`|`true` to inject the miniprofiler script in the page.
 backtrace_ignores|`[]`|Regexes of lines to be removed from backtraces.
-backtrace_includes|Rails: `[/^\/?(app|config|lib|test)/]`<br>Rack: `[]`|Regexes of lines to keep in backtraces.
+backtrace_includes|Rails: `[/^\/?(app\|config\|lib\|test)/]`<br>Rack: `[]`|Regexes of lines to keep in backtraces.
 backtrace_remove|rails: `Rails.root`<br>Rack: `nil`|A string or regex to remove part of each line in the backtrace.
 toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
 start_hidden|`false`|`false` to make mini_profiler visible on page load.
