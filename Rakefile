@@ -1,4 +1,4 @@
-# Rakefile
+# frozen_string_literal: true
 require 'rubygems'
 require 'bundler'
 require 'bundler/gem_tasks'
@@ -36,9 +36,10 @@ task update_asset_version: :compile_sass do
   end
   File.open('lib/mini_profiler/asset_version.rb', 'w') do |f|
     f.write \
-"module Rack
+"# frozen_string_literal: true
+module Rack
   class MiniProfiler
-    ASSET_VERSION = '#{Digest::MD5.hexdigest(h.sort.join(''))}'.freeze
+    ASSET_VERSION = '#{Digest::MD5.hexdigest(h.sort.join(''))}'
   end
 end\n"
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler::TimerStruct::Page do
 
   before do

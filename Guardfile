@@ -1,4 +1,5 @@
-# A sample Guardfile
+# frozen_string_literal: true
+
 # More info at https://github.com/guard/guard#readme
 
 directories %w(lib spec) \

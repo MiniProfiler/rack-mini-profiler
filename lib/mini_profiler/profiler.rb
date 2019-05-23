@@ -71,7 +71,7 @@ module Rack
       MiniProfiler.config.merge!(config)
       @config = MiniProfiler.config
       @app    = app
-      @config.base_url_path << "/" unless @config.base_url_path.end_with? "/"
+      @config.base_url_path += "/" unless @config.base_url_path.end_with? "/"
       unless @config.storage_instance
         @config.storage_instance = @config.storage.new(@config.storage_options)
       end

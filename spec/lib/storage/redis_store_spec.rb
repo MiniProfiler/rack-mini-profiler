@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler::RedisStore do
   let(:store) { Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4) }
   let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),

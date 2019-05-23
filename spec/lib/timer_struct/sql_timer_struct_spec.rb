@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler::TimerStruct::Sql do
   before do
     @page = Rack::MiniProfiler::TimerStruct::Page.new({})

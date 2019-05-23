@@ -1,4 +1,6 @@
 #! rackup -
+# frozen_string_literal: true
+
 #\ -w -p 8080
 require 'active_support/inflector' # see https://code.google.com/p/ruby-sequel/issues/detail?id=329
 require 'sequel'

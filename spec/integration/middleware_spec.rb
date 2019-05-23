@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rack/test'
 require 'zlib'
 
@@ -26,7 +28,7 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, ['<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
@@ -41,7 +43,7 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::MiniProfiler
         use Rack::Deflater
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, ['<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
@@ -77,7 +79,7 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::Deflater
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, ['<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 

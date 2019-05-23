@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rack/test'
 
 describe Rack::MiniProfiler do
@@ -7,10 +9,10 @@ describe Rack::MiniProfiler do
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
       map '/path2/a' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, '<h1>path1</h1>'] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>'] }
       end
       map '/path1/a' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, '<h1>path2</h1>'] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +'<h1>path2</h1>'] }
       end
       map '/cached-resource' do
         run lambda { |env|
@@ -23,50 +25,50 @@ describe Rack::MiniProfiler do
         }
       end
       map '/post' do
-        run lambda { |env| [302, { 'Content-Type' => 'text/html' }, '<h1>POST</h1>'] }
+        run lambda { |env| [302, { 'Content-Type' => 'text/html' }, +'<h1>POST</h1>'] }
       end
       map '/html' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
       end
       map '/whitelisted-html' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
-          [200, { 'Content-Type' => 'text/html' }, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
+          [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
         }
       end
       map '/implicitbody' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, "<html><h1>Hi</h1></html>"] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><h1>Hi</h1></html>"] }
       end
       map '/implicitbodyhtml' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, "<h1>Hi</h1>"] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<h1>Hi</h1>"] }
       end
       map '/db' do
         run lambda { |env|
           ::Rack::MiniProfiler.record_sql("I want to be, in a db", 10)
-          [200, { 'Content-Type' => 'text/html' }, '<h1>Hi+db</h1>']
+          [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi+db</h1>']
         }
       end
       map '/3ms' do
         run lambda { |env|
           sleep(0.003)
-          [200, { 'Content-Type' => 'text/html' }, '<h1>Hi</h1>']
+          [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi</h1>']
         }
       end
       map '/whitelisted' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
-          [200, { 'Content-Type' => 'text/html' }, '<h1>path1</h1>']
+          [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>']
         }
       end
       map '/rails_engine' do
         run lambda { |env|
           env['SCRIPT_NAME'] = '/rails_engine'  # Rails engines do that
-          [200, { 'Content-Type' => 'text/html' }, '<html><h1>Hi</h1></html>']
+          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>Hi</h1></html>']
         }
       end
       map '/under_passenger' do
         run lambda { |env|
-          [200, { 'Content-Type' => 'text/html' }, '<html><h1>and I ride and I ride</h1></html>']
+          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>and I ride and I ride</h1></html>']
         }
       end
     }.to_app
