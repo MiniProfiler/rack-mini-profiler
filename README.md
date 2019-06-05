@@ -25,6 +25,7 @@ We have decided to restructure our repository so there is a central UI repo and 
 
 - Setting up a build that reuses https://github.com/MiniProfiler/ui
 - Migrating the internal data structures [per the spec](https://github.com/MiniProfiler/ui)
+- Help [triage issues](https://www.codetriage.com/miniprofiler/rack-mini-profiler) [![Open Source Helpers](https://www.codetriage.com/miniprofiler/rack-mini-profiler/badges/users.svg)](https://www.codetriage.com/miniprofiler/rack-mini-profiler)
 
 If you feel like taking on any of this start an issue and update us on your progress.
 
