@@ -55,7 +55,7 @@ module Process
 
     undef clock_gettime
     def clock_gettime(*)
-      @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
+      defined?(@now) && @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
     end
     module_function :clock_gettime
 
