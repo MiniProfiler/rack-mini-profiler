@@ -50,17 +50,18 @@ describe Rack::MiniProfiler do
   end
 
   describe 'profile method' do
+    class TestClass
+      def foo(bar, baz)
+        return [bar, baz, yield]
+      end
+
+      def self.bar(baz, boo)
+        return [baz, boo, yield]
+      end
+    end
+
     before do
       Rack::MiniProfiler.create_current
-      class TestClass
-        def foo(bar, baz)
-          return [bar, baz, yield]
-        end
-
-        def self.bar(baz, boo)
-          return [baz, boo, yield]
-        end
-      end
     end
 
     it 'should not destroy a method' do
