@@ -84,11 +84,11 @@ module Rack
 
     def serve_results(env)
       request     = Rack::Request.new(env)
-      id          = request[:id]
+      id          = request.params['id']
       page_struct = @storage.load(id)
       unless page_struct
         @storage.set_viewed(user(env), id)
-        id        = ERB::Util.html_escape(request['id'])
+        id        = ERB::Util.html_escape(request.params['id'])
         user_info = ERB::Util.html_escape(user(env))
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
