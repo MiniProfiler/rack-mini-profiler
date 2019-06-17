@@ -53,6 +53,7 @@ module Process
     end
     module_function :clock_travel
 
+    undef clock_gettime
     def clock_gettime(*)
       @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
     end
