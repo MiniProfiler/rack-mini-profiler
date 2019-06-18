@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+$VERBOSE = true
 require 'simplecov'
 SimpleCov.start do
   add_filter "/spec/"
@@ -52,8 +53,9 @@ module Process
     end
     module_function :clock_travel
 
+    undef clock_gettime
     def clock_gettime(*)
-      @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
+      defined?(@now) && @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
     end
     module_function :clock_gettime
 
