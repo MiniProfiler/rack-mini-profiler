@@ -3,8 +3,9 @@
 describe Rack::MiniProfiler::TimerStruct::Custom do
   before do
     @name = 'cool request'
+    @more_path = 'http://localhost:3000/posts'
     @page    = Rack::MiniProfiler::TimerStruct::Page.new({})
-    @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, @page)
+    @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, @more_path, @page)
     @custom  = Rack::MiniProfiler::TimerStruct::Custom.new('a', 0.2, @page, @request)
   end
 

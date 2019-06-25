@@ -44,7 +44,7 @@
             <tr>
               <td colspan="3">
                 {{if !client_timings}}
-                {{tmpl "#linksTemplate"}}
+                  {{tmpl({timing:root, page:this.data}) "#linksTemplate"}}
                 {{/if}}
                 <a class="profiler-toggle-duration-with-children" title="toggles column with aggregate child durations">show time with children</a>
               </td>
@@ -89,7 +89,7 @@
           </tbody>
           <tfoot>
             <td colspan="3">
-              {{tmpl "#linksTemplate"}}
+              {{tmpl({timing:root, page:this.data}) "#linksTemplate"}}
             </td>
           </tfoot>
         </table>
@@ -127,8 +127,8 @@
 </script>
 
 <script id="linksTemplate" type="text/x-jquery-tmpl">
-  <a href="${MiniProfiler.shareUrl(id)}" class="profiler-share-profiler-results" target="_blank">share</a>
-  <a href="${MiniProfiler.moreUrl()}" class="profiler-more-actions">more</a>
+  <a href="${MiniProfiler.shareUrl(page.id)}" class="profiler-share-profiler-results" target="_blank">share</a>
+  <a href="${timing.more_path}" class="profiler-more-actions">more</a>
   {{if custom_link}}
   <a href="${custom_link}" class="profiler-custom-link" target="_blank">${custom_link_name}</a>
   {{/if}}

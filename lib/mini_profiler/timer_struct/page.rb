@@ -41,12 +41,18 @@ module Rack
             custom_timing_names: [],
             custom_timing_stats: {}
           )
-          name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
-          self[:root] = TimerStruct::Request.createRoot(name, self)
+          request_path = "http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
+          name = "#{env['REQUEST_METHOD']} #{request_path}"
+          more_path = request_path + (request_path.include?('?') ? "&pp=help" : "?pp=help")
+          self[:root] = TimerStruct::Request.createRoot(name, more_path, self)
         end
 
         def name
           @attributes[:name]
+        end
+
+        def more_path
+          @attributes[:more_path]
         end
 
         def duration_ms

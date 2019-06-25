@@ -8,7 +8,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
 
   before do
     @name = 'cool request'
-    @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, new_page)
+    @more_path = 'http://localhost:3000/posts'
+    @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, @more_path, new_page)
   end
 
   it 'sets IsRoot to true' do
@@ -21,6 +22,10 @@ describe Rack::MiniProfiler::TimerStruct::Request do
 
   it 'has a Root' do
     expect(@request[:name]).to eq(@name)
+  end
+
+  it 'has a path' do
+    expect(@request[:more_path]).to eq(@more_path)
   end
 
   it 'begins with a children duration of 0' do

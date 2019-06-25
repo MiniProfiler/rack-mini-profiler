@@ -5,15 +5,15 @@ module Rack
     module TimerStruct
       class Request < TimerStruct::Base
 
-        def self.createRoot(name, page)
-          TimerStruct::Request.new(name, page, nil).tap do |timer|
+        def self.createRoot(name, more_path, page)
+          TimerStruct::Request.new(name, more_path, page, nil).tap do |timer|
             timer[:is_root] = true
           end
         end
 
         attr_accessor :children_duration
 
-        def initialize(name, page, parent)
+        def initialize(name, more_path, page, parent)
           start_millis = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]
           depth        = parent ? parent.depth + 1 : 0
           super(
@@ -33,6 +33,7 @@ module Rack
             sql_timings_duration_milliseconds: 0,
             is_trivial: false,
             is_root: false,
+            more_path: more_path,
             depth: depth,
             executed_readers: 0,
             executed_scalars: 0,
@@ -48,6 +49,10 @@ module Rack
 
         def name
           @attributes[:name]
+        end
+
+        def more_path
+          @attributes[:more_path]
         end
 
         def duration_ms
@@ -83,7 +88,7 @@ module Rack
         end
 
         def add_child(name)
-          TimerStruct::Request.new(name, @page, self).tap do |timer|
+          TimerStruct::Request.new(name, nil, @page, self).tap do |timer|
             self[:children].push(timer)
             self[:has_children]      = true
             timer[:parent_timing_id] = self[:id]
