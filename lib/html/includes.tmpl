@@ -128,7 +128,9 @@
 
 <script id="linksTemplate" type="text/x-jquery-tmpl">
   <a href="${MiniProfiler.shareUrl(page.id)}" class="profiler-share-profiler-results" target="_blank">share</a>
+  {{if timing.more_path}}
   <a href="${timing.more_path}" class="profiler-more-actions">more</a>
+  {{/if}}
   {{if custom_link}}
   <a href="${custom_link}" class="profiler-custom-link" target="_blank">${custom_link_name}</a>
   {{/if}}
@@ -218,7 +220,7 @@
 
   <tr class="profiler-gap-info{{if g.duration < 4}} profiler-trivial-gaps{{/if}}">
     <td class="profiler-info">
-      ${g.duration} <span class="profiler-unit">ms</span>  
+      ${g.duration} <span class="profiler-unit">ms</span>
     </td>
     <td class="query">
       <div>${g.topReason.name} &mdash; ${g.topReason.duration.toFixed(2)} <span class="profiler-unit">ms</span></div>
