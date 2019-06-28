@@ -128,7 +128,7 @@
 
 <script id="linksTemplate" type="text/x-jquery-tmpl">
   <a href="${MiniProfiler.shareUrl(page.id)}" class="profiler-share-profiler-results" target="_blank">share</a>
-  <a href="${timing.more_path || MiniProfiler.moreUrl()}" class="profiler-more-actions">more</a>
+  <a href="${MiniProfiler.moreUrl(timing.name)}" class="profiler-more-actions">more</a>
   {{if custom_link}}
   <a href="${custom_link}" class="profiler-custom-link" target="_blank">${custom_link_name}</a>
   {{/if}}

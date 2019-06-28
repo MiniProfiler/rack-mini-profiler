@@ -16,7 +16,6 @@ module Rack
           started_at   = (Time.now.to_f * 1000).to_i
           started      = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
           machine_name = env['SERVER_NAME']
-          request_path = "http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           super(
             id: timer_id,
             name: page_name,
@@ -42,17 +41,12 @@ module Rack
             custom_timing_names: [],
             custom_timing_stats: {}
           )
-          name = "#{env['REQUEST_METHOD']} #{request_path}"
-          more_path = setup_more_path(env['REQUEST_METHOD'], request_path)
-          self[:root] = TimerStruct::Request.createRoot(name, more_path, self)
+          name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
+          self[:root] = TimerStruct::Request.createRoot(name, self)
         end
 
         def name
           @attributes[:name]
-        end
-
-        def more_path
-          @attributes[:more_path]
         end
 
         def duration_ms
@@ -81,11 +75,6 @@ module Rack
             duration_milliseconds: @attributes[:root][:duration_milliseconds],
             custom_timing_names: @attributes[:custom_timing_stats].keys.sort
           }
-        end
-
-        def setup_more_path(http_request_type, request_path)
-          return nil unless http_request_type == 'GET'
-          request_path + (request_path.include?('?') ? "&pp=help" : "?pp=help")
         end
       end
     end
