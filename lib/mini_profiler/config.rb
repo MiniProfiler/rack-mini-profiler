@@ -47,7 +47,7 @@ module Rack
           @show_trivial         = false
           @show_total_sql_count = false
           @start_hidden         = false
-          @toggle_shortcut      = 'Alt+P'
+          @toggle_shortcut      = 'alt+p'
           @html_container       = 'body'
           @position             = "top-left"
 
