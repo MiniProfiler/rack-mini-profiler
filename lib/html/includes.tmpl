@@ -117,7 +117,7 @@
       </tbody>
       </table>
       <p class="profiler-trivial-gap-container">
-        <a class="profiler-toggle-trivial-gaps" href="#">show trivial gaps</a>
+        <a class="profiler-toggle-trivial-gaps">show trivial gaps</a>
       </p>
     </div>
   {{/if}}
@@ -218,7 +218,7 @@
 
   <tr class="profiler-gap-info{{if g.duration < 4}} profiler-trivial-gaps{{/if}}">
     <td class="profiler-info">
-      ${g.duration} <span class="profiler-unit">ms</span>  
+      ${g.duration} <span class="profiler-unit">ms</span>
     </td>
     <td class="query">
       <div>${g.topReason.name} &mdash; ${g.topReason.duration.toFixed(2)} <span class="profiler-unit">ms</span></div>
