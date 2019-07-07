@@ -42,6 +42,7 @@ module Rack
           form = env['rack.request.form_hash']
 
           clientPerf  = form['clientPerformance']           if form
+          puts form.inspect
           clientTimes = clientPerf['timing']                if clientPerf
           baseTime    = clientTimes['navigationStart'].to_i if clientTimes
           return unless clientTimes && baseTime
