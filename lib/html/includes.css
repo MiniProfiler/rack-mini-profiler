@@ -82,70 +82,72 @@
         margin-left: 0px; }
       .profiler-result .profiler-timings tfoot td a.profiler-custom-link {
         float: left; }
-  .profiler-result .profiler-queries {
+  .profiler-result .cached-queries {
+    height: 100vh; }
+  .profiler-result .profiler-queries, .profiler-result .cached-queries {
     font-family: Helvetica, Arial, sans-serif; }
-    .profiler-result .profiler-queries .profiler-stack-trace {
+    .profiler-result .profiler-queries .profiler-stack-trace, .profiler-result .cached-queries .profiler-stack-trace {
       margin-bottom: 15px; }
-    .profiler-result .profiler-queries tbody tr {
+    .profiler-result .profiler-queries tbody tr, .profiler-result .cached-queries tbody tr {
       border-bottom: 1px solid #f1f1f1; }
-    .profiler-result .profiler-queries tr {
+    .profiler-result .profiler-queries tr, .profiler-result .cached-queries tr {
       background-color: #FFF; }
-    .profiler-result .profiler-queries tr.slow {
+    .profiler-result .profiler-queries tr.slow, .profiler-result .cached-queries tr.slow {
       background-color: #FEE; }
-    .profiler-result .profiler-queries tr.very-slow {
+    .profiler-result .profiler-queries tr.very-slow, .profiler-result .cached-queries tr.very-slow {
       background-color: #FDD; }
-    .profiler-result .profiler-queries tr.very-very-slow {
+    .profiler-result .profiler-queries tr.very-very-slow, .profiler-result .cached-queries tr.very-very-slow {
       background-color: #FCC; }
-    .profiler-result .profiler-queries pre {
+    .profiler-result .profiler-queries pre, .profiler-result .cached-queries pre {
       font-family: Consolas, monospace, serif;
       white-space: pre-wrap; }
-    .profiler-result .profiler-queries th {
+    .profiler-result .profiler-queries th, .profiler-result .cached-queries th {
       background-color: #fff;
       border-bottom: 1px solid #555;
       font-weight: bold;
       padding: 15px;
       white-space: nowrap; }
-    .profiler-result .profiler-queries td {
+    .profiler-result .profiler-queries td, .profiler-result .cached-queries td {
       padding: 15px;
       text-align: left; }
-      .profiler-result .profiler-queries td:last-child {
+      .profiler-result .profiler-queries td:last-child, .profiler-result .cached-queries td:last-child {
         padding-right: 25px; }
-    .profiler-result .profiler-queries .profiler-since-start, .profiler-result .profiler-queries .profiler-duration {
+    .profiler-result .profiler-queries .profiler-since-start, .profiler-result .profiler-queries .profiler-duration, .profiler-result .cached-queries .profiler-since-start, .profiler-result .cached-queries .profiler-duration {
       text-align: right; }
-    .profiler-result .profiler-queries .profiler-info div {
+    .profiler-result .profiler-queries .profiler-info div, .profiler-result .cached-queries .profiler-info div {
       text-align: right;
       margin-bottom: 5px; }
-    .profiler-result .profiler-queries .profiler-gap-info, .profiler-result .profiler-queries .profiler-gap-info td {
+    .profiler-result .profiler-queries .profiler-gap-info, .profiler-result .profiler-queries .profiler-gap-info td, .profiler-result .cached-queries .profiler-gap-info, .profiler-result .cached-queries .profiler-gap-info td {
       background-color: #ccc; }
-    .profiler-result .profiler-queries .profiler-gap-info .profiler-unit {
+    .profiler-result .profiler-queries .profiler-gap-info .profiler-unit, .profiler-result .cached-queries .profiler-gap-info .profiler-unit {
       color: #777; }
-    .profiler-result .profiler-queries .profiler-gap-info .profiler-info {
+    .profiler-result .profiler-queries .profiler-gap-info .profiler-info, .profiler-result .cached-queries .profiler-gap-info .profiler-info {
       text-align: right; }
-    .profiler-result .profiler-queries .profiler-gap-info.profiler-trivial-gaps {
+    .profiler-result .profiler-queries .profiler-gap-info.profiler-trivial-gaps, .profiler-result .cached-queries .profiler-gap-info.profiler-trivial-gaps {
       display: none; }
-    .profiler-result .profiler-queries .profiler-trivial-gap-container {
+    .profiler-result .profiler-queries .profiler-trivial-gap-container, .profiler-result .cached-queries .profiler-trivial-gap-container {
       text-align: center; }
-    .profiler-result .profiler-queries .str {
+    .profiler-result .profiler-queries .str, .profiler-result .cached-queries .str {
       color: maroon; }
-    .profiler-result .profiler-queries .kwd {
+    .profiler-result .profiler-queries .kwd, .profiler-result .cached-queries .kwd {
       color: #00008b; }
-    .profiler-result .profiler-queries .com {
+    .profiler-result .profiler-queries .com, .profiler-result .cached-queries .com {
       color: gray; }
-    .profiler-result .profiler-queries .typ {
+    .profiler-result .profiler-queries .typ, .profiler-result .cached-queries .typ {
       color: #2b91af; }
-    .profiler-result .profiler-queries .lit {
+    .profiler-result .profiler-queries .lit, .profiler-result .cached-queries .lit {
       color: maroon; }
-    .profiler-result .profiler-queries .pun {
+    .profiler-result .profiler-queries .pun, .profiler-result .cached-queries .pun {
       color: #000; }
-    .profiler-result .profiler-queries .pln {
+    .profiler-result .profiler-queries .pln, .profiler-result .cached-queries .pln {
       color: #000; }
-    .profiler-result .profiler-queries .tag {
+    .profiler-result .profiler-queries .tag, .profiler-result .cached-queries .tag {
       color: maroon; }
-    .profiler-result .profiler-queries .atn {
+    .profiler-result .profiler-queries .atn, .profiler-result .cached-queries .atn {
       color: red; }
-    .profiler-result .profiler-queries .atv {
+    .profiler-result .profiler-queries .atv, .profiler-result .cached-queries .atv {
       color: blue; }
-    .profiler-result .profiler-queries .dec {
+    .profiler-result .profiler-queries .dec, .profiler-result .cached-queries .dec {
       color: purple; }
   .profiler-result .profiler-warning, .profiler-result .profiler-warning *, .profiler-result .profiler-warning .profiler-queries-show, .profiler-result .profiler-warning .profiler-queries-show .profiler-unit {
     color: #f00; }
@@ -266,14 +268,14 @@
       padding-bottom: 3px; }
     .profiler-results .profiler-popup .profiler-timings .profiler-label {
       max-width: 275px; }
-  .profiler-results .profiler-queries {
+  .profiler-results .profiler-queries, .profiler-results .cached-queries {
     display: none;
     z-index: 2147483643;
     position: absolute;
     overflow-y: auto;
     overflow-x: auto;
     background-color: #fff; }
-    .profiler-results .profiler-queries th {
+    .profiler-results .profiler-queries th, .profiler-results .cached-queries th {
       font-size: 17px; }
   .profiler-results.profiler-min .profiler-result {
     display: none; }
