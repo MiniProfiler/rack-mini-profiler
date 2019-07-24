@@ -94,9 +94,6 @@ module Rack
       end
       unless page_struct[:has_user_viewed]
         page_struct[:client_timings]  = TimerStruct::Client.init_from_form_data(env, page_struct)
-        puts "$$$$$$$$$$$$$$$$$$$$$$$$$$"
-        puts page_struct[:client_timings]
-        puts '$$$$$$$$$$$$$$$$$$$$$$$'
         page_struct[:has_user_viewed] = true
         @storage.save(page_struct)
         @storage.set_viewed(user(env), id)
