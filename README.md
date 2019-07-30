@@ -188,6 +188,13 @@ In those cases use:
 Rack::MiniProfiler.config.authorization_mode = :whitelist
 ```
 
+When deciding to fully profile a page mini profiler consults with the `authorization_mode`
+
+By default in production we attempt to set the authorization mode to `:whitelist` meaning that end user will only be able to see requests where somewhere `Rack::MiniProfiler.authorize_request` is invoked.
+
+In development we run in the `:allow_all` authorization mode meaning every request is profiled and displayed to the end user.
+
+
 ## Configuration
 
 Various aspects of rack-mini-profiler's behavior can be configured when your app boots.
