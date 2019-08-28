@@ -299,6 +299,9 @@ You need to inject the following in your SPA to load MiniProfiler's speed badge 
 
 _Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will change with each release of `rack_mini_profiler`. The MiniProfiler's speed badge will continue to work, although you will have to change the GUID to expire the script to fetch the most recent version.
 
+#### Using MiniProfiler's built in route for apps without HTML responses
+MiniProfiler also ships with a `/rack-mini-profiler/requests` route that displays the speed badge on a blank HTML page. This can be useful when profiling an application that does not render HTML.
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
