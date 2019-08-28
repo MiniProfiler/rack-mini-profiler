@@ -331,6 +331,17 @@ module Rack
         return client_settings.handle_cookie(self.flamegraph(flamegraph))
       end
 
+      if path == '/rack-mini-profiler/requests'
+        blank_page_html = <<~HTML
+          <html>
+            <head></head>
+            <body></body>
+          </html>
+        HTML
+
+        status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]]
+      end
+
       begin
         @storage.save(page_struct)
         # no matter what it is, it should be unviewed, otherwise we will miss POST
