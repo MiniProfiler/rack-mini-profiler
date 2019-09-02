@@ -334,32 +334,13 @@ max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on o
 html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
 show_total_sql_count|`false`|Displays the total number of SQL executions.
 
-### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
+### Using MiniProfiler with `Rack::Deflate` middleware
 
-If you are using `Rack::Deflate` with rails and rack-mini-profiler in its default configuration,
-`Rack::MiniProfiler` will be injected (as always) at position 0 in the middleware stack. This
-will result in it attempting to inject html into the already-compressed response body. To fix this,
-the middleware ordering must be overriden.
-
-To do this, first add `, require: false` to the gemfile entry for rack-mini-profiler.
-This will prevent the railtie from running. Then, customize the initialization
-in the initializer like so:
-
-```ruby
-require 'rack-mini-profiler'
-
-Rack::MiniProfilerRails.initialize!(Rails.application)
-
-Rails.application.middleware.delete(Rack::MiniProfiler)
-Rails.application.middleware.insert_after(Rack::Deflater, Rack::MiniProfiler)
-```
-
-Deleting the middleware and then reinserting it is a bit inelegant, but
-a sufficient and costless solution. It is possible that rack-mini-profiler might
-support this scenario more directly if it is found that
-there is significant need for this confriguration or that
-the above recipe causes problems.
-
+If you are using `Rack::Deflate` with Rails and `rack-mini-profiler` in its default configuration,
+`Rack::MiniProfiler` will be injected (as always) at position 0 in the middleware stack,
+which means it will run after `Rack::Deflate` on response processing. To prevent attempting to inject
+HTML in already compressed response body MiniProfiler will suppress compression by setting 
+`identity` encoding in `Accept-Encoding` request header.
 
 ## Special query strings
 
