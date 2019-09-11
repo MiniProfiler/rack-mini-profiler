@@ -149,7 +149,11 @@ $zindex:2147483640; // near 32bit max 2147483647
         }
     }
 
-    .profiler-queries {
+    .cached-queries {
+        height: 100vh;
+    }
+
+    .profiler-queries, .cached-queries {
         font-family:$normalFonts;
 
         .profiler-stack-trace {
@@ -257,7 +261,7 @@ $zindex:2147483640; // near 32bit max 2147483647
 
     &.profiler-top {
       top:0px;
-      
+
       &.profiler-left {
           left:0px;
 
@@ -423,7 +427,7 @@ $zindex:2147483640; // near 32bit max 2147483647
         }
     }
 
-    .profiler-queries {
+    .profiler-queries, .cached-queries {
         display:none;
         z-index:$zindex + 3;
         position:absolute;

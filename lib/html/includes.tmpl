@@ -61,6 +61,15 @@
               </td>
             {{/each}}
             </tr>
+            {{if activerecord_query_cache_hits.length > 0}}
+              <tr>
+                <td colspan="3">&nbsp;</td>
+                <td colspan="2" class="profiler-number profiler-percent-in-sql" title="${activerecord_query_cache_hits} queries served by ActiveRecord::QueryCache">
+                  <a class="cached-queries-show">${activerecord_query_cache_hits.length}</a>
+                  <span class="profiler-unit"> queries served by ActiveRecord::QueryCache</span>
+                </td>
+              </tr>
+            {{/if}}
           </tfoot>
         </table>
         {{if client_timings}}
@@ -121,7 +130,23 @@
       </p>
     </div>
   {{/if}}
-
+  {{if activerecord_query_cache_hits.length > 0}}
+    <div class="cached-queries">
+      <table>
+      <thead>
+        <tr>
+          <th style="text-align:left">Query</th>
+          <th style="text-align:left">Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{each(i, s) activerecord_query_cache_hits}}
+          {{tmpl({g: s}) "#queryCacheTemplate"}}
+        {{/each}}
+      </tbody>
+      </table>
+    </div>
+  {{/if}}
   </div>
 
 </script>
@@ -225,4 +250,15 @@
     </td>
   </tr>
 
+</script>
+
+<script id="queryCacheTemplate" type="text/x-jquery-tmpl">
+  <tr>
+    <td class="query">
+      <div>${g.sql}</div>
+    </td>
+    <td class="query">
+      <div>${g.location}</div>
+    </td>
+  </tr>
 </script>

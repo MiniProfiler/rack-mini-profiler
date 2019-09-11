@@ -76,6 +76,35 @@ module Rack
         @config.storage_instance = @config.storage.new(@config.storage_options)
       end
       @storage = @config.storage_instance
+      if defined?(ActiveSupport)
+        ActiveSupport::Notifications.subscribe "sql.active_record" do |*args|
+          source_line, line_number = extract_callstack(caller_locations)
+          payload = args[4]
+          if payload[:cached]
+            current.current_timer.page.attributes[:activerecord_query_cache_hits] << {
+              sql: payload[:sql],
+              location: "#{source_line}:#{line_number}"
+            }
+          end
+        end
+      end
+    end
+
+    def gem_path_regexp
+      @gem_path_regexp ||= Gem.path.dup.push(RbConfig::CONFIG["rubylibdir"]).map { |p| "^#{p}" }.join('|')
+    end
+
+    def extract_callstack(callstack)
+      line = callstack.find do |frame|
+        frame.absolute_path && !frame.absolute_path.match?(gem_path_regexp)
+      end
+
+      offending_line = line || callstack.first
+
+      [
+        offending_line.path,
+        offending_line.lineno
+      ]
     end
 
     def user(env)

@@ -11,7 +11,7 @@ module Rack
           end
         end
 
-        attr_accessor :children_duration
+        attr_accessor :children_duration, :page
 
         def initialize(name, page, parent)
           start_millis = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]
