@@ -24,7 +24,10 @@ end
 
 desc "compile sass"
 task compile_sass: :copy_files do
-  `sass lib/html/includes.scss > lib/html/includes.css`
+  require "sassc"
+  scss = File.read("lib/html/includes.scss")
+  css = SassC::Engine.new(scss).render
+  File.write("lib/html/includes.css", css)
 end
 
 desc "update asset version file"
