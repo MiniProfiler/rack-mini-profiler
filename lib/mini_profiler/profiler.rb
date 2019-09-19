@@ -380,7 +380,7 @@ module Rack
 
       # inject header
       if headers.is_a? Hash
-        headers['X-MiniProfiler-Ids'] = ids_json(env)
+        headers['X-MiniProfiler-Ids'] = ids_comma_separated(env)
       end
 
       if current.inject_js && content_type =~ /text\/html/
@@ -583,10 +583,6 @@ Append the following to your query string:
         @storage.set_all_unviewed(user(env), all)
       end
       all
-    end
-
-    def ids_json(env)
-      ::JSON.generate(ids(env))
     end
 
     def ids_comma_separated(env)
