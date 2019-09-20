@@ -94,7 +94,7 @@ describe Rack::MiniProfiler do
 
     it 'has only one X-MiniProfiler-Ids header' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      ids = ::JSON.parse(h)
+      ids = h.split(",")
       expect(ids.count).to eq(1)
     end
 
@@ -104,14 +104,14 @@ describe Rack::MiniProfiler do
 
     it 'has a functioning share link' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      id = ::JSON.parse(h)[0]
+      id = h.split(",")[0]
       get "/mini-profiler-resources/results?id=#{id}"
       expect(last_response).to be_ok
     end
 
     it 'avoids xss attacks' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      _id = ::JSON.parse(h)[0]
+      _id = h.split(",")[0]
       get "/mini-profiler-resources/results?id=%22%3E%3Cqss%3E"
       expect(last_response).not_to be_ok
       expect(last_response.body).not_to match(/<qss>/)
@@ -244,7 +244,7 @@ describe Rack::MiniProfiler do
 
   def load_prof(response)
     id = response.headers['X-MiniProfiler-Ids']
-    id = ::JSON.parse(id)[0]
+    id = id.split(",")[0]
     Rack::MiniProfiler.config.storage_instance.load(id)
   end
 
@@ -316,7 +316,7 @@ describe Rack::MiniProfiler do
       get '/html'
 
       ids = last_response.headers['X-MiniProfiler-Ids']
-      expect(::JSON.parse(ids).length).to eq(2)
+      expect(ids.split(",").length).to eq(2)
     end
   end
 
