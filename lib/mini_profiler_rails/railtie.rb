@@ -95,6 +95,7 @@ module Rack::MiniProfilerRails
       middlewares = app.middleware.middlewares
       if Rack::MiniProfiler.config.suppress_encoding.nil? &&
           middlewares.include?(Rack::Deflater) &&
+          middlewares.include?(Rack::MiniProfiler) &&
           middlewares.index(Rack::Deflater) > middlewares.index(Rack::MiniProfiler)
         Rack::MiniProfiler.config.suppress_encoding = true
       end
