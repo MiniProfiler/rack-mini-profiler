@@ -24,6 +24,21 @@ describe Rack::MiniProfiler do
     end
   end
 
+  describe 'when enable_advanced_debugging_tools is false' do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+      end
+    end
+    it 'advanced tools are disabled' do
+      %w{env analyze-memory profile-gc profile-memory}.each do |p|
+        do_get(pp: p)
+        expect(last_response.body).to eq(Rack::MiniProfiler.advanced_tools_message)
+      end
+    end
+  end
+
   describe 'with analyze-memory query' do
     def app
       Rack::Builder.new do
@@ -32,7 +47,8 @@ describe Rack::MiniProfiler do
       end
     end
 
-    it 'should return ObjectSpace statistics' do
+    it 'should return ObjectSpace statistics if advanced tools are enabled' do
+      Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
       do_get(pp: 'analyze-memory')
       expect(last_response.body).to include('Largest strings:')
     end
