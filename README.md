@@ -333,6 +333,7 @@ collapse_results|`true`|If multiple timing results exist in a single page, colla
 max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page
 html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
 show_total_sql_count|`false`|Displays the total number of SQL executions.
+enable_advanced_debugging_tools|`false`|Enables memory debugging tools that can be used via the UI.
 
 ### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
 
