@@ -539,7 +539,7 @@ module Rack
 
     def make_link(postfix, env)
       link = env["PATH_INFO"] + "?" + env["QUERY_STRING"].sub("pp=help", "pp=#{postfix}")
-      "pp=<a href='#{link}'>#{postfix}</a>"
+      "pp=<a href='#{ERB::Util.html_escape(link)}'>#{postfix}</a>"
     end
 
     def help(client_settings, env)
