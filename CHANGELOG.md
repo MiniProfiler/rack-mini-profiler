@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.0 2019-10-01
+
+- [FEATURE] remove jQuery dependency, switch template library to dot.js
+- [FEATURE] disable all sensitive debugging methods by default (env, memory profiling) can be enabled with enable_advanced_debugging_tools.
+- [FIX] when conditionally requiring rack mini profiler, asset precompile could fail
+- [FEATURE] `/rack-mini-profiler/requests` can be used to monitor all requests for apps that do not have a UI (like API apps)
+
 ## 1.0.2 2019-02-05
 
 - [FIX] correct script injection to work with Rails 6 and above
