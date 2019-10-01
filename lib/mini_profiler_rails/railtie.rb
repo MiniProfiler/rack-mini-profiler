@@ -64,6 +64,7 @@ module Rack::MiniProfilerRails
       ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) { |x, y| "Rendering: #{@virtual_path}" }
     end
 
+    c.enable_advanced_debugging_tools = Rails.env.development?
     @already_initialized = true
   end
 

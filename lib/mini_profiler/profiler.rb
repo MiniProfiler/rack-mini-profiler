@@ -62,6 +62,11 @@ module Rack
         Thread.current[:mp_authorized]
       end
 
+      def advanced_tools_message
+        <<~TEXT
+          This feature is disabled by default, to enable set the enable_advanced_debugging_tools option to true in Mini Profiler config.
+        TEXT
+      end
     end
 
     #
@@ -147,6 +152,14 @@ module Rack
       @config
     end
 
+    def advanced_debugging_enabled?
+      config.enable_advanced_debugging_tools
+    end
+
+    def tool_disabled_message(client_settings)
+      client_settings.handle_cookie(text_result(Rack::MiniProfiler.advanced_tools_message))
+    end
+
     def call(env)
 
       start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -195,12 +208,14 @@ module Rack
 
       # profile gc
       if query_string =~ /pp=profile-gc/
+        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         current.measure = false if current
         return client_settings.handle_cookie(Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env))
       end
 
       # profile memory
       if query_string =~ /pp=profile-memory/
+        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         query_params = Rack::Utils.parse_nested_query(query_string)
         options = {
           ignore_files: query_params['memory_profiler_ignore_files'],
@@ -307,12 +322,14 @@ module Rack
         return client_settings.handle_cookie(dump_exceptions exceptions)
       end
 
-      if query_string =~ /pp=env/ && !config.disable_env_dump
+      if query_string =~ /pp=env/
+        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(dump_env env)
       end
 
       if query_string =~ /pp=analyze-memory/
+        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(analyze_memory)
       end
