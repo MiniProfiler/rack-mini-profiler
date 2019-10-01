@@ -322,7 +322,7 @@ module Rack
         return client_settings.handle_cookie(dump_exceptions exceptions)
       end
 
-      if query_string =~ /pp=env/ && !config.disable_env_dump
+      if query_string =~ /pp=env/
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(dump_env env)

@@ -288,25 +288,13 @@ describe Rack::MiniProfiler do
       end
     end
 
-    describe 'disable_env_dump config option' do
-      context 'default (not configured' do
-        it 'allows env dump' do
-          Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
-          get '/html?pp=env'
+    describe 'env dump' do
+      it 'works when advanced tools are enabled' do
+        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+        get '/html?pp=env'
 
-          expect(last_response.body).to include('QUERY_STRING')
-          expect(last_response.body).to include('CONTENT_LENGTH')
-        end
-      end
-      context 'when enabled' do
-        it 'disables dumping the ENV over the web' do
-          Rack::MiniProfiler.config.disable_env_dump = true
-          get '/html?pp=env'
-
-          # Contains no ENV vars:
-          expect(last_response.body).not_to include('QUERY_STRING')
-          expect(last_response.body).not_to include('CONTENT_LENGTH')
-        end
+        expect(last_response.body).to include('QUERY_STRING')
+        expect(last_response.body).to include('CONTENT_LENGTH')
       end
     end
   end
