@@ -58,7 +58,7 @@ module Rack
       end
 
       def initialize_locks
-        @token_lock = Mutex.new
+        @token_lock         = Mutex.new
         @timer_struct_lock  = Mutex.new
         @user_view_lock     = Mutex.new
         @timer_struct_cache = {}

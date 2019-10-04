@@ -10,8 +10,10 @@ module Rack
       def initialize(args = nil)
         require 'dalli' unless defined? Dalli
         args ||= {}
+
         @prefix = args[:prefix] || "MPMemcacheStore"
         @prefix += "-#{Rack::MiniProfiler::VERSION}"
+
         @client             = args[:client]     || Dalli::Client.new
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
       end
