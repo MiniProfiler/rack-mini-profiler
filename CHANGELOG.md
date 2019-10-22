@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.1 2019-22-10
+
+- [FIX] correct JavaScript fetch support header iteration (Jorge Manrubia)
+
 ## 1.1.0 2019-10-01
 
 - [FEATURE] remove jQuery dependency, switch template library to dot.js
