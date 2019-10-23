@@ -54,7 +54,7 @@
               {{?}}
               {{~ it.custom_timing_names :value}}
                 <td colspan="2" class="profiler-number profiler-percentage-in-sql" title="{{= it.custom_timing_stats[value].count }} {{= value.toLowerCase() }} invocations spent {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration) }} ms of total request time">
-                  {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration / duration_milliseconds * 100) }}
+                  {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration / it.duration_milliseconds * 100) }}
                   <span class="profiler-unit">% in {{= value.toLowerCase() }}</span>
                 </td>
               {{~}}
