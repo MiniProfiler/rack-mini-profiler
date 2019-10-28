@@ -1,16 +1,16 @@
 # CHANGELOG
 
-## 1.1.3 2019-28-10
+## 1.1.3 2019-10-28
 
 - [FEATURE] precompile all templates to avoid need for unsafe-eval
 
-## 1.1.2 2019-24-10
+## 1.1.2 2019-10-24
 
 - [FIX] JS payload was not working on IE11 and leading to errors
 - [FIX] Remove global singleton_class which was injected
 - [FIX] Regressions post removal of jQuery
 
-## 1.1.1 2019-22-10
+## 1.1.1 2019-10-22
 
 - [FIX] correct JavaScript fetch support header iteration (Jorge Manrubia)
 
