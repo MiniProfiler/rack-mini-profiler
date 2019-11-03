@@ -1,20 +1,20 @@
 # CHANGELOG
 
-## 1.1.3 2019-10-28
+## 1.1.3 - 2019-10-28
 
 - [FEATURE] precompile all templates to avoid need for unsafe-eval
 
-## 1.1.2 2019-10-24
+## 1.1.2 - 2019-10-24
 
 - [FIX] JS payload was not working on IE11 and leading to errors
 - [FIX] Remove global singleton_class which was injected
 - [FIX] Regressions post removal of jQuery
 
-## 1.1.1 2019-10-22
+## 1.1.1 - 2019-10-22
 
 - [FIX] correct JavaScript fetch support header iteration (Jorge Manrubia)
 
-## 1.1.0 2019-10-01
+## 1.1.0 - 2019-10-01
 
 - [FEATURE] remove jQuery dependency, switch template library to dot.js
 - [FEATURE] disable all sensitive debugging methods by default (env, memory profiling) can be enabled with enable_advanced_debugging_tools.
@@ -22,11 +22,11 @@
 - [FEATURE] `/rack-mini-profiler/requests` can be used to monitor all requests for apps that do not have a UI (like API apps)
 - [SECURITY] XSS injection in `?pp=help` via rogue uri
 
-## 1.0.2 2019-02-05
+## 1.0.2 - 2019-02-05
 
 - [FIX] correct script injection to work with Rails 6 and above
 
-## 1.0.1 2018-12-10
+## 1.0.1 - 2018-12-10
 
 - [FIX] add support for exec_params instrumentation in PG, this method as of PG 1.1.0 no longer
  routes calls to exec / async_exec
@@ -36,7 +36,7 @@
 - [FIX] getEntriesByName is missing in iOS, workaround
 - [FEATURE] drop support for Ruby 2.2.0 we require 2.3.0 and up (EOL Ruby no longer supported)
 
-## 1.0.0 2017-03-29
+## 1.0.0 - 2018-03-29
 
 - [BREAKING CHANGE] Ruby version 2.2.0 or later is required
 - [FEATURE] use new web performance API to avoid warning @MikeRogers0
@@ -44,16 +44,16 @@
 - [FIX] correct jQuery 3.0 deprecations @TiSer
 - [FIX] JS in IFRAME @naiyt
 
-## 0.10.8 2017-12-01
+## 0.10.8 - 2017-12-01
 
 - [FEATURE] Add `# frozen_string_literal: true` to all `lib/**/*.rb` files
 
-## 0.10.7 2017-11-24
+## 0.10.7 - 2017-11-24
 
 - [FEATURE] Replace Time.now with Process.clock_gettime(Process::CLOCK_MONOTONIC)
 - [FIX] Error with webrick and empty cache control
 
-## 0.10.6 2017-10-30
+## 0.10.6 - 2017-10-30
 
 - [FEATURE] Support for vertical positions (top/bottom)
 - [FEATURE] Suppress profiler results in print media @Mike Dillon
@@ -61,11 +61,11 @@
 - [FEATURE] install generator @yhirano
 - [FEATURE] store initial cache control headers in X-MiniProfiler-Original-Cache-Control @mrasu
 
-## 0.10.5 2017-05-22
+## 0.10.5 - 2017-05-22
 
 - [FIX] revert PG bind sniffing until it is properly tested
 
-## 0.10.4 2017-05-17
+## 0.10.4 - 2017-05-17
 
 - [FEATURE] log binds for pg @neznauy
 - [FIX] use async exec pg monkey patch instead of exec
@@ -74,25 +74,25 @@
 - [FIX] ensure redis get_unviewed_ids returns only ids that exist
 - [FIX] correctly respect SCRIPT in env if it is sniffed by middleware
 
-## 0.10.2 2017-02-08
+## 0.10.2 - 2017-02-08
 
 - [FIX] improve turbolinks support
 - [FEATURE] make location of mini_profiler injection customizable
 
-## 0.10.1 2016-05-18
+## 0.10.1 - 2016-05-18
 
 - [FEATURE] push forward the security checks so no work is ever done if a valid production
     cookie is not available (@sam)
 
-## 0.9.9.2 2016-03-06
+## 0.9.9.2 - 2016-03-06
 
 - [FEATURE] on pageTransition collapse previously expanded timings
 
-## 0.9.9.1 2016-03-06
+## 0.9.9.1 - 2016-03-06
 
 - [FEATURE] expost MiniProfiler.pageTransition() for use by SPA web apps (@sam)
 
-## 0.9.9 2016-03-06
+## 0.9.9 - 2016-03-06
 
 - [FIX] removes alias_method_chain in favor of alias_method until Ruby 1.9.3 (@ayfredlund)
 - [FIX] Dont block mongo when already patched for another db (@rrooding @kbrock)
@@ -148,7 +148,7 @@
 - [FIXED] Possible XSS (admin only)
 - [FIXED] Corrected Sql patching to avoid setting instance vars on nil which is frozen (thanks Andy, huoxito)
 
-## 0.9.0.pre - 2013-12-12 (Sam Saffron)
+## 0.9.0.pre - 2013-12-05 (Sam Saffron)
 - Bumped up version to reflect the stability of the project
 - [IMPROVED] Reports for pp=profile-gc
 - [IMPROVED] pp=flamegraph&flamegraph_sample_rate=1 , allow you to specify sampling rates
@@ -158,7 +158,7 @@
   config.assets.prefix path since developers can rename the path to serve Asset Pipeline
   files from
 
-## 2013-09-03
+## 0.1.31 - 2013-09-03
 - [IMPROVED] Flamegraph now has much increased fidelity
 - [REMOVED] Ripped out flamegraph so it can be isolated into a gem
 - [REMOVED] Ripped out pp=sample it just was never really used
@@ -214,13 +214,13 @@
 - [ADDED] New MemchacedStore
 - [ADDED] Rails 4 support
 
-## 2012-09-12 (Sam Saffron)
+## 0.1.20 - 2012-09-12 (Sam Saffron)
 - [ADDED] pp=profile-gc: allows you to profile the GC in Ruby 1.9.3
 
 ## 0.1.19 - 2012-09-10 (Sam Saffron)
 - [FIXED] Compatibility issue with Ruby 1.8.7
 
-## 0.1.17 - 2012-09-09 (Sam Saffron)
+## 0.1.17 - 2012-09-07 (Sam Saffron)
 - [FIXED] pp=sample was bust unless stacktrace was installed
 
 ## 0.1.16 - 2012-09-05 (Sam Saffron)
@@ -244,10 +244,10 @@
 ## 0.1.12.pre - 2012-08-20 (Sam Saffron)
 - [IMPROVED] Cap X-MiniProfiler-Ids at 10, otherwise the header can get killed
 
-## 2012-08-10 (Sam Saffron)
+## 0.1.11.pre - 2012-08-10 (Sam Saffron)
 - [ADDED] Basic prepared statement profiling for Postgres
 
-## 2012-08-07 (Sam Saffron)
+## 0.1.10 - 2012-08-07 (Sam Saffron)
 - [ADDED] Option to disable profiler for the current session (pp=disable / pp=enable)
 - [ADDED] yajl compatability contributed by Sven Riedel
 
@@ -261,7 +261,7 @@
 - [ADDED] First Paint time for Google Chrome
 - [FIXED] Ensure non Rails installs have mini profiler
 
-## 2012-07-12 (Sam Saffron)
+## 0.1.6 - 2012-07-12 (Sam Saffron)
 - [ADDED] Native PG and MySql2 interceptors, this gives way more accurate times
 - [ADDED] some more client probing built in to rails
 - [IMPROVED] Refactored context so its a proper class and not a hash
@@ -275,7 +275,7 @@
   production
 - [IMPROVED] Cleaned up railties, got rid of the post authorize callback
 
-## 2012-06-28 (Sam Saffron)
+## 0.1.1 - 2012-06-28 (Sam Saffron)
 - [ADDED] Started change log
 - [ADDED] added MemcacheStore
 - [IMPROVED] Corrected profiler so it properly captures POST requests (was supressing non 200s)
