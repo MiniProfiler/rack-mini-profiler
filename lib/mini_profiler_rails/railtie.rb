@@ -55,17 +55,75 @@ module Rack::MiniProfilerRails
 
     # Install the Middleware
     app.middleware.insert(0, Rack::MiniProfiler)
-
-    # Attach to various Rails methods
-    ActiveSupport.on_load(:action_controller) do
-      ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing action: #{action}" }
-    end
-    ActiveSupport.on_load(:action_view) do
-      ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) { |x, y| "Rendering: #{@virtual_path}" }
-    end
-
     c.enable_advanced_debugging_tools = Rails.env.development?
+
+    if !::Rails.configuration.respond_to?(:mini_profiler_without_patches) || !::Rails.configuration.mini_profiler_without_patches
+      # Attach to various Rails methods
+      ActiveSupport.on_load(:action_controller) do
+        ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing action: #{action}" }
+      end
+
+      ActiveSupport.on_load(:action_view) do
+        ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) { |x, y| "Rendering: #{@virtual_path}" }
+      end
+    else
+      subscribe("start_processing.action_controller") do |name, start, finish, id, payload|
+        next if !should_measure?
+
+        current = Rack::MiniProfiler.current
+        description = "Executing action: #{payload[:action]}"
+        Thread.current[get_key(payload)] = current.current_timer
+        Rack::MiniProfiler.current.current_timer = current.current_timer.add_child(description)
+      end
+
+      subscribe("process_action.action_controller") do |name, start, finish, id, payload|
+        next if !should_measure?
+
+        key = get_key(payload)
+        parent_timer = Thread.current[key]
+        next if !parent_timer
+
+        Thread.current[key] = nil
+        Rack::MiniProfiler.current.current_timer.record_time
+        Rack::MiniProfiler.current.current_timer = parent_timer
+      end
+
+      subscribe("render_template.action_view") do |name, start, finish, id, payload|
+        next if !should_measure?
+
+        description = "Rendering: #{payload[:layout]}"
+        Rack::MiniProfiler.current.current_timer.add_child(description).record_time(time_diff_ms(finish, start))
+      end
+
+      subscribe("sql.active_record") do |name, start, finish, id, payload|
+        next if !should_measure?
+        next if payload[:name] =~ /SCHEMA/ && Rack::MiniProfiler.config.skip_schema_queries
+
+        Rack::MiniProfiler.record_sql(
+          payload[:sql],
+          time_diff_ms(finish, start),
+          Rack::MiniProfiler.binds_to_params(payload[:binds])
+        )
+      end
+    end
     @already_initialized = true
+  end
+
+  def self.subscribe(name, &blk)
+    ActiveSupport::Notifications.subscribe(name) { |*args| blk.call(*args) }
+  end
+
+  def self.should_measure?
+    current = Rack::MiniProfiler.current
+    current && current.measure
+  end
+
+  def self.time_diff_ms(finish, start)
+    (finish - start) * 1000
+  end
+
+  def self.get_key(payload)
+    "mini_profiler_parent_timer_#{payload[:controller]}_#{payload[:action]}".to_sym
   end
 
   def self.serves_static_assets?(app)
