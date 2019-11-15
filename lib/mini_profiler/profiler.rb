@@ -6,6 +6,10 @@ module Rack
 
       include Rack::MiniProfiler::ProfilingMethods
 
+      def disable_method_patches?
+        !!defined?(::Rack::MiniProfiler::DISABLE_METHOD_PATCHES)
+      end
+
       def generate_id
         rand(36**20).to_s(36)
       end

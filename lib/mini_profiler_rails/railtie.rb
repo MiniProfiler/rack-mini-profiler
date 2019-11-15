@@ -57,7 +57,7 @@ module Rack::MiniProfilerRails
     app.middleware.insert(0, Rack::MiniProfiler)
     c.enable_advanced_debugging_tools = Rails.env.development?
 
-    if !::Rails.configuration.respond_to?(:mini_profiler_without_patches) || !::Rails.configuration.mini_profiler_without_patches
+    if !::Rack::MiniProfiler.disable_method_patches?
       # Attach to various Rails methods
       ActiveSupport.on_load(:action_controller) do
         ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing action: #{action}" }
