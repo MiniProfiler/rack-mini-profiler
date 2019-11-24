@@ -19,7 +19,7 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 ## rack-mini-profiler needs your help
 
-We have decided to restructure our repository so there is a central UI repo and the various language implementation have their own.
+We have decided to restructure our repository so there is a central UI repo and the various language implementations have their own.
 
 **WE NEED HELP.**
 
