@@ -8,7 +8,7 @@ class Mongo::Server::Connection
     result, _record = SqlPatches.record_sql(args[0][0].payload.inspect) do
       dispatch_without_timing(*args, &blk)
     end
-    return result
+    result
   end
 
   # TODO: change to Module#prepend as soon as Ruby 1.9.3 support is dropped

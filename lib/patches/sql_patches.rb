@@ -11,7 +11,7 @@ class SqlPatches
     start  = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result = yield
     record = ::Rack::MiniProfiler.record_sql(statement, elapsed_time(start), parameters)
-    return result, record
+    [result, record]
   end
 
   def self.should_measure?

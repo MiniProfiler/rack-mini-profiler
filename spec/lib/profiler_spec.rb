@@ -52,11 +52,11 @@ describe Rack::MiniProfiler do
   describe 'profile method' do
     class TestClass
       def foo(bar, baz)
-        return [bar, baz, yield]
+        [bar, baz, yield]
       end
 
       def self.bar(baz, boo)
-        return [baz, boo, yield]
+        [baz, boo, yield]
       end
     end
 

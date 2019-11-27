@@ -9,6 +9,6 @@ class Moped::Node
     result, _record = SqlPatches.record_sql(args[0].log_inspect) do
       process_without_profiling(*args, &blk)
     end
-    return result
+    result
   end
 end
