@@ -101,6 +101,7 @@ describe Rack::MiniProfiler do
           }
           clock_set(start + 1 + 2 + 3 + 4)
         }
+
         @page_struct = Rack::MiniProfiler.current.page_struct
         @root = @page_struct.root
         @root.record_time
@@ -114,23 +115,23 @@ describe Rack::MiniProfiler do
       end
 
       it 'measures total duration correctly' do
-        expect(@page_struct.duration_ms.to_i).to eq(10 * 1000)
+        expect(@page_struct.duration_ms).to be_within(0.1).of(10 * 1000)
       end
 
       it 'measures outer start time correctly' do
-        expect(@outer.start_ms.to_i).to eq(1 * 1000)
+        expect(@outer.start_ms).to be_within(0.1).of(1 * 1000)
       end
 
       it 'measures outer duration correctly' do
-        expect(@outer.duration_ms.to_i).to eq(9 * 1000)
+        expect(@outer.duration_ms).to be_within(0.1).of(9 * 1000)
       end
 
       it 'measures inner start time correctly' do
-        expect(@inner.start_ms.to_i).to eq(3 * 1000)
+        expect(@inner.start_ms).to be_within(0.1).of(3 * 1000)
       end
 
       it 'measures inner duration correctly' do
-        expect(@inner.duration_ms.to_i).to eq(3 * 1000)
+        expect(@inner.duration_ms).to be_within(0.1).of(3 * 1000)
       end
     end
   end
