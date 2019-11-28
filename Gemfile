@@ -10,6 +10,5 @@ gem 'codecov', require: false, group: :test
 group :development do
   gem 'guard', platforms: [:mri_22, :mri_23]
   gem 'guard-rspec', platforms: [:mri_22, :mri_23]
-  gem 'rubocop', require: false
-  gem 'rubocop-discourse', require: false
+  gem 'rubocop', '>=0.77.0', require: false
 end

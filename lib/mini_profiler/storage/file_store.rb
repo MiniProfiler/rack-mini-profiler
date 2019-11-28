@@ -17,9 +17,9 @@ module Rack
         def [](key)
           begin
             data = ::File.open(path(key), "rb") { |f| f.read }
-            return Marshal.load data
+            Marshal.load data
           rescue
-            return nil
+            nil
           end
         end
 
