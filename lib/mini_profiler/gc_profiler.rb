@@ -151,7 +151,7 @@ String stats:
       body << "#{count} : #{string}\n"
     end
 
-    return [200, { 'Content-Type' => 'text/plain' }, body]
+    [200, { 'Content-Type' => 'text/plain' }, body]
   ensure
     prev_gc_state ? GC.disable : GC.enable
   end

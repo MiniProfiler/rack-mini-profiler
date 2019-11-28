@@ -9,19 +9,19 @@ class Plucky::Query
   alias_method :remove_without_profiling, :remove
 
   def find_each(*args, &blk)
-    return profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
   end
 
   def find_one(*args, &blk)
-    return profile_database_operation(__callee__, filtered_inspect(args[0]), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect(args[0]), *args, &blk)
   end
 
   def count(*args, &blk)
-    return profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
   end
 
   def remove(*args, &blk)
-    return profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
   end
 
   private
