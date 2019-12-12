@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.4 - 2019-12-12
+
+- [SECURITY] carefully crafted SQL could cause an XSS on sites that do not use CSPs
+
 ## 1.1.3 - 2019-10-28
 
 - [FEATURE] precompile all templates to avoid need for unsafe-eval
