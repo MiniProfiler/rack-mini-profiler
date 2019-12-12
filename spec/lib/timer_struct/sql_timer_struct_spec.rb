@@ -99,4 +99,17 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
       Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil, params)
     end
   end
+
+  describe "#formatted_command_string" do
+    it "escapes malicious code" do
+      malicious_query = <<-SQL
+        UPDATE "table" SET "column" = '<iframe srcdoc="<script>alert(&#x22;hi&#x22;)</script>" />'
+      SQL
+      escaped_query = <<-SQL
+        UPDATE &quot;table&quot; SET &quot;column&quot; = &#39;&lt;iframe srcdoc=&quot;&lt;script&gt;alert(&amp;#x22;hi&amp;#x22;)&lt;/script&gt;&quot; /&gt;&#39;
+      SQL
+      sql = Rack::MiniProfiler::TimerStruct::Sql.new(malicious_query, 200, @page, nil, {})
+      expect(sql[:formatted_command_string]).to eq(escaped_query)
+    end
+  end
 end
