@@ -89,10 +89,17 @@ module Rack
       def has_valid_cookie?
         valid_cookie = !@cookie.nil?
 
-        if (MiniProfiler.config.authorization_mode == :whitelist)
-          @allowed_tokens ||= @store.allowed_tokens
+        if (MiniProfiler.config.authorization_mode == :whitelist) && valid_cookie
+          begin
+            @allowed_tokens ||= @store.allowed_tokens
+          rescue => e
+            if @config.storage_failure != nil
+              @config.storage_failure.call(e)
+            end
+          end
 
-          valid_cookie = (Array === @orig_auth_tokens) &&
+          valid_cookie = @allowed_tokens &&
+            (Array === @orig_auth_tokens) &&
             ((@allowed_tokens & @orig_auth_tokens).length > 0)
         end
 
