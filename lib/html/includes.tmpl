@@ -181,7 +181,7 @@
 
   {{? it.timing.has_children}}
     {{~ it.timing.children :value}}
-      {{= MiniProfiler.templates.timingTemplate({timing: value, page: it}) }}
+      {{= MiniProfiler.templates.timingTemplate({timing: value, page: it.page}) }}
     {{~}}
   {{?}}
 </script>
