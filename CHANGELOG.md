@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.5 - 2020-01-28
+
+- [FIX] correct custom counter regression
+- [FIX] respect max_traces_to_show
+- [FIX] handle storage engine failures in whitelist mode
+
 ## 1.1.4 - 2019-12-12
 
 - [SECURITY] carefully crafted SQL could cause an XSS on sites that do not use CSPs
