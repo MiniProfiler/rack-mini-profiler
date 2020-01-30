@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.6 - 2020-01-30
+
+- [FIX] edge condition on page transition function could lead to exceptions
+
 ## 1.1.5 - 2020-01-28
 
 - [FIX] correct custom counter regression
