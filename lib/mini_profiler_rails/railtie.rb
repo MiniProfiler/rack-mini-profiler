@@ -58,7 +58,7 @@ module Rack::MiniProfilerRails
 
     # Attach to various Rails methods
     ActiveSupport.on_load(:action_controller) do
-      ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing action: #{action}" }
+      ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing: #{self.class.to_s}##{action}" }
     end
     ActiveSupport.on_load(:action_view) do
       ::Rack::MiniProfiler.profile_method(ActionView::Template, :render) { |x, y| "Rendering: #{@virtual_path}" }
