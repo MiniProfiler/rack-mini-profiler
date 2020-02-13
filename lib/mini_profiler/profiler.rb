@@ -5,9 +5,10 @@ module Rack
     class << self
 
       include Rack::MiniProfiler::ProfilingMethods
+      attr_accessor :subscribe_sql_active_record
 
-      def disable_method_patches?
-        !!defined?(::Rack::MiniProfiler::DISABLE_METHOD_PATCHES)
+      def patch_rails?
+        !!defined?(::Rack::MiniProfiler::ENABLE_RAILS_PATCHES)
       end
 
       def generate_id

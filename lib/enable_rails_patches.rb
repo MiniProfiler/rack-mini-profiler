@@ -2,6 +2,6 @@
 
 module Rack
   class MiniProfiler
-    DISABLE_METHOD_PATCHES = true
+    ENABLE_RAILS_PATCHES = true
   end
 end

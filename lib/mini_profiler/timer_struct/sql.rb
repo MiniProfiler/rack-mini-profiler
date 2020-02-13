@@ -6,6 +6,8 @@ module Rack
     # Timing system for a SQL query
     module TimerStruct
       class Sql < TimerStruct::Base
+        attr_accessor :parent
+
         def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false)
 
           stack_trace = nil

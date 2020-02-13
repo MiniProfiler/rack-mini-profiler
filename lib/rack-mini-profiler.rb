@@ -27,11 +27,8 @@ require 'mini_profiler/context'
 require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
 require 'mini_profiler/profiler'
-
-if !::Rack::MiniProfiler.disable_method_patches?
-  require 'patches/sql_patches'
-  require 'patches/net_patches'
-end
+require 'patches/sql_patches'
+require 'patches/net_patches'
 
 if defined?(::Rails) && defined?(::Rails::VERSION) && ::Rails::VERSION::MAJOR.to_i >= 3
   require 'mini_profiler_rails/railtie'

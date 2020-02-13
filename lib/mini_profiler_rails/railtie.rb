@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'fileutils'
+require_relative './railtie_methods'
 
 module Rack::MiniProfilerRails
+  extend Rack::MiniProfilerRailsMethods
 
   # call direct if needed to do a defer init
   def self.initialize!(app)
@@ -57,7 +59,7 @@ module Rack::MiniProfilerRails
     app.middleware.insert(0, Rack::MiniProfiler)
     c.enable_advanced_debugging_tools = Rails.env.development?
 
-    if !::Rack::MiniProfiler.disable_method_patches?
+    if ::Rack::MiniProfiler.patch_rails?
       # Attach to various Rails methods
       ActiveSupport.on_load(:action_controller) do
         ::Rack::MiniProfiler.profile_method(ActionController::Base, :process) { |action| "Executing action: #{action}" }
@@ -88,38 +90,34 @@ module Rack::MiniProfilerRails
         Rack::MiniProfiler.current.current_timer = parent_timer
       end
 
-      subscribe("render_template.action_view") do |name, start, finish, id, payload|
-        next if !should_measure?
-
-        description = "Rendering: #{payload[:layout]}"
-        Rack::MiniProfiler.current.current_timer.add_child(description).record_time(time_diff_ms(finish, start))
+      subscribe("render_partial.action_view") do |name, start, finish, id, payload|
+        render_notification_handler(payload[:identifier].split("/").last(2).join("/"), finish, start)
       end
 
-      subscribe("sql.active_record") do |name, start, finish, id, payload|
-        next if !should_measure?
-        next if payload[:name] =~ /SCHEMA/ && Rack::MiniProfiler.config.skip_schema_queries
+      subscribe("render_template.action_view") do |name, start, finish, id, payload|
+        render_notification_handler(payload[:layout], finish, start)
+      end
 
-        Rack::MiniProfiler.record_sql(
-          payload[:sql],
-          time_diff_ms(finish, start),
-          Rack::MiniProfiler.binds_to_params(payload[:binds])
-        )
+      if Rack::MiniProfiler.subscribe_sql_active_record
+        # we don't want to subscribe if we've already patched a DB driver
+        # otherwise we would end up with 2 records for every query
+        subscribe("sql.active_record") do |name, start, finish, id, payload|
+          next if !should_measure?
+          next if payload[:name] =~ /SCHEMA/ && Rack::MiniProfiler.config.skip_schema_queries
+
+          Rack::MiniProfiler.record_sql(
+            payload[:sql],
+            (finish - start) * 1000,
+            Rack::MiniProfiler.binds_to_params(payload[:binds])
+          )
+        end
       end
     end
     @already_initialized = true
   end
 
   def self.subscribe(name, &blk)
-    ActiveSupport::Notifications.subscribe(name) { |*args| blk.call(*args) }
-  end
-
-  def self.should_measure?
-    current = Rack::MiniProfiler.current
-    current && current.measure
-  end
-
-  def self.time_diff_ms(finish, start)
-    (finish - start) * 1000
+    ActiveSupport::Notifications.monotonic_subscribe(name) { |*args| blk.call(*args) }
   end
 
   def self.get_key(payload)
