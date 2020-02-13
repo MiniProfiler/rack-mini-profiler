@@ -294,8 +294,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     it 'updates custom_timings and custom_timing_stats attributes' do
       expect(@origin[:custom_timings]).to eq({})
       expect(@origin[:custom_timing_stats]).to eq({})
-      expect(@destination[:custom_timings]).to eq({ 'tests' => [@custom] })
-      expect(@destination[:custom_timing_stats]).to eq({ 'tests' => { count: 1, duration: 30 } })
+      expect(@destination[:custom_timings]).to eq('tests' => [@custom])
+      expect(@destination[:custom_timing_stats]).to eq('tests' => { count: 1, duration: 30 })
     end
   end
 
@@ -309,10 +309,10 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     end
 
     it 'updates custom_timings and custom_timing_stats attributes' do
-      expect(@origin[:custom_timings]).to eq({ 'tests' => [@custom_2] })
-      expect(@origin[:custom_timing_stats]).to eq({ 'tests' => { count: 1, duration: 50 } })
-      expect(@destination[:custom_timings]).to eq({ 'tests' => [@custom] })
-      expect(@destination[:custom_timing_stats]).to eq({ 'tests' => { count: 1, duration: 30 } })
+      expect(@origin[:custom_timings]).to eq('tests' => [@custom_2])
+      expect(@origin[:custom_timing_stats]).to eq('tests' => { count: 1, duration: 50 })
+      expect(@destination[:custom_timings]).to eq('tests' => [@custom])
+      expect(@destination[:custom_timing_stats]).to eq('tests' => { count: 1, duration: 30 })
     end
   end
 
@@ -328,8 +328,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     it 'updates custom_timings and custom_timing_stats attributes' do
       expect(@origin[:custom_timings]).to eq({})
       expect(@origin[:custom_timing_stats]).to eq({})
-      expect(@destination[:custom_timings]).to eq({ 'tests' => [@custom_2, @custom] })
-      expect(@destination[:custom_timing_stats]).to eq({ 'tests' => { count: 2, duration: 80 } })
+      expect(@destination[:custom_timings]).to eq('tests' => [@custom_2, @custom])
+      expect(@destination[:custom_timing_stats]).to eq('tests' => { count: 2, duration: 80 })
     end
   end
 
