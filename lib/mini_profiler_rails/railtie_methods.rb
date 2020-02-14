@@ -22,7 +22,7 @@ module Rack::MiniProfilerRailsMethods
         children_duration += child[:duration_milliseconds]
       end
     end
-    node[:duration_without_children_milliseconds] = duration - children_duration
+    node[:duration_without_children_milliseconds] = duration_ms - children_duration
     to_be_moved[:requests].each { |req| current.move_child(req, node) }
 
     current.sql_timings.each do |sql|

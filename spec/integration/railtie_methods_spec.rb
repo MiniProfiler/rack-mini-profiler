@@ -112,6 +112,29 @@ describe Rack::MiniProfilerRailsMethods do
       end
     end
 
+    it 'should correct the duration_milliseconds and duration_without_children_milliseconds attributes for the nodes' do
+      dm = :duration_milliseconds
+      dwcm = :duration_without_children_milliseconds
+
+      expect(@nodes[:A][dm].round).to eq(80)
+      expect(@nodes[:A][dwcm].round).to eq(80 - (15 + 30 + 10))
+
+      expect(@nodes[:B][dm].round).to eq(15)
+      expect(@nodes[:B][dwcm].round).to eq(15)
+
+      expect(@nodes[:C][dm].round).to eq(30)
+      expect(@nodes[:C][dwcm].round).to eq(30 - 10)
+
+      expect(@nodes[:D][dm].round).to eq(10)
+      expect(@nodes[:D][dwcm].round).to eq(10)
+
+      expect(@nodes[:E][dm].round).to eq(10)
+      expect(@nodes[:E][dwcm].round).to eq(10)
+
+      expect(@nodes[:F][dm].round).to eq(10)
+      expect(@nodes[:F][dwcm].round).to eq(10)
+    end
+
     it 'should move sql timings to the correct nodes' do
       %i{A B E F}.each do |name|
         sql_timings = @nodes[name].sql_timings
