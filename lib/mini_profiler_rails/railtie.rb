@@ -117,7 +117,13 @@ module Rack::MiniProfilerRails
   end
 
   def self.subscribe(name, &blk)
-    ActiveSupport::Notifications.monotonic_subscribe(name) { |*args| blk.call(*args) }
+    if ActiveSupport::Notifications.respond_to?(:monotonic_subscribe)
+      ActiveSupport::Notifications.monotonic_subscribe(name) { |*args| blk.call(*args) }
+    else
+      ActiveSupport::Notifications.subscribe(name) do |name, start, finish, id, payload|
+        blk.call(name, start.to_f, finish.to_f, id, payload)
+      end
+    end
   end
 
   def self.get_key(payload)
