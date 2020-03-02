@@ -91,11 +91,11 @@ module Rack::MiniProfilerRails
       end
 
       subscribe("render_partial.action_view") do |name, start, finish, id, payload|
-        render_notification_handler(payload[:identifier].split("/").last(2).join("/"), finish, start)
+        render_notification_handler(shorten_identifier(payload[:identifier]), finish, start)
       end
 
       subscribe("render_template.action_view") do |name, start, finish, id, payload|
-        render_notification_handler(payload[:layout], finish, start)
+        render_notification_handler(shorten_identifier(payload[:identifier]), finish, start)
       end
 
       if Rack::MiniProfiler.subscribe_sql_active_record
@@ -128,6 +128,10 @@ module Rack::MiniProfilerRails
 
   def self.get_key(payload)
     "mini_profiler_parent_timer_#{payload[:controller]}_#{payload[:action]}".to_sym
+  end
+
+  def self.shorten_identifier(identifier)
+    identifier.split('/').last(2).join('/')
   end
 
   def self.serves_static_assets?(app)
