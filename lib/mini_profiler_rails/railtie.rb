@@ -116,11 +116,11 @@ module Rack::MiniProfilerRails
     @already_initialized = true
   end
 
-  def self.subscribe(name, &blk)
+  def self.subscribe(event, &blk)
     if ActiveSupport::Notifications.respond_to?(:monotonic_subscribe)
-      ActiveSupport::Notifications.monotonic_subscribe(name) { |*args| blk.call(*args) }
+      ActiveSupport::Notifications.monotonic_subscribe(event) { |*args| blk.call(*args) }
     else
-      ActiveSupport::Notifications.subscribe(name) do |name, start, finish, id, payload|
+      ActiveSupport::Notifications.subscribe(event) do |name, start, finish, id, payload|
         blk.call(name, start.to_f, finish.to_f, id, payload)
       end
     end
