@@ -23,18 +23,26 @@ class SqlPatches
     ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time).to_f * 1000).round(1)
   end
 
+  def self.patch_rails?
+    ::Rack::MiniProfiler.patch_rails?
+  end
+
   def self.sql_patches
     patches = []
 
     patches << 'mysql2' if defined?(Mysql2::Client) && Mysql2::Client.class == Class
     patches << 'pg' if defined?(PG::Result) && PG::Result.class == Class
     patches << 'oracle_enhanced' if defined?(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter) && ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter.class == Class &&
-                                    SqlPatches.correct_version?('~> 1.5.0', ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter)
+                                    SqlPatches.correct_version?('~> 1.5.0', ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter) &&
+                                    patch_rails?
     # if the adapters were directly patched, don't patch again
-    return patches unless patches.empty?
+    if !patches.empty?
+      Rack::MiniProfiler.subscribe_sql_active_record = false
+      return patches
+    end
     patches << 'sequel' if defined?(Sequel::Database) && Sequel::Database.class == Class
-    patches << 'activerecord' if defined?(ActiveRecord) && ActiveRecord.class == Module
-
+    patches << 'activerecord' if defined?(ActiveRecord) && ActiveRecord.class == Module && patch_rails?
+    Rack::MiniProfiler.subscribe_sql_active_record = patches.empty? && !patch_rails?
     patches
   end
 

@@ -6,6 +6,7 @@ module Rack
       # Timing system for a custom timers such as cache, redis, RPC, external API
       # calls, etc.
       class Custom < TimerStruct::Base
+        attr_accessor :parent
         def initialize(type, duration_ms, page, parent)
           @parent      = parent
           @page        = page

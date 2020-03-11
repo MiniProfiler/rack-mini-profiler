@@ -27,7 +27,6 @@ require 'mini_profiler/context'
 require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
 require 'mini_profiler/profiler'
-
 require 'patches/sql_patches'
 require 'patches/net_patches'
 

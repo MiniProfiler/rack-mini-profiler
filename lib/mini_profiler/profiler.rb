@@ -5,6 +5,11 @@ module Rack
     class << self
 
       include Rack::MiniProfiler::ProfilingMethods
+      attr_accessor :subscribe_sql_active_record
+
+      def patch_rails?
+        !!defined?(::Rack::MiniProfiler::ENABLE_RAILS_PATCHES)
+      end
 
       def generate_id
         rand(36**20).to_s(36)
@@ -66,6 +71,17 @@ module Rack
         <<~TEXT
           This feature is disabled by default, to enable set the enable_advanced_debugging_tools option to true in Mini Profiler config.
         TEXT
+      end
+
+      def binds_to_params(binds)
+        return if binds.nil? || config.max_sql_param_length == 0
+        # map ActiveRecord::Relation::QueryAttribute to [name, value]
+        params = binds.map { |c| c.kind_of?(Array) ? [c.first, c.last] : [c.name, c.value] }
+        if (skip = config.skip_sql_param_names)
+          params.map { |(n, v)| n =~ skip ? [n, nil] : [n, v] }
+        else
+          params
+        end
       end
     end
 
