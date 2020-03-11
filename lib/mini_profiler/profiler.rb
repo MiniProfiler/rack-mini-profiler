@@ -8,7 +8,7 @@ module Rack
       attr_accessor :subscribe_sql_active_record
 
       def patch_rails?
-        !!defined?(::Rack::MiniProfiler::ENABLE_RAILS_PATCHES)
+        ENV["MINI_PROFILER_ENABLE_RAILS_PATCHES"] == '1'
       end
 
       def generate_id
