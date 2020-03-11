@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.0.0 - 2020-03-11
+
+- [FEATURE] Prepend Net::HTTP patch instead of class_eval and aliasing (#429)
+- [FEATURE] Stop patching Rails and use `ActiveSupport::Notifications` by default (see README.md for details)
+
 ## 1.1.6 - 2020-01-30
 
 - [FIX] edge condition on page transition function could lead to exceptions

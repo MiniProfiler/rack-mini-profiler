@@ -51,6 +51,20 @@ gem 'stackprof'
 
 All you have to do is to include the Gem and you're good to go in development. See notes below for use in production.
 
+#### Upgrading to version 2.0.0
+
+Prior to version 2.0.0, Mini Profiler patched various Rails methods to get the information it needed such as template rendering time. Starting from version 2.0.0, Mini Profiler doesn't patch any Rails methods by default and relies on `ActiveSupport::Notifications` to get the information it needs from Rails. If you want Mini Profiler to keep using its patches in version 2.0.0 and later, change the gem line in your `Gemfile` to the following:
+
+If you want to manually require Mini Profiler:
+```ruby
+gem 'rack-mini-profiler', require: ['enable_rails_patches']
+```
+
+If you don't want to manually require Mini Profiler:
+```ruby
+gem 'rack-mini-profiler', require: ['enable_rails_patches', 'rack-mini-profiler']
+```
+
 #### Rails and manual initialization
 
 In case you need to make sure rack_mini_profiler is initialized after all other gems, or you want to execute some code before rack_mini_profiler required:
