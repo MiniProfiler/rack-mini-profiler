@@ -30,6 +30,7 @@ module Rack::MiniProfilerRails
 
     if serves_static_assets?(app)
       c.skip_paths << app.config.assets.prefix
+      c.skip_paths << "/packs"
     end
 
     unless Rails.env.development? || Rails.env.test?
