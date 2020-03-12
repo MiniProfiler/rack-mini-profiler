@@ -30,7 +30,11 @@ module Rack::MiniProfilerRails
 
     if serves_static_assets?(app)
       c.skip_paths << app.config.assets.prefix
-      c.skip_paths << "/packs"
+      if defined?(Webpacker)
+        public_packs_folder =
+          Webpacker.config.public_output_path.to_s.gsub!(Webpacker.config.public_path.to_s, "")
+        c.skip_paths << public_packs_folder
+      end
     end
 
     unless Rails.env.development? || Rails.env.test?
