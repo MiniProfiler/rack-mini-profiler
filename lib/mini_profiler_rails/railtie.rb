@@ -32,7 +32,7 @@ module Rack::MiniProfilerRails
       c.skip_paths << app.config.assets.prefix
       if defined?(Webpacker)
         public_packs_folder =
-          Webpacker.config.public_output_path.to_s.gsub!(Webpacker.config.public_path.to_s, "")
+          Webpacker.config.public_output_path.to_s.gsub(Webpacker.config.public_path.to_s, "")
         c.skip_paths << public_packs_folder
       end
     end
