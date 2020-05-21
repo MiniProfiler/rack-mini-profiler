@@ -128,8 +128,8 @@
   {{? it.custom_link}}
     <a href="{{= it.custom_link }}" class="profiler-custom-link" target="_blank">{{= it.custom_link_name }}</a>
   {{?}}
-  {{? it.has_trivial_timings}}
-    <a class="profiler-toggle-trivial" data-show-on-load="{{= it.has_all_trivial_timings }}" title="toggles any rows with &lt; {{= it.trivial_duration_threshold_milliseconds }} ms">
+  {{? it.page.has_trivial_timings}}
+    <a class="profiler-toggle-trivial" data-show-on-load="{{= it.page.has_all_trivial_timings }}" title="toggles any rows with &lt; {{= it.page.trivial_duration_threshold_milliseconds }} ms">
       show trivial
     </a>
   {{?}}
