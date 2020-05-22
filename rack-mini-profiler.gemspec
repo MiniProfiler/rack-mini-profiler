@@ -40,6 +40,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'mini_racer'
   s.add_development_dependency 'nokogiri'
   s.add_development_dependency 'rubocop-discourse'
+  s.add_development_dependency 'listen'
 
   s.require_paths = ["lib"]
 end
