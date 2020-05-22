@@ -407,6 +407,16 @@ if JSON.const_defined?(:Pure)
 end
 ```
 
+## Development
+
+If you want to contribute to this project, that's great, thank you! You can run the following rake task:
+
+```
+$ bundle exec rake client_dev
+```
+
+which will start a local Sinatra server at `http://localhost:9292` where you'll be able to preview your changes. Refreshing the page should be enough to see any changes you make to files in the `lib/html` directory.A
+
 ## Running the Specs
 
 ```
