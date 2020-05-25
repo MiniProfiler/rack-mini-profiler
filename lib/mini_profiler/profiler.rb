@@ -152,7 +152,7 @@ module Rack
       resources_env = env.dup
       resources_env['PATH_INFO'] = file_name
 
-      rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => 'max-age:86400')
+      rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => "max-age:#{cache_control_value}")
       rack_file.call(resources_env)
     end
 
@@ -673,5 +673,8 @@ Append the following to your query string:
       current.inject_js = false
     end
 
+    def cache_control_value
+      86400
+    end
   end
 end

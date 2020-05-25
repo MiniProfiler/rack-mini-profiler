@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rubygems'
 require 'bundler'
 require 'bundler/gem_tasks'
@@ -50,6 +51,7 @@ end\n"
   end
 end
 
+@mini_racer_context = nil
 desc "generate vendor asset file"
 task :write_vendor_js do
   require 'mini_racer'
@@ -65,13 +67,13 @@ task :write_vendor_js do
     templates[id] = node.content
   end
 
-  c = MiniRacer::Context.new
-  c.eval(dot_js)
+  @mini_racer_context ||= MiniRacer::Context.new
+  @mini_racer_context.eval(dot_js)
   templates_js = "MiniProfiler.templates = {};\n"
 
   templates.each do |k, v|
     template = v.gsub('`', '\\`')
-    compiled = c.eval <<~JS
+    compiled = @mini_racer_context.eval <<~JS
       doT.compile(`#{template}`).toString()
     JS
     templates_js += <<~JS
@@ -94,6 +96,29 @@ task :write_vendor_js do
   path = File.expand_path("../lib/html/vendor.js", __FILE__)
   FileUtils.touch(path)
   File.write(path, content)
+end
+
+desc "Start Sinatra server for client-side development"
+task :client_dev do
+  require 'listen'
+
+  regexp = /(vendor\.js|includes\.css)$/
+  listener = Listen.to(File.expand_path("lib/html", __dir__)) do |modified|
+    next if modified.all? { |m| m =~ regexp }
+    print("Assets change detected; updating ASSET_VERSION constant and recompiling templates... ")
+    rake_task = Rake.application[:update_asset_version]
+    rake_task.all_prerequisite_tasks.each(&:reenable)
+    rake_task.reenable
+    rake_task.invoke
+    puts "Done"
+  rescue => err
+    puts "\nError occurred: #{err.inspect}"
+  end
+  listener.start
+  pid = spawn("cd website && BUNDLE_GEMFILE=Gemfile bundle exec rackup")
+  Process.wait(pid)
+rescue Interrupt
+  listener.stop
 end
 
 desc "copy files from other parts of the tree"
