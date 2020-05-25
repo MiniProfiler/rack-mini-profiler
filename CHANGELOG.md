@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.2 - 2020-05-25
+
+- [FIX] client timings were not showing up when you clicked show trivial
+
 ## 2.0.1 - 2020-03-17
 
 - [REVERT] Prepend Net::HTTP patch instead of class_eval and aliasing (#429) (technique clashes with New Relic and Skylight agents)
