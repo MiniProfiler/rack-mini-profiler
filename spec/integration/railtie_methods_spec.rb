@@ -178,4 +178,19 @@ describe Rack::MiniProfilerRailsMethods do
       expect(@current_timer[cts]).to eq({})
     end
   end
+
+  it '#get_webpacker_assets_path returns webpacker public_output_path if webpacker exists' do
+    expect(described_class.get_webpacker_assets_path()).to eq(nil)
+    require 'rails'
+    require 'webpacker'
+    tmp_path = Pathname.new("/tmp/rails_root_#{SecureRandom.hex}")
+    FileUtils.mkdir(tmp_path)
+    Webpacker.instance = Webpacker::Instance.new(
+      root_path: tmp_path,
+      config_path: Pathname.new(File.expand_path("../fixtures/webpacker.yml", __dir__))
+    )
+    expect(described_class.get_webpacker_assets_path()).to eq("/some/assets/path")
+  ensure
+    FileUtils.rm_rf(tmp_path)
+  end
 end
