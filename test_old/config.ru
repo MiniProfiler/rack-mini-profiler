@@ -1,5 +1,7 @@
 #! rackup -
-#\ -w -p 8080 
+# frozen_string_literal: true
+
+#\ -w -p 8080
 require 'active_support/inflector' # see https://code.google.com/p/ruby-sequel/issues/detail?id=329
 require 'sequel'
 require File.expand_path('../lib/rack-mini-profiler', File.dirname(__FILE__))
@@ -32,7 +34,7 @@ app = proc do |env|
       end
     end
   end
-  [ 200, {'Content-Type' => 'text/html'}, ["<h1>This is Rack::MiniProfiler test"] ]
+  [ 200, { 'Content-Type' => 'text/html' }, ["<h1>This is Rack::MiniProfiler test"] ]
 end
 
 puts "Rack::MiniProfiler test"

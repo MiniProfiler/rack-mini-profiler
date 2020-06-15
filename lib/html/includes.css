@@ -1,9 +1,29 @@
 @charset "UTF-8";
-.profiler-result, .profiler-queries {
+.profiler-result,
+.profiler-queries {
   color: #555;
   line-height: 1;
   font-size: 12px; }
-  .profiler-result pre, .profiler-result code, .profiler-result label, .profiler-result table, .profiler-result tbody, .profiler-result thead, .profiler-result tfoot, .profiler-result tr, .profiler-result th, .profiler-result td, .profiler-queries pre, .profiler-queries code, .profiler-queries label, .profiler-queries table, .profiler-queries tbody, .profiler-queries thead, .profiler-queries tfoot, .profiler-queries tr, .profiler-queries th, .profiler-queries td {
+  .profiler-result pre,
+  .profiler-result code,
+  .profiler-result label,
+  .profiler-result table,
+  .profiler-result tbody,
+  .profiler-result thead,
+  .profiler-result tfoot,
+  .profiler-result tr,
+  .profiler-result th,
+  .profiler-result td,
+  .profiler-queries pre,
+  .profiler-queries code,
+  .profiler-queries label,
+  .profiler-queries table,
+  .profiler-queries tbody,
+  .profiler-queries thead,
+  .profiler-queries tfoot,
+  .profiler-queries tr,
+  .profiler-queries th,
+  .profiler-queries td {
     margin: 0;
     padding: 0;
     border: 0;
@@ -13,15 +33,21 @@
     background-color: transparent;
     overflow: visible;
     max-height: none; }
-  .profiler-result table, .profiler-queries table {
+  .profiler-result table,
+  .profiler-queries table {
     border-collapse: collapse;
     border-spacing: 0; }
-  .profiler-result a, .profiler-result a:hover, .profiler-queries a, .profiler-queries a:hover {
+  .profiler-result a,
+  .profiler-result a:hover,
+  .profiler-queries a,
+  .profiler-queries a:hover {
     cursor: pointer;
-    color: #0077CC; }
-  .profiler-result a, .profiler-queries a {
+    color: #0077cc; }
+  .profiler-result a,
+  .profiler-queries a {
     text-decoration: none; }
-    .profiler-result a:hover, .profiler-queries a:hover {
+    .profiler-result a:hover,
+    .profiler-queries a:hover {
       text-decoration: underline; }
 
 .profiler-result {
@@ -35,12 +61,16 @@
     overflow: hidden;
     text-overflow: ellipsis; }
   .profiler-result .profiler-unit {
-    color: #aaa; }
+    color: #767676; }
   .profiler-result .profiler-trivial {
     display: none; }
-    .profiler-result .profiler-trivial td, .profiler-result .profiler-trivial td * {
-      color: #aaa !important; }
-  .profiler-result pre, .profiler-result code, .profiler-result .profiler-number, .profiler-result .profiler-unit {
+    .profiler-result .profiler-trivial td,
+    .profiler-result .profiler-trivial td * {
+      color: #767676 !important; }
+  .profiler-result pre,
+  .profiler-result code,
+  .profiler-result .profiler-number,
+  .profiler-result .profiler-unit {
     font-family: Consolas, monospace, serif; }
   .profiler-result .profiler-number {
     color: #111; }
@@ -52,9 +82,10 @@
       white-space: nowrap; }
   .profiler-result .profiler-timings th {
     background-color: #fff;
-    color: #aaa;
+    color: #767676;
     text-align: right; }
-  .profiler-result .profiler-timings th, .profiler-result .profiler-timings td {
+  .profiler-result .profiler-timings th,
+  .profiler-result .profiler-timings td {
     white-space: nowrap; }
   .profiler-result .profiler-timings .profiler-duration-with-children {
     display: none; }
@@ -63,8 +94,9 @@
     text-align: right; }
   .profiler-result .profiler-timings .profiler-indent {
     letter-spacing: 4px; }
-  .profiler-result .profiler-timings .profiler-queries-show .profiler-number, .profiler-result .profiler-timings .profiler-queries-show .profiler-unit {
-    color: #0077CC; }
+  .profiler-result .profiler-timings .profiler-queries-show .profiler-number,
+  .profiler-result .profiler-timings .profiler-queries-show .profiler-unit {
+    color: #0077cc; }
   .profiler-result .profiler-timings .profiler-queries-duration {
     padding-left: 6px; }
   .profiler-result .profiler-timings .profiler-percent-in-sql {
@@ -89,13 +121,15 @@
     .profiler-result .profiler-queries tbody tr {
       border-bottom: 1px solid #f1f1f1; }
     .profiler-result .profiler-queries tr {
-      background-color: #FFF; }
+      background-color: #fff; }
+      .profiler-result .profiler-queries tr.higlight-animate {
+        animation: highlight-in 3s; }
     .profiler-result .profiler-queries tr.slow {
-      background-color: #FEE; }
+      background-color: #fee; }
     .profiler-result .profiler-queries tr.very-slow {
-      background-color: #FDD; }
+      background-color: #fdd; }
     .profiler-result .profiler-queries tr.very-very-slow {
-      background-color: #FCC; }
+      background-color: #fcc; }
     .profiler-result .profiler-queries pre {
       font-family: Consolas, monospace, serif;
       white-space: pre-wrap; }
@@ -110,12 +144,14 @@
       text-align: left; }
       .profiler-result .profiler-queries td:last-child {
         padding-right: 25px; }
-    .profiler-result .profiler-queries .profiler-since-start, .profiler-result .profiler-queries .profiler-duration {
+    .profiler-result .profiler-queries .profiler-since-start,
+    .profiler-result .profiler-queries .profiler-duration {
       text-align: right; }
     .profiler-result .profiler-queries .profiler-info div {
       text-align: right;
       margin-bottom: 5px; }
-    .profiler-result .profiler-queries .profiler-gap-info, .profiler-result .profiler-queries .profiler-gap-info td {
+    .profiler-result .profiler-queries .profiler-gap-info,
+    .profiler-result .profiler-queries .profiler-gap-info td {
       background-color: #ccc; }
     .profiler-result .profiler-queries .profiler-gap-info .profiler-unit {
       color: #777; }
@@ -147,9 +183,15 @@
       color: blue; }
     .profiler-result .profiler-queries .dec {
       color: purple; }
-  .profiler-result .profiler-warning, .profiler-result .profiler-warning *, .profiler-result .profiler-warning .profiler-queries-show, .profiler-result .profiler-warning .profiler-queries-show .profiler-unit {
+  .profiler-result .profiler-warning,
+  .profiler-result .profiler-warning *,
+  .profiler-result .profiler-warning .profiler-queries-show,
+  .profiler-result .profiler-warning .profiler-queries-show .profiler-unit {
     color: #f00; }
-    .profiler-result .profiler-warning:hover, .profiler-result .profiler-warning *:hover, .profiler-result .profiler-warning .profiler-queries-show:hover, .profiler-result .profiler-warning .profiler-queries-show .profiler-unit:hover {
+    .profiler-result .profiler-warning:hover,
+    .profiler-result .profiler-warning *:hover,
+    .profiler-result .profiler-warning .profiler-queries-show:hover,
+    .profiler-result .profiler-warning .profiler-queries-show .profiler-unit:hover {
       color: #f00; }
   .profiler-result .profiler-nuclear {
     color: #f00;
@@ -165,39 +207,52 @@
     top: 0px; }
     .profiler-results.profiler-top.profiler-left {
       left: 0px; }
-      .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-totals, .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-results.profiler-top.profiler-left .profiler-controls {
+      .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-totals,
+      .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-result:last-child .profiler-button,
+      .profiler-results.profiler-top.profiler-left .profiler-controls {
         -webkit-border-bottom-right-radius: 10px;
         -moz-border-radius-bottomright: 10px;
         border-bottom-right-radius: 10px; }
-      .profiler-results.profiler-top.profiler-left .profiler-button, .profiler-results.profiler-top.profiler-left .profiler-controls {
+      .profiler-results.profiler-top.profiler-left .profiler-button,
+      .profiler-results.profiler-top.profiler-left .profiler-controls {
         border-right: 1px solid #888; }
     .profiler-results.profiler-top.profiler-right {
       right: 0px; }
-      .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-totals, .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-result:last-child .profiler-button, .profiler-results.profiler-top.profiler-right .profiler-controls {
+      .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-totals,
+      .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-result:last-child .profiler-button,
+      .profiler-results.profiler-top.profiler-right .profiler-controls {
         -webkit-border-bottom-left-radius: 10px;
         -moz-border-radius-bottomleft: 10px;
         border-bottom-left-radius: 10px; }
-      .profiler-results.profiler-top.profiler-right .profiler-button, .profiler-results.profiler-top.profiler-right .profiler-controls {
+      .profiler-results.profiler-top.profiler-right .profiler-button,
+      .profiler-results.profiler-top.profiler-right .profiler-controls {
         border-left: 1px solid #888; }
   .profiler-results.profiler-bottom {
     bottom: 0px; }
     .profiler-results.profiler-bottom.profiler-left {
       left: 0px; }
-      .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-totals, .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-result:first-child .profiler-button, .profiler-results.profiler-bottom.profiler-left .profiler-controls {
+      .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-totals,
+      .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-result:first-child .profiler-button,
+      .profiler-results.profiler-bottom.profiler-left .profiler-controls {
         -webkit-border-top-right-radius: 10px;
         -moz-border-radius-topright: 10px;
         border-top-right-radius: 10px; }
-      .profiler-results.profiler-bottom.profiler-left .profiler-button, .profiler-results.profiler-bottom.profiler-left .profiler-controls {
+      .profiler-results.profiler-bottom.profiler-left .profiler-button,
+      .profiler-results.profiler-bottom.profiler-left .profiler-controls {
         border-right: 1px solid #888; }
     .profiler-results.profiler-bottom.profiler-right {
       right: 0px; }
-      .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-totals, .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-result:first-child .profiler-button, .profiler-results.profiler-bottom.profiler-right .profiler-controls {
+      .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-totals,
+      .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-result:first-child .profiler-button,
+      .profiler-results.profiler-bottom.profiler-right .profiler-controls {
         -webkit-border-bottom-top-radius: 10px;
         -moz-border-radius-topleft: 10px;
         border-top-left-radius: 10px; }
-      .profiler-results.profiler-bottom.profiler-right .profiler-button, .profiler-results.profiler-bottom.profiler-right .profiler-controls {
+      .profiler-results.profiler-bottom.profiler-right .profiler-button,
+      .profiler-results.profiler-bottom.profiler-right .profiler-controls {
         border-left: 1px solid #888; }
-  .profiler-results .profiler-button, .profiler-results .profiler-controls {
+  .profiler-results .profiler-button,
+  .profiler-results .profiler-controls {
     display: none;
     z-index: 2147483640;
     border-bottom: 1px solid #888;
@@ -205,12 +260,17 @@
     padding: 4px 7px;
     text-align: right;
     cursor: pointer; }
-    .profiler-results .profiler-button.profiler-button-active, .profiler-results .profiler-controls.profiler-button-active {
+    .profiler-results .profiler-button.profiler-button-active,
+    .profiler-results .profiler-controls.profiler-button-active {
       background-color: maroon; }
-      .profiler-results .profiler-button.profiler-button-active .profiler-number, .profiler-results .profiler-button.profiler-button-active .profiler-nuclear, .profiler-results .profiler-controls.profiler-button-active .profiler-number, .profiler-results .profiler-controls.profiler-button-active .profiler-nuclear {
+      .profiler-results .profiler-button.profiler-button-active .profiler-number,
+      .profiler-results .profiler-button.profiler-button-active .profiler-nuclear,
+      .profiler-results .profiler-controls.profiler-button-active .profiler-number,
+      .profiler-results .profiler-controls.profiler-button-active .profiler-nuclear {
         color: #fff;
         font-weight: bold; }
-      .profiler-results .profiler-button.profiler-button-active .profiler-unit, .profiler-results .profiler-controls.profiler-button-active .profiler-unit {
+      .profiler-results .profiler-button.profiler-button-active .profiler-unit,
+      .profiler-results .profiler-controls.profiler-button-active .profiler-unit {
         color: #fff;
         font-weight: normal; }
   .profiler-results .profiler-totals .profiler-reqs {
@@ -228,7 +288,7 @@
     cursor: default;
     text-align: center; }
     .profiler-results .profiler-controls span {
-      border-right: 1px solid #aaa;
+      border-right: 1px solid #767676;
       padding-right: 5px;
       margin-right: 5px;
       cursor: pointer; }
@@ -258,7 +318,8 @@
           display: none; }
       .profiler-results .profiler-popup .profiler-info .profiler-server-time {
         font-size: 95%; }
-    .profiler-results .profiler-popup .profiler-timings th, .profiler-results .profiler-popup .profiler-timings td {
+    .profiler-results .profiler-popup .profiler-timings th,
+    .profiler-results .profiler-popup .profiler-timings td {
       padding-left: 6px;
       padding-right: 6px; }
     .profiler-results .profiler-popup .profiler-timings th {
@@ -306,14 +367,15 @@
     display: none; }
   .profiler-result-full .profiler-result .profiler-popup .profiler-info {
     font-size: 25px;
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #767676;
     padding-bottom: 3px;
     margin-bottom: 25px; }
     .profiler-result-full .profiler-result .profiler-popup .profiler-info .profiler-overall-duration {
       padding-right: 20px;
       font-size: 80%;
       color: #888; }
-  .profiler-result-full .profiler-result .profiler-popup .profiler-timings td, .profiler-result-full .profiler-result .profiler-popup .profiler-timings th {
+  .profiler-result-full .profiler-result .profiler-popup .profiler-timings td,
+  .profiler-result-full .profiler-result .profiler-popup .profiler-timings th {
     padding-left: 8px;
     padding-right: 8px; }
   .profiler-result-full .profiler-result .profiler-popup .profiler-timings th {
@@ -339,3 +401,9 @@
     .profiler-result-full .profiler-result .profiler-queries .profiler-info div {
       text-align: right;
       margin-bottom: 5px; }
+
+@keyframes highlight-in {
+  0% {
+    background: #ffffbb; }
+  100% {
+    background: #fff; } }

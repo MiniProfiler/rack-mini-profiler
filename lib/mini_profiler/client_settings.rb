@@ -13,10 +13,9 @@ module Rack
       attr_accessor :disable_profiling
       attr_accessor :backtrace_level
 
-
       def initialize(env, store, start)
-        request = ::Rack::Request.new(env)
-        @cookie = request.cookies[COOKIE_NAME]
+        @request = ::Rack::Request.new(env)
+        @cookie = @request.cookies[COOKIE_NAME]
         @store = store
         @start = start
         @backtrace_level = nil
@@ -25,8 +24,8 @@ module Rack
         @allowed_tokens, @orig_auth_tokens = nil
 
         if @cookie
-          @cookie.split(",").map{|pair| pair.split("=")}.each do |k,v|
-            @orig_disable_profiling = @disable_profiling = (v=='t') if k == "dp"
+          @cookie.split(",").map { |pair| pair.split("=") }.each do |k, v|
+            @orig_disable_profiling = @disable_profiling = (v == 't') if k == "dp"
             @backtrace_level = v.to_i if k == "bt"
             @orig_auth_tokens = v.to_s.split("|") if k == "a"
           end
@@ -41,7 +40,7 @@ module Rack
       end
 
       def handle_cookie(result)
-        status,headers,_body = result
+        status, headers, _body = result
 
         if (MiniProfiler.config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
           # this is non-obvious, don't kill the profiling cookie on errors or short requests
@@ -70,35 +69,42 @@ module Rack
             @cookie.nil? ||
             tokens_changed
 
-          settings = {"p" =>  "t" }
+          settings = { "p" => "t" }
           settings["dp"] = "t"                  if @disable_profiling
           settings["bt"] = @backtrace_level     if @backtrace_level
           settings["a"] = @allowed_tokens.join("|") if @allowed_tokens && MiniProfiler.request_authorized?
-
-          settings_string = settings.map{|k,v| "#{k}=#{v}"}.join(",")
-          Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, :value => settings_string, :path => '/')
+          settings_string = settings.map { |k, v| "#{k}=#{v}" }.join(",")
+          cookie = { value: settings_string, path: '/', httponly: true }
+          cookie[:secure] = true if @request.ssl?
+          Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
         end
       end
 
       def discard_cookie!(headers)
         if @cookie
-          Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, :path => '/')
+          Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, path: '/')
         end
       end
 
       def has_valid_cookie?
         valid_cookie = !@cookie.nil?
 
-        if (MiniProfiler.config.authorization_mode == :whitelist)
-          @allowed_tokens ||= @store.allowed_tokens
+        if (MiniProfiler.config.authorization_mode == :whitelist) && valid_cookie
+          begin
+            @allowed_tokens ||= @store.allowed_tokens
+          rescue => e
+            if @config.storage_failure != nil
+              @config.storage_failure.call(e)
+            end
+          end
 
-          valid_cookie = (Array === @orig_auth_tokens) &&
+          valid_cookie = @allowed_tokens &&
+            (Array === @orig_auth_tokens) &&
             ((@allowed_tokens & @orig_auth_tokens).length > 0)
         end
 
         valid_cookie
       end
-
 
       def disable_profiling?
         @disable_profiling

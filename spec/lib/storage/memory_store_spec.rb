@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler::MemoryStore do
 
   context 'page struct' do
@@ -9,7 +11,7 @@ describe Rack::MiniProfiler::MemoryStore do
     describe 'storage' do
 
       it 'can store a PageStruct and retrieve it' do
-        page_struct = {:id => "XYZ", :random => "random"}
+        page_struct = { id: "XYZ", random: "random" }
         @store.save(page_struct)
         page_struct = @store.load("XYZ")
         expect(page_struct[:id]).to eq("XYZ")
@@ -41,14 +43,13 @@ describe Rack::MiniProfiler::MemoryStore do
 
   end
 
-
   describe 'cleanup_cache' do
     before do
       @fast_expiring_store = Rack::MiniProfiler::MemoryStore.new(expires_in: 1)
     end
 
     it "cleans up expired values" do
-      old_page_struct = {:id => "XYZ", :random => "random", :started => ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - 2) * 1000).to_i }
+      old_page_struct = { id: "XYZ", random: "random", started: ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - 2) * 1000).to_i }
       @fast_expiring_store.save(old_page_struct)
       old_page_struct = @fast_expiring_store.load("XYZ")
       expect(old_page_struct[:id]).to eq("XYZ")
@@ -84,56 +85,4 @@ describe Rack::MiniProfiler::MemoryStore do
     end
   end
 
-  describe 'cache cleanup thread' do
-    let(:described){Rack::MiniProfiler::MemoryStore::CacheCleanupThread}
-    before do
-      store = double()
-      allow(store).to receive(:cleanup_cache)
-      @cleaner = described.new(1, 2, store) do
-        self.sleepy_run
-      end
-    end
-
-    it "just run on start" do
-      expect(@cleaner.should_cleanup?).to eq(false)
-    end
-
-    it "when number of runs * interval gets bigger than cycle, it should cleanup" do
-      @cleaner.increment_cycle
-      expect(@cleaner.should_cleanup?).to eq(true)
-    end
-
-    describe 'cleanup' do
-      before do
-        store = double()
-        expect(store).to receive(:cleanup_cache) { true }
-        @cleaner = described.new(1, 2, store) do
-          self.sleepy_run
-        end
-      end
-      it "calls store" do
-        @cleaner.cleanup
-      end
-
-      it "resets counter" do
-        @cleaner.increment_cycle
-        expect(@cleaner.cycle_count).to eq(2)
-        @cleaner.cleanup
-        expect(@cleaner.cycle_count).to eq(1)
-      end
-    end
-
-    describe 'sleepy_run' do
-      before do
-        store = double()
-        allow(store).to receive(:cleanup_cache)
-        @cleaner = described.new(0, 0, store) do
-          self.sleepy_run
-        end
-      end
-      it "works" do
-        @cleaner.sleepy_run
-      end
-    end
-  end
 end

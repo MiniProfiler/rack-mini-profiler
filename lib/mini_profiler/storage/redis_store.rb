@@ -10,7 +10,7 @@ module Rack
 
       def initialize(args = nil)
         @args               = args || {}
-        @prefix             = @args.delete(:prefix)     || 'MPRedisStore'
+        @prefix             = @args.delete(:prefix) || 'MPRedisStore'
         @redis_connection   = @args.delete(:connection)
         @expires_in_seconds = @args.delete(:expires_in) || EXPIRES_IN_SECONDS
       end
@@ -103,7 +103,7 @@ unviewed_ids: #{get_unviewed_ids(user)}
         end
 
         redis.setex "#{@prefix}-key1", timeout, key1
-        redis.setex "#{@prefix}-key1_old", timeout*2, key1
+        redis.setex "#{@prefix}-key1_old", timeout * 2, key1
 
         [key1, key2].compact
       end

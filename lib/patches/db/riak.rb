@@ -20,7 +20,7 @@ end
 class Riak::Client
 
   alias_method :buckets_without_profiling, :buckets
-  def buckets(options={}, &blk)
+  def buckets(options = {}, &blk)
     profile("buckets #{options}") { buckets_without_profiling(options, &blk) }
   end
 
@@ -30,32 +30,32 @@ class Riak::Client
   end
 
   alias_method :delete_object_without_profiling, :delete_object
-  def delete_object(bucket, key, options={})
+  def delete_object(bucket, key, options = {})
     profile("delete_object bucket=#{bucket.name} key=#{key} options=#{options}") { delete_object_without_profiling(bucket, key, options) }
   end
 
   alias_method :get_bucket_props_without_profiling, :get_bucket_props
-  def get_bucket_props(bucket, options={})
+  def get_bucket_props(bucket, options = {})
     profile("get_bucket_props bucket=#{bucket.name} options=#{options}") { get_bucket_props_without_profiling(bucket, options) }
   end
 
   alias_method :get_index_without_profiling, :get_index
-  def get_index(bucket, index, query, options={})
+  def get_index(bucket, index, query, options = {})
     profile("get_index bucket=#{bucket.name} index=#{index} query=#{query} options=#{options}") { get_index_without_profiling(bucket, index, query, options) }
   end
 
   alias_method :get_preflist_without_profiling, :get_preflist
-  def get_preflist(bucket, key, type=nil, options={})
+  def get_preflist(bucket, key, type = nil, options = {})
     profile("get_preflist bucket=#{bucket.name} key=#{key} type=#{type} options=#{options}") { get_preflist_without_profiling(bucket, key, type, options) }
   end
 
   alias_method :get_object_without_profiling, :get_object
-  def get_object(bucket, key, options={})
+  def get_object(bucket, key, options = {})
     profile("get_object bucket=#{bucket.name} key=#{key} options=#{options}") { get_object_without_profiling(bucket, key, options) }
   end
 
   alias_method :list_keys_without_profiling, :list_keys
-  def list_keys(bucket, options={}, &block)
+  def list_keys(bucket, options = {}, &block)
     profile("list_keys bucket=#{bucket.name} options=#{options}") { list_keys_without_profiling(bucket, options, &block) }
   end
 
@@ -70,22 +70,22 @@ class Riak::Client
   end
 
   alias_method :reload_object_without_profiling, :reload_object
-  def reload_object(object, options={})
+  def reload_object(object, options = {})
     profile("reload_object bucket=#{object.bucket.name} key=#{object.key} vclock=#{object.vclock} options=#{options}") { reload_object_without_profiling(object, options) }
   end
 
   alias_method :set_bucket_props_without_profiling, :set_bucket_props
-  def set_bucket_props(bucket, properties, type=nil)
+  def set_bucket_props(bucket, properties, type = nil)
     profile("set_bucket_props bucket=#{bucket.name} type=#{type}") { set_bucket_props_without_profiling(bucket, properties, type) }
   end
 
   alias_method :clear_bucket_props_without_profiling, :clear_bucket_props
-  def clear_bucket_props(bucket, options={})
+  def clear_bucket_props(bucket, options = {})
     profile("clear_bucket_props bucket=#{bucket.name} options=#{options}") { clear_bucket_props_without_profiling(bucket, options) }
   end
 
   alias_method :store_object_without_profiling, :store_object
-  def store_object(object, options={})
+  def store_object(object, options = {})
     profile("store_object bucket=#{object.bucket.name} key=#{object.key} vclock=#{object.vclock} options=#{options}") { store_object_without_profiling(object, options) }
   end
 

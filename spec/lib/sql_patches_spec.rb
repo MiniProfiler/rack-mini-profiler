@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # this enables activerecord, and allows us to test the auto detection logic
 require 'active_record'
 
@@ -30,6 +32,8 @@ describe SqlPatches do
 
     it "uses detection of env variable is not defined" do
       with_patch_env(nil) do
+        expect(SqlPatches.all_patch_files).to eq([])
+        expect(Rack::MiniProfiler).to receive(:patch_rails?) { true }
         expect(SqlPatches.all_patch_files).to eq(["activerecord"])
       end
     end

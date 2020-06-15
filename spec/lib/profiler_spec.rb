@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler do
   describe 'unique id' do
 
@@ -33,12 +35,12 @@ describe Rack::MiniProfiler do
 
       describe 'base_url_path' do
         it 'adds a trailing slash onto the base_url_path' do
-          profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource")
+          profiler = Rack::MiniProfiler.new(nil, base_url_path: "/test-resource")
           expect(profiler.config.base_url_path).to eq("/test-resource/")
         end
 
         it "doesn't add the trailing slash when it's already there" do
-          profiler = Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource/")
+          profiler = Rack::MiniProfiler.new(nil, base_url_path: "/test-resource/")
           expect(profiler.config.base_url_path).to eq("/test-resource/")
         end
 
@@ -48,28 +50,29 @@ describe Rack::MiniProfiler do
   end
 
   describe 'profile method' do
+    class TestClass
+      def foo(bar, baz)
+        [bar, baz, yield]
+      end
+
+      def self.bar(baz, boo)
+        [baz, boo, yield]
+      end
+    end
+
     before do
       Rack::MiniProfiler.create_current
-      class TestClass
-        def foo(bar,baz)
-          return [bar, baz, yield]
-        end
-
-        def self.bar(baz,boo)
-          return [baz, boo, yield]
-        end
-      end
     end
 
     it 'should not destroy a method' do
       Rack::MiniProfiler.profile_method TestClass, :foo
-      expect(TestClass.new.foo("a","b"){"c"}).to eq(["a","b","c"])
+      expect(TestClass.new.foo("a", "b") { "c" }).to eq(["a", "b", "c"])
       Rack::MiniProfiler.unprofile_method TestClass, :foo
     end
 
     it 'should not destroy a singleton method' do
       Rack::MiniProfiler.profile_singleton_method TestClass, :bar
-      expect(TestClass.bar("a", "b"){"c"}).to eq(["a","b","c"])
+      expect(TestClass.bar("a", "b") { "c" }).to eq(["a", "b", "c"])
       Rack::MiniProfiler.unprofile_singleton_method TestClass, :bar
     end
 
@@ -83,7 +86,6 @@ describe Rack::MiniProfiler do
         expect(Rack::MiniProfiler.step('test') { "mini profiler" }).to eq("mini profiler")
       end
     end
-
 
     describe 'typical usage' do
       before(:all) do
@@ -99,6 +101,7 @@ describe Rack::MiniProfiler do
           }
           clock_set(start + 1 + 2 + 3 + 4)
         }
+
         @page_struct = Rack::MiniProfiler.current.page_struct
         @root = @page_struct.root
         @root.record_time
@@ -112,32 +115,32 @@ describe Rack::MiniProfiler do
       end
 
       it 'measures total duration correctly' do
-        expect(@page_struct.duration_ms.to_i).to eq(10 * 1000)
+        expect(@page_struct.duration_ms).to be_within(0.1).of(10 * 1000)
       end
 
       it 'measures outer start time correctly' do
-        expect(@outer.start_ms.to_i).to eq(1 * 1000)
+        expect(@outer.start_ms).to be_within(0.1).of(1 * 1000)
       end
 
       it 'measures outer duration correctly' do
-        expect(@outer.duration_ms.to_i).to eq(9 * 1000)
+        expect(@outer.duration_ms).to be_within(0.1).of(9 * 1000)
       end
 
       it 'measures inner start time correctly' do
-        expect(@inner.start_ms.to_i).to eq(3 * 1000)
+        expect(@inner.start_ms).to be_within(0.1).of(3 * 1000)
       end
 
       it 'measures inner duration correctly' do
-        expect(@inner.duration_ms.to_i).to eq(3 * 1000)
+        expect(@inner.duration_ms).to be_within(0.1).of(3 * 1000)
       end
     end
   end
 
   describe '#ids' do
     let(:profiler) do
-      Rack::MiniProfiler.new(nil, :base_url_path => "/test-resource",
-                                  :storage       => Rack::MiniProfiler::MemoryStore,
-                                  :user_provider => Proc.new{|env| user_id },
+      Rack::MiniProfiler.new(nil, base_url_path: "/test-resource",
+                                  storage: Rack::MiniProfiler::MemoryStore,
+                                  user_provider: Proc.new { |env| user_id },
                             )
     end
 

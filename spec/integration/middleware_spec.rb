@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rack/test'
 require 'zlib'
 
@@ -6,8 +8,8 @@ describe Rack::MiniProfiler do
 
   before(:each) { Rack::MiniProfiler.reset_config }
 
-  def do_get(params={})
-    get '/html', params, { 'HTTP_ACCEPT_ENCODING' => 'gzip, compress' }
+  def do_get(params = {})
+    get '/html', params, 'HTTP_ACCEPT_ENCODING' => 'gzip, compress'
   end
 
   def decompressed_response
@@ -16,9 +18,24 @@ describe Rack::MiniProfiler do
 
   shared_examples 'should not affect a skipped requests' do
     it 'should not affect a skipped requests' do
-      do_get(:pp=>'skip')
+      do_get(pp: 'skip')
       expect(last_response.headers).to include('Content-Encoding')
       expect(last_response.headers['Content-Encoding']).to eq('gzip')
+    end
+  end
+
+  describe 'when enable_advanced_debugging_tools is false' do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+      end
+    end
+    it 'advanced tools are disabled' do
+      %w{env analyze-memory profile-gc profile-memory}.each do |p|
+        do_get(pp: p)
+        expect(last_response.body).to eq(Rack::MiniProfiler.advanced_tools_message)
+      end
     end
   end
 
@@ -26,12 +43,13 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, {'Content-Type' => 'text/html'}, ['<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
-    it 'should return ObjectSpace statistics' do
-      do_get(:pp=>'analyze-memory')
+    it 'should return ObjectSpace statistics if advanced tools are enabled' do
+      Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+      do_get(pp: 'analyze-memory')
       expect(last_response.body).to include('Largest strings:')
     end
   end
@@ -41,7 +59,7 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::MiniProfiler
         use Rack::Deflater
-        run lambda { |_env| [200, {'Content-Type' => 'text/html'}, ['<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
@@ -77,7 +95,7 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::Deflater
         use Rack::MiniProfiler
-        run lambda { |_env| [200, {'Content-Type' => 'text/html'}, ['<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 

@@ -8,7 +8,7 @@ class Mysql2::Result
     return each_without_profiling(*args, &blk) unless defined?(@miniprofiler_sql_id)
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result       = each_without_profiling(*args,&blk)
+    result       = each_without_profiling(*args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
 
     @miniprofiler_sql_id.report_reader_duration(elapsed_time)
@@ -18,11 +18,11 @@ end
 
 class Mysql2::Client
   alias_method :query_without_profiling, :query
-  def query(*args,&blk)
-    return query_without_profiling(*args,&blk) unless SqlPatches.should_measure?
+  def query(*args, &blk)
+    return query_without_profiling(*args, &blk) unless SqlPatches.should_measure?
 
-    result, record = SqlPatches.record_sql( args[0] ) do
-      query_without_profiling(*args,&blk)
+    result, record = SqlPatches.record_sql(args[0]) do
+      query_without_profiling(*args, &blk)
     end
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
     result

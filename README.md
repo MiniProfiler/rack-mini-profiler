@@ -19,18 +19,17 @@ Middleware that displays speed badge for every html page. Designed to work both 
 
 ## rack-mini-profiler needs your help
 
-We have decided to restructure our repository so there is a central UI repo and the various language implementation have their own.
+We have decided to restructure our repository so there is a central UI repo and the various language implementations have their own.
 
 **WE NEED HELP.**
 
-- Setting up a build that reuses https://github.com/MiniProfiler/ui
-- Migrating the internal data structures [per the spec](https://github.com/MiniProfiler/ui)
+- Help [triage issues](https://www.codetriage.com/miniprofiler/rack-mini-profiler) [![Open Source Helpers](https://www.codetriage.com/miniprofiler/rack-mini-profiler/badges/users.svg)](https://www.codetriage.com/miniprofiler/rack-mini-profiler)
 
 If you feel like taking on any of this start an issue and update us on your progress.
 
 ## Installation
 
-Install/add to Gemfile in Ruby 2.2+
+Install/add to Gemfile in Ruby 2.3+
 
 ```ruby
 gem 'rack-mini-profiler'
@@ -52,9 +51,39 @@ gem 'stackprof'
 
 All you have to do is to include the Gem and you're good to go in development. See notes below for use in production.
 
+#### Upgrading to version 2.0.0
+
+Prior to version 2.0.0, Mini Profiler patched various Rails methods to get the information it needed such as template rendering time. Starting from version 2.0.0, Mini Profiler doesn't patch any Rails methods by default and relies on `ActiveSupport::Notifications` to get the information it needs from Rails. If you want Mini Profiler to keep using its patches in version 2.0.0 and later, change the gem line in your `Gemfile` to the following:
+
+If you want to manually require Mini Profiler:
+```ruby
+gem 'rack-mini-profiler', require: ['enable_rails_patches']
+```
+
+If you don't want to manually require Mini Profiler:
+```ruby
+gem 'rack-mini-profiler', require: ['enable_rails_patches', 'rack-mini-profiler']
+```
+
+#### `Net::HTTP` stack level too deep errors
+
+If you start seeing `SystemStackError: stack level too deep` errors from `Net::HTTP` after installing Mini Profiler, this means there is another patch for `Net::HTTP#request` that conflicts with Mini Profiler's patch in your application. To fix this, change `rack-mini-profiler` gem line in your `Gemfile` to the following:
+
+```ruby
+gem 'rack-mini-profiler', require: ['prepend_net_http_patch', 'rack-mini-profiler']
+```
+
+If you currently have `require: false`, remove the `'rack-mini-profiler'` string from the `require` array above so the gem line becomes like this:
+
+```ruby
+gem 'rack-mini-profiler', require: ['prepend_net_http_patch']
+```
+
+This conflict happens when a ruby method is patched twice, once using module prepend, and once using method aliasing. See this [ruby issue](https://bugs.ruby-lang.org/issues/11120) for details. The fix is to apply all patches the same way. Mini Profiler by default will apply its patch using method aliasing, but you can change that to module prepend by adding `require: ['prepend_net_http_patch']` to the gem line as shown above.
+
 #### Rails and manual initialization
 
-In case you need to make sure rack_mini_profiler initialized is after all other gems, or you want to execute some code before rack_mini_profiler required:
+In case you need to make sure rack_mini_profiler is initialized after all other gems, or you want to execute some code before rack_mini_profiler required:
 
 ```ruby
 gem 'rack-mini-profiler', require: false
@@ -187,6 +216,13 @@ In those cases use:
 Rack::MiniProfiler.config.authorization_mode = :whitelist
 ```
 
+When deciding to fully profile a page mini profiler consults with the `authorization_mode`
+
+By default in production we attempt to set the authorization mode to `:whitelist` meaning that end user will only be able to see requests where somewhere `Rack::MiniProfiler.authorize_request` is invoked.
+
+In development we run in the `:allow_all` authorization mode meaning every request is profiled and displayed to the end user.
+
+
 ## Configuration
 
 Various aspects of rack-mini-profiler's behavior can be configured when your app boots.
@@ -221,8 +257,7 @@ Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
 
 # set RedisStore
 if Rails.env.production?
-  uri = URI.parse(ENV["REDIS_SERVER_URL"])
-  Rack::MiniProfiler.config.storage_options = { :host => uri.host, :port => uri.port, :password => uri.password }
+  Rack::MiniProfiler.config.storage_options = { url: ENV["REDIS_SERVER_URL"] }
   Rack::MiniProfiler.config.storage = Rack::MiniProfiler::RedisStore
 end
 ```
@@ -291,6 +326,9 @@ You need to inject the following in your SPA to load MiniProfiler's speed badge 
 
 _Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will change with each release of `rack_mini_profiler`. The MiniProfiler's speed badge will continue to work, although you will have to change the GUID to expire the script to fetch the most recent version.
 
+#### Using MiniProfiler's built in route for apps without HTML responses
+MiniProfiler also ships with a `/rack-mini-profiler/requests` route that displays the speed badge on a blank HTML page. This can be useful when profiling an application that does not render HTML.
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
@@ -310,17 +348,18 @@ skip_paths|`[]`|Paths that skip profiling.
 skip_schema_queries|Rails dev: `'true'`<br>Othwerwise: `'false'`|`'true'` to log schema queries.
 auto_inject|`true`|`true` to inject the miniprofiler script in the page.
 backtrace_ignores|`[]`|Regexes of lines to be removed from backtraces.
-backtrace_includes|Rails: `[/^\/?(app|config|lib|test)/]`<br>Rack: `[]`|Regexes of lines to keep in backtraces.
+backtrace_includes|Rails: `[/^\/?(app\|config\|lib\|test)/]`<br>Rack: `[]`|Regexes of lines to keep in backtraces.
 backtrace_remove|rails: `Rails.root`<br>Rack: `nil`|A string or regex to remove part of each line in the backtrace.
 toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
 start_hidden|`false`|`false` to make mini_profiler visible on page load.
 backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded.
 flamegraph_sample_rate|`0.5`|How often to capture stack traces for flamegraphs in milliseconds.
-disable_env_dump|`false`|`true` disables `?pp=env`, which prevents sending ENV vars over HTTP.
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
 collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
 max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page
 html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
+show_total_sql_count|`false`|Displays the total number of SQL executions.
+enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords.
 
 ### Custom middleware ordering (required if using `Rack::Deflate` with Rails)
 
@@ -383,6 +422,16 @@ if JSON.const_defined?(:Pure)
   end
 end
 ```
+
+## Development
+
+If you want to contribute to this project, that's great, thank you! You can run the following rake task:
+
+```
+$ bundle exec rake client_dev
+```
+
+which will start a local Sinatra server at `http://localhost:9292` where you'll be able to preview your changes. Refreshing the page should be enough to see any changes you make to files in the `lib/html` directory.
 
 ## Running the Specs
 

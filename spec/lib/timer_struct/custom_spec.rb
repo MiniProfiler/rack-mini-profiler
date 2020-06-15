@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler::TimerStruct::Custom do
   before do
-    @name = 'cool request'
+    @name    = 'cool request'
     @page    = Rack::MiniProfiler::TimerStruct::Page.new({})
     @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, @page)
     @custom  = Rack::MiniProfiler::TimerStruct::Custom.new('a', 0.2, @page, @request)

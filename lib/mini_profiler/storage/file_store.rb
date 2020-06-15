@@ -16,25 +16,28 @@ module Rack
 
         def [](key)
           begin
-            data = ::File.open(path(key),"rb") {|f| f.read}
-            return Marshal.load data
+            data = ::File.open(path(key), "rb") { |f| f.read }
+            Marshal.load data
           rescue
-            return nil
+            nil
           end
         end
 
-        def []=(key,val)
-          ::File.open(path(key), "wb+") {|f| f.write Marshal.dump(val)}
+        def []=(key, val)
+          ::File.open(path(key), "wb+") do |f|
+            f.sync = true
+            f.write Marshal.dump(val)
+          end
         end
 
         private
-        if RUBY_PLATFORM =~ /mswin(?!ce)|mingw|cygwin|bccwin/
+        if Gem.win_platform?
           def path(key)
-            @path + "/" + @prefix  + "_" + key.gsub(/:/, '_')
+            @path.dup << "/" << @prefix << "_" << key.gsub(/:/, '_')
           end
         else
           def path(key)
-            @path + "/" + @prefix  + "_" + key
+            @path.dup << "/" << @prefix << "_" << key
           end
         end
       end
@@ -158,13 +161,13 @@ module Rack
         @timer_struct_lock.synchronize {
           files.each do |f|
             f = @path + '/' + f
-            ::File.delete f if ::File.basename(f) =~ /^mp_timers/ and (Time.now - ::File.mtime(f)) > @expires_in_seconds
+            ::File.delete f if ::File.basename(f) =~ (/^mp_timers/) && ((Time.now - ::File.mtime(f)) > @expires_in_seconds)
           end
         }
         @user_view_lock.synchronize {
           files.each do |f|
             f = @path + '/' + f
-            ::File.delete f if ::File.basename(f) =~ /^mp_views/ and (Time.now - ::File.mtime(f)) > @expires_in_seconds
+            ::File.delete f if ::File.basename(f) =~ (/^mp_views/) && ((Time.now - ::File.mtime(f)) > @expires_in_seconds)
           end
         }
       end

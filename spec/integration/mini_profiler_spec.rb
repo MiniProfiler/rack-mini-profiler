@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rack/test'
 
 describe Rack::MiniProfiler do
@@ -7,66 +9,66 @@ describe Rack::MiniProfiler do
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
       map '/path2/a' do
-        run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>path1</h1>'] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>'] }
       end
       map '/path1/a' do
-        run lambda { |env| [200, {'Content-Type' => 'text/html'}, '<h1>path2</h1>'] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +'<h1>path2</h1>'] }
       end
       map '/cached-resource' do
         run lambda { |env|
           ims = env['HTTP_IF_MODIFIED_SINCE'] || ""
           if ims.size > 0
-            [304, {'Content-Type' => 'application/json'}, '']
+            [304, { 'Content-Type' => 'application/json' }, '']
           else
-            [200, {'Content-Type' => 'application/json', 'Cache-Control' => 'original-cache-control'}, '{"name": "Ryan"}']
+            [200, { 'Content-Type' => 'application/json', 'Cache-Control' => 'original-cache-control' }, '{"name": "Ryan"}']
           end
         }
       end
       map '/post' do
-        run lambda { |env| [302, {'Content-Type' => 'text/html'}, '<h1>POST</h1>'] }
+        run lambda { |env| [302, { 'Content-Type' => 'text/html' }, +'<h1>POST</h1>'] }
       end
       map '/html' do
-        run lambda { |env| [200, {'Content-Type' => 'text/html'}, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
       end
       map '/whitelisted-html' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
-          [200, {'Content-Type' => 'text/html'}, "<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
+          [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
         }
       end
       map '/implicitbody' do
-        run lambda { |env| [200, {'Content-Type' => 'text/html'}, "<html><h1>Hi</h1></html>"] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><h1>Hi</h1></html>"] }
       end
       map '/implicitbodyhtml' do
-        run lambda { |env| [200, {'Content-Type' => 'text/html'}, "<h1>Hi</h1>"] }
+        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<h1>Hi</h1>"] }
       end
       map '/db' do
         run lambda { |env|
           ::Rack::MiniProfiler.record_sql("I want to be, in a db", 10)
-          [200, {'Content-Type' => 'text/html'}, '<h1>Hi+db</h1>']
+          [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi+db</h1>']
         }
       end
       map '/3ms' do
         run lambda { |env|
           sleep(0.003)
-          [200, {'Content-Type' => 'text/html'}, '<h1>Hi</h1>']
+          [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi</h1>']
         }
       end
       map '/whitelisted' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
-          [200, {'Content-Type' => 'text/html'}, '<h1>path1</h1>']
+          [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>']
         }
       end
       map '/rails_engine' do
         run lambda { |env|
           env['SCRIPT_NAME'] = '/rails_engine'  # Rails engines do that
-          [200, {'Content-Type' => 'text/html'}, '<html><h1>Hi</h1></html>']
+          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>Hi</h1></html>']
         }
       end
       map '/under_passenger' do
         run lambda { |env|
-          [200, {'Content-Type' => 'text/html'}, '<html><h1>and I ride and I ride</h1></html>']
+          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>and I ride and I ride</h1></html>']
         }
       end
     }.to_app
@@ -92,7 +94,7 @@ describe Rack::MiniProfiler do
 
     it 'has only one X-MiniProfiler-Ids header' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      ids = ::JSON.parse(h)
+      ids = h.split(",")
       expect(ids.count).to eq(1)
     end
 
@@ -102,21 +104,20 @@ describe Rack::MiniProfiler do
 
     it 'has a functioning share link' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      id = ::JSON.parse(h)[0]
+      id = h.split(",")[0]
       get "/mini-profiler-resources/results?id=#{id}"
       expect(last_response).to be_ok
     end
 
     it 'avoids xss attacks' do
       h = last_response.headers['X-MiniProfiler-Ids']
-      _id = ::JSON.parse(h)[0]
+      _id = h.split(",")[0]
       get "/mini-profiler-resources/results?id=%22%3E%3Cqss%3E"
       expect(last_response).not_to be_ok
       expect(last_response.body).not_to match(/<qss>/)
       expect(last_response.body).to match(/&lt;qss&gt;/)
     end
   end
-
 
   describe 'with an implicit body tag' do
 
@@ -129,7 +130,6 @@ describe Rack::MiniProfiler do
     end
 
   end
-
 
   describe 'with implicit body and html tags' do
 
@@ -185,7 +185,6 @@ describe Rack::MiniProfiler do
 
   end
 
-
   describe 'configuration' do
     it "should remove caching headers by default" do
       get '/cached-resource'
@@ -200,7 +199,7 @@ describe Rack::MiniProfiler do
 
     it "should strip if-modified-since on the way in" do
       old_time = 1409326086
-      get '/cached-resource', {}, {'HTTP_IF_MODIFIED_SINCE' => old_time}
+      get '/cached-resource', {}, 'HTTP_IF_MODIFIED_SINCE' => old_time
       expect(last_response.status).to equal(200)
     end
 
@@ -211,10 +210,9 @@ describe Rack::MiniProfiler do
 
       it "should strip if-modified-since on the way in" do
         old_time = 1409326086
-        get '/cached-resource', {}, {'HTTP_IF_MODIFIED_SINCE' => old_time}
+        get '/cached-resource', {}, 'HTTP_IF_MODIFIED_SINCE' => old_time
         expect(last_response.status).to equal(304)
       end
-
 
       it "should be able to re-enable caching" do
         get '/cached-resource'
@@ -224,7 +222,7 @@ describe Rack::MiniProfiler do
     end
 
     it "doesn't add MiniProfiler if the callback fails" do
-      Rack::MiniProfiler.config.pre_authorize_cb = lambda {|env| false }
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| false }
       get '/html'
       expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(false)
     end
@@ -246,7 +244,7 @@ describe Rack::MiniProfiler do
 
   def load_prof(response)
     id = response.headers['X-MiniProfiler-Ids']
-    id = ::JSON.parse(id)[0]
+    id = id.split(",")[0]
     Rack::MiniProfiler.config.storage_instance.load(id)
   end
 
@@ -290,24 +288,13 @@ describe Rack::MiniProfiler do
       end
     end
 
-    describe 'disable_env_dump config option' do
-      context 'default (not configured' do
-        it 'allows env dump' do
-          get '/html?pp=env'
+    describe 'env dump' do
+      it 'works when advanced tools are enabled' do
+        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+        get '/html?pp=env'
 
-          expect(last_response.body).to include('QUERY_STRING')
-          expect(last_response.body).to include('CONTENT_LENGTH')
-        end
-      end
-      context 'when enabled' do
-        it 'disables dumping the ENV over the web' do
-          Rack::MiniProfiler.config.disable_env_dump = true
-          get '/html?pp=env'
-
-          # Contains no ENV vars:
-          expect(last_response.body).not_to include('QUERY_STRING')
-          expect(last_response.body).not_to include('CONTENT_LENGTH')
-        end
+        expect(last_response.body).to include('QUERY_STRING')
+        expect(last_response.body).to include('CONTENT_LENGTH')
       end
     end
   end
@@ -318,7 +305,7 @@ describe Rack::MiniProfiler do
       get '/html'
 
       ids = last_response.headers['X-MiniProfiler-Ids']
-      expect(::JSON.parse(ids).length).to eq(2)
+      expect(ids.split(",").length).to eq(2)
     end
   end
 
@@ -341,7 +328,6 @@ describe Rack::MiniProfiler do
     end
   end
 
-
   describe 'gc profiler' do
     it "should return a report" do
       get '/html?pp=profile-gc'
@@ -351,7 +337,7 @@ describe Rack::MiniProfiler do
 
   describe 'error handling when storage_instance fails to save' do
     it "should recover gracefully" do
-      Rack::MiniProfiler.config.pre_authorize_cb = lambda {|env| true }
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
       allow_any_instance_of(Rack::MiniProfiler::MemoryStore).to receive(:save) { raise "This error" }
       expect(Rack::MiniProfiler.config.storage_failure).to receive(:call)
       get '/html'

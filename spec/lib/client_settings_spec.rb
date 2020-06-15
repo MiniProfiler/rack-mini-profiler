@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rack'
 
 describe Rack::MiniProfiler::ClientSettings do
@@ -7,7 +9,7 @@ describe Rack::MiniProfiler::ClientSettings do
       @store = Rack::MiniProfiler::MemoryStore.new
       settings = URI.encode_www_form_component("dp=t,bt=1")
       @settings = Rack::MiniProfiler::ClientSettings.new(
-        {"HTTP_COOKIE" => "__profilin=#{settings};" },
+        { "HTTP_COOKIE" => "__profilin=#{settings};" },
         @store,
         Process.clock_gettime(Process::CLOCK_MONOTONIC)
       )
@@ -71,6 +73,5 @@ describe Rack::MiniProfiler::ClientSettings do
     expect(Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Process.clock_gettime(Process::CLOCK_MONOTONIC))
       .has_valid_cookie?).to eq(false)
   end
-
 
 end

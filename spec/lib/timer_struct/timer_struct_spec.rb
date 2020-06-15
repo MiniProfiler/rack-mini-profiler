@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe Rack::MiniProfiler::TimerStruct::Base do
 
   before do
@@ -25,7 +27,7 @@ describe Rack::MiniProfiler::TimerStruct::Base do
     end
 
     it 'should not add a second (nil) argument if no arguments were passed' do
-      expect(::JSON).to receive( :generate ).once.with( @timer.attributes, :max_nesting => 100 ).and_return( nil )
+      expect(::JSON).to receive(:generate).once.with(@timer.attributes, max_nesting: 100).and_return(nil)
       @timer.to_json
     end
 

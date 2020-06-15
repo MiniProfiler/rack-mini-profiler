@@ -1,14 +1,17 @@
+# frozen_string_literal: true
+
+$VERBOSE = true
 require 'simplecov'
 SimpleCov.start do
   add_filter "/spec/"
   add_filter "/.direnv/"
 end
-if ENV['CI']=='true'
+if ENV['CI'] == 'true'
   require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
-Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
+Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -50,8 +53,9 @@ module Process
     end
     module_function :clock_travel
 
+    undef clock_gettime
     def clock_gettime(*)
-      @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
+      defined?(@now) && @now || old_clock_gettime(Process::CLOCK_MONOTONIC)
     end
     module_function :clock_gettime
 
