@@ -33,7 +33,7 @@ describe SqlPatches do
     it "uses detection of env variable is not defined" do
       with_patch_env(nil) do
         expect(SqlPatches.all_patch_files).to eq([])
-        expect(Rack::MiniProfiler).to receive(:patch_rails?) { true }
+        expect(Rack::MiniProfiler).to have_received(:patch_rails?).and_return(true)
         expect(SqlPatches.all_patch_files).to eq(["activerecord"])
       end
     end
