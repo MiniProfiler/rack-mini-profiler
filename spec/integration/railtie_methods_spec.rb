@@ -11,7 +11,7 @@ end
 describe Rack::MiniProfilerRailsMethods do
   describe '#render_notification_handler' do
     before do
-      allow(Process).to receive(:clock_gettime).and_return(0)
+      allow(Process).to have_received(:clock_gettime).and_return(0)
       Rack::MiniProfiler.create_current
       @current_timer = Rack::MiniProfiler.current.current_timer
 
@@ -22,7 +22,7 @@ describe Rack::MiniProfilerRailsMethods do
         ['SELECT E', 73,  77], # in node E
         ['SELECT F', 93,  96]  # in node F
       ]).each do |query, start, finish|
-        allow(Process).to receive(:clock_gettime).and_return(finish)
+        allow(Process).to have_received(:clock_gettime).and_return(finish)
         @current_timer.add_sql(
           query,
           finish - start,
@@ -39,7 +39,7 @@ describe Rack::MiniProfilerRailsMethods do
         ['custom1 B', 11, 16],
         ['custom1 B', 17, 19]
       ]).each do |type, start, finish|
-        allow(Process).to receive(:clock_gettime).and_return(finish)
+        allow(Process).to have_received(:clock_gettime).and_return(finish)
         timing = @current_timer.add_custom(
           type,
           finish - start,
@@ -68,7 +68,7 @@ describe Rack::MiniProfilerRailsMethods do
         ['A',  0,     80],
         ['F',  90,    100]
       ]).each do |name, start, finish|
-        allow(Process).to receive(:clock_gettime).and_return(finish)
+        allow(Process).to have_received(:clock_gettime).and_return(finish)
         described_class.render_notification_handler(name, finish, start, name_as_description: true)
       end
       @nodes = {
