@@ -30,6 +30,8 @@ module Rack::MiniProfilerRails
 
     if serves_static_assets?(app)
       c.skip_paths << app.config.assets.prefix
+      wp_assets_path = get_webpacker_assets_path()
+      c.skip_paths << wp_assets_path if wp_assets_path
     end
 
     unless Rails.env.development? || Rails.env.test?

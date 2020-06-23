@@ -51,5 +51,11 @@ module Rack::MiniProfilerRailsMethods
     child[start] + child[duration] <= node[start] + node[duration]
   end
 
+  def get_webpacker_assets_path
+    if defined?(Webpacker)
+      Webpacker.config.public_output_path.to_s.gsub(Webpacker.config.public_path.to_s, "")
+    end
+  end
+
   extend self
 end

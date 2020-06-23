@@ -30,7 +30,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake', '< 11'
   s.add_development_dependency 'rack-test'
-  s.add_development_dependency 'activerecord', '~> 3.0'
   s.add_development_dependency 'dalli'
   s.add_development_dependency 'rspec', '~> 3.6.0'
   s.add_development_dependency 'redis'
@@ -41,6 +40,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'nokogiri'
   s.add_development_dependency 'rubocop-discourse'
   s.add_development_dependency 'listen'
+  s.add_development_dependency 'webpacker', '~> 5.1'
+  s.add_development_dependency 'rails', '~> 5.1'
 
   s.require_paths = ["lib"]
 end
