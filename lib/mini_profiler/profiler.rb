@@ -308,6 +308,15 @@ module Rack
               status, headers, body = @app.call(env)
             end
           end
+        elsif path == '/rack-mini-profiler/requests'
+          blank_page_html = <<~HTML
+            <html>
+              <head></head>
+              <body></body>
+            </html>
+          HTML
+
+          status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]]
         else
           status, headers, body = @app.call(env)
         end
@@ -364,16 +373,6 @@ module Rack
         return client_settings.handle_cookie(self.flamegraph(flamegraph))
       end
 
-      if path == '/rack-mini-profiler/requests'
-        blank_page_html = <<~HTML
-          <html>
-            <head></head>
-            <body></body>
-          </html>
-        HTML
-
-        status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]]
-      end
 
       begin
         @storage.save(page_struct)
