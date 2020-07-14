@@ -1,2 +1,5 @@
 inherit_gem:
   rubocop-discourse: default.yml
+
+RSpec/MessageSpies:
+  Enabled: false

@@ -33,8 +33,8 @@ describe Rack::MiniProfiler::RedisStore do
         connection = instance_double("redis-connection")
         store = Rack::MiniProfiler::RedisStore.new(connection: connection)
 
-        expect(connection).to have_received(:get)
-        expect(Redis).not_to have_received(:new)
+        expect(connection).to receive(:get)
+        expect(Redis).not_to receive(:new)
         store.load("XYZ")
       end
     end

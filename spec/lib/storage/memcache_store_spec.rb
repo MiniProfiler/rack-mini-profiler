@@ -80,8 +80,8 @@ describe Rack::MiniProfiler::MemcacheStore do
         client = instance_double("memcache-client")
         store = Rack::MiniProfiler::MemcacheStore.new(client: client)
 
-        expect(client).to have_received(:get)
-        expect(Dalli::Client).not_to have_received(:new)
+        expect(client).to receive(:get)
+        expect(Dalli::Client).not_to receive(:new)
         store.load("XYZ")
       end
     end
