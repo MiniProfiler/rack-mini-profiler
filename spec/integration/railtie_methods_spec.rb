@@ -181,6 +181,7 @@ describe Rack::MiniProfilerRailsMethods do
 
   it '#get_webpacker_assets_path returns webpacker public_output_path if webpacker exists' do
     expect(described_class.get_webpacker_assets_path()).to eq(nil)
+    ENV['RAILS_ENV'] = 'test'
     require 'rails'
     require 'webpacker'
     tmp_path = Pathname.new("/tmp/rails_root_#{SecureRandom.hex}")
