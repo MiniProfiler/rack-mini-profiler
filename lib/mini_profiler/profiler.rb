@@ -628,10 +628,20 @@ Append the following to your query string:
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
       path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+      version = MiniProfiler::ASSET_VERSION
+      if @config.assets_url
+        url = @config.assets_url.call('rack-mini-profiler.js', version, env)
+        css_url = @config.assets_url.call('rack-mini-profiler.css', version, env)
+      end
+
+      url = "#{path}includes.js?v=#{version}" if !url
+      css_url = "#{path}includes.css?v=#{version}" if !css_url
 
       settings = {
        path: path,
-       version: MiniProfiler::ASSET_VERSION,
+       url: url,
+       cssUrl: css_url,
+       version: version,
        verticalPosition: @config.vertical_position,
        horizontalPosition: @config.horizontal_position,
        showTrivial: @config.show_trivial,
