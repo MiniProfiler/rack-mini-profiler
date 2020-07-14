@@ -33,7 +33,7 @@ module Rack
 
       def set_unviewed(user, id)
         key = user_key(user)
-        if redis.exists(prefixed_id(id))
+        if redis.call([:exists, prefixed_id(id)]) == 1
           expire_at = Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i + redis.ttl(prefixed_id(id))
           redis.zadd(key, expire_at, id)
         end
@@ -44,7 +44,7 @@ module Rack
         key = user_key(user)
         redis.del(key)
         ids.each do |id|
-          if redis.exists(prefixed_id(id))
+          if redis.call([:exists, prefixed_id(id)]) == 1
             expire_at = Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i + redis.ttl(prefixed_id(id))
             redis.zadd(key, expire_at, id)
           end
