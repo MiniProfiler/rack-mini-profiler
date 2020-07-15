@@ -6,13 +6,6 @@ require_relative './railtie_methods'
 module Rack::MiniProfilerRails
   extend Rack::MiniProfilerRailsMethods
 
-  class Engine < ::Rails::Engine
-    engine_name 'rack-mini-profiler'
-    config.assets.paths << File.expand_path('../../html', __FILE__)
-    config.assets.precompile << 'rack-mini-profiler.js'
-    config.assets.precompile << 'rack-mini-profiler.css'
-  end
-
   # call direct if needed to do a defer init
   def self.initialize!(app)
 
@@ -123,6 +116,17 @@ module Rack::MiniProfilerRails
       end
     end
     @already_initialized = true
+  end
+
+  def self.create_engine
+    return if defined?(Rack::MiniProfilerRails::Engine)
+    klass = Class.new(::Rails::Engine) do
+      engine_name 'rack-mini-profiler'
+      config.assets.paths << File.expand_path('../../html', __FILE__)
+      config.assets.precompile << 'rack-mini-profiler.js'
+      config.assets.precompile << 'rack-mini-profiler.css'
+    end
+    Rack::MiniProfilerRails.const_set("Engine", klass)
   end
 
   def self.subscribe(event, &blk)
