@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.0.3 - 2020-07-29
+
+- [FIX] support for deprecation free Redis 4.2
+- [FEATURE] skip /packs when serving static assets
+- [FEATURE] allow Net::HTTP patch to be applied with either prerpend or alias
+
 ## 2.0.2 - 2020-05-25
 
 - [FIX] client timings were not showing up when you clicked show trivial
