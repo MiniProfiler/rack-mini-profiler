@@ -207,8 +207,7 @@
     top: 0px; }
     .profiler-results.profiler-top.profiler-left {
       left: 0px; }
-      .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-totals,
-      .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-result:last-child .profiler-button,
+      .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-totals, .profiler-results.profiler-top.profiler-left.profiler-no-controls .profiler-result:last-child .profiler-button,
       .profiler-results.profiler-top.profiler-left .profiler-controls {
         -webkit-border-bottom-right-radius: 10px;
         -moz-border-radius-bottomright: 10px;
@@ -218,8 +217,7 @@
         border-right: 1px solid #888; }
     .profiler-results.profiler-top.profiler-right {
       right: 0px; }
-      .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-totals,
-      .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-result:last-child .profiler-button,
+      .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-totals, .profiler-results.profiler-top.profiler-right.profiler-no-controls .profiler-result:last-child .profiler-button,
       .profiler-results.profiler-top.profiler-right .profiler-controls {
         -webkit-border-bottom-left-radius: 10px;
         -moz-border-radius-bottomleft: 10px;
@@ -231,8 +229,7 @@
     bottom: 0px; }
     .profiler-results.profiler-bottom.profiler-left {
       left: 0px; }
-      .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-totals,
-      .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-result:first-child .profiler-button,
+      .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-totals, .profiler-results.profiler-bottom.profiler-left.profiler-no-controls .profiler-result:first-child .profiler-button,
       .profiler-results.profiler-bottom.profiler-left .profiler-controls {
         -webkit-border-top-right-radius: 10px;
         -moz-border-radius-topright: 10px;
@@ -242,8 +239,7 @@
         border-right: 1px solid #888; }
     .profiler-results.profiler-bottom.profiler-right {
       right: 0px; }
-      .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-totals,
-      .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-result:first-child .profiler-button,
+      .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-totals, .profiler-results.profiler-bottom.profiler-right.profiler-no-controls .profiler-result:first-child .profiler-button,
       .profiler-results.profiler-bottom.profiler-right .profiler-controls {
         -webkit-border-bottom-top-radius: 10px;
         -moz-border-radius-topleft: 10px;
@@ -349,7 +345,6 @@
   @media print {
     .profiler-results {
       display: none; } }
-
 .profiler-queries-bg {
   z-index: 2147483642;
   display: none;
