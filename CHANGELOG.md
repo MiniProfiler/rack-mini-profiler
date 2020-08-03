@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.4 - 2020-08-04
+
+- [FIX] webpacker may exist with no config, allow for that
+
 ## 2.0.3 - 2020-07-29
 
 - [FIX] support for deprecation free Redis 4.2
