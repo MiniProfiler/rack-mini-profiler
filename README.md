@@ -329,6 +329,15 @@ _Note:_ The GUID (`data-version` and the `?v=` parameter on the `src`) will chan
 #### Using MiniProfiler's built in route for apps without HTML responses
 MiniProfiler also ships with a `/rack-mini-profiler/requests` route that displays the speed badge on a blank HTML page. This can be useful when profiling an application that does not render HTML.
 
+#### Register MiniProfiler's assets in the Rails assets pipeline
+MiniProfiler can be configured so it registers its assets in the assets pipeline. To do that, you'll need to provide a lambda (or proc) to the `assets_url` config (see the below section). The callback will receive 3 arguments which are: `name` represents asset name (currently it's either `rack-mini-profiling.js` or `rack-mini-profiling.css`), `assets_version` is a 32 characters long hash of MiniProfiler's assets, and `env` which is the `env` object of the request. MiniProfiler expects the `assets_url` callback to return a URL from which the asset can be loaded (the return value will be used as a `href`/`src` attribute in the DOM). If the `assets_url` callback is not set (the default) or it returns a non-truthy value, MiniProfiler will fallback to loading assets from its own middleware (`/mini-profiler-resources/*`). The following callback should work for most applications:
+
+```ruby
+Rack::MiniProfiler.config.assets_url = ->(name, version, env) {
+  ActionController::Base.helpers.asset_path(name)
+}
+```
+
 ### Configuration Options
 
 You can set configuration options using the configuration accessor on `Rack::MiniProfiler`.
@@ -360,6 +369,7 @@ max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on o
 html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
 show_total_sql_count|`false`|Displays the total number of SQL executions.
 enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords.
+assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 

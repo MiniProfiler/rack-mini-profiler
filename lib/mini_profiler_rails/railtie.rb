@@ -118,6 +118,17 @@ module Rack::MiniProfilerRails
     @already_initialized = true
   end
 
+  def self.create_engine
+    return if defined?(Rack::MiniProfilerRails::Engine)
+    klass = Class.new(::Rails::Engine) do
+      engine_name 'rack-mini-profiler'
+      config.assets.paths << File.expand_path('../../html', __FILE__)
+      config.assets.precompile << 'rack-mini-profiler.js'
+      config.assets.precompile << 'rack-mini-profiler.css'
+    end
+    Rack::MiniProfilerRails.const_set("Engine", klass)
+  end
+
   def self.subscribe(event, &blk)
     if ActiveSupport::Notifications.respond_to?(:monotonic_subscribe)
       ActiveSupport::Notifications.monotonic_subscribe(event) { |*args| blk.call(*args) }

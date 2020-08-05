@@ -71,6 +71,15 @@ module Rack
       # Deprecated options
       attr_accessor :use_existing_jquery
 
+      attr_reader :assets_url
+
+      def assets_url=(lmbda)
+        if defined?(Rack::MiniProfilerRails)
+          Rack::MiniProfilerRails.create_engine
+        end
+        @assets_url = lmbda
+      end
+
       def vertical_position
         position.include?('bottom') ? 'bottom' : 'top'
       end
