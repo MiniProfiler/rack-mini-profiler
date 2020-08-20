@@ -14,6 +14,7 @@ $codeFonts: Consolas, monospace, serif;
 $zindex: 2147483640; // near 32bit max 2147483647
 
 // do some resets
+.mp-snapshots,
 .profiler-result,
 .profiler-queries {
   color: #555;
@@ -615,5 +616,24 @@ $zindex: 2147483640; // near 32bit max 2147483647
   }
   100% {
     background: #fff;
+  }
+}
+
+.mp-snapshots {
+  font-family: $normalFonts;
+  font-size: 16px;
+
+  .snapshots-table {
+    thead {
+      background: #6a737c;
+      color: #ffffff;
+    }
+    th, td {
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    th {
+      border-right: 1px solid #ffffff;
+    }
   }
 }

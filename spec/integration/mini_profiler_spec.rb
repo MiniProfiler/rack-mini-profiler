@@ -71,6 +71,21 @@ describe Rack::MiniProfiler do
           [200, { 'Content-Type' => 'text/html' }, +'<html><h1>and I ride and I ride</h1></html>']
         }
       end
+      map '/create' do
+        run lambda { |env|
+          [201, { 'Content-Type' => 'text/html' }, +'<html><h1>success</h1></html>']
+        }
+      end
+      map '/notallowed' do
+        run lambda { |env|
+          [403, { 'Content-Type' => 'text/html' }, +'<html><h1>you are not allowed here</h1></html>']
+        }
+      end
+      map '/whoopsie-daisy' do
+        run lambda { |env|
+          [500, { 'Content-Type' => 'text/html' }, +'<html><h1>whoopsie daisy</h1></html>']
+        }
+      end
     }.to_app
   end
 
@@ -359,4 +374,74 @@ describe Rack::MiniProfiler do
     end
   end
 
+  context 'snapshots sampling' do
+    before(:each) do
+      Rack::MiniProfiler.config.tap do |c|
+        c.authorization_mode = :whitelist
+        c.snapshot_every_n_requests = 1
+      end
+    end
+
+    after(:each) do
+      Rack::MiniProfiler.reset_config
+    end
+
+    it 'does not take snapshots of paths in skip_paths' do
+      config = Rack::MiniProfiler.config
+      config.skip_paths = ['/path2/a']
+      get '/path2/a'
+      expect(Rack::MiniProfiler.config.storage_instance.snapshots_overview).to eq([])
+    end
+
+    it 'takes snapshots of requests that fail the pre_authorize_cb check' do
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| false }
+      get '/path2/a'
+      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      expect(data.size).to eq(1)
+      expect(data[0][:name]).to eq("GET /path2/a")
+    end
+
+    it 'takes snapshots of requests that do not have valid token in cookie' do
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
+      get '/path2/a'
+      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      expect(data.size).to eq(1)
+    end
+
+    it 'does not take snapshots of requests that have valid token in cookie' do
+      Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
+      get '/whitelisted-html'
+      cookies = last_response.set_cookie_header
+      get '/path2/a', nil, { cookie: cookies } # no snapshot here
+      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      expect(data.size).to eq(1)
+      expect(data[0][:name]).to eq("GET /whitelisted-html")
+    end
+
+    it 'respects snapshot_every_n_requests config' do
+      Rack::MiniProfiler.config.snapshot_every_n_requests = 2
+      get '/path2/a'
+      get '/path2/a'
+      get '/path2/a'
+      get '/path2/a'
+      store = Rack::MiniProfiler.config.storage_instance
+      groups = store.snapshots_overview
+      expect(groups.size).to eq(1)
+      group_name = "GET /path2/a"
+      expect(groups[0][:name]).to eq(group_name)
+      expect(store.group_snapshots_list(group_name).size).to eq(2)
+    end
+
+    it 'does not take snapshots for non-2xx requests' do
+      Rack::MiniProfiler.config.snapshot_every_n_requests = 1
+      get '/path/that/doesnot/exist' # 404
+      get '/post' # 302
+      get '/notallowed' # 403
+      get '/whoopsie-daisy' # 500
+      post '/create' # 201
+      groups = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      expect(groups.size).to eq(1)
+      expect(groups[0][:name]).to eq("POST /create")
+    end
+  end
 end

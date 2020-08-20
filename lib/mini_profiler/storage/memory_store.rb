@@ -52,17 +52,21 @@ module Rack
         @expires_in_seconds = args.fetch(:expires_in) { EXPIRES_IN_SECONDS }
 
         @token1, @token2, @cycle_at = nil
+        @snapshots_cycle = 0
+        @snapshot_groups = {}
 
         initialize_locks
         initialize_cleanup_thread(args)
       end
 
       def initialize_locks
-        @token_lock         = Mutex.new
-        @timer_struct_lock  = Mutex.new
-        @user_view_lock     = Mutex.new
-        @timer_struct_cache = {}
-        @user_view_cache    = {}
+        @token_lock           = Mutex.new
+        @timer_struct_lock    = Mutex.new
+        @user_view_lock       = Mutex.new
+        @snapshots_cycle_lock = Mutex.new
+        @snapshots_lock       = Mutex.new
+        @timer_struct_cache   = {}
+        @user_view_cache      = {}
       end
 
       #FIXME: use weak ref, trouble it may be broken in 1.9 so need to use the 'ref' gem
@@ -134,6 +138,66 @@ module Rack
           [@token1, @token2].compact
 
         end
+      end
+
+      def should_take_snapshot?(period)
+        @snapshots_cycle_lock.synchronize do
+          @snapshots_cycle += 1
+          if @snapshots_cycle % period == 0
+            @snapshots_cycle = 0
+            return true
+          else
+            return false
+          end
+        end
+      end
+
+      def push_snapshot(page_struct, group_name, config)
+        @snapshots_lock.synchronize do
+          @snapshot_groups[group_name] ||= []
+          group = @snapshot_groups[group_name]
+          group << page_struct
+          group.sort_by! { |snapshot| snapshot.duration_ms }
+          group.reverse!
+          if group.size > config.max_snapshots_per_group
+            group.slice!(-1)
+          end
+        end
+      end
+
+      def snapshots_overview
+        data = []
+        @snapshot_groups.each do |group_name, snapshots|
+          next if !snapshots || snapshots.size == 0
+          data << { name: group_name, worst_score: snapshots[0].duration_ms }
+        end
+        data
+      end
+
+      def group_snapshots_list(group_name)
+        data = []
+        @snapshot_groups[group_name]&.each do |snapshot|
+          data << {
+            id: snapshot[:id],
+            duration: snapshot.duration_ms,
+            timestamp: snapshot[:started_at]
+          }
+        end
+        data
+      end
+
+      def load_snapshot(id, group_name)
+        @snapshot_groups[group_name]&.find do |snapshot|
+          snapshot[:id] == id
+        end
+      end
+
+      private
+
+      # used in tests only
+      def wipe_snapshots_data
+        @snapshots_cycle = 0
+        @snapshot_groups = {}
       end
     end
   end

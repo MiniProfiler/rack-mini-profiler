@@ -12,7 +12,7 @@ module Rack
       class Page < TimerStruct::Base
         def initialize(env)
           timer_id     = MiniProfiler.generate_id
-          page_name    = env['PATH_INFO']
+          page_name    = env['PATH_INFO']&.sub('//', '/')
           started_at   = (Time.now.to_f * 1000).to_i
           started      = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
           machine_name = env['SERVER_NAME']
@@ -39,7 +39,8 @@ module Rack
             executed_scalars: 0,
             executed_non_queries: 0,
             custom_timing_names: [],
-            custom_timing_stats: {}
+            custom_timing_stats: {},
+            custom_fields: {}
           )
           name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           self[:root] = TimerStruct::Request.createRoot(name, self)

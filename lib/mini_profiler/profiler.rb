@@ -38,7 +38,18 @@ module Rack
 
       def current=(c)
         # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
+        Thread.current[:mini_profiler_snapshot_custom_fields] = nil
         Thread.current[:mini_profiler_private] = c
+      end
+
+      def add_snapshot_custom_field(key, value)
+        thread_var_key = :mini_profiler_snapshot_custom_fields
+        Thread.current[thread_var_key] ||= {}
+        Thread.current[thread_var_key][key] = value
+      end
+
+      def get_snapshot_custom_fields
+        Thread.current[:mini_profiler_snapshot_custom_fields]
       end
 
       # discard existing results, don't track this request
@@ -106,7 +117,12 @@ module Rack
     def serve_results(env)
       request     = Rack::Request.new(env)
       id          = request.params['id']
-      page_struct = @storage.load(id)
+      group_name  = request.params['group_name']
+      if group_name && @config.snapshot_every_n_requests > 0
+        page_struct = @storage.load_snapshot(id, group_name)
+      else
+        page_struct = @storage.load(id)
+      end
       unless page_struct
         @storage.set_viewed(user(env), id)
         id        = ERB::Util.html_escape(request.params['id'])
@@ -148,6 +164,7 @@ module Rack
       file_name = path.sub(@config.base_url_path, '')
 
       return serve_results(env) if file_name.eql?('results')
+      return handle_snapshots_request(env) if file_name.eql?('snapshots')
 
       resources_env = env.dup
       resources_env['PATH_INFO'] = file_name
@@ -177,7 +194,6 @@ module Rack
     end
 
     def call(env)
-
       start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       client_settings = ClientSettings.new(env, @storage, start)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
@@ -189,15 +205,23 @@ module Rack
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)) ||
-                (@config.skip_paths && @config.skip_paths.any? { |p| path.start_with?(p) }) ||
+      skip_it = (@config.skip_paths && @config.skip_paths.any? { |p| path.start_with?(p) }) ||
                 query_string =~ /pp=skip/
+      if skip_it
+        return client_settings.handle_cookie(@app.call(env))
+      end
+
+      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env))
 
       if skip_it || (
         @config.authorization_mode == :whitelist &&
         !client_settings.has_valid_cookie?
       )
-        return client_settings.handle_cookie(@app.call(env))
+        if take_snapshot?(path)
+          return client_settings.handle_cookie(take_snapshot(env, path, start))
+        else
+          return client_settings.handle_cookie(@app.call(env))
+        end
       end
 
       # handle all /mini-profiler requests here
@@ -683,6 +707,110 @@ Append the following to your query string:
 
     def cache_control_value
       86400
+    end
+
+    private
+
+    def handle_snapshots_request(env)
+      self.current = nil
+      MiniProfiler.authorize_request
+      status = 200
+      headers = { 'Content-Type' => 'text/html' }
+      qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
+      if group_name = qp["group_name"]
+        list = @storage.group_snapshots_list(group_name)
+        list.sort_by! { |snapshot| snapshot[:duration] }
+        list.reverse!
+        list.each do |snapshot|
+          snapshot[:url] = url_for_snapshot(snapshot[:id], group_name)
+        end
+        data = {
+          group_name: group_name,
+          list: list
+        }
+      else
+        list = @storage.snapshots_overview
+        list.sort_by! { |g| g[:worst_score] }
+        list.reverse!
+        list.each do |group|
+          group[:url] = url_for_snapshots_group(group[:name])
+        end
+        data = {
+          page: "overview",
+          list: list
+        }
+      end
+      data_html = <<~HTML
+        <div style="display: none;" id="snapshots-data">
+        #{data.to_json}
+        </div>
+      HTML
+      response = Rack::Response.new([], status, headers)
+
+      response.write <<~HTML
+        <html>
+          <head></head>
+          <body class="mp-snapshots">
+      HTML
+      response.write(data_html)
+      script = self.get_profile_script(env)
+      response.write(script)
+      response.write <<~HTML
+          </body>
+        </html>
+      HTML
+      response.finish
+    end
+
+    def rails_route_from_path(path, method)
+      if defined?(Rails) && defined?(ActionController::RoutingError)
+        hash = Rails.application.routes.recognize_path(path, method: method)
+        if hash && hash[:controller] && hash[:action]
+          "#{method} #{hash[:controller]}##{hash[:action]}"
+        end
+      end
+    rescue ActionController::RoutingError
+      nil
+    end
+
+    def url_for_snapshots_group(group_name)
+      qs = Rack::Utils.build_query({ group_name: group_name })
+      "/#{@config.base_url_path.gsub('/', '')}/snapshots?#{qs}"
+    end
+
+    def url_for_snapshot(id, group_name)
+      qs = Rack::Utils.build_query({ id: id, group_name: group_name })
+      "/#{@config.base_url_path.gsub('/', '')}/results?#{qs}"
+    end
+
+    def take_snapshot?(path)
+      @config.snapshot_every_n_requests > 0 &&
+      !path.start_with?(@config.base_url_path) &&
+      @storage.should_take_snapshot?(@config.snapshot_every_n_requests)
+    end
+
+    def take_snapshot(env, path, start)
+      MiniProfiler.create_current(env, @config)
+      results = @app.call(env)
+      status = results[0].to_i
+      if status >= 200 && status < 300
+        method = env['REQUEST_METHOD']
+        group_name = path.gsub(/(\?|#).*/, '')
+        group_name = rails_route_from_path(path, method) || "#{method} #{group_name}"
+        page_struct = current.page_struct
+        page_struct[:root].record_time(
+          (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+        )
+        custom_fields = MiniProfiler.get_snapshot_custom_fields
+        page_struct[:custom_fields] = custom_fields if custom_fields
+        @storage.push_snapshot(
+          page_struct,
+          group_name,
+          @config
+        )
+      end
+      self.current = nil
+      results
     end
   end
 end

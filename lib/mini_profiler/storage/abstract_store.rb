@@ -41,6 +41,25 @@ module Rack
         raise NotImplementedError.new("allowed_tokens is not implemented")
       end
 
+      def should_take_snapshot?(period)
+        raise NotImplementedError.new("should_take_snapshot? is not implemented")
+      end
+
+      def push_snapshot(page_struct, group_name, config)
+        raise NotImplementedError.new("push_snapshot is not implemented")
+      end
+
+      def snapshots_overview
+        raise NotImplementedError.new("snapshots_overview is not implemented")
+      end
+
+      def group_snapshots_list(group_name)
+        raise NotImplementedError.new("group_snapshots_list is not implemented")
+      end
+
+      def load_snapshot(id, group_name)
+        raise NotImplementedError.new("load_snapshot is not implemented")
+      end
     end
   end
 end
