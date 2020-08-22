@@ -86,6 +86,13 @@ describe Rack::MiniProfiler do
           [500, { 'Content-Type' => 'text/html' }, +'<html><h1>whoopsie daisy</h1></html>']
         }
       end
+      map '/test-snapshots-custom-fields' do
+        run lambda { |env|
+          qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
+          qp.each { |k, v| Rack::MiniProfiler.add_snapshot_custom_field(k, v) }
+          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>whoopsie daisy</h1></html>']
+        }
+      end
     }.to_app
   end
 
@@ -442,6 +449,27 @@ describe Rack::MiniProfiler do
       groups = Rack::MiniProfiler.config.storage_instance.snapshots_overview
       expect(groups.size).to eq(1)
       expect(groups[0][:name]).to eq("POST /create")
+    end
+
+    it 'custom fields are reset between requests' do
+      get '/test-snapshots-custom-fields?field1=value1&field2=value2'
+      store = Rack::MiniProfiler.config.storage_instance
+
+      group_name = "GET /test-snapshots-custom-fields"
+
+      id1 = store.group_snapshots_list(group_name).first[:id]
+      snapshot1 = store.load_snapshot(id1, group_name)
+
+      get '/test-snapshots-custom-fields?field3=value3&field4=value4'
+      id2 = store.group_snapshots_list(group_name).find { |s| s[:id] != id1 }[:id]
+      snapshot2 = store.load_snapshot(id2, group_name)
+
+      expect(snapshot1[:custom_fields]).to eq(
+        { "field1" => "value1", "field2" => "value2" }
+      )
+      expect(snapshot2[:custom_fields]).to eq(
+        { "field3" => "value3", "field4" => "value4" }
+      )
     end
   end
 end
