@@ -152,4 +152,63 @@ describe Rack::MiniProfiler::RedisStore do
       expect(res).to eq(expected)
     end
   end
+
+  describe '#push_snapshot' do
+    it 'properly deletes keys when snapshots or groups are discarded/removed' do
+      # this case tests implementation details of the push_snapshot method, more
+      # specifically the LUA script. The implementation details are important to
+      # test to ensure that redis is not filled up with stray keys.
+      # If you've changed the implementation details of this method and this test
+      # case starts failing, don't bother fixing it and remove it entirely.
+
+      redis = store.send(:redis)
+      redis.flushdb
+
+      config = Rack::MiniProfiler::Config.default
+      config.max_snapshots_per_group = 2
+      config.max_snapshot_groups = 2
+
+      pstruct_class = Rack::MiniProfiler::TimerStruct::Page
+      pstruct1 = pstruct_class.new({}).tap { |s| s[:root].record_time(30) }
+      pstruct2 = pstruct_class.new({}).tap { |s| s[:root].record_time(20) }
+      pstruct3 = pstruct_class.new({}).tap { |s| s[:root].record_time(40) }
+
+      pstruct4 = pstruct_class.new({}).tap { |s| s[:root].record_time(30) }
+      pstruct5 = pstruct_class.new({}).tap { |s| s[:root].record_time(20) }
+      pstruct6 = pstruct_class.new({}).tap { |s| s[:root].record_time(10) }
+
+      pstruct7 = pstruct_class.new({}).tap { |s| s[:root].record_time(15) }
+      pstruct8 = pstruct_class.new({}).tap { |s| s[:root].record_time(38) }
+      pstruct9 = pstruct_class.new({}).tap { |s| s[:root].record_time(7) }
+
+      store.push_snapshot(pstruct1, "g1", config)
+      store.push_snapshot(pstruct2, "g1", config)
+      store.push_snapshot(pstruct3, "g1", config)
+
+      store.push_snapshot(pstruct4, "g2", config)
+      store.push_snapshot(pstruct5, "g2", config)
+      store.push_snapshot(pstruct6, "g2", config)
+
+      store.push_snapshot(pstruct7, "g3", config)
+      store.push_snapshot(pstruct8, "g3", config)
+      store.push_snapshot(pstruct9, "g3", config)
+
+      groups = store.snapshots_overview
+      expect(groups.size).to eq(2)
+      expect(groups).to contain_exactly(
+        { name: "g3", worst_score: 38 },
+        { name: "g1", worst_score: 40 }
+      )
+      expect(redis.keys).to contain_exactly(
+        store.send(:snapshot_hash_key, "g1"),
+        store.send(:snapshot_hash_key, "g3"),
+        store.send(:snapshot_groups_zset_key),
+        store.send(:snapshot_zset_key, "g1"),
+        store.send(:snapshot_zset_key, "g3")
+      )
+
+      expect(redis.hkeys(store.send(:snapshot_hash_key, "g1")).size).to eq(2)
+      expect(redis.hkeys(store.send(:snapshot_hash_key, "g3")).size).to eq(2)
+    end
+  end
 end
