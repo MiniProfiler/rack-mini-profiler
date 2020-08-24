@@ -92,6 +92,19 @@
             </tfoot>
           </table>
         {{?}}
+        {{? it.custom_fields && Object.keys(it.custom_fields).length > 0 }}
+          <p class="custom-fields-title">Snapshot custom fields</p>
+          <table class="profiler-timings">
+            <tbody>
+              {{~ Object.keys(it.custom_fields) :key }}
+                <tr>
+                  <td class="profiler-label">{{= key }}</td>
+                  <td class="profiler-label">{{= it.custom_fields[key] }}</td>
+                </tr>
+              {{~}}
+            </tbody>
+          </table>
+        {{?}}
       </div>
     </div>
 

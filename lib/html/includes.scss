@@ -17,7 +17,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
 .mp-snapshots,
 .profiler-result,
 .profiler-queries {
-  color: #555;
+  color: $textColor;
   line-height: 1;
   font-size: 12px;
 
@@ -55,6 +55,11 @@ $zindex: 2147483640; // near 32bit max 2147483647
     &:hover {
       text-decoration: underline;
     }
+  }
+  .custom-fields-title {
+    color: $textColor;
+    font: $normalFonts;
+    font-size: 14px;
   }
 }
 
@@ -200,7 +205,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
 
     th {
       background-color: #fff;
-      border-bottom: 1px solid #555;
+      border-bottom: 1px solid $textColor;
       font-weight: bold;
       padding: 15px;
       white-space: nowrap;
@@ -453,7 +458,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
     line-height: 18px;
     overflow: auto;
 
-    @include box-shadow(0px, 1px, 15px, #555);
+    @include box-shadow(0px, 1px, 15px, $textColor);
 
     .profiler-info {
       margin-bottom: 3px;
@@ -593,7 +598,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
       }
       th {
         font-size: 16px;
-        color: #555;
+        color: $textColor;
         line-height: 20px;
       }
 

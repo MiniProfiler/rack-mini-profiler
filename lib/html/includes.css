@@ -65,6 +65,12 @@
     .profiler-result a:hover,
     .profiler-queries a:hover {
       text-decoration: underline; }
+  .mp-snapshots .custom-fields-title,
+  .profiler-result .custom-fields-title,
+  .profiler-queries .custom-fields-title {
+    color: #555;
+    font: Helvetica, Arial, sans-serif;
+    font-size: 14px; }
 
 .profiler-result {
   font-family: Helvetica, Arial, sans-serif; }
