@@ -85,4 +85,5 @@ describe Rack::MiniProfiler::MemoryStore do
     end
   end
 
+  include_examples "snapshots storage", Rack::MiniProfiler::MemoryStore.new
 end

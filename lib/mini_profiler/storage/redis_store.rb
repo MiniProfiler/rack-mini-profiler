@@ -120,98 +120,86 @@ unviewed_ids: #{get_unviewed_ids(user)}
 
         1 == redis.eval(
           lua,
-          keys: ["#{@prefix}-mini-profiler-snapshots-counter"],
+          keys: [snapshot_counter_key()],
           argv: [period]
         )
       end
 
-      def push_snapshot(page_struct, group_name, config)
+      def push_snapshot(page_struct, config)
+        zset_key = snapshot_zset_key()
+        hash_key = snapshot_hash_key()
+
         id = page_struct[:id]
         score = page_struct.duration_ms
-        group_zset_key = snapshot_zset_key(group_name)
-        hash_key = snapshot_hash_key(group_name)
-        zset_key = snapshot_groups_zset_key()
-        page_struct_raw = Marshal::dump(page_struct)
-        per_group_limit = config.max_snapshots_per_group
-        groups_limit = config.max_snapshot_groups
+        limit = config.snapshots_limit
+        bytes = Marshal.dump(page_struct)
+
         lua = <<~LUA
-          local group_zset_key = KEYS[1]
+          local zset_key = KEYS[1]
           local hash_key = KEYS[2]
-          local zset_key = KEYS[3]
-          local score = tonumber(ARGV[1])
-          local id = ARGV[2]
-          local page_struct_raw = ARGV[3]
-          local group_name = ARGV[4]
-          local per_group_limit = tonumber(ARGV[5])
-          local groups_limit = tonumber(ARGV[6])
-          local prefix = ARGV[7]
-          local current_group_score = redis.call("ZSCORE", zset_key, group_name)
-          if current_group_score == false or score > tonumber(current_group_score) then
-            redis.call("ZADD", zset_key, score, group_name)
-          end
-          local skip_snapshot = false
-          if redis.call("ZCARD", zset_key) > groups_limit then
-            local lowest_group = redis.call("ZRANGE", zset_key, 0, 0)[1]
-            redis.call("ZREM", zset_key, lowest_group)
-            skip_snapshot = lowest_group == group_name
-            if not skip_snapshot then
-              local lowest_group_zset_key = prefix .. "-mini-profiler-snapshots-zset-for-" .. lowest_group
-              local lowest_group_hash_key = prefix .. "-mini-profiler-snapshots-hash-for-" .. lowest_group
-              redis.call("DEL", lowest_group_zset_key)
-              redis.call("DEL", lowest_group_hash_key)
-            end
-          end
-          if not skip_snapshot then
-            local skip_hash = false
-            redis.call("ZADD", group_zset_key, score, id)
-            if redis.call("ZCARD", group_zset_key) > per_group_limit then
-              local lowest_snapshot_id = redis.call("ZRANGE", group_zset_key, 0, 0)[1]
-              redis.call("ZREM", group_zset_key, lowest_snapshot_id)
-              skip_hash = lowest_snapshot_id == id
-              if not skip_hash then
-                redis.call("HDEL", hash_key, lowest_snapshot_id)
-              end
-            end
-            if not skip_hash then
-              redis.call("HSET", hash_key, id, page_struct_raw)
-            end
+          local id = ARGV[1]
+          local score = tonumber(ARGV[2])
+          local bytes = ARGV[3]
+          local limit = tonumber(ARGV[4])
+          redis.call("ZADD", zset_key, score, id)
+          redis.call("HSET", hash_key, id, bytes)
+          if redis.call("ZCARD", zset_key) > limit then
+            local lowest_snapshot_id = redis.call("ZRANGE", zset_key, 0, 0)[1]
+            redis.call("ZREM", zset_key, lowest_snapshot_id)
+            redis.call("HDEL", hash_key, lowest_snapshot_id)
           end
         LUA
         redis.eval(
           lua,
-          keys: [group_zset_key, hash_key, zset_key],
-          argv: [score, id, page_struct_raw, group_name, per_group_limit, groups_limit, @prefix]
+          keys: [zset_key, hash_key],
+          argv: [id, score, bytes, limit]
         )
       end
 
-      def snapshots_overview
-        data = []
-        redis.zrange(snapshot_groups_zset_key(), 0, -1, withscores: true).each do |name, worst_score|
-          data << { name: name, worst_score: worst_score }
+      def fetch_snapshots(batch_size: 200, &blk)
+        zset_key = snapshot_zset_key()
+        hash_key = snapshot_hash_key()
+        iteration = 0
+        corrupt_snapshots = []
+        while true
+          ids = redis.zrange(
+            zset_key,
+            batch_size * iteration,
+            batch_size * iteration + batch_size - 1
+          )
+          break if ids.size == 0
+          batch = redis.mapped_hmget(hash_key, *ids).to_a
+          batch.map! do |id, bytes|
+            begin
+              Marshal.load(bytes)
+            rescue
+              corrupt_snapshots << id
+              nil
+            end
+          end
+          batch.compact!
+          blk.call(batch) if batch.size != 0
+          break if ids.size < batch_size
+          iteration += 1
         end
-        data
+        if corrupt_snapshots.size > 0
+          redis.pipelined do
+            redis.zrem(zset_key, corrupt_snapshots)
+            redis.hdel(hash_key, corrupt_snapshots)
+          end
+        end
       end
 
-      def group_snapshots_list(group_name)
-        data = []
-        redis.zrange(snapshot_zset_key(group_name), 0, -1, withscores: true).each do |id, duration|
-          hash = { id: id, duration: duration }
-          page_struct = load_snapshot(id, group_name)
-          next unless page_struct
-          hash[:timestamp] = page_struct[:started_at]
-          data << hash
-        end
-        data
-      end
-
-      def load_snapshot(id, group_name)
-        key = snapshot_hash_key(group_name)
-        raw = redis.hget(key, id)
+      def load_snapshot(id)
+        hash_key = snapshot_hash_key()
+        bytes = redis.hget(hash_key, id)
         begin
-          Marshal::load(raw) if raw
+          Marshal.load(bytes)
         rescue
-          redis.hdel(key, id)
-          redis.zrem(snapshot_zset_key(group_name), id)
+          redis.pipelined do
+            redis.zrem(snapshot_zset_key(), id)
+            redis.hdel(hash_key, id)
+          end
           nil
         end
       end
@@ -233,26 +221,24 @@ unviewed_ids: #{get_unviewed_ids(user)}
         end
       end
 
-      def snapshot_zset_key(group_name)
-        # if you change the key, remember to chnage it the LUA
-        # script in the push_snapshot method
-        "#{@prefix}-mini-profiler-snapshots-zset-for-#{group_name}"
+      def snapshot_counter_key
+        @snapshot_zset_key ||= "#{@prefix}-mini-profiler-snapshots-counter"
       end
 
-      def snapshot_hash_key(group_name)
-        # if you change the key, remember to chnage it the LUA
-        # script in the push_snapshot method
-        "#{@prefix}-mini-profiler-snapshots-hash-for-#{group_name}"
+      def snapshot_zset_key
+        @snapshot_zset_key ||= "#{@prefix}-mini-profiler-snapshots-zset"
       end
 
-      def snapshot_groups_zset_key
-        "#{@prefix}-mini-profiler-snapshots-groups-zset"
+      def snapshot_hash_key
+        @snapshot_hash_key ||= "#{@prefix}-mini-profiler-snapshots-hash"
       end
 
       # only used in tests
       def wipe_snapshots_data
-        redis.keys.each do |key|
-          redis.del(key) if key.include?("mini-profiler-snapshots")
+        redis.pipelined do
+          redis.del(snapshot_counter_key())
+          redis.del(snapshot_zset_key())
+          redis.del(snapshot_hash_key())
         end
       end
     end

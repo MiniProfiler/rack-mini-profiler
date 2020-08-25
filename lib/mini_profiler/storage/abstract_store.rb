@@ -45,20 +45,73 @@ module Rack
         raise NotImplementedError.new("should_take_snapshot? is not implemented")
       end
 
-      def push_snapshot(page_struct, group_name, config)
+      def push_snapshot(page_struct, config)
         raise NotImplementedError.new("push_snapshot is not implemented")
       end
 
-      def snapshots_overview
-        raise NotImplementedError.new("snapshots_overview is not implemented")
+      def fetch_snapshots(batch_size: 200, &blk)
+        raise NotImplementedError.new("fetch_snapshots is not implemented")
       end
 
-      def group_snapshots_list(group_name)
-        raise NotImplementedError.new("group_snapshots_list is not implemented")
+      def snapshot_groups_overview
+        groups = {}
+        fetch_snapshots do |batch|
+          batch.each do |snapshot|
+            group_name = default_snapshot_grouping(snapshot)
+            if !groups[group_name] || groups[group_name] < snapshot.duration_ms
+              groups[group_name] = snapshot.duration_ms
+            end
+          end
+        end
+        groups = groups.to_a
+        groups.sort_by! { |name, score| score }
+        groups.reverse!
+        groups.map! do |name, score|
+          { name: name, worst_score: score }
+        end
+        groups
       end
 
-      def load_snapshot(id, group_name)
+      def find_snapshots_group(group_name)
+        data = []
+        fetch_snapshots do |batch|
+          batch.each do |snapshot|
+            snapshot_group_name = default_snapshot_grouping(snapshot)
+            if group_name == snapshot_group_name
+              data << {
+                id: snapshot[:id],
+                duration: snapshot.duration_ms,
+                timestamp: snapshot[:started_at]
+              }
+            end
+          end
+        end
+        data.sort_by! { |s| s[:duration] }
+        data.reverse!
+        data
+      end
+
+      def load_snapshot(id)
         raise NotImplementedError.new("load_snapshot is not implemented")
+      end
+
+      private
+
+      def default_snapshot_grouping(snapshot)
+        group_name = rails_route_from_path(snapshot[:request_method], snapshot[:request_path])
+        group_name ||= snapshot[:request_path]
+        "#{snapshot[:request_method]} #{group_name}"
+      end
+
+      def rails_route_from_path(path, method)
+        if defined?(Rails) && defined?(ActionController::RoutingError)
+          hash = Rails.application.routes.recognize_path(path, method: method)
+          if hash && hash[:controller] && hash[:action]
+            "#{hash[:controller]}##{hash[:action]}"
+          end
+        end
+      rescue ActionController::RoutingError
+        nil
       end
     end
   end

@@ -7,6 +7,8 @@ require 'sinatra/base'
 class SampleStorage < Rack::MiniProfiler::AbstractStore
   def initialize(args)
     @multipliers = [10, 100, 1000]
+    @time_units = [1, 60, 3600, 3600 * 24]
+    @time_multipliers = (1..60).to_a
   end
 
   def load(*args)
@@ -27,33 +29,43 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
   def get_unviewed_ids(*args)
   end
 
-  def snapshots_overview
-    [
-      {
-        name: "GET topics#list",
-        worst_score: SecureRandom.rand * @multipliers.sample
-      },
-      {
-        name: "GET users#list",
-        worst_score: SecureRandom.rand * @multipliers.sample
-      },
-      {
-        name: "GET /a/very/long/path/that/doesnt/exist",
-        worst_score: SecureRandom.rand * @multipliers.sample
-      }
+  def fetch_snapshots(batch_size: 200, &blk)
+    if @snapshots
+      @snapshots.each_slice(batch_size) { |batch| blk.call(batch) }
+      return
+    end
+    methods = %w[POST GET DELETE PUT PATCH]
+    paths = %w[
+      topics#index
+      topics#update
+      topics#delete
+      users#delete
+      users#update
+      users#index
+      /some/fairly/long/path/here
     ]
+    @snapshots = methods.product(paths).map do |method, path|
+      create_fake_snapshot(
+        methods.sample,
+        paths.sample,
+        SecureRandom.rand * @multipliers.sample,
+        ((Time.new.to_f - @time_units.sample * @time_multipliers.sample) * 1000).round
+      )
+    end
+    @snapshots.each_slice(batch_size) { |batch| blk.call(batch) }
+    nil
   end
 
-  def group_snapshots_list(*args)
-    units = [1, 60, 3600, 3600 * 24]
-    multipliers = (1..60).to_a
-    (3..15).to_a.sample.times.to_a.map do
-      {
-        id: SecureRandom.hex,
-        duration: SecureRandom.rand * @multipliers.sample,
-        timestamp: ((Time.new.to_f - units.sample * multipliers.sample) * 1000).round
-      }
-    end
+  private
+
+  def create_fake_snapshot(method, path, duration, started_at)
+    page = Rack::MiniProfiler::TimerStruct::Page.new({
+      'PATH_INFO' => path,
+      'REQUEST_METHOD' => method
+    })
+    page[:root].record_time(duration)
+    page[:started_at] = started_at
+    page
   end
 end
 

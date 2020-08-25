@@ -218,7 +218,7 @@ module Rack
         !client_settings.has_valid_cookie?
       )
         if take_snapshot?(path)
-          return client_settings.handle_cookie(take_snapshot(env, path, start))
+          return client_settings.handle_cookie(take_snapshot(env, start))
         else
           return client_settings.handle_cookie(@app.call(env))
         end
@@ -718,9 +718,7 @@ Append the following to your query string:
       headers = { 'Content-Type' => 'text/html' }
       qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
       if group_name = qp["group_name"]
-        list = @storage.group_snapshots_list(group_name)
-        list.sort_by! { |snapshot| snapshot[:duration] }
-        list.reverse!
+        list = @storage.find_snapshots_group(group_name)
         list.each do |snapshot|
           snapshot[:url] = url_for_snapshot(snapshot[:id], group_name)
         end
@@ -729,9 +727,7 @@ Append the following to your query string:
           list: list
         }
       else
-        list = @storage.snapshots_overview
-        list.sort_by! { |g| g[:worst_score] }
-        list.reverse!
+        list = @storage.snapshot_groups_overview
         list.each do |group|
           group[:url] = url_for_snapshots_group(group[:name])
         end
@@ -789,14 +785,11 @@ Append the following to your query string:
       @storage.should_take_snapshot?(@config.snapshot_every_n_requests)
     end
 
-    def take_snapshot(env, path, start)
+    def take_snapshot(env, start)
       MiniProfiler.create_current(env, @config)
       results = @app.call(env)
       status = results[0].to_i
       if status >= 200 && status < 300
-        method = env['REQUEST_METHOD']
-        group_name = path.gsub(/(\?|#).*/, '')
-        group_name = rails_route_from_path(path, method) || "#{method} #{group_name}"
         page_struct = current.page_struct
         page_struct[:root].record_time(
           (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
@@ -805,7 +798,6 @@ Append the following to your query string:
         page_struct[:custom_fields] = custom_fields if custom_fields
         @storage.push_snapshot(
           page_struct,
-          group_name,
           @config
         )
       end

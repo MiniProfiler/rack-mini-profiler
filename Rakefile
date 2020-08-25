@@ -16,7 +16,8 @@ require 'rspec/core'
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   pattern = ARGV[1] || 'spec/**/*_spec.rb'
-  spec.pattern = FileList[pattern]
+  excluded = 'spec/support/*.rb'
+  spec.pattern = FileList[pattern] - FileList[excluded]
   spec.verbose = false
   # spec.rspec_opts = ["-p"] # turns on profiling
 end

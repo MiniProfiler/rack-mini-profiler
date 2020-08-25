@@ -42,6 +42,8 @@ module Rack
             custom_timing_stats: {},
             custom_fields: {}
           )
+          self[:request_method] = env['REQUEST_METHOD']
+          self[:request_path] = env['PATH_INFO']
           name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           self[:root] = TimerStruct::Request.createRoot(name, self)
         end

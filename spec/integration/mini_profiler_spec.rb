@@ -90,7 +90,7 @@ describe Rack::MiniProfiler do
         run lambda { |env|
           qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
           qp.each { |k, v| Rack::MiniProfiler.add_snapshot_custom_field(k, v) }
-          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>whoopsie daisy</h1></html>']
+          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>custom fields</h1></html>']
         }
       end
     }.to_app
@@ -397,13 +397,13 @@ describe Rack::MiniProfiler do
       config = Rack::MiniProfiler.config
       config.skip_paths = ['/path2/a']
       get '/path2/a'
-      expect(Rack::MiniProfiler.config.storage_instance.snapshots_overview).to eq([])
+      expect(Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview).to eq([])
     end
 
     it 'takes snapshots of requests that fail the pre_authorize_cb check' do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| false }
       get '/path2/a'
-      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
       expect(data.size).to eq(1)
       expect(data[0][:name]).to eq("GET /path2/a")
     end
@@ -411,7 +411,7 @@ describe Rack::MiniProfiler do
     it 'takes snapshots of requests that do not have valid token in cookie' do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
       get '/path2/a'
-      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
       expect(data.size).to eq(1)
     end
 
@@ -420,7 +420,7 @@ describe Rack::MiniProfiler do
       get '/whitelisted-html'
       cookies = last_response.set_cookie_header
       get '/path2/a', nil, { cookie: cookies } # no snapshot here
-      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
       expect(data.size).to eq(1)
       expect(data[0][:name]).to eq("GET /whitelisted-html")
     end
@@ -432,11 +432,11 @@ describe Rack::MiniProfiler do
       get '/path2/a'
       get '/path2/a'
       store = Rack::MiniProfiler.config.storage_instance
-      groups = store.snapshots_overview
+      groups = store.snapshot_groups_overview
       expect(groups.size).to eq(1)
       group_name = "GET /path2/a"
       expect(groups[0][:name]).to eq(group_name)
-      expect(store.group_snapshots_list(group_name).size).to eq(2)
+      expect(store.find_snapshots_group(group_name).size).to eq(2)
     end
 
     it 'does not take snapshots for non-2xx requests' do
@@ -446,7 +446,7 @@ describe Rack::MiniProfiler do
       get '/notallowed' # 403
       get '/whoopsie-daisy' # 500
       post '/create' # 201
-      groups = Rack::MiniProfiler.config.storage_instance.snapshots_overview
+      groups = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
       expect(groups.size).to eq(1)
       expect(groups[0][:name]).to eq("POST /create")
     end
@@ -457,12 +457,12 @@ describe Rack::MiniProfiler do
 
       group_name = "GET /test-snapshots-custom-fields"
 
-      id1 = store.group_snapshots_list(group_name).first[:id]
-      snapshot1 = store.load_snapshot(id1, group_name)
+      id1 = store.find_snapshots_group(group_name).first[:id]
+      snapshot1 = store.load_snapshot(id1)
 
       get '/test-snapshots-custom-fields?field3=value3&field4=value4'
-      id2 = store.group_snapshots_list(group_name).find { |s| s[:id] != id1 }[:id]
-      snapshot2 = store.load_snapshot(id2, group_name)
+      id2 = store.find_snapshots_group(group_name).find { |s| s[:id] != id1 }[:id]
+      snapshot2 = store.load_snapshot(id2)
 
       expect(snapshot1[:custom_fields]).to eq(
         { "field1" => "value1", "field2" => "value2" }
@@ -470,6 +470,81 @@ describe Rack::MiniProfiler do
       expect(snapshot2[:custom_fields]).to eq(
         { "field3" => "value3", "field4" => "value4" }
       )
+    end
+  end
+
+  context 'snapshots page' do
+    it 'allows only authorized users to access it' do
+      base_url = Rack::MiniProfiler.config.base_url_path
+      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      get "#{base_url}snapshots"
+      expect(last_response.status).to eq(404)
+      expect(last_response.body).to eq("Not Found: /mini-profiler-resources/snapshots")
+
+      get '/whitelisted-html'
+      cookies = last_response.set_cookie_header
+      get "#{base_url}snapshots", nil, { cookie: cookies }
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to include('id="snapshots-data"')
+    end
+
+    it 'without group_name param it sends groups list in response' do
+      base_url = Rack::MiniProfiler.config.base_url_path
+      # initial request to initialize storage_instance
+      get "#{base_url}snapshots"
+
+      store = Rack::MiniProfiler.config.storage_instance
+      struct = Rack::MiniProfiler::TimerStruct::Page.new({
+        'PATH_INFO' => '/some/path/here',
+        'REQUEST_METHOD' => 'POST'
+      })
+      struct[:root].record_time(1342.314242)
+      store.push_snapshot(struct, Rack::MiniProfiler.config)
+      get "#{base_url}snapshots"
+      expect(last_response.body).to include('id="snapshots-data"')
+      expect(last_response.body).to include("/some/path/here")
+      expect(last_response.body).to include("POST /some/path/here")
+      expect(last_response.body).to include("1342.314242")
+    end
+
+    it 'with group_name params it sends a list of snapshots of the given group' do
+      base_url = Rack::MiniProfiler.config.base_url_path
+      # initial request to initialize storage_instance
+      get "#{base_url}snapshots"
+
+      store = Rack::MiniProfiler.config.storage_instance
+      struct1 = Rack::MiniProfiler::TimerStruct::Page.new({
+        'PATH_INFO' => '/some/path/here',
+        'REQUEST_METHOD' => 'POST'
+      })
+      struct1[:root].record_time(1342.314242)
+
+      struct2 = Rack::MiniProfiler::TimerStruct::Page.new({
+        'PATH_INFO' => '/another/path/here',
+        'REQUEST_METHOD' => 'DELETE'
+      })
+      struct2[:root].record_time(8342.08342)
+
+      struct3 = Rack::MiniProfiler::TimerStruct::Page.new({
+        'PATH_INFO' => '/another/path/here',
+        'REQUEST_METHOD' => 'DELETE'
+      })
+      struct3[:root].record_time(3084.803185)
+
+      store.push_snapshot(struct1, Rack::MiniProfiler.config)
+      store.push_snapshot(struct2, Rack::MiniProfiler.config)
+      store.push_snapshot(struct3, Rack::MiniProfiler.config)
+
+      qs = Rack::Utils.build_query({ group_name: "DELETE /another/path/here" })
+      get "#{base_url}snapshots?#{qs}"
+      expect(last_response.body).to include('id="snapshots-data"')
+      expect(last_response.body).to include(struct2[:id])
+      expect(last_response.body).to include(struct3[:id])
+      expect(last_response.body).to include("DELETE /another/path/here")
+      expect(last_response.body).to include("3084.803185")
+      expect(last_response.body).to include("8342.08342")
+      expect(last_response.body).not_to include(struct1[:id])
+      expect(last_response.body).not_to include("1342.314242")
     end
   end
 end

@@ -38,8 +38,7 @@ module Rack
           @skip_sql_param_names = /password/ # skips parameters with the name password by default
           @enable_advanced_debugging_tools = false
           @snapshot_every_n_requests = -1
-          @max_snapshots_per_group = 15
-          @max_snapshot_groups = 300
+          @snapshots_limit = 1000
 
           # ui parameters
           @autorized            = true
@@ -64,7 +63,7 @@ module Rack
         :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
         :skip_schema_queries, :storage, :storage_failure, :storage_instance,
         :storage_options, :user_provider, :enable_advanced_debugging_tools,
-        :snapshot_every_n_requests, :max_snapshots_per_group, :max_snapshot_groups
+        :snapshot_every_n_requests, :snapshots_limit
       attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
 
       # ui accessors
