@@ -98,7 +98,7 @@ module Rack
       private
 
       def default_snapshot_grouping(snapshot)
-        group_name = rails_route_from_path(snapshot[:request_method], snapshot[:request_path])
+        group_name = rails_route_from_path(snapshot[:request_path], snapshot[:request_method])
         group_name ||= snapshot[:request_path]
         "#{snapshot[:request_method]} #{group_name}"
       end
