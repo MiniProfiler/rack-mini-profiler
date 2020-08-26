@@ -222,7 +222,7 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       def snapshot_counter_key
-        @snapshot_zset_key ||= "#{@prefix}-mini-profiler-snapshots-counter"
+        @snapshot_counter_key ||= "#{@prefix}-mini-profiler-snapshots-counter"
       end
 
       def snapshot_zset_key
