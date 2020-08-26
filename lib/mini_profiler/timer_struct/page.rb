@@ -12,7 +12,7 @@ module Rack
       class Page < TimerStruct::Base
         def initialize(env)
           timer_id     = MiniProfiler.generate_id
-          page_name    = env['PATH_INFO']&.sub('//', '/')
+          page_name    = env['PATH_INFO']
           started_at   = (Time.now.to_f * 1000).to_i
           started      = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
           machine_name = env['SERVER_NAME']
