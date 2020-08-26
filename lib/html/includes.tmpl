@@ -259,7 +259,7 @@
     <table class="snapshots-table">
       <thead>
         <tr>
-          <th>Snapshot ID</th>
+          <th>ID</th>
           <th>Duration (ms)</th>
           <th>Age</th>
         </tr>
@@ -268,7 +268,7 @@
         {{~ it.list :row}}
           <tr>
             <td><a href="{{= row.url }}">
-              {{= row.id.substring(0, 8) }}...
+              {{= row.id }}
             </a></td>
             <td>{{= MiniProfiler.formatDuration(row.duration) }}</td>
             <td>
