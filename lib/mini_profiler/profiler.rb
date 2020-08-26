@@ -117,19 +117,23 @@ module Rack
     def serve_results(env)
       request     = Rack::Request.new(env)
       id          = request.params['id']
-      group_name  = request.params['group_name']
-      if group_name && @config.snapshot_every_n_requests > 0
-        page_struct = @storage.load_snapshot(id, group_name)
+      is_snapshot = request.params['snapshot']
+      is_snapshot = [true, "true"].include?(is_snapshot)
+      if is_snapshot
+        page_struct = @storage.load_snapshot(id)
       else
         page_struct = @storage.load(id)
       end
-      unless page_struct
+      if !page_struct && is_snapshot
+        id = ERB::Util.html_escape(id)
+        return [404, {}, ["Snapshot with id '#{id}' not found"]]
+      elsif !page_struct
         @storage.set_viewed(user(env), id)
-        id        = ERB::Util.html_escape(request.params['id'])
+        id        = ERB::Util.html_escape(id)
         user_info = ERB::Util.html_escape(user(env))
         return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
       end
-      unless page_struct[:has_user_viewed]
+      if !page_struct[:has_user_viewed] && !is_snapshot
         page_struct[:client_timings]  = TimerStruct::Client.init_from_form_data(env, page_struct)
         page_struct[:has_user_viewed] = true
         @storage.save(page_struct)
@@ -720,7 +724,7 @@ Append the following to your query string:
       if group_name = qp["group_name"]
         list = @storage.find_snapshots_group(group_name)
         list.each do |snapshot|
-          snapshot[:url] = url_for_snapshot(snapshot[:id], group_name)
+          snapshot[:url] = url_for_snapshot(snapshot[:id])
         end
         data = {
           group_name: group_name,
@@ -774,8 +778,8 @@ Append the following to your query string:
       "/#{@config.base_url_path.gsub('/', '')}/snapshots?#{qs}"
     end
 
-    def url_for_snapshot(id, group_name)
-      qs = Rack::Utils.build_query({ id: id, group_name: group_name })
+    def url_for_snapshot(id)
+      qs = Rack::Utils.build_query({ id: id, snapshot: true })
       "/#{@config.base_url_path.gsub('/', '')}/results?#{qs}"
     end
 

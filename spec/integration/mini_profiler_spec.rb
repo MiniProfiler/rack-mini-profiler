@@ -546,5 +546,35 @@ describe Rack::MiniProfiler do
       expect(last_response.body).not_to include(struct1[:id])
       expect(last_response.body).not_to include("1342.314242")
     end
+
+    it 'individual snapshot can be viewed' do
+      base_url = Rack::MiniProfiler.config.base_url_path
+      # initial request to initialize storage_instance
+      get "#{base_url}snapshots"
+
+      store = Rack::MiniProfiler.config.storage_instance
+      struct = Rack::MiniProfiler::TimerStruct::Page.new({
+        'PATH_INFO' => '/some/path/here',
+        'REQUEST_METHOD' => 'POST'
+      })
+      struct[:root].record_time(1342.314242)
+      store.push_snapshot(struct, Rack::MiniProfiler.config)
+
+      get "#{base_url}results?id=#{struct[:id]}&snapshot=true"
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to include(struct[:id])
+      expect(last_response.body).to include("1342.314242")
+    end
+
+    it 'when snapshot is not found a 404 response is given' do
+      base_url = Rack::MiniProfiler.config.base_url_path
+      get "#{base_url}results?id=nonsenseidhere&snapshot=true"
+      expect(last_response.status).to eq(404)
+      expect(last_response.body).to eq("Snapshot with id 'nonsenseidhere' not found")
+
+      get "#{base_url}results?id=%22%3E%3Cqss%3E&snapshot=true"
+      expect(last_response.status).to eq(404)
+      expect(last_response.body).to eq("Snapshot with id '&quot;&gt;&lt;qss&gt;' not found"), "id should be escaped to prevent XSS"
+    end
   end
 end
