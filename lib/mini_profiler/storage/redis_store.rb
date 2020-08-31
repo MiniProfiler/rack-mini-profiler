@@ -108,6 +108,106 @@ unviewed_ids: #{get_unviewed_ids(user)}
         [key1, key2].compact
       end
 
+      COUNTER_LUA = <<~LUA
+        if redis.call("INCR", KEYS[1]) % ARGV[1] == 0 then
+          redis.call("DEL", KEYS[1])
+          return 1
+        else
+          return 0
+        end
+      LUA
+
+      COUNTER_LUA_SHA = Digest::SHA1.hexdigest(COUNTER_LUA)
+
+      def should_take_snapshot?(period)
+        1 == cached_redis_eval(
+          COUNTER_LUA,
+          COUNTER_LUA_SHA,
+          reraise: false,
+          keys: [snapshot_counter_key()],
+          argv: [period]
+        )
+      end
+
+      def push_snapshot(page_struct, config)
+        zset_key = snapshot_zset_key()
+        hash_key = snapshot_hash_key()
+
+        id = page_struct[:id]
+        score = page_struct.duration_ms
+        limit = config.snapshots_limit
+        bytes = Marshal.dump(page_struct)
+
+        lua = <<~LUA
+          local zset_key = KEYS[1]
+          local hash_key = KEYS[2]
+          local id = ARGV[1]
+          local score = tonumber(ARGV[2])
+          local bytes = ARGV[3]
+          local limit = tonumber(ARGV[4])
+          redis.call("ZADD", zset_key, score, id)
+          redis.call("HSET", hash_key, id, bytes)
+          if redis.call("ZCARD", zset_key) > limit then
+            local lowest_snapshot_id = redis.call("ZRANGE", zset_key, 0, 0)[1]
+            redis.call("ZREM", zset_key, lowest_snapshot_id)
+            redis.call("HDEL", hash_key, lowest_snapshot_id)
+          end
+        LUA
+        redis.eval(
+          lua,
+          keys: [zset_key, hash_key],
+          argv: [id, score, bytes, limit]
+        )
+      end
+
+      def fetch_snapshots(batch_size: 200, &blk)
+        zset_key = snapshot_zset_key()
+        hash_key = snapshot_hash_key()
+        iteration = 0
+        corrupt_snapshots = []
+        while true
+          ids = redis.zrange(
+            zset_key,
+            batch_size * iteration,
+            batch_size * iteration + batch_size - 1
+          )
+          break if ids.size == 0
+          batch = redis.mapped_hmget(hash_key, *ids).to_a
+          batch.map! do |id, bytes|
+            begin
+              Marshal.load(bytes)
+            rescue
+              corrupt_snapshots << id
+              nil
+            end
+          end
+          batch.compact!
+          blk.call(batch) if batch.size != 0
+          break if ids.size < batch_size
+          iteration += 1
+        end
+        if corrupt_snapshots.size > 0
+          redis.pipelined do
+            redis.zrem(zset_key, corrupt_snapshots)
+            redis.hdel(hash_key, corrupt_snapshots)
+          end
+        end
+      end
+
+      def load_snapshot(id)
+        hash_key = snapshot_hash_key()
+        bytes = redis.hget(hash_key, id)
+        begin
+          Marshal.load(bytes)
+        rescue
+          redis.pipelined do
+            redis.zrem(snapshot_zset_key(), id)
+            redis.hdel(hash_key, id)
+          end
+          nil
+        end
+      end
+
       private
 
       def user_key(user)
@@ -125,6 +225,38 @@ unviewed_ids: #{get_unviewed_ids(user)}
         end
       end
 
+      def snapshot_counter_key
+        @snapshot_counter_key ||= "#{@prefix}-mini-profiler-snapshots-counter"
+      end
+
+      def snapshot_zset_key
+        @snapshot_zset_key ||= "#{@prefix}-mini-profiler-snapshots-zset"
+      end
+
+      def snapshot_hash_key
+        @snapshot_hash_key ||= "#{@prefix}-mini-profiler-snapshots-hash"
+      end
+
+      def cached_redis_eval(script, script_sha, reraise: true, argv: [], keys: [])
+        begin
+          redis.evalsha(script_sha, argv: argv, keys: keys)
+        rescue ::Redis::CommandError => e
+          if e.message.start_with?('NOSCRIPT')
+            redis.eval(script, argv: argv, keys: keys)
+          else
+            raise e if reraise
+          end
+        end
+      end
+
+      # only used in tests
+      def wipe_snapshots_data
+        redis.pipelined do
+          redis.del(snapshot_counter_key())
+          redis.del(snapshot_zset_key())
+          redis.del(snapshot_hash_key())
+        end
+      end
     end
   end
 end

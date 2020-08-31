@@ -16,8 +16,10 @@ require 'rspec/core'
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   pattern = ARGV[1] || 'spec/**/*_spec.rb'
-  spec.pattern = FileList[pattern]
+  excluded = 'spec/support/*.rb'
+  spec.pattern = FileList[pattern] - FileList[excluded]
   spec.verbose = false
+  # spec.rspec_opts = ["-p"] # turns on profiling
 end
 
 desc "builds a gem"
@@ -26,7 +28,7 @@ task build: :update_asset_version do
 end
 
 desc "compile sass"
-task compile_sass: :copy_files do
+task :compile_sass do
   require "sassc"
   scss = File.read("lib/html/includes.scss")
   css = SassC::Engine.new(scss).render
@@ -119,9 +121,4 @@ task :client_dev do
   Process.wait(pid)
 rescue Interrupt
   listener.stop
-end
-
-desc "copy files from other parts of the tree"
-task :copy_files do
-  # TODO grab files from MiniProfiler/UI
 end

@@ -1,9 +1,20 @@
 @charset "UTF-8";
+.mp-snapshots,
 .profiler-result,
 .profiler-queries {
   color: #555;
   line-height: 1;
   font-size: 12px; }
+  .mp-snapshots pre,
+  .mp-snapshots code,
+  .mp-snapshots label,
+  .mp-snapshots table,
+  .mp-snapshots tbody,
+  .mp-snapshots thead,
+  .mp-snapshots tfoot,
+  .mp-snapshots tr,
+  .mp-snapshots th,
+  .mp-snapshots td,
   .profiler-result pre,
   .profiler-result code,
   .profiler-result label,
@@ -33,22 +44,33 @@
     background-color: transparent;
     overflow: visible;
     max-height: none; }
+  .mp-snapshots table,
   .profiler-result table,
   .profiler-queries table {
     border-collapse: collapse;
     border-spacing: 0; }
+  .mp-snapshots a,
+  .mp-snapshots a:hover,
   .profiler-result a,
   .profiler-result a:hover,
   .profiler-queries a,
   .profiler-queries a:hover {
     cursor: pointer;
     color: #0077cc; }
+  .mp-snapshots a,
   .profiler-result a,
   .profiler-queries a {
     text-decoration: none; }
+    .mp-snapshots a:hover,
     .profiler-result a:hover,
     .profiler-queries a:hover {
       text-decoration: underline; }
+  .mp-snapshots .custom-fields-title,
+  .profiler-result .custom-fields-title,
+  .profiler-queries .custom-fields-title {
+    color: #555;
+    font: Helvetica, Arial, sans-serif;
+    font-size: 14px; }
 
 .profiler-result {
   font-family: Helvetica, Arial, sans-serif; }
@@ -407,3 +429,15 @@
     background: #ffffbb; }
   100% {
     background: #fff; } }
+
+.mp-snapshots {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px; }
+  .mp-snapshots .snapshots-table thead {
+    background: #6a737c;
+    color: #ffffff; }
+  .mp-snapshots .snapshots-table th, .mp-snapshots .snapshots-table td {
+    padding: 5px;
+    box-sizing: border-box; }
+  .mp-snapshots .snapshots-table th {
+    border-right: 1px solid #ffffff; }

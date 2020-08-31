@@ -37,6 +37,8 @@ module Rack
           @max_sql_param_length = 0 # disable sql parameter collection by default
           @skip_sql_param_names = /password/ # skips parameters with the name password by default
           @enable_advanced_debugging_tools = false
+          @snapshot_every_n_requests = -1
+          @snapshots_limit = 1000
 
           # ui parameters
           @autorized            = true
@@ -60,7 +62,8 @@ module Rack
         :base_url_path, :disable_caching, :enabled,
         :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
         :skip_schema_queries, :storage, :storage_failure, :storage_instance,
-        :storage_options, :user_provider, :enable_advanced_debugging_tools
+        :storage_options, :user_provider, :enable_advanced_debugging_tools,
+        :snapshot_every_n_requests, :snapshots_limit
       attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
 
       # ui accessors

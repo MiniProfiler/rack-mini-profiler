@@ -52,17 +52,21 @@ module Rack
         @expires_in_seconds = args.fetch(:expires_in) { EXPIRES_IN_SECONDS }
 
         @token1, @token2, @cycle_at = nil
+        @snapshots_cycle = 0
+        @snapshots = []
 
         initialize_locks
         initialize_cleanup_thread(args)
       end
 
       def initialize_locks
-        @token_lock         = Mutex.new
-        @timer_struct_lock  = Mutex.new
-        @user_view_lock     = Mutex.new
-        @timer_struct_cache = {}
-        @user_view_cache    = {}
+        @token_lock           = Mutex.new
+        @timer_struct_lock    = Mutex.new
+        @user_view_lock       = Mutex.new
+        @snapshots_cycle_lock = Mutex.new
+        @snapshots_lock       = Mutex.new
+        @timer_struct_cache   = {}
+        @user_view_cache      = {}
       end
 
       #FIXME: use weak ref, trouble it may be broken in 1.9 so need to use the 'ref' gem
@@ -134,6 +138,51 @@ module Rack
           [@token1, @token2].compact
 
         end
+      end
+
+      def should_take_snapshot?(period)
+        @snapshots_cycle_lock.synchronize do
+          @snapshots_cycle += 1
+          if @snapshots_cycle % period == 0
+            @snapshots_cycle = 0
+            true
+          else
+            false
+          end
+        end
+      end
+
+      def push_snapshot(page_struct, config)
+        @snapshots_lock.synchronize do
+          @snapshots << page_struct
+          @snapshots.sort_by! { |s| s.duration_ms }
+          @snapshots.reverse!
+          if @snapshots.size > config.snapshots_limit
+            @snapshots.slice!(-1)
+          end
+        end
+      end
+
+      def fetch_snapshots(batch_size: 200, &blk)
+        @snapshots_lock.synchronize do
+          @snapshots.each_slice(batch_size) do |batch|
+            blk.call(batch)
+          end
+        end
+      end
+
+      def load_snapshot(id)
+        @snapshots_lock.synchronize do
+          @snapshots.find { |s| s[:id] == id }
+        end
+      end
+
+      private
+
+      # used in tests only
+      def wipe_snapshots_data
+        @snapshots_cycle = 0
+        @snapshots = []
       end
     end
   end

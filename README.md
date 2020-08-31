@@ -186,6 +186,18 @@ There are two additional `pp` options that can be used to analyze memory which d
 * Use `?pp=profile-gc` to report on Garbage Collection statistics
 * Use `?pp=analyze-memory` to report on ObjectSpace statistics
 
+### Snapshots Sampling
+
+In a complex web application, it's possible for a request to trigger rare conditions that result in poor performance. Mini Profiler ships with a feature to help detect those rare conditions and fix them. It works by enabling invisible profiling on one request every N requests, and saving the performance metrics that are collected during the request (a.k.a snapshot of the request) so that they can be viewed later. To turn this feature on, set the `snapshot_every_n_requests` config to a value larger than 0. The larger the value is, the less frequently requests are profiled.
+
+Mini Profiler will exclude requests that are made to skippd paths (see `skip_paths` config below) from being sampled. Additionally, if profiling is enabled for a request that later finishes with a non-2xx status code, Mini Profiler will discard the snapshot and not save it (this behavior may change in the future).
+
+After enabling snapshots sampling, you can see the snapshots that have been collected at `/mini-profiler-resources/snapshots` (or if you changed the `base_url_path` config, substitute `mini-profiler-resources` with your value of the config). You'll see on that page a table where each row represents a group of snapshots with the duration of the worst snapshot in that group. The worst snapshot in a group is defined as the snapshot whose request took longer than all of the snapshots in the same group. Snapshots grouped by HTTP method and path of the request, and if your application is a Rails app, Mini Profiler will try to convert the path to `controller#action` and group by that instead of request path. Clicking on a group will display the snapshots of that group sorted from worst to best. From there, you can click on a snapshot's ID to see the snapshot with all the performance metrics that were collected.
+
+Access to the snapshots page is restricted to only those who can see the speed badge on their own requests, see the section below this one about access control.
+
+Mini Profiler will keep a maximum of 1000 snapshots by default, and you can change that via the `snapshots_limit` config. When snapshots reach the configured limit, Mini Profiler will save a new snapshot only if it's worse than at least one of the existing snapshots and delete the best one (i.e. the snapshot whose request took the least time compared to other snapshots).
+
 ## Access control in non-development environments
 
 rack-mini-profiler is designed with production profiling in mind. To enable that run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
@@ -370,6 +382,8 @@ html_container|`body`|The HTML container (as a jQuery selector) to inject the mi
 show_total_sql_count|`false`|Displays the total number of SQL executions.
 enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords.
 assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
+snapshot_every_n_requests|`-1`|Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
+snapshots_limit|`1000`|Determines how many snapshots Mini Profiler is allowed to keep.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 

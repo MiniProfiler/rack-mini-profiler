@@ -92,6 +92,19 @@
             </tfoot>
           </table>
         {{?}}
+        {{? it.custom_fields && Object.keys(it.custom_fields).length > 0 }}
+          <p class="custom-fields-title">Snapshot custom fields</p>
+          <table class="profiler-timings">
+            <tbody>
+              {{~ Object.keys(it.custom_fields) :key }}
+                <tr>
+                  <td class="profiler-label">{{= key }}</td>
+                  <td class="profiler-label">{{= it.custom_fields[key] }}</td>
+                </tr>
+              {{~}}
+            </tbody>
+          </table>
+        {{?}}
       </div>
     </div>
 
@@ -215,4 +228,59 @@
       <div>{{= it.g.topReason.name }} &mdash; {{= it.g.topReason.duration.toFixed(2) }} <span class="profiler-unit">ms</span></div>
     </td>
   </tr>
+</script>
+
+<script id="snapshotsGroupsList" type="text/x-dot-tmpl">
+  {{? it.list && it.list.length }}
+    <table class="snapshots-table">
+      <thead>
+        <tr>
+          <th>Requests Group</th>
+          <th>Worst Time (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{~ it.list :row}}
+          <tr>
+            <td><a href="{{= row.url }}">{{= row.name }}</a></td>
+            <td>{{= MiniProfiler.formatDuration(row.worst_score) }}</td>
+          </tr>
+        {{~}}
+      </tbody>
+    </table>
+  {{??}}
+    <h2>No snapshots exist</h2>
+  {{?}}
+</script>
+
+<script id="snapshotsList" type="text/x-dot-tmpl">
+  {{? it.list && it.list.length }}
+    <h2>Snapshots for {{= it.group_name }}</h2>
+    <table class="snapshots-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Duration (ms)</th>
+          <th>Age</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{~ it.list :row}}
+          <tr>
+            <td><a href="{{= row.url }}">
+              {{= row.id }}
+            </a></td>
+            <td>{{= MiniProfiler.formatDuration(row.duration) }}</td>
+            <td>
+              {{? row.timestamp }}
+                {{= MiniProfiler.timestampToRelative(row.timestamp) }}
+              {{?}}
+            </td>
+          </tr>
+        {{~}}
+      </tbody>
+    </table>
+  {{??}}
+    <h2>No snapshots for {{= it.group_name }}</h2>
+  {{?}}
 </script>
