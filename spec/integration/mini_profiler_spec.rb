@@ -405,6 +405,8 @@ describe Rack::MiniProfiler do
       get '/path2/a'
       data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
       expect(data.size).to eq(1)
+      expect(last_response.body.include?('/mini-profiler-resources/includes.js')).to be(false)
+      expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(false)
       expect(data[0][:name]).to eq("GET /path2/a")
     end
 
@@ -412,6 +414,8 @@ describe Rack::MiniProfiler do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
       get '/path2/a'
       data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
+      expect(last_response.body.include?('/mini-profiler-resources/includes.js')).to be(false)
+      expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(false)
       expect(data.size).to eq(1)
     end
 
