@@ -108,18 +108,22 @@ unviewed_ids: #{get_unviewed_ids(user)}
         [key1, key2].compact
       end
 
-      def should_take_snapshot?(period)
-        lua = <<~LUA
-          if redis.call("INCR", KEYS[1]) % ARGV[1] == 0 then
-            redis.call("DEL", KEYS[1])
-            return 1
-          else
-            return 0
-          end
-        LUA
+      COUNTER_LUA = <<~LUA
+        if redis.call("INCR", KEYS[1]) % ARGV[1] == 0 then
+          redis.call("DEL", KEYS[1])
+          return 1
+        else
+          return 0
+        end
+      LUA
 
-        1 == redis.eval(
-          lua,
+      COUNTER_LUA_SHA = Digest::SHA1.hexdigest(COUNTER_LUA)
+
+      def should_take_snapshot?(period)
+        1 == cached_redis_eval(
+          COUNTER_LUA,
+          COUNTER_LUA_SHA,
+          reraise: false,
           keys: [snapshot_counter_key()],
           argv: [period]
         )
@@ -231,6 +235,18 @@ unviewed_ids: #{get_unviewed_ids(user)}
 
       def snapshot_hash_key
         @snapshot_hash_key ||= "#{@prefix}-mini-profiler-snapshots-hash"
+      end
+
+      def cached_redis_eval(script, script_sha, reraise: true, argv: [], keys: [])
+        begin
+          redis.evalsha(script_sha, argv: argv, keys: keys)
+        rescue ::Redis::CommandError => e
+          if e.message.start_with?('NOSCRIPT')
+            redis.eval(script, argv: argv, keys: keys)
+          else
+            raise e if reraise
+          end
+        end
       end
 
       # only used in tests
