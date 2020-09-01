@@ -257,6 +257,14 @@ describe Rack::MiniProfiler do
       expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(true)
     end
 
+    it "skip_paths can contain regular expressions" do
+      Rack::MiniProfiler.config.skip_paths = [/path[^1]/]
+      get '/path2/a'
+      expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(false)
+      get '/path1/a'
+      expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(true)
+    end
+
     it 'disables default functionality' do
       Rack::MiniProfiler.config.enabled = false
       get '/html'

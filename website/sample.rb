@@ -19,7 +19,7 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
     @page_struct
   end
   alias_method :load_snapshot, :load
-  
+
   def save(*args)
   end
 
@@ -49,7 +49,7 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
         methods.sample,
         paths.sample,
         SecureRandom.rand * @multipliers.sample,
-        ((Time.new.to_f - @time_units.sample * @time_multipliers.sample) * 1000).round
+        ((Time.now.to_f - @time_units.sample * @time_multipliers.sample) * 1000).round
       )
     end
     @snapshots.each_slice(batch_size) { |batch| blk.call(batch) }
