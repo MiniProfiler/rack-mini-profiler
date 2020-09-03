@@ -365,7 +365,7 @@ Option|Default|Description
 -------|---|--------
 pre_authorize_cb|Rails: dev only<br>Rack: always on|A lambda callback that returns true to make mini_profiler visible on a given request.
 position|`'top-left'`|Display mini_profiler on `'top-right'`, `'top-left'`, `'bottom-right'` or `'bottom-left'`.
-skip_paths|`[]`|Paths that skip profiling.
+skip_paths|`[]`|An array of paths that skip profiling. Both `String` and `Regexp` are acceptable in the array.
 skip_schema_queries|Rails dev: `true`<br>Othwerwise: `false`|`true` to skip schema queries.
 auto_inject|`true`|`true` to inject the miniprofiler script in the page.
 backtrace_ignores|`[]`|Regexes of lines to be removed from backtraces.

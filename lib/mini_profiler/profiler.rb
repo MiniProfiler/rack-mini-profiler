@@ -209,8 +209,16 @@ module Rack
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      skip_it = (@config.skip_paths && @config.skip_paths.any? { |p| path.start_with?(p) }) ||
-                query_string =~ /pp=skip/
+      skip_it = /pp=skip/.match?(query_string) || (
+        @config.skip_paths &&
+        @config.skip_paths.any? do |p|
+          if p.instance_of?(String)
+            path.start_with?(p)
+          elsif p.instance_of?(Regexp)
+            p.match?(path)
+          end
+        end
+      )
       if skip_it
         return client_settings.handle_cookie(@app.call(env))
       end

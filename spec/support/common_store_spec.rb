@@ -119,7 +119,7 @@ RSpec.shared_examples "snapshots storage" do |store|
       page = Rack::MiniProfiler::TimerStruct::Page.new({})
       page[:root].record_time(400)
       store.push_snapshot(page, Rack::MiniProfiler::Config.default)
-      
+
       loaded = store.load_snapshot(page[:id])
       expect(loaded).to be_instance_of(Rack::MiniProfiler::TimerStruct::Page)
       expect(loaded[:id]).to eq(page[:id])
