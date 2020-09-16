@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.1.0 - 2020-09-17
+
+- [FEATURE] Allow assets to be precompiled with Sprockets
+- [FEATURE] Snapshots sampling (see README in repo)
+- [FEATURE] Allow `skip_paths` config to contain regular expressions
+
 ## 2.0.4 - 2020-08-04
 
 - [FIX] webpacker may exist with no config, allow for that
