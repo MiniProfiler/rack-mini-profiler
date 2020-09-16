@@ -45,6 +45,10 @@
                    {{= MiniProfiler.templates.linksTemplate({timing: it.root, page: it}) }}
                 {{?}}
                 <a class="profiler-toggle-duration-with-children" title="toggles column with aggregate child durations">show time with children</a>
+                <a
+                  class="profiler-snapshots-page-link"
+                  title="Go to snapshots page"
+                  href="{{= MiniProfiler.options.path }}snapshots">snapshots</a>
               </td>
               {{? it.has_sql_timings}}
                 <td colspan="2" class="profiler-number profiler-percent-in-sql" title="{{= MiniProfiler.getSqlTimingsCount(it.root) }} queries spent {{= MiniProfiler.formatDuration(it.duration_milliseconds_in_sql) }} ms of total request time">

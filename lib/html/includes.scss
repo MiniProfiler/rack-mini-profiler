@@ -68,6 +68,9 @@ $zindex: 2147483640; // near 32bit max 2147483647
   .profiler-toggle-duration-with-children {
     float: right;
   }
+  .profiler-snapshots-page-link {
+    float: left;
+  }
   table.profiler-client-timings {
     margin-top: 10px;
   }

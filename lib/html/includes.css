@@ -76,6 +76,8 @@
   font-family: Helvetica, Arial, sans-serif; }
   .profiler-result .profiler-toggle-duration-with-children {
     float: right; }
+  .profiler-result .profiler-snapshots-page-link {
+    float: left; }
   .profiler-result table.profiler-client-timings {
     margin-top: 10px; }
   .profiler-result .profiler-label {

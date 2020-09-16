@@ -173,7 +173,7 @@ module Rack
       resources_env = env.dup
       resources_env['PATH_INFO'] = file_name
 
-      rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => "max-age:#{cache_control_value}")
+      rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
       rack_file.call(resources_env)
     end
 
