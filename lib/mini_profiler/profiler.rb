@@ -689,7 +689,8 @@ Append the following to your query string:
        toggleShortcut: @config.toggle_shortcut,
        startHidden: @config.start_hidden,
        collapseResults: @config.collapse_results,
-       htmlContainer: @config.html_container
+       htmlContainer: @config.html_container,
+       hiddenCustomFields: @config.snapshot_hidden_custom_fields.join(',')
       }
 
       if current && current.page_struct

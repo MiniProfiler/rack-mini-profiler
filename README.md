@@ -384,6 +384,7 @@ enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that c
 assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
 snapshot_every_n_requests|`-1`|Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
 snapshots_limit|`1000`|Determines how many snapshots Mini Profiler is allowed to keep.
+snapshot_hidden_custom_fields|`[]`|Each snapshot custom field will have a dedicated column in the UI by default. Use this config to exclude certain custom fields from having their own columns.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 

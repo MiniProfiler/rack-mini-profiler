@@ -8,25 +8,27 @@ describe Rack::MiniProfiler::AbstractStore do
   test_store = Class.new(Rack::MiniProfiler::AbstractStore) do
     def fetch_snapshots(batch_size: 3, &blk)
       blk.call([
-        get_page_struct("topics#index", "GET", 50.314),
-        get_page_struct("topics#delete", "DELETE", 15.424),
-        get_page_struct("users#delete", "DELETE", 831.4232)
+        get_page_struct("topics#index", "GET", 50.314, 4, f1: 15),
+        get_page_struct("topics#delete", "DELETE", 15.424, 7, f2: 'val'),
+        get_page_struct("topics#delete", "DELETE", 63.984, 13, f4: '1')
       ])
       blk.call([
-        get_page_struct("topics#delete", "DELETE", 63.984),
-        get_page_struct("users#delete", "DELETE", 24.243),
-        get_page_struct("/some/path", "POST", 75.3793)
+        get_page_struct("users#delete", "DELETE", 24.243, 9, f5: 98),
+        get_page_struct("users#delete", "DELETE", 831.4232, 15, f3: 82),
+        get_page_struct("/some/path", "POST", 75.3793, 20, f6: 10)
       ])
     end
 
     private
 
-    def get_page_struct(path, method, duration)
+    def get_page_struct(path, method, duration, sql_count, **custom_fields)
       page = Rack::MiniProfiler::TimerStruct::Page.new({
         'PATH_INFO' => path,
         'REQUEST_METHOD' => method
       })
       page[:root].record_time(duration)
+      page[:sql_count] = sql_count
+      page[:custom_fields] = custom_fields
       page
     end
   end.new
@@ -46,6 +48,10 @@ describe Rack::MiniProfiler::AbstractStore do
 
     it 'sorts groups from worst to best' do
       expect(groups.map { |g| g[:worst_score] }).to eq([831.4232, 75.3793, 63.984, 50.314])
+    end
+
+    it 'includes best_score' do
+      expect(groups.map { |g| g[:best_score] }).to eq([24.243, 75.3793, 15.424, 50.314])
     end
   end
 
@@ -67,6 +73,20 @@ describe Rack::MiniProfiler::AbstractStore do
       expect(g2.map { |s| s[:duration] }).to eq([75.3793])
       expect(g3.map { |s| s[:duration] }).to eq([63.984, 15.424])
       expect(g4.map { |s| s[:duration] }).to eq([50.314])
+    end
+
+    it 'includes sql_count with each snapshot' do
+      expect(g1.map { |s| s[:sql_count] }).to eq([15, 9])
+      expect(g2.map { |s| s[:sql_count] }).to eq([20])
+      expect(g3.map { |s| s[:sql_count] }).to eq([13, 7])
+      expect(g4.map { |s| s[:sql_count] }).to eq([4])
+    end
+
+    it 'includes custom_fields with each snapshot' do
+      expect(g1.map { |s| s[:custom_fields] }).to eq([{ f3: 82 }, { f5: 98 }])
+      expect(g2.map { |s| s[:custom_fields] }).to eq([{ f6: 10 }])
+      expect(g3.map { |s| s[:custom_fields] }).to eq([{ f4: '1' }, { f2: 'val' }])
+      expect(g4.map { |s| s[:custom_fields] }).to eq([{ f1: 15 }])
     end
   end
 end

@@ -65,11 +65,15 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
     })
     page[:root].record_time(duration)
     page[:started_at] = started_at
+    page[:sql_count] = (SecureRandom.rand * @multipliers.sample).round
+    page[:custom_fields]["Application Version"] = SecureRandom.hex
+    page[:custom_fields]["User"] = %w[Anon Logged-in].sample
     page
   end
 end
 
 Rack::MiniProfiler.config.storage = SampleStorage
+Rack::MiniProfiler.config.snapshot_hidden_custom_fields += ["application Version"]
 Rack::MiniProfiler.config.storage_failure = ->(e) do
   puts e
 end

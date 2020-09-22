@@ -637,8 +637,11 @@ $zindex: 2147483640; // near 32bit max 2147483647
       color: #ffffff;
     }
     th, td {
-      padding: 5px;
+      padding: 5px 10px;
       box-sizing: border-box;
+      &:not(.request-group) {
+        text-align: center;
+      }
     }
     th {
       border-right: 1px solid #ffffff;

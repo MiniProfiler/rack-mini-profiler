@@ -52,6 +52,7 @@ module Rack
           @toggle_shortcut      = 'alt+p'
           @html_container       = 'body'
           @position             = "top-left"
+          @snapshot_hidden_custom_fields = []
 
           self
         }
@@ -69,7 +70,7 @@ module Rack
       # ui accessors
       attr_accessor :collapse_results, :max_traces_to_show, :position,
         :show_children, :show_controls, :show_trivial, :show_total_sql_count,
-        :start_hidden, :toggle_shortcut, :html_container
+        :start_hidden, :toggle_shortcut, :html_container, :snapshot_hidden_custom_fields
 
       # Deprecated options
       attr_accessor :use_existing_jquery

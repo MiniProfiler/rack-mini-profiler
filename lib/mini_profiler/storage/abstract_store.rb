@@ -58,17 +58,21 @@ module Rack
         fetch_snapshots do |batch|
           batch.each do |snapshot|
             group_name = default_snapshot_grouping(snapshot)
-            if !groups[group_name] || groups[group_name] < snapshot.duration_ms
-              groups[group_name] = snapshot.duration_ms
+            hash = groups[group_name] ||= {}
+            hash[:snapshots_count] ||= 0
+            hash[:snapshots_count] += 1
+            if !hash[:worst_score] || hash[:worst_score] < snapshot.duration_ms
+              groups[group_name][:worst_score] = snapshot.duration_ms
+            end
+            if !hash[:best_score] || hash[:best_score] > snapshot.duration_ms
+              groups[group_name][:best_score] = snapshot.duration_ms
             end
           end
         end
         groups = groups.to_a
-        groups.sort_by! { |name, score| score }
+        groups.sort_by! { |name, hash| hash[:worst_score] }
         groups.reverse!
-        groups.map! do |name, score|
-          { name: name, worst_score: score }
-        end
+        groups.map! { |name, hash| hash.merge(name: name) }
         groups
       end
 
@@ -81,7 +85,9 @@ module Rack
               data << {
                 id: snapshot[:id],
                 duration: snapshot.duration_ms,
-                timestamp: snapshot[:started_at]
+                sql_count: snapshot[:sql_count],
+                timestamp: snapshot[:started_at],
+                custom_fields: snapshot[:custom_fields]
               }
             end
           end

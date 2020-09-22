@@ -241,13 +241,17 @@
         <tr>
           <th>Requests Group</th>
           <th>Worst Time (ms)</th>
+          <th>Best Time (ms)</th>
+          <th>No. of Snapshots</th>
         </tr>
       </thead>
       <tbody>
         {{~ it.list :row}}
           <tr>
-            <td><a href="{{= row.url }}">{{= row.name }}</a></td>
+            <td class="request-group"><a href="{{= row.url }}">{{= row.name }}</a></td>
             <td>{{= MiniProfiler.formatDuration(row.worst_score) }}</td>
+            <td>{{= MiniProfiler.formatDuration(row.best_score) }}</td>
+            <td>{{= row.snapshots_count }}</td>
           </tr>
         {{~}}
       </tbody>
@@ -258,23 +262,33 @@
 </script>
 
 <script id="snapshotsList" type="text/x-dot-tmpl">
-  {{? it.list && it.list.length }}
-    <h2>Snapshots for {{= it.group_name }}</h2>
+  {{ var data = it.data; }}
+  {{ var customFieldsNames = it.allCustomFieldsNames; }}
+  {{? data.list && data.list.length }}
+    <h2>Snapshots for {{= data.group_name }}</h2>
     <table class="snapshots-table">
       <thead>
         <tr>
           <th>ID</th>
           <th>Duration (ms)</th>
+          <th>SQL Count</th>
+          {{~ customFieldsNames :name }}
+            <th>{{= name }}</th>
+          {{~}}
           <th>Age</th>
         </tr>
       </thead>
       <tbody>
-        {{~ it.list :row}}
+        {{~ data.list :row}}
           <tr>
             <td><a href="{{= row.url }}">
               {{= row.id }}
             </a></td>
             <td>{{= MiniProfiler.formatDuration(row.duration) }}</td>
+            <td>{{= row.sql_count }}</td>
+            {{~ customFieldsNames :name }}
+              <td>{{= row.custom_fields[name] || "" }}</td>
+            {{~}}
             <td>
               {{? row.timestamp }}
                 {{= MiniProfiler.timestampToRelative(row.timestamp) }}
@@ -285,6 +299,6 @@
       </tbody>
     </table>
   {{??}}
-    <h2>No snapshots for {{= it.group_name }}</h2>
+    <h2>No snapshots for {{= data.group_name }}</h2>
   {{?}}
 </script>

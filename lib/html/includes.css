@@ -439,7 +439,9 @@
     background: #6a737c;
     color: #ffffff; }
   .mp-snapshots .snapshots-table th, .mp-snapshots .snapshots-table td {
-    padding: 5px;
+    padding: 5px 10px;
     box-sizing: border-box; }
+    .mp-snapshots .snapshots-table th:not(.request-group), .mp-snapshots .snapshots-table td:not(.request-group) {
+      text-align: center; }
   .mp-snapshots .snapshots-table th {
     border-right: 1px solid #ffffff; }
