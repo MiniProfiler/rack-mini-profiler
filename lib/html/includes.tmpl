@@ -17,7 +17,7 @@
         <span class="profiler-name">
           {{= it.name}} <span class="profiler-overall-duration">({{= MiniProfiler.formatDuration(it.duration_milliseconds)}} ms)</span>
         </span>
-        <span class="profiler-server-time">{{= it.machine_name}} on {{= MiniProfiler.renderDate(it.started)}}</span>
+        <span class="profiler-server-time">{{= it.machine_name}} on {{= MiniProfiler.renderDate(it.started_formatted)}}</span>
       </div>
       <div class="profiler-output">
         <table class="profiler-timings">

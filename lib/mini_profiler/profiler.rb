@@ -94,6 +94,11 @@ module Rack
           params
         end
       end
+
+      def snapshots_transporter?
+        !!config.snapshots_transport_destination_url &&
+        !!config.snapshots_transport_auth_key
+      end
     end
 
     #
@@ -809,10 +814,14 @@ Append the following to your query string:
         )
         custom_fields = MiniProfiler.get_snapshot_custom_fields
         page_struct[:custom_fields] = custom_fields if custom_fields
-        @storage.push_snapshot(
-          page_struct,
-          @config
-        )
+        if Rack::MiniProfiler.snapshots_transporter?
+          Rack::MiniProfiler::SnapshotsTransporter.transport(page_struct)
+        else
+          @storage.push_snapshot(
+            page_struct,
+            @config
+          )
+        end
       end
       self.current = nil
       results

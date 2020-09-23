@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 $VERBOSE = true
+require 'webmock/rspec'
 require 'simplecov'
+
 SimpleCov.start do
   add_filter "/spec/"
   add_filter "/.direnv/"

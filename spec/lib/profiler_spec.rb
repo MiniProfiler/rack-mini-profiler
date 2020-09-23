@@ -170,4 +170,20 @@ describe Rack::MiniProfiler do
                                            11, 12, 13, 14, 15, 16, 17, 18, 19])
     end
   end
+
+  describe '.snapshots_transporter?' do
+    it 'returns true only if both destination URL and auth key are set' do
+      expect(Rack::MiniProfiler.snapshots_transporter?).to eq(false)
+
+      Rack::MiniProfiler.config.snapshots_transport_destination_url = 'http://example.com'
+      expect(Rack::MiniProfiler.snapshots_transporter?).to eq(false)
+
+      Rack::MiniProfiler.config.snapshots_transport_auth_key = 'somekeyhere'
+      Rack::MiniProfiler.config.snapshots_transport_destination_url = nil
+      expect(Rack::MiniProfiler.snapshots_transporter?).to eq(false)
+
+      Rack::MiniProfiler.config.snapshots_transport_destination_url = 'http://example.com'
+      expect(Rack::MiniProfiler.snapshots_transporter?).to eq(true)
+    end
+  end
 end
