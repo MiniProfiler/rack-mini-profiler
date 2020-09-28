@@ -76,6 +76,7 @@ module Rack
           settings_string = settings.map { |k, v| "#{k}=#{v}" }.join(",")
           cookie = { value: settings_string, path: '/', httponly: true }
           cookie[:secure] = true if @request.ssl?
+          cookie[:same_site] = 'Lax'
           Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
         end
       end
