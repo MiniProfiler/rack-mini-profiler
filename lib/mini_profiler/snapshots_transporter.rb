@@ -1,7 +1,21 @@
 # frozen_string_literal: true
 
 class ::Rack::MiniProfiler::SnapshotsTransporter
+  @@transported_snapshots_count = 0
+  @@successful_http_requests_count = 0
+  @@failed_http_requests_count = 0
+
   class << self
+    def transported_snapshots_count
+      @@transported_snapshots_count
+    end
+    def successful_http_requests_count
+      @@successful_http_requests_count
+    end
+    def failed_http_requests_count
+      @@failed_http_requests_count
+    end
+
     def transport(snapshot)
       @transporter ||= self.new(Rack::MiniProfiler.config)
       @transporter.ship(snapshot)
@@ -45,9 +59,13 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
       http.use_ssl = @uri.scheme == 'https'
       res = http.request(request)
       if res.code.to_i == 200
+        @@successful_http_requests_count += 1
+        @@transported_snapshots_count += buffer_content.size
         @buffer_mutex.synchronize do
           @buffer -= buffer_content
         end
+      else
+        @@failed_http_requests_count += 1
       end
     end
   end
