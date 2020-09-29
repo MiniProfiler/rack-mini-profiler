@@ -12,7 +12,7 @@ module Rack
       class Page < TimerStruct::Base
         class << self
           def from_hash(hash)
-            hash = symbolize_hash(hash.dup)
+            hash = symbolize_hash(hash)
             if hash.key?(:custom_timing_names)
               hash[:custom_timing_names] = []
             end
