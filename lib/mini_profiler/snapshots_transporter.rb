@@ -31,8 +31,10 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
   end
 
   def flush_buffer
-    if @buffer.size > 0
-      buffer_content = @buffer.dup
+    buffer_content = @buffer_mutex.synchronize do
+      @buffer.dup if @buffer.size > 0
+    end
+    if buffer_content
       request = Net::HTTP::Post.new(
         @uri,
         'Content-Type' => 'application/json',

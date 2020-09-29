@@ -40,4 +40,9 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
     transporter.flush_buffer
     expect(transporter.buffer.size).to eq(1)
   end
+
+  it '#flush_buffer does not error when buffer is empty' do
+    transporter.flush_buffer
+    transporter.flush_buffer
+  end
 end
