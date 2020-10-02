@@ -198,6 +198,16 @@ Access to the snapshots page is restricted to only those who can see the speed b
 
 Mini Profiler will keep a maximum of 1000 snapshots by default, and you can change that via the `snapshots_limit` config. When snapshots reach the configured limit, Mini Profiler will save a new snapshot only if it's worse than at least one of the existing snapshots and delete the best one (i.e. the snapshot whose request took the least time compared to other snapshots).
 
+#### Snapshots Transporter
+
+Mini Profiler can be configured so that it sends snapshots over HTTP using the snapshots transporter. The main use-case of the transporter is to allow the aggregation of snapshots from multiple applications/sources in a single place. To enable the snapshots transporter, you need to provide a destination URL to the `snapshots_transport_destination_url` config, and a secure key to the `snapshots_transport_auth_key` config (will be used for authorization). Both of these configs are required for the transporter to be enabled.
+
+The transporter uses a buffer to temporarily hold snapshots in memory with a limit of 100 snapshots. Every 10 seconds, *if* the buffer is not empty, the transporter will make a `POST` request with the buffer content to the destination URL. Requests made by the transporter will have a `Mini-Profiler-Transport-Auth` header with the value of the `snapshots_transport_auth_key` config. The destination should only accept requests that include this header AND the header's value matches the key you set to the `snapshots_transport_auth_key` config.
+
+The body of the requests made by the transporter is a JSON string with a single top-level key called `snapshots` and it has an array of snapshots. The structure of a snapshot is too complex to be explained here, but it has the same structure that Mini Profiler client expects. So if your use-case is to simply be able to view snapshots from multiple sources in one place, you should simply store the snapshots as-is, and then serve them to Mini Profiler client to consume. If the destination application also has Mini Profiler, you can simply use the API of the storage backends to store the incoming snapshots and Mini Profiler will treat them the same as local snapshots (e.g. they'll be grouped and displayed in the same manner described in the previous section).
+
+Mini Profiler offers an API to add extra fields (a.k.a custom fields) to snapshots. For example, you may want to add whether the request was made by a logged-in or anonymous user, the version of your application or any other things that are specific to your application. To add custom fields to a snapshot, call the `Rack::MiniProfiler.add_snapshot_custom_field(<key>, <value>)` method anywhere during the lifetime of a request, and the snapshot of that request will include the fields you added. If you have a Rails app, you can call that method in an `after_action` callback. Custom fields are cleared between requests.
+
 ## Access control in non-development environments
 
 rack-mini-profiler is designed with production profiling in mind. To enable that run `Rack::MiniProfiler.authorize_request` once you know a request is allowed to profile.
@@ -385,6 +395,8 @@ assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pip
 snapshot_every_n_requests|`-1`|Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
 snapshots_limit|`1000`|Determines how many snapshots Mini Profiler is allowed to keep.
 snapshot_hidden_custom_fields|`[]`|Each snapshot custom field will have a dedicated column in the UI by default. Use this config to exclude certain custom fields from having their own columns.
+snapshots_transport_destination_url|`nil`|Set this config to a valid URL to enable snapshots transporter which will `POST` snapshots to the given URL. The transporter requires `snapshots_transport_auth_key` config to be set as well.
+snapshots_transport_auth_key|`nil`|`POST` requests made by the snapshots transporter to the destination URL will have a `Mini-Profiler-Transport-Auth` header with the value of this config. Make sure you use a secure and random key for this config.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 
