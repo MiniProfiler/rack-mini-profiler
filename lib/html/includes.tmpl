@@ -217,7 +217,11 @@
     <td>
       <div class="query">
         <pre class="profiler-stack-trace">{{= it.s.stack_trace_snippet }}</pre>
-        <pre class="prettyprint lang-sql"><code>{{= it.s.formatted_command_string }}; {{= MiniProfiler.formatParameters(it.s.parameters) }}</code></pre>
+        {{? it.s.formatted_command_string}}
+          <pre class="prettyprint lang-sql"><code>{{= it.s.formatted_command_string }}; {{= MiniProfiler.formatParameters(it.s.parameters) }}</code></pre>
+        {{??}}
+          <i>Query redacted</i>
+        {{?}}
       </div>
     </td>
   </tr>

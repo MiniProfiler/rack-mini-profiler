@@ -39,6 +39,7 @@ module Rack
       def current=(c)
         # we use TLS cause we need access to this from sql blocks and code blocks that have no access to env
         Thread.current[:mini_profiler_snapshot_custom_fields] = nil
+        Thread.current[:mp_ongoing_snapshot] = nil
         Thread.current[:mini_profiler_private] = c
       end
 
@@ -98,6 +99,10 @@ module Rack
       def snapshots_transporter?
         !!config.snapshots_transport_destination_url &&
         !!config.snapshots_transport_auth_key
+      end
+
+      def is_snapshot?
+        Thread.current[:mp_ongoing_snapshot] == true
       end
     end
 
@@ -805,6 +810,7 @@ Append the following to your query string:
 
     def take_snapshot(env, start)
       MiniProfiler.create_current(env, @config)
+      Thread.current[:mp_ongoing_snapshot] = true
       results = @app.call(env)
       status = results[0].to_i
       if status >= 200 && status < 300
