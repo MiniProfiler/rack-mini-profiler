@@ -53,6 +53,8 @@ module Rack
           @html_container       = 'body'
           @position             = "top-left"
           @snapshot_hidden_custom_fields = []
+          @snapshots_transport_destination_url = nil
+          @snapshots_transport_auth_key = nil
 
           self
         }
@@ -64,13 +66,17 @@ module Rack
         :flamegraph_sample_rate, :logger, :pre_authorize_cb, :skip_paths,
         :skip_schema_queries, :storage, :storage_failure, :storage_instance,
         :storage_options, :user_provider, :enable_advanced_debugging_tools,
-        :snapshot_every_n_requests, :snapshots_limit
-      attr_accessor :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
+        :skip_sql_param_names, :suppress_encoding, :max_sql_param_length
 
       # ui accessors
       attr_accessor :collapse_results, :max_traces_to_show, :position,
         :show_children, :show_controls, :show_trivial, :show_total_sql_count,
-        :start_hidden, :toggle_shortcut, :html_container, :snapshot_hidden_custom_fields
+        :start_hidden, :toggle_shortcut, :html_container
+
+      # snapshot related config
+      attr_accessor :snapshot_every_n_requests, :snapshots_limit,
+        :snapshot_hidden_custom_fields, :snapshots_transport_destination_url,
+        :snapshots_transport_auth_key
 
       # Deprecated options
       attr_accessor :use_existing_jquery

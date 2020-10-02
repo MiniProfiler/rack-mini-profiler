@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'listen'
   s.add_development_dependency 'webpacker', '~> 5.1'
   s.add_development_dependency 'rails', '~> 5.1'
+  s.add_development_dependency 'webmock', '3.9.1'
 
   s.require_paths = ["lib"]
 end

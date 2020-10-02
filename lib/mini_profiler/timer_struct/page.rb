@@ -10,6 +10,53 @@ module Rack
       #     :has_many TimerStruct::Sql children
       #     :has_many TimerStruct::Custom children
       class Page < TimerStruct::Base
+        class << self
+          def from_hash(hash)
+            hash = symbolize_hash(hash)
+            if hash.key?(:custom_timing_names)
+              hash[:custom_timing_names] = []
+            end
+            hash.delete(:started_formatted)
+            if hash.key?(:duration_milliseconds)
+              hash[:duration_milliseconds] = 0
+            end
+            page = self.allocate
+            page.instance_variable_set(:@attributes, hash)
+            page
+          end
+
+          private
+
+          def symbolize_hash(hash)
+            new_hash = {}
+            hash.each do |k, v|
+              sym_k = String === k ? k.to_sym : k
+              if Hash === v
+                new_hash[sym_k] = symbolize_hash(v)
+              elsif Array === v
+                new_hash[sym_k] = symbolize_array(v)
+              else
+                new_hash[sym_k] = v
+              end
+            end
+            new_hash
+          end
+
+          def symbolize_array(array)
+            array.map do |item|
+              if Array === item
+                symbolize_array(item)
+              elsif Hash === item
+                symbolize_hash(item)
+              else
+                item
+              end
+            end
+          end
+        end
+
+        attr_reader :attributes
+
         def initialize(env)
           timer_id     = MiniProfiler.generate_id
           page_name    = env['PATH_INFO']
@@ -74,7 +121,7 @@ module Rack
 
         def extra_json
           {
-            started: '/Date(%d)/' % @attributes[:started_at],
+            started_formatted: '/Date(%d)/' % @attributes[:started_at],
             duration_milliseconds: @attributes[:root][:duration_milliseconds],
             custom_timing_names: @attributes[:custom_timing_stats].keys.sort
           }

@@ -21,8 +21,8 @@ describe Rack::MiniProfiler::TimerStruct::Page do
     end
 
     it 'has a Started element' do
-      expect(@deserialized['started']).not_to be_nil
-      expect(@deserialized['started']).to match(/Date\(\d{13}\)/)
+      expect(@deserialized['started_formatted']).not_to be_nil
+      expect(@deserialized['started_formatted']).to match(/Date\(\d{13}\)/)
     end
 
     it 'has a DurationMilliseconds element' do
@@ -30,4 +30,15 @@ describe Rack::MiniProfiler::TimerStruct::Page do
     end
   end
 
+  describe '.from_hash' do
+    it 'can re-create Page struct from hash object' do
+      page = described_class.new({
+        'REQUEST_METHOD' => 'POST',
+        'PATH_INFO' => '/some/path',
+        'SERVER_NAME' => 'server001'
+      })
+      from_json_page = described_class.from_hash(JSON.parse(page.to_json))
+      expect(page.to_json).to eq(from_json_page.to_json)
+    end
+  end
 end
