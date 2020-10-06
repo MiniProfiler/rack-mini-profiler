@@ -101,8 +101,9 @@ module Rack
         !!config.snapshots_transport_auth_key
       end
 
-      def is_snapshot?
-        Thread.current[:mp_ongoing_snapshot] == true
+      def redact_sql_queries?
+        Thread.current[:mp_ongoing_snapshot] == true &&
+        Rack::MiniProfiler.config.snapshots_redact_sql_queries
       end
     end
 

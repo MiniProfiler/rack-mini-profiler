@@ -8,10 +8,10 @@ module Rack
         return unless current && current.current_timer
         c = current
         c.current_timer.add_sql(
-          is_snapshot? ? nil : query,
+          redact_sql_queries? ? nil : query,
           elapsed_ms,
           c.page_struct,
-          is_snapshot? ? nil : params,
+          redact_sql_queries? ? nil : params,
           c.skip_backtrace,
           c.full_backtrace
         )
