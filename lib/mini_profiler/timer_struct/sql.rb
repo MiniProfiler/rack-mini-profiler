@@ -38,12 +38,12 @@ module Rack
           start_millis = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]) - duration_ms
           super(
             execute_type: 3, # TODO
-            formatted_command_string: ERB::Util.html_escape(query),
+            formatted_command_string: query ? ERB::Util.html_escape(query) : nil,
             stack_trace_snippet: stack_trace,
             start_milliseconds: start_millis,
             duration_milliseconds: duration_ms,
             first_fetch_duration_milliseconds: duration_ms,
-            parameters: trim_binds(params),
+            parameters: query ? trim_binds(params) : nil,
             parent_timing_id: nil,
             is_duplicate: false
           )
