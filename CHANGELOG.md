@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.2.0 - 2020-10-19
+
+- [UX] Enhancements to snapshots UI
+- [FEATURE] Mini Profiler cookie is now sameSite=lax
+- [FEATURE] Snapshots transporter
+- [FEATURE] Redact SQL queries in snapshots by default
+
 ## 2.1.0 - 2020-09-17
 
 - [FEATURE] Allow assets to be precompiled with Sprockets
