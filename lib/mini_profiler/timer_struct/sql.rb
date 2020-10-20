@@ -2,43 +2,65 @@
 
 module Rack
   class MiniProfiler
-
     # Timing system for a SQL query
     module TimerStruct
       class Sql < TimerStruct::Base
         attr_accessor :parent
 
-        def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false)
-
+        def initialize(
+          query,
+          duration_ms,
+          page,
+          parent,
+          params = nil,
+          skip_backtrace = false,
+          full_backtrace = false
+        )
           stack_trace = nil
-          unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
+          unless skip_backtrace ||
+                   duration_ms <
+                     Rack::MiniProfiler.config.backtrace_threshold_ms
             # Allow us to filter the stack trace
-            stack_trace = "".dup
+            stack_trace = ''.dup
+
             # Clean up the stack trace if there are options to do so
             Kernel.caller.each do |ln|
-              ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove && !full_backtrace
-              if    full_backtrace ||
-                    (
-                      (
-                        Rack::MiniProfiler.config.backtrace_includes.nil? ||
-                        Rack::MiniProfiler.config.backtrace_includes.any? { |regex| ln =~ regex }
-                      ) &&
-                      (
-                        Rack::MiniProfiler.config.backtrace_ignores.nil? ||
-                        Rack::MiniProfiler.config.backtrace_ignores.none? { |regex| ln =~ regex }
-                      )
-                    )
+              if Rack::MiniProfiler.config.backtrace_remove && !full_backtrace
+                ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '')
+              end
+              if full_backtrace ||
+                   (
+                     (
+                       Rack::MiniProfiler.config.backtrace_includes
+                         .nil? || Rack::MiniProfiler
+                         .config
+                         .backtrace_includes
+                         .any? { |regex| ln =~ regex }
+                     ) &&
+                       (
+                         Rack::MiniProfiler.config.backtrace_ignores
+                           .nil? || Rack::MiniProfiler
+                           .config
+                           .backtrace_ignores
+                           .none? { |regex| ln =~ regex }
+                       )
+                   )
                 stack_trace << ln << "\n"
               end
             end
           end
 
-          @parent      = parent
-          @page        = page
-          start_millis = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]) - duration_ms
+          @parent = parent
+          @page = page
+          start_millis =
+            (
+              (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i -
+                page[:started]
+            ) - duration_ms
           super(
             execute_type: 3, # TODO
-            formatted_command_string: query ? ERB::Util.html_escape(query) : nil,
+            formatted_command_string:
+              query ? ERB::Util.html_escape(query) : nil,
             stack_trace_snippet: stack_trace,
             start_milliseconds: start_millis,
             duration_milliseconds: duration_ms,
@@ -52,9 +74,9 @@ module Rack
         def report_reader_duration(elapsed_ms)
           return if @reported
           @reported = true
-          self[:duration_milliseconds]                += elapsed_ms
+          self[:duration_milliseconds] += elapsed_ms
           @parent[:sql_timings_duration_milliseconds] += elapsed_ms
-          @page[:duration_milliseconds_in_sql]        += elapsed_ms
+          @page[:duration_milliseconds_in_sql] += elapsed_ms
         end
 
         def trim_binds(binds)
@@ -66,12 +88,16 @@ module Rack
             if val.nil? || val == true || val == false || val.kind_of?(Numeric)
               # keep these parameters as is
             elsif val.kind_of?(String)
-              val = val[0...max_len] + (max_len < val.length ? '...' : '') if max_len
+              val =
+                val[0...max_len] +
+                  (max_len < val.length ? '...' : '') if max_len
             else
               val = val.class.name
             end
             if name.kind_of?(String)
-              name = name[0...max_len] + (max_len < name.length ? '...' : '') if max_len
+              name =
+                name[0...max_len] +
+                  (max_len < name.length ? '...' : '') if max_len
             end
             [name, val]
           end

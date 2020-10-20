@@ -32,9 +32,8 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
   end
 
   it '#ship keeps buffer size at max_buffer_size' do
-    snapshots = 5.times.to_a.map do
-      Rack::MiniProfiler::TimerStruct::Page.new({})
-    end
+    snapshots =
+      5.times.to_a.map { Rack::MiniProfiler::TimerStruct::Page.new({}) }
     snapshots.each { |s| transporter.ship(s) }
     expect(transporter.buffer.size).to eq(4)
     expect(transporter.buffer).to eq(snapshots[1..4])
@@ -47,16 +46,22 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
         body: { snapshots: [snapshot] }.to_json,
         headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
       )
-      .to_return(status: 200, body: "", headers: {})
+      .to_return(status: 200, body: '', headers: {})
     transporter.ship(snapshot)
     transporter.flush_buffer
     expect(transporter.buffer.size).to eq(0)
   end
 
   it '#flush_buffer increments metric counters' do
-    expect(Rack::MiniProfiler::SnapshotsTransporter.transported_snapshots_count).to eq(0)
-    expect(Rack::MiniProfiler::SnapshotsTransporter.successful_http_requests_count).to eq(0)
-    expect(Rack::MiniProfiler::SnapshotsTransporter.failed_http_requests_count).to eq(0)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.transported_snapshots_count
+    ).to eq(0)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.successful_http_requests_count
+    ).to eq(0)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.failed_http_requests_count
+    ).to eq(0)
 
     snapshot = Rack::MiniProfiler::TimerStruct::Page.new({})
     snapshot2 = Rack::MiniProfiler::TimerStruct::Page.new({})
@@ -67,30 +72,42 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
         body: { snapshots: [snapshot, snapshot2] }.to_json,
         headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
       )
-      .to_return(status: 200, body: "", headers: {})
+      .to_return(status: 200, body: '', headers: {})
     transporter.ship(snapshot)
     transporter.ship(snapshot2)
     transporter.flush_buffer
-    expect(Rack::MiniProfiler::SnapshotsTransporter.transported_snapshots_count).to eq(2)
-    expect(Rack::MiniProfiler::SnapshotsTransporter.successful_http_requests_count).to eq(1)
-    expect(Rack::MiniProfiler::SnapshotsTransporter.failed_http_requests_count).to eq(0)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.transported_snapshots_count
+    ).to eq(2)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.successful_http_requests_count
+    ).to eq(1)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.failed_http_requests_count
+    ).to eq(0)
 
     stub_request(:post, url)
       .with(
         body: { snapshots: [snapshot3, snapshot4] }.to_json,
         headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
       )
-      .to_return(status: 500, body: "", headers: {})
+      .to_return(status: 500, body: '', headers: {})
     transporter.ship(snapshot3)
     transporter.ship(snapshot4)
     transporter.flush_buffer
-    expect(Rack::MiniProfiler::SnapshotsTransporter.transported_snapshots_count).to eq(2)
-    expect(Rack::MiniProfiler::SnapshotsTransporter.successful_http_requests_count).to eq(1)
-    expect(Rack::MiniProfiler::SnapshotsTransporter.failed_http_requests_count).to eq(1)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.transported_snapshots_count
+    ).to eq(2)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.successful_http_requests_count
+    ).to eq(1)
+    expect(
+      Rack::MiniProfiler::SnapshotsTransporter.failed_http_requests_count
+    ).to eq(1)
   end
 
   it '#flush_buffer does not clear buffer if response is not 200' do
-    stub_request(:post, url).to_return(status: 500, body: "", headers: {})
+    stub_request(:post, url).to_return(status: 500, body: '', headers: {})
     transporter.ship(Rack::MiniProfiler::TimerStruct::Page.new({}))
     transporter.flush_buffer
     expect(transporter.buffer.size).to eq(1)
@@ -108,7 +125,7 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
         body: { snapshots: [snapshot] }.to_json,
         headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
       )
-      .to_return(status: 500, body: "", headers: {})
+      .to_return(status: 500, body: '', headers: {})
     transporter.ship(snapshot)
     expect(transporter.requests_interval).to eq(30)
     transporter.flush_buffer
@@ -129,7 +146,7 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
         body: { snapshots: [snapshot] }.to_json,
         headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
       )
-      .to_return(status: 200, body: "", headers: {})
+      .to_return(status: 200, body: '', headers: {})
     transporter.flush_buffer
     expect(transporter.requests_interval).to eq(30)
     expect(transporter.buffer).to eq([])
@@ -147,7 +164,7 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
           'Content-Encoding' => 'gzip'
         }
       )
-      .to_return(status: 200, body: "", headers: {})
+      .to_return(status: 200, body: '', headers: {})
     expect(gzip_transporter.gzip_requests).to eq(true)
     gzip_transporter.ship(snapshot)
     gzip_transporter.flush_buffer

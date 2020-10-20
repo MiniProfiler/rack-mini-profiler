@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 describe Rack::MiniProfiler::TimerStruct::Page do
-
-  before do
-    @page = Rack::MiniProfiler::TimerStruct::Page.new({})
-  end
+  before { @page = Rack::MiniProfiler::TimerStruct::Page.new({}) }
 
   it 'has an Id' do
     expect(@page[:id]).not_to be_nil
@@ -32,11 +29,14 @@ describe Rack::MiniProfiler::TimerStruct::Page do
 
   describe '.from_hash' do
     it 'can re-create Page struct from hash object' do
-      page = described_class.new({
-        'REQUEST_METHOD' => 'POST',
-        'PATH_INFO' => '/some/path',
-        'SERVER_NAME' => 'server001'
-      })
+      page =
+        described_class.new(
+          {
+            'REQUEST_METHOD' => 'POST',
+            'PATH_INFO' => '/some/path',
+            'SERVER_NAME' => 'server001'
+          }
+        )
       from_json_page = described_class.from_hash(JSON.parse(page.to_json))
       expect(page.to_json).to eq(from_json_page.to_json)
     end

@@ -3,36 +3,41 @@
 module Rack
   class MiniProfiler
     class MemcacheStore < AbstractStore
-
       EXPIRES_IN_SECONDS = 60 * 60 * 24
-      MAX_RETRIES        = 10
+      MAX_RETRIES = 10
 
       def initialize(args = nil)
-        require 'dalli' unless defined? Dalli
+        require 'dalli' unless defined?(Dalli)
         args ||= {}
 
-        @prefix = args[:prefix] || "MPMemcacheStore"
+        @prefix = args[:prefix] || 'MPMemcacheStore'
         @prefix += "-#{Rack::MiniProfiler::VERSION}"
 
-        @client             = args[:client]     || Dalli::Client.new
+        @client = args[:client] || Dalli::Client.new
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
       end
 
       def save(page_struct)
-        @client.set("#{@prefix}#{page_struct[:id]}", Marshal::dump(page_struct), @expires_in_seconds)
+        @client.set(
+          "#{@prefix}#{page_struct[:id]}",
+          Marshal.dump(page_struct),
+          @expires_in_seconds
+        )
       end
 
       def load(id)
         raw = @client.get("#{@prefix}#{id}")
-        Marshal::load(raw) if raw
+        Marshal.load(raw) if raw
       end
 
       def set_unviewed(user, id)
         @client.add("#{@prefix}-#{user}-v", [], @expires_in_seconds)
         MAX_RETRIES.times do
-          break if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
-            ids << id unless ids.include?(id)
-            ids
+          if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
+               ids << id unless ids.include?(id)
+               ids
+             end
+            break
           end
         end
       end
@@ -40,9 +45,11 @@ module Rack
       def set_viewed(user, id)
         @client.add("#{@prefix}-#{user}-v", [], @expires_in_seconds)
         MAX_RETRIES.times do
-          break if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
-            ids.delete id
-            ids
+          if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
+               ids.delete id
+               ids
+             end
+            break
           end
         end
       end
@@ -60,19 +67,19 @@ module Rack
       end
 
       def allowed_tokens
-
         token_info = @client.get("#{@prefix}-tokens")
         key1, key2, cycle_at = nil
 
         if token_info
-          key1, key2, cycle_at = Marshal::load(token_info)
+          key1, key2, cycle_at = Marshal.load(token_info)
 
-           key1 = nil unless key1 && key1.length == 32
-           key2 = nil unless key2 && key2.length == 32
+          key1 = nil unless key1 && key1.length == 32
+          key2 = nil unless key2 && key2.length == 32
 
-           if key1 && cycle_at && (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
-             return [key1, key2].compact
-           end
+          if key1 && cycle_at &&
+               (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
+            return [key1, key2].compact
+          end
         end
 
         timeout = Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
@@ -82,11 +89,10 @@ module Rack
         key1 = SecureRandom.hex
         cycle_at = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
 
-        @client.set("#{@prefix}-tokens", Marshal::dump([key1, key2, cycle_at]))
+        @client.set("#{@prefix}-tokens", Marshal.dump([key1, key2, cycle_at]))
 
         [key1, key2].compact
       end
-
     end
   end
 end

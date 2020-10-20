@@ -9,28 +9,35 @@ class Plucky::Query
   alias_method :remove_without_profiling, :remove
 
   def find_each(*args, &blk)
-    profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect, *args, &blk)
   end
 
   def find_one(*args, &blk)
-    profile_database_operation(__callee__, filtered_inspect(args[0]), *args, &blk)
+    profile_database_operation(
+      __callee__,
+      filtered_inspect(args[0]),
+      *args,
+      &blk
+    )
   end
 
   def count(*args, &blk)
-    profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect, *args, &blk)
   end
 
   def remove(*args, &blk)
-    profile_database_operation(__callee__, filtered_inspect(), *args, &blk)
+    profile_database_operation(__callee__, filtered_inspect, *args, &blk)
   end
 
   private
 
   def profile_database_operation(method, message, *args, &blk)
-    return self.send("#{method.id2name}_without_profiling", *args, &blk) unless SqlPatches.should_measure?
+    unless SqlPatches.should_measure?
+      return self.send("#{method.id2name}_without_profiling", *args, &blk)
+    end
 
-    start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result       = self.send("#{method.id2name}_without_profiling", *args, &blk)
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    result = self.send("#{method.id2name}_without_profiling", *args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
 
     query_message = "#{@collection.name}.#{method.id2name} => #{message}"
@@ -39,10 +46,12 @@ class Plucky::Query
     result
   end
 
-  def filtered_inspect(hash = to_hash())
-    hash_string = hash.reject { |key| key == :transformer }.collect do |key, value|
-      "  #{key}: #{value.inspect}"
-    end.join(",\n")
+  def filtered_inspect(hash = to_hash)
+    hash_string =
+      hash
+        .reject { |key| key == :transformer }
+        .collect { |key, value| "  #{key}: #{value.inspect}" }
+        .join(",\n")
 
     "{\n#{hash_string}\n}"
   end

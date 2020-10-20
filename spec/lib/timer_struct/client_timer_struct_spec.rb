@@ -3,7 +3,6 @@
 require 'yaml'
 
 describe Rack::MiniProfiler::TimerStruct::Client do
-
   let(:described) { Rack::MiniProfiler::TimerStruct::Client }
 
   def new_page
@@ -14,20 +13,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
     YAML.load(File.open(File.dirname(__FILE__) + "/../../fixtures/#{name}.yml"))
   end
 
-  before do
-    @client = described.new
-  end
+  before { @client = described.new }
 
   it 'defaults to no attributes' do
     expect(::JSON.parse(@client.to_json)).to be_empty
   end
 
   describe 'init_from_form_data' do
-
     describe 'without a form' do
-      before do
-        @client = described.init_from_form_data({}, new_page)
-      end
+      before { @client = described.init_from_form_data({}, new_page) }
 
       it 'is null' do
         expect(@client).to be_nil
@@ -35,21 +29,26 @@ describe Rack::MiniProfiler::TimerStruct::Client do
     end
 
     describe 'init_instrumentation' do
-      it "returns the body of mPt js function" do
+      it 'returns the body of mPt js function' do
         expect(described.init_instrumentation).to match(/mPt/)
       end
     end
 
     describe 'instrument' do
-      it "works" do
-        expected = "<script>mPt.probe('a')</script>b<script>mPt.probe('a')</script>b"
+      it 'works' do
+        expected =
+          "<script>mPt.probe('a')</script>b<script>mPt.probe('a')</script>b"
         expect(described.instrument('a', 'b')).to eq(expected)
       end
     end
 
     describe 'with a simple request' do
       before do
-        @client = described.init_from_form_data(fixture(:simple_client_request), new_page)
+        @client =
+          described.init_from_form_data(
+            fixture(:simple_client_request),
+            new_page
+          )
       end
 
       it 'has the correct RedirectCount' do
@@ -60,10 +59,8 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         expect(@client.timings).not_to be_empty
       end
 
-      describe "bob.js" do
-        before do
-          @bob = @client.timings.find { |t| t["Name"] == "bob.js" }
-        end
+      describe 'bob.js' do
+        before { @bob = @client.timings.find { |t| t['Name'] == 'bob.js' } }
 
         it 'has it in the timings' do
           expect(@bob).not_to be_nil
@@ -72,13 +69,10 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         it 'has the correct duration' do
           expect(@bob['Duration']).to eq(6)
         end
-
       end
 
-      describe "Navigation" do
-        before do
-          @nav = @client.timings.find { |t| t["Name"] == "Navigation" }
-        end
+      describe 'Navigation' do
+        before { @nav = @client.timings.find { |t| t['Name'] == 'Navigation' } }
 
         it 'has a Timing for the Navigation' do
           expect(@nav).not_to be_nil
@@ -93,10 +87,8 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
       end
 
-      describe "Simple" do
-        before do
-          @simple = @client.timings.find { |t| t["Name"] == "Simple" }
-        end
+      describe 'Simple' do
+        before { @simple = @client.timings.find { |t| t['Name'] == 'Simple' } }
 
         it 'has a Timing for the Simple' do
           expect(@simple).not_to be_nil
@@ -110,12 +102,15 @@ describe Rack::MiniProfiler::TimerStruct::Client do
           expect(@simple['Duration']).to eq(10)
         end
       end
-
     end
 
     describe 'with some odd values' do
       before do
-        @client = described.init_from_form_data(fixture(:weird_client_request), new_page)
+        @client =
+          described.init_from_form_data(
+            fixture(:weird_client_request),
+            new_page
+          )
       end
 
       it 'has the correct redirect_count' do
@@ -127,13 +122,11 @@ describe Rack::MiniProfiler::TimerStruct::Client do
       end
 
       it 'has no timing when the start is before Navigation' do
-        expect(@client.timings.find { |t| t["Name"] == "Previous" }).to be_nil
+        expect(@client.timings.find { |t| t['Name'] == 'Previous' }).to be_nil
       end
 
-      describe "weird" do
-        before do
-          @weird = @client.timings.find { |t| t["Name"] == "Weird" }
-        end
+      describe 'weird' do
+        before { @weird = @client.timings.find { |t| t['Name'] == 'Weird' } }
 
         it 'has a Timing for the Weird' do
           expect(@weird).not_to be_nil
@@ -148,9 +141,9 @@ describe Rack::MiniProfiler::TimerStruct::Client do
         end
       end
 
-      describe "differentFormat" do
+      describe 'differentFormat' do
         before do
-          @diff = @client.timings.find { |t| t["Name"] == "differentFormat" }
+          @diff = @client.timings.find { |t| t['Name'] == 'differentFormat' }
         end
 
         it 'has a Timing for the differentFormat' do

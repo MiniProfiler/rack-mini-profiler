@@ -3,7 +3,6 @@
 module Rack
   class MiniProfiler
     module ProfilingMethods
-
       def record_sql(query, elapsed_ms, params = nil)
         return unless current && current.current_timer
         c = current
@@ -19,8 +18,9 @@ module Rack
 
       def start_step(name)
         return unless current
-        parent_timer          = current.current_timer
-        current.current_timer = current_timer = current.current_timer.add_child(name)
+        parent_timer = current.current_timer
+        current.current_timer =
+          current_timer = current.current_timer.add_child(name)
         [current_timer, parent_timer]
       end
 
@@ -34,8 +34,9 @@ module Rack
       # perform a profiling step on given block
       def step(name, opts = nil)
         if current
-          parent_timer          = current.current_timer
-          current.current_timer = current_timer = current.current_timer.add_child(name)
+          parent_timer = current.current_timer
+          current.current_timer =
+            current_timer = current.current_timer.add_child(name)
           begin
             yield if block_given?
           ensure
@@ -48,7 +49,6 @@ module Rack
       end
 
       def unprofile_method(klass, method)
-
         clean = clean_method_name(method)
 
         with_profiling = ("#{clean}_with_mini_profiler").intern
@@ -70,10 +70,11 @@ module Rack
       end
 
       def profile_method(klass, method, type = :profile, &blk)
-        default_name = type == :counter ? method.to_s : klass.to_s + " " + method.to_s
-        clean        = clean_method_name(method)
+        default_name =
+          type == :counter ? method.to_s : klass.to_s + ' ' + method.to_s
+        clean = clean_method_name(method)
 
-        with_profiling    = ("#{clean}_with_mini_profiler").intern
+        with_profiling = ("#{clean}_with_mini_profiler").intern
         without_profiling = ("#{clean}_without_mini_profiler").intern
 
         if klass.send :method_defined?, with_profiling
@@ -82,7 +83,9 @@ module Rack
 
         klass.send :alias_method, without_profiling, method
         klass.send :define_method, with_profiling do |*args, &orig|
-          return self.send without_profiling, *args, &orig unless Rack::MiniProfiler.current
+          unless Rack::MiniProfiler.current
+            return self.send without_profiling, *args, &orig
+          end
 
           name = default_name
           if blk
@@ -102,11 +105,18 @@ module Rack
             begin
               self.send without_profiling, *args, &orig
             ensure
-              duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
-              parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct)
+              duration_ms =
+                (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f *
+                  1000
+              parent_timer.add_custom(
+                name,
+                duration_ms,
+                Rack::MiniProfiler.current.page_struct
+              )
             end
           else
-            Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
+            Rack::MiniProfiler.current.current_timer =
+              current_timer = parent_timer.add_child(name)
             begin
               self.send without_profiling, *args, &orig
             ensure
@@ -140,9 +150,11 @@ module Rack
       def counter(type, duration_ms = nil)
         result = nil
         if block_given?
-          start       = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-          result      = yield
-          duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
+          start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          result = yield
+          duration_ms =
+            (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f *
+              1000
         end
         return result if current.nil? || !request_authorized?
         current.current_timer.add_custom(type, duration_ms, current.page_struct)
@@ -152,9 +164,8 @@ module Rack
       private
 
       def clean_method_name(method)
-        method.to_s.gsub(/[\?\!]/, "")
+        method.to_s.gsub(/[\?\!]/, '')
       end
-
     end
   end
 end

@@ -1,23 +1,18 @@
 # frozen_string_literal: true
 
 describe Rack::MiniProfiler::MemcacheStore do
-
   context 'page struct' do
-
-    before do
-      @store = Rack::MiniProfiler::MemcacheStore.new
-    end
+    before { @store = Rack::MiniProfiler::MemcacheStore.new }
 
     describe 'storage' do
-
       it 'can store a PageStruct and retrieve it' do
         page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
-        page_struct[:id] = "XYZ"
-        page_struct[:random] = "random"
+        page_struct[:id] = 'XYZ'
+        page_struct[:random] = 'random'
         @store.save(page_struct)
-        page_struct = @store.load("XYZ")
-        expect(page_struct[:random]).to eq("random")
-        expect(page_struct[:id]).to eq("XYZ")
+        page_struct = @store.load('XYZ')
+        expect(page_struct[:random]).to eq('random')
+        expect(page_struct[:id]).to eq('XYZ')
       end
 
       it 'can list unviewed items for a user' do
@@ -31,8 +26,8 @@ describe Rack::MiniProfiler::MemcacheStore do
       it 'can set all unviewed items for a user' do
         @store.set_unviewed('a', 'XYZ')
         @store.set_unviewed('a', 'ABC')
-        @store.set_all_unviewed('a', %w(111 222))
-        expect(@store.get_unviewed_ids('a')).to eq(['111', '222'])
+        @store.set_all_unviewed('a', %w[111 222])
+        expect(@store.get_unviewed_ids('a')).to eq(%w[111 222])
         @store.set_all_unviewed('a', [])
       end
 
@@ -42,18 +37,13 @@ describe Rack::MiniProfiler::MemcacheStore do
         @store.set_viewed('a', 'XYZ')
         expect(@store.get_unviewed_ids('a')).to eq(['ABC'])
       end
-
     end
-
   end
 
   describe 'allowed_tokens' do
-    before do
-      @store = Rack::MiniProfiler::MemcacheStore.new
-    end
+    before { @store = Rack::MiniProfiler::MemcacheStore.new }
 
     it 'should return tokens' do
-
       @store.flush_tokens
 
       tokens = @store.allowed_tokens
@@ -66,7 +56,10 @@ describe Rack::MiniProfiler::MemcacheStore do
         expect(new_tokens).to eq(tokens)
       end
 
-      clock_travel(Process.clock_gettime(Process::CLOCK_MONOTONIC) + Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1) do
+      clock_travel(
+        Process.clock_gettime(Process::CLOCK_MONOTONIC) +
+          Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE + 1
+      ) do
         new_tokens = @store.allowed_tokens
         expect(new_tokens.length).to eq(2)
         expect((new_tokens - tokens).length).to eq(1)
@@ -77,14 +70,13 @@ describe Rack::MiniProfiler::MemcacheStore do
   context 'passing in a Memcache client' do
     describe 'client' do
       it 'uses the passed in object rather than creating a new one' do
-        client = instance_double("memcache-client")
+        client = instance_double('memcache-client')
         store = Rack::MiniProfiler::MemcacheStore.new(client: client)
 
         expect(client).to receive(:get)
         expect(Dalli::Client).not_to receive(:new)
-        store.load("XYZ")
+        store.load('XYZ')
       end
     end
   end
-
 end

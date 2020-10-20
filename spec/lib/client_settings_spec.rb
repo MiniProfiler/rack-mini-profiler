@@ -3,16 +3,16 @@
 require 'rack'
 
 describe Rack::MiniProfiler::ClientSettings do
-
-  describe "with settings" do
+  describe 'with settings' do
     before do
       @store = Rack::MiniProfiler::MemoryStore.new
-      settings = URI.encode_www_form_component("dp=t,bt=1")
-      @settings = Rack::MiniProfiler::ClientSettings.new(
-        { "HTTP_COOKIE" => "__profilin=#{settings};" },
-        @store,
-        Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      )
+      settings = URI.encode_www_form_component('dp=t,bt=1')
+      @settings =
+        Rack::MiniProfiler::ClientSettings.new(
+          { 'HTTP_COOKIE' => "__profilin=#{settings};" },
+          @store,
+          Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        )
     end
 
     it 'has the cookies' do
@@ -45,7 +45,7 @@ describe Rack::MiniProfiler::ClientSettings do
       Rack::MiniProfiler.authorize_request
       hash = {}
       @settings.write!(hash)
-      expect(hash["Set-Cookie"]).to include(@store.allowed_tokens.join("|"))
+      expect(hash['Set-Cookie']).to include(@store.allowed_tokens.join('|'))
     end
 
     it 'does nothing on short unauthed requests' do
@@ -65,13 +65,17 @@ describe Rack::MiniProfiler::ClientSettings do
         @settings.handle_cookie([200, hash, []])
       end
 
-      expect(hash["Set-Cookie"]).to include("max-age=0")
+      expect(hash['Set-Cookie']).to include('max-age=0')
     end
   end
 
-  it "should not have settings by default" do
-    expect(Rack::MiniProfiler::ClientSettings.new({}, Rack::MiniProfiler::MemoryStore.new, Process.clock_gettime(Process::CLOCK_MONOTONIC))
-      .has_valid_cookie?).to eq(false)
+  it 'should not have settings by default' do
+    expect(
+      Rack::MiniProfiler::ClientSettings.new(
+        {},
+        Rack::MiniProfiler::MemoryStore.new,
+        Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      ).has_valid_cookie?
+    ).to eq(false)
   end
-
 end

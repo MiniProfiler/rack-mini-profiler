@@ -4,18 +4,19 @@ module Rack
   class MiniProfiler
     module TimerStruct
       class Request < TimerStruct::Base
-
         def self.createRoot(name, page)
-          TimerStruct::Request.new(name, page, nil).tap do |timer|
-            timer[:is_root] = true
-          end
+          TimerStruct::Request
+            .new(name, page, nil)
+            .tap { |timer| timer[:is_root] = true }
         end
 
         attr_accessor :children_duration, :start, :parent
 
         def initialize(name, page, parent)
-          start_millis = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]
-          depth        = parent ? parent.depth + 1 : 0
+          start_millis =
+            (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i -
+              page[:started]
+          depth = parent ? parent.depth + 1 : 0
           super(
             id: MiniProfiler.generate_id,
             name: name,
@@ -41,9 +42,9 @@ module Rack
             custom_timings: {}
           )
           @children_duration = 0
-          @start             = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-          @parent            = parent
-          @page              = page
+          @start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          @parent = parent
+          @page = page
         end
 
         def name
@@ -79,12 +80,14 @@ module Rack
         end
 
         def add_child(name)
-          TimerStruct::Request.new(name, @page, self).tap do |timer|
-            self[:children].push(timer)
-            self[:has_children]      = true
-            timer[:parent_timing_id] = self[:id]
-            timer[:depth]            = self[:depth] + 1
-          end
+          TimerStruct::Request
+            .new(name, @page, self)
+            .tap do |timer|
+              self[:children].push(timer)
+              self[:has_children] = true
+              timer[:parent_timing_id] = self[:id]
+              timer[:depth] = self[:depth] + 1
+            end
         end
 
         def move_child(child, destination)
@@ -101,45 +104,66 @@ module Rack
           end
         end
 
-        def add_sql(query, elapsed_ms, page, params = nil, skip_backtrace = false, full_backtrace = false)
-          TimerStruct::Sql.new(query, elapsed_ms, page, self, params, skip_backtrace, full_backtrace).tap do |timer|
-            self[:sql_timings].push(timer)
-            timer[:parent_timing_id] = self[:id]
-            self[:has_sql_timings]   = true
-            self[:sql_timings_duration_milliseconds] += elapsed_ms
-            page[:duration_milliseconds_in_sql]      += elapsed_ms
-            page[:sql_count] += 1
-          end
+        def add_sql(
+          query,
+          elapsed_ms,
+          page,
+          params = nil,
+          skip_backtrace = false,
+          full_backtrace = false
+        )
+          TimerStruct::Sql
+            .new(
+              query,
+              elapsed_ms,
+              page,
+              self,
+              params,
+              skip_backtrace,
+              full_backtrace
+            )
+            .tap do |timer|
+              self[:sql_timings].push(timer)
+              timer[:parent_timing_id] = self[:id]
+              self[:has_sql_timings] = true
+              self[:sql_timings_duration_milliseconds] += elapsed_ms
+              page[:duration_milliseconds_in_sql] += elapsed_ms
+              page[:sql_count] += 1
+            end
         end
 
         def move_sql(sql, destination)
           if index = self[:sql_timings].index(sql)
             self[:sql_timings].slice!(index)
             self[:has_sql_timings] = self[:sql_timings].size > 0
-            self[:sql_timings_duration_milliseconds] -= sql[:duration_milliseconds]
+            self[:sql_timings_duration_milliseconds] -=
+              sql[:duration_milliseconds]
             destination[:sql_timings].push(sql)
             destination[:has_sql_timings] = true
-            destination[:sql_timings_duration_milliseconds] += sql[:duration_milliseconds]
+            destination[:sql_timings_duration_milliseconds] +=
+              sql[:duration_milliseconds]
             sql[:parent_timing_id] = destination[:id]
             sql.parent = destination
           end
         end
 
         def add_custom(type, elapsed_ms, page)
-          TimerStruct::Custom.new(type, elapsed_ms, page, self).tap do |timer|
-            timer[:parent_timing_id] = self[:id]
+          TimerStruct::Custom
+            .new(type, elapsed_ms, page, self)
+            .tap do |timer|
+              timer[:parent_timing_id] = self[:id]
 
-            self[:custom_timings][type] ||= []
-            self[:custom_timings][type].push(timer)
+              self[:custom_timings][type] ||= []
+              self[:custom_timings][type].push(timer)
 
-            self[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
-            self[:custom_timing_stats][type][:count]    += 1
-            self[:custom_timing_stats][type][:duration] += elapsed_ms
+              self[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
+              self[:custom_timing_stats][type][:count] += 1
+              self[:custom_timing_stats][type][:duration] += elapsed_ms
 
-            page[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
-            page[:custom_timing_stats][type][:count]    += 1
-            page[:custom_timing_stats][type][:duration] += elapsed_ms
-          end
+              page[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
+              page[:custom_timing_stats][type][:count] += 1
+              page[:custom_timing_stats][type][:duration] += elapsed_ms
+            end
         end
 
         def move_custom(type, custom, destination)
@@ -152,21 +176,27 @@ module Rack
               self[:custom_timing_stats].delete(type)
             else
               self[:custom_timing_stats][type][:count] -= 1
-              self[:custom_timing_stats][type][:duration] -= custom[:duration_milliseconds]
+              self[:custom_timing_stats][type][:duration] -=
+                custom[:duration_milliseconds]
             end
             destination[:custom_timings][type] ||= []
             destination[:custom_timings][type].push(custom)
-            destination[:custom_timing_stats][type] ||= { count: 0, duration: 0.0 }
+            destination[:custom_timing_stats][type] ||=
+              { count: 0, duration: 0.0 }
             destination[:custom_timing_stats][type][:count] += 1
-            destination[:custom_timing_stats][type][:duration] += custom[:duration_milliseconds]
+            destination[:custom_timing_stats][type][:duration] +=
+              custom[:duration_milliseconds]
           end
         end
 
         def record_time(milliseconds = nil)
-          milliseconds ||= (Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start) * 1000
-          self[:duration_milliseconds]                  = milliseconds
-          self[:is_trivial]                             = true if milliseconds < self[:trivial_duration_threshold_milliseconds]
-          self[:duration_without_children_milliseconds] = milliseconds - self[:children].sum(&:duration_ms)
+          milliseconds ||=
+            (Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start) * 1000
+          self[:duration_milliseconds] = milliseconds
+          self[:is_trivial] = true if milliseconds <
+            self[:trivial_duration_threshold_milliseconds]
+          self[:duration_without_children_milliseconds] =
+            milliseconds - self[:children].sum(&:duration_ms)
         end
 
         def adjust_depth

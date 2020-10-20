@@ -13,21 +13,22 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
 
   def load(*args)
     return @page_struct if @page_struct
-    @data = JSON.parse(File.read(File.expand_path("data.json", __dir__)), symbolize_names: true)
+    @data =
+      JSON.parse(
+        File.read(File.expand_path('data.json', __dir__)),
+        symbolize_names: true
+      )
     @page_struct = Rack::MiniProfiler::TimerStruct::Page.allocate
     @page_struct.instance_variable_set(:@attributes, @data)
     @page_struct
   end
   alias_method :load_snapshot, :load
 
-  def save(*args)
-  end
+  def save(*args); end
 
-  def set_unviewed(*args)
-  end
+  def set_unviewed(*args); end
 
-  def get_unviewed_ids(*args)
-  end
+  def get_unviewed_ids(*args); end
 
   def fetch_snapshots(batch_size: 200, &blk)
     if @snapshots
@@ -44,14 +45,20 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
       users#index
       /some/fairly/long/path/here
     ]
-    @snapshots = methods.product(paths).map do |method, path|
-      create_fake_snapshot(
-        methods.sample,
-        paths.sample,
-        SecureRandom.rand * @multipliers.sample,
-        ((Time.now.to_f - @time_units.sample * @time_multipliers.sample) * 1000).round
-      )
-    end
+    @snapshots =
+      methods
+        .product(paths)
+        .map do |method, path|
+          create_fake_snapshot(
+            methods.sample,
+            paths.sample,
+            SecureRandom.rand * @multipliers.sample,
+            (
+              (Time.now.to_f - @time_units.sample * @time_multipliers.sample) *
+                1000
+            ).round
+          )
+        end
     @snapshots.each_slice(batch_size) { |batch| blk.call(batch) }
     nil
   end
@@ -59,24 +66,23 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
   private
 
   def create_fake_snapshot(method, path, duration, started_at)
-    page = Rack::MiniProfiler::TimerStruct::Page.new({
-      'PATH_INFO' => path,
-      'REQUEST_METHOD' => method
-    })
+    page =
+      Rack::MiniProfiler::TimerStruct::Page.new(
+        { 'PATH_INFO' => path, 'REQUEST_METHOD' => method }
+      )
     page[:root].record_time(duration)
     page[:started_at] = started_at
     page[:sql_count] = (SecureRandom.rand * @multipliers.sample).round
-    page[:custom_fields]["Application Version"] = SecureRandom.hex
-    page[:custom_fields]["User"] = %w[Anon Logged-in].sample
+    page[:custom_fields]['Application Version'] = SecureRandom.hex
+    page[:custom_fields]['User'] = %w[Anon Logged-in].sample
     page
   end
 end
 
 Rack::MiniProfiler.config.storage = SampleStorage
-Rack::MiniProfiler.config.snapshot_hidden_custom_fields += ["application Version"]
-Rack::MiniProfiler.config.storage_failure = ->(e) do
-  puts e
-end
+Rack::MiniProfiler.config.snapshot_hidden_custom_fields +=
+  ['application Version']
+Rack::MiniProfiler.config.storage_failure = ->(e) { puts e }
 
 class Rack::MiniProfiler
   private
