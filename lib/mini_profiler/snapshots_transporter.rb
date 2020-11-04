@@ -33,6 +33,7 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
     @buffer = []
     @buffer_mutex = Mutex.new
     @max_buffer_size = 100
+    @consecutive_failures_count = 0
     @testing = false
   end
 
@@ -64,19 +65,30 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
         @buffer_mutex.synchronize do
           @buffer -= buffer_content
         end
+        @consecutive_failures_count = 0
       else
         @@failed_http_requests_count += 1
+        @consecutive_failures_count += 1
       end
     end
   end
 
+  def requests_interval
+    [30 + backoff_delay, 60 * 60].min
+  end
+
   private
+
+  def backoff_delay
+    return 0 if @consecutive_failures_count == 0
+    2 ** @consecutive_failures_count
+  end
 
   def start_thread
     return if @thread&.alive? || @testing
     @thread = Thread.new do
       while true
-        sleep 10
+        sleep requests_interval
         flush_buffer
       end
     end

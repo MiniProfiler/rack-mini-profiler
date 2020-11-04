@@ -87,4 +87,38 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
     transporter.flush_buffer
     transporter.flush_buffer
   end
+
+  it 'exponentially backs off when requests fail' do
+    snapshot = Rack::MiniProfiler::TimerStruct::Page.new({})
+    stub_request(:post, url)
+      .with(
+        body: { snapshots: [snapshot] }.to_json,
+        headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
+      )
+      .to_return(status: 500, body: "", headers: {})
+    transporter.ship(snapshot)
+    expect(transporter.requests_interval).to eq(30)
+    transporter.flush_buffer
+    expect(transporter.requests_interval).to eq(32)
+    transporter.flush_buffer
+    expect(transporter.requests_interval).to eq(34)
+    transporter.flush_buffer
+    expect(transporter.requests_interval).to eq(38)
+    expect(transporter.buffer).to eq([snapshot])
+    8.times { transporter.flush_buffer }
+    expect(transporter.requests_interval).to eq(2078)
+    transporter.flush_buffer
+    expect(transporter.requests_interval).to eq(60 * 60)
+    expect(transporter.buffer).to eq([snapshot])
+
+    stub_request(:post, url)
+      .with(
+        body: { snapshots: [snapshot] }.to_json,
+        headers: { 'Mini-Profiler-Transport-Auth' => 'somepasswordhere' }
+      )
+      .to_return(status: 200, body: "", headers: {})
+    transporter.flush_buffer
+    expect(transporter.requests_interval).to eq(30)
+    expect(transporter.buffer).to eq([])
+  end
 end
