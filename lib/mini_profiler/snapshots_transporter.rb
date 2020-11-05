@@ -23,11 +23,12 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
   end
 
   attr_reader :buffer
-  attr_accessor :max_buffer_size
+  attr_accessor :max_buffer_size, :gzip_requests
 
   def initialize(config)
     @uri = URI(config.snapshots_transport_destination_url)
     @auth_key = config.snapshots_transport_auth_key
+    @gzip_requests = config.snapshots_transport_gzip_requests
     @thread = nil
     @thread_mutex = Mutex.new
     @buffer = []
@@ -50,12 +51,24 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
       @buffer.dup if @buffer.size > 0
     end
     if buffer_content
-      request = Net::HTTP::Post.new(
-        @uri,
+      headers = {
         'Content-Type' => 'application/json',
         'Mini-Profiler-Transport-Auth' => @auth_key
-      )
-      request.body = { snapshots: buffer_content }.to_json
+      }
+      json = { snapshots: buffer_content }.to_json
+      body = if @gzip_requests
+        require 'zlib'
+        io = StringIO.new
+        gzip_writer = Zlib::GzipWriter.new(io)
+        gzip_writer.write(json)
+        gzip_writer.close
+        headers['Content-Encoding'] = 'gzip'
+        io.string
+      else
+        json
+      end
+      request = Net::HTTP::Post.new(@uri, headers)
+      request.body = body
       http = Net::HTTP.new(@uri.hostname, @uri.port)
       http.use_ssl = @uri.scheme == 'https'
       res = http.request(request)
