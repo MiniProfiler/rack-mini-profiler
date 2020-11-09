@@ -56,6 +56,7 @@ module Rack
           @snapshots_transport_destination_url = nil
           @snapshots_transport_auth_key = nil
           @snapshots_redact_sql_queries = true
+          @snapshots_transport_gzip_requests = false
 
           self
         }
@@ -77,7 +78,8 @@ module Rack
       # snapshot related config
       attr_accessor :snapshot_every_n_requests, :snapshots_limit,
         :snapshot_hidden_custom_fields, :snapshots_transport_destination_url,
-        :snapshots_transport_auth_key, :snapshots_redact_sql_queries
+        :snapshots_transport_auth_key, :snapshots_redact_sql_queries,
+        :snapshots_transport_gzip_requests
 
       # Deprecated options
       attr_accessor :use_existing_jquery

@@ -1,11 +1,24 @@
 # frozen_string_literal: true
 
+require 'zlib'
+
 describe Rack::MiniProfiler::SnapshotsTransporter do
   let(:url) { 'http://example.com/dest' }
   let(:transporter) do
     config = Rack::MiniProfiler.config
     config.snapshots_transport_destination_url = url
     config.snapshots_transport_auth_key = 'somepasswordhere'
+    transporter = described_class.new(config)
+    transporter.instance_variable_set(:@testing, true)
+    transporter.max_buffer_size = 4
+    transporter
+  end
+
+  let(:gzip_transporter) do
+    config = Rack::MiniProfiler.config.dup
+    config.snapshots_transport_destination_url = url
+    config.snapshots_transport_auth_key = 'somepasswordhere'
+    config.snapshots_transport_gzip_requests = true
     transporter = described_class.new(config)
     transporter.instance_variable_set(:@testing, true)
     transporter.max_buffer_size = 4
@@ -120,5 +133,38 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
     transporter.flush_buffer
     expect(transporter.requests_interval).to eq(30)
     expect(transporter.buffer).to eq([])
+  end
+
+  it 'can gzip requests' do
+    snapshot = Rack::MiniProfiler::TimerStruct::Page.new({})
+    json = { snapshots: [snapshot] }.to_json
+    compressed = compress(json)
+    stub_request(:post, url)
+      .with(
+        body: compressed,
+        headers: {
+          'Mini-Profiler-Transport-Auth' => 'somepasswordhere',
+          'Content-Encoding' => 'gzip'
+        }
+      )
+      .to_return(status: 200, body: "", headers: {})
+    expect(gzip_transporter.gzip_requests).to eq(true)
+    gzip_transporter.ship(snapshot)
+    gzip_transporter.flush_buffer
+    expect(gzip_transporter.buffer.size).to eq(0)
+    expect(compressed.bytes.size < json.bytes.size).to eq(true)
+    expect(decompress(compressed)).to eq(json)
+  end
+
+  def compress(body)
+    io = StringIO.new
+    gzip_writer = Zlib::GzipWriter.new(io)
+    gzip_writer.write(body)
+    gzip_writer.close
+    io.string
+  end
+
+  def decompress(gzipped_body)
+    Zlib::GzipReader.new(StringIO.new(gzipped_body)).read
   end
 end
