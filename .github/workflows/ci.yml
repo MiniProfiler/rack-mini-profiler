@@ -1,4 +1,4 @@
-name: Mobystash Tests
+name: Mini Profiler Tests
 
 on:
   pull_request:
