@@ -1,0 +1,49 @@
+name: Mini Profiler Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+env:
+  MEMCACHE_SERVERS: localhost:11211
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }}
+    services:
+      memcached:
+        image: memcached:1.6.9
+        ports:
+          - 11211:11211
+        options: --health-cmd "timeout 5 bash -c 'cat < /dev/null > /dev/udp/127.0.0.1/11211'" --health-interval 10s --health-timeout 5s --health-retries 5
+    strategy:
+      matrix:
+        ruby: ["2.7", "2.6", "2.5"]
+        redis: ["5.x"]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Setup redis
+        uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: ${{ matrix.redis }}
+      - name: Bundler cache
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-${{ matrix.ruby }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.ruby }}-gems-
+      - name: Setup gems
+        run: |
+          bundle config path vendor/bundle
+          bundle install --jobs 4
+      - name: Tests
+        run: bundle exec rspec
+      - name: Rubocop
+        run: bundle exec rubocop

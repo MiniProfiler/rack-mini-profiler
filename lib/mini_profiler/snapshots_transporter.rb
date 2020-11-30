@@ -94,7 +94,7 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
 
   def backoff_delay
     return 0 if @consecutive_failures_count == 0
-    2 ** @consecutive_failures_count
+    2**@consecutive_failures_count
   end
 
   def start_thread
