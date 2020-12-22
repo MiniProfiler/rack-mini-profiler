@@ -41,6 +41,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.ruby }}-gems-
       - name: Setup gems
         run: |
+          gem install bundler
           bundle config path vendor/bundle
           bundle install --jobs 4
       - name: Tests
