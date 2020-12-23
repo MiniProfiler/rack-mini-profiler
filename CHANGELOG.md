@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.2.1 - 2020-12-23
+
+- [FIX] Turbolinks integration causing increasing number of GET requests
+- [FEATURE] enahanced log transporter with compression and exponential backoff
+- [FEATURE] sameSite=Lax added to MiniProfiler cookie
+
 ## 2.2.0 - 2020-10-19
 
 - [UX] Enhancements to snapshots UI
