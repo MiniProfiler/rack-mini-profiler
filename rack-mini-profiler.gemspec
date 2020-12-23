@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
     'changelog_uri' => 'https://github.com/MiniProfiler/rack-mini-profiler/blob/master/CHANGELOG.md'
   }
 
-  s.add_development_dependency 'rake', '< 11'
+  s.add_development_dependency 'rake'
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'dalli'
   s.add_development_dependency 'rspec', '~> 3.6.0'
@@ -40,8 +40,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'nokogiri'
   s.add_development_dependency 'rubocop-discourse'
   s.add_development_dependency 'listen'
-  s.add_development_dependency 'webpacker', '~> 5.1'
-  s.add_development_dependency 'rails', '~> 5.1'
+  s.add_development_dependency 'webpacker'
+  s.add_development_dependency 'rails', '~> 6.0'
   s.add_development_dependency 'webmock', '3.9.1'
 
   s.require_paths = ["lib"]
