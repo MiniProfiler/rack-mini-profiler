@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.6.0'
   s.add_development_dependency 'redis'
   s.add_development_dependency 'sassc'
-  s.add_development_dependency 'flamegraph'
+  s.add_development_dependency 'stackprof'
   s.add_development_dependency 'rubocop'
   s.add_development_dependency 'mini_racer'
   s.add_development_dependency 'nokogiri'
