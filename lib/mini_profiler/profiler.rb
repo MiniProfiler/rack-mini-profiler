@@ -416,8 +416,14 @@ module Rack
       page_struct[:root].record_time((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000)
 
       if flamegraph
-        body.close if body.respond_to? :close
-        return client_settings.handle_cookie(self.flamegraph(flamegraph))
+        if query_string =~ /save/
+          file_name = Dir::Tmpname.create(['flamegraph-', '.html']) {}
+          ::File.write file_name, flamegraph
+          puts "saved flamegraph to #{Socket.gethostname} #{file_name}"
+        else
+          body.close if body.respond_to? :close
+          return client_settings.handle_cookie(self.flamegraph(flamegraph))
+        end
       end
 
       begin
@@ -639,6 +645,7 @@ Append the following to your query string:
   #{make_link "flamegraph", env} : works best on Ruby 2.0, a graph representing sampled activity (requires the flamegraph gem).
   #{make_link "flamegraph&flamegraph_sample_rate=1", env}: creates a flamegraph with the specified sample rate (in ms). Overrides value set in config
   #{make_link "flamegraph_embed", env} : works best on Ruby 2.0, a graph representing sampled activity (requires the flamegraph gem), embedded resources for use on an intranet.
+  #{make_link "flamegraph_save", env} : works best on Ruby 2.0, saves a graph representing sampled activity to a local file (requires the flamegraph gem).
   #{make_link "trace-exceptions", env} : requires Ruby 2.0, will return all the spots where your application raises exceptions
   #{make_link "analyze-memory", env} : requires Ruby 2.0, will perform basic memory analysis of heap
 </pre>
