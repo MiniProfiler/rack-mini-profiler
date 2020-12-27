@@ -3,7 +3,6 @@
 module Rack
   class MiniProfiler
     module TimerStruct
-
       # TimerStruct::Page
       #   Root: TimerStruct::Request
       #     :has_many TimerStruct::Request children
@@ -13,9 +12,7 @@ module Rack
         class << self
           def from_hash(hash)
             hash = symbolize_hash(hash)
-            if hash.key?(:custom_timing_names)
-              hash[:custom_timing_names] = []
-            end
+            hash[:custom_timing_names] = [] if hash.key?(:custom_timing_names)
             hash.delete(:started_formatted)
             if hash.key?(:duration_milliseconds)
               hash[:duration_milliseconds] = 0
@@ -58,10 +55,11 @@ module Rack
         attr_reader :attributes
 
         def initialize(env)
-          timer_id     = MiniProfiler.generate_id
-          page_name    = env['PATH_INFO']
-          started_at   = (Time.now.to_f * 1000).to_i
-          started      = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
+          timer_id = MiniProfiler.generate_id
+          page_name = env['PATH_INFO']
+          started_at = (Time.now.to_f * 1000).to_i
+          started =
+            (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
           machine_name = env['SERVER_NAME']
           super(
             id: timer_id,
@@ -70,7 +68,7 @@ module Rack
             started_at: started_at,
             machine_name: machine_name,
             level: 0,
-            user: "unknown user",
+            user: 'unknown user',
             has_user_viewed: false,
             client_timings: nil,
             duration_milliseconds: 0,
@@ -91,7 +89,10 @@ module Rack
           )
           self[:request_method] = env['REQUEST_METHOD']
           self[:request_path] = env['PATH_INFO']
-          name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
+          name =
+            "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{
+              env['SERVER_PORT']
+            }#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
           self[:root] = TimerStruct::Request.createRoot(name, self)
         end
 

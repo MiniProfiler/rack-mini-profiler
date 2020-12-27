@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require 'rack/test'
-require File.expand_path('../../../lib/mini_profiler_rails/railtie_methods', __FILE__)
+require File.expand_path(
+          '../../../lib/mini_profiler_rails/railtie_methods',
+          __FILE__
+        )
 
 def to_seconds(array)
   array.map! { |n, s, f| [n, s / 1000.0, f / 1000.0] }
@@ -16,12 +19,14 @@ describe Rack::MiniProfilerRailsMethods do
       @current_timer = Rack::MiniProfiler.current.current_timer
 
       # SQL timings
-      to_seconds([
-        ['SELECT A', 2,   04], # in node A
-        ['SELECT B', 6,   15], # in node B
-        ['SELECT E', 73,  77], # in node E
-        ['SELECT F', 93,  96]  # in node F
-      ]).each do |query, start, finish|
+      to_seconds(
+        [
+          ['SELECT A', 2, 04], # in node A
+          ['SELECT B', 6, 15], # in node B
+          ['SELECT E', 73, 77], # in node E
+          ['SELECT F', 93, 96] # in node F
+        ]
+      ).each do |query, start, finish|
         allow(Process).to receive(:clock_gettime).and_return(finish)
         @current_timer.add_sql(
           query,
@@ -31,20 +36,23 @@ describe Rack::MiniProfilerRailsMethods do
       end
 
       # Custom timings
-      to_seconds([
-        ['custom1 D', 53, 55],
-        ['custom1 D', 57, 60],
-        ['custom2 D', 55, 57],
-        ['custom1 F', 90, 99],
-        ['custom1 B', 11, 16],
-        ['custom1 B', 17, 19]
-      ]).each do |type, start, finish|
+      to_seconds(
+        [
+          ['custom1 D', 53, 55],
+          ['custom1 D', 57, 60],
+          ['custom2 D', 55, 57],
+          ['custom1 F', 90, 99],
+          ['custom1 B', 11, 16],
+          ['custom1 B', 17, 19]
+        ]
+      ).each do |type, start, finish|
         allow(Process).to receive(:clock_gettime).and_return(finish)
-        timing = @current_timer.add_custom(
-          type,
-          finish - start,
-          Rack::MiniProfiler.current.page_struct
-        )
+        timing =
+          @current_timer.add_custom(
+            type,
+            finish - start,
+            Rack::MiniProfiler.current.page_struct
+          )
         @custom_timings ||= {}
         @custom_timings[type] ||= []
         @custom_timings[type] << timing
@@ -60,29 +68,31 @@ describe Rack::MiniProfilerRailsMethods do
       # B finishes first, F finishes last
 
       # [name, start, finish] units are ms which are converted by `to_seconds` to seconds
-      to_seconds([
-        ['B',  5,     20],
-        ['D',  50,    60],
-        ['C',  40,    70],
-        ['E',  70,    80],
-        ['A',  0,     80],
-        ['F',  90,    100]
-      ]).each do |name, start, finish|
+      to_seconds(
+        [
+          ['B', 5, 20],
+          ['D', 50, 60],
+          ['C', 40, 70],
+          ['E', 70, 80],
+          ['A', 0, 80],
+          ['F', 90, 100]
+        ]
+      ).each do |name, start, finish|
         allow(Process).to receive(:clock_gettime).and_return(finish)
-        described_class.render_notification_handler(name, finish, start, name_as_description: true)
+        described_class.render_notification_handler(
+          name,
+          finish,
+          start,
+          name_as_description: true
+        )
       end
-      @nodes = {
-        A: @current_timer.children[0],
-        F: @current_timer.children[1]
-      }
+      @nodes = { A: @current_timer.children[0], F: @current_timer.children[1] }
       @nodes.merge!(
         B: @nodes[:A].children[0],
         C: @nodes[:A].children[1],
         E: @nodes[:A].children[2]
       )
-      @nodes.merge!(
-        D: @nodes[:C].children[0]
-      )
+      @nodes.merge!(D: @nodes[:C].children[0])
 
       # This is how the nodes should be nested after they do through
       # render_notification_handler:
@@ -98,18 +108,14 @@ describe Rack::MiniProfilerRailsMethods do
     end
 
     it 'should be able to nest the nodes correctly' do
-      @nodes.each do |key, node|
-        expect(key.to_s).to eq(node.name)
-      end
+      @nodes.each { |key, node| expect(key.to_s).to eq(node.name) }
       top_nodes = @current_timer.children
-      expect(top_nodes.map(&:name)).to eq(%w{A F})
-      expect(@nodes[:A].children.map(&:name)).to eq(%w{B C E})
-      expect(@nodes[:C].children.map(&:name)).to eq(%w{D})
+      expect(top_nodes.map(&:name)).to eq(%w[A F])
+      expect(@nodes[:A].children.map(&:name)).to eq(%w[B C E])
+      expect(@nodes[:C].children.map(&:name)).to eq(%w[D])
 
-      without_children = %i{B D E F}
-      without_children.each do |name|
-        expect(@nodes[name].children).to eq([])
-      end
+      without_children = %i[B D E F]
+      without_children.each { |name| expect(@nodes[name].children).to eq([]) }
     end
 
     it 'should correct the duration_milliseconds and duration_without_children_milliseconds attributes for the nodes' do
@@ -136,10 +142,12 @@ describe Rack::MiniProfilerRailsMethods do
     end
 
     it 'should move sql timings to the correct nodes' do
-      %i{A B E F}.each do |name|
+      %i[A B E F].each do |name|
         sql_timings = @nodes[name].sql_timings
         expect(sql_timings.size).to eq(1)
-        expect(sql_timings[0][:formatted_command_string]).to eq("SELECT #{name}")
+        expect(sql_timings[0][:formatted_command_string]).to eq(
+          "SELECT #{name}"
+        )
       end
       expect(@current_timer.sql_timings).to eq([])
     end
@@ -153,7 +161,9 @@ describe Rack::MiniProfilerRailsMethods do
       expect(@nodes[:D][ct]['custom1 D'].size).to eq(2)
       expect(@nodes[:D][ct]['custom1 D']).to eq(@custom_timings['custom1 D'])
       expect(@nodes[:D][cts]['custom1 D'][:count]).to eq(2)
-      expect((@nodes[:D][cts]['custom1 D'][:duration] * 1000).round).to eq(2 + 3)
+      expect((@nodes[:D][cts]['custom1 D'][:duration] * 1000).round).to eq(
+        2 + 3
+      )
 
       expect(@nodes[:D][ct]['custom2 D'].size).to eq(1)
       expect(@nodes[:D][ct]['custom2 D']).to eq(@custom_timings['custom2 D'])
@@ -172,7 +182,9 @@ describe Rack::MiniProfilerRailsMethods do
       expect(@nodes[:B][ct]['custom1 B'].size).to eq(2)
       expect(@nodes[:B][ct]['custom1 B']).to eq(@custom_timings['custom1 B'])
       expect(@nodes[:B][cts]['custom1 B'][:count]).to eq(2)
-      expect((@nodes[:B][cts]['custom1 B'][:duration] * 1000).round).to eq(5 + 2)
+      expect((@nodes[:B][cts]['custom1 B'][:duration] * 1000).round).to eq(
+        5 + 2
+      )
 
       expect(@current_timer[ct]).to eq({})
       expect(@current_timer[cts]).to eq({})
@@ -180,17 +192,19 @@ describe Rack::MiniProfilerRailsMethods do
   end
 
   it '#get_webpacker_assets_path returns webpacker public_output_path if webpacker exists' do
-    expect(described_class.get_webpacker_assets_path()).to eq(nil)
+    expect(described_class.get_webpacker_assets_path).to eq(nil)
     ENV['RAILS_ENV'] = 'test'
     require 'rails'
     require 'webpacker'
     tmp_path = Pathname.new("/tmp/rails_root_#{SecureRandom.hex}")
     FileUtils.mkdir(tmp_path)
-    Webpacker.instance = Webpacker::Instance.new(
-      root_path: tmp_path,
-      config_path: Pathname.new(File.expand_path("../fixtures/webpacker.yml", __dir__))
-    )
-    expect(described_class.get_webpacker_assets_path()).to eq("/some/assets/path")
+    Webpacker.instance =
+      Webpacker::Instance.new(
+        root_path: tmp_path,
+        config_path:
+          Pathname.new(File.expand_path('../fixtures/webpacker.yml', __dir__))
+      )
+    expect(described_class.get_webpacker_assets_path).to eq('/some/assets/path')
   ensure
     FileUtils.rm_rf(tmp_path)
   end

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Rack::MiniProfiler::GCProfiler
-
   def initialize
     @ignore = []
     @ignore << @ignore.__id__
@@ -14,14 +13,14 @@ class Rack::MiniProfiler::GCProfiler
     @ignore << stats.__id__
     @ignore << ids.__id__
 
-    ObjectSpace.each_object { |o|
+    ObjectSpace.each_object do |o|
       begin
         stats[o.class] += 1
         ids[o.__id__] = o if Integer === o.__id__
       rescue NoMethodError
         # protect against BasicObject
       end
-    }
+    end
 
     @ignore.each do |id|
       if ids.delete(id)
@@ -38,12 +37,8 @@ class Rack::MiniProfiler::GCProfiler
 
   def diff_object_stats(before, after)
     diff = {}.compare_by_identity
-    after.each do |k, v|
-      diff[k] = v - before[k]
-    end
-    before.each do |k, v|
-      diff[k] = 0 - v unless after.has_key?(k)
-    end
+    after.each { |k, v| diff[k] = v - before[k] }
+    before.each { |k, v| diff[k] = 0 - v unless after.has_key?(k) }
 
     diff
   end
@@ -92,29 +87,31 @@ class Rack::MiniProfiler::GCProfiler
   end
 
   def profile_gc(app, env)
-
     # for memsize_of
     require 'objspace'
 
     # clean up before
     GC.start
-    stat          = GC.stat
+    stat = GC.stat
     prev_gc_state = GC.disable
-    stat_before   = object_space_stats
-    b             = app.call(env)[2]
+    stat_before = object_space_stats
+    b = app.call(env)[2]
     b.close if b.respond_to? :close
     stat_after = object_space_stats
+
     # so we don't blow out on memory
     prev_gc_state ? GC.disable : GC.enable
 
-    diff                          = diff_object_stats(stat_before[:stats], stat_after[:stats])
-    string_analysis               = analyze_strings(stat_before[:ids], stat_after[:ids])
-    new_objects, memory_allocated = analyze_growth(stat_before[:ids], stat_after[:ids])
+    diff = diff_object_stats(stat_before[:stats], stat_after[:stats])
+    string_analysis = analyze_strings(stat_before[:ids], stat_after[:ids])
+    new_objects, memory_allocated =
+      analyze_growth(stat_before[:ids], stat_after[:ids])
     objects_before, memory_before = analyze_initial_state(stat_before[:ids])
 
     body = []
 
-    body << "
+    body <<
+      "
 Overview
 --------
 Initial state: object count: #{objects_before}
@@ -128,28 +125,36 @@ New bytes allocated outside of Ruby heaps: #{memory_allocated}
 New objects: #{new_objects}
 "
 
-    body << "
+    body <<
+      "
 ObjectSpace delta caused by request:
 -----------------------------------\n"
-    diff.to_a.delete_if { |_k, v| v == 0 }.sort_by! { |_k, v| v }.reverse_each do |k, v|
-      body << "#{k} : #{v}\n"
-    end
+    diff
+      .to_a
+      .delete_if { |_k, v| v == 0 }
+      .sort_by! { |_k, v| v }
+      .reverse_each { |k, v| body << "#{k} : #{v}\n" }
 
-    body << "\n
+    body <<
+      "\n
 ObjectSpace stats:
 -----------------\n"
 
-    stat_after[:stats].to_a.sort_by! { |_k, v| v }.reverse_each do |k, v|
-      body << "#{k} : #{v}\n"
-    end
+    stat_after[:stats]
+      .to_a
+      .sort_by! { |_k, v| v }
+      .reverse_each { |k, v| body << "#{k} : #{v}\n" }
 
-    body << "\n
+    body <<
+      "\n
 String stats:
 ------------\n"
 
-    string_analysis.to_a.sort_by! { |_k, v| -v }.take(1000).each do |string, count|
-      body << "#{count} : #{string}\n"
-    end
+    string_analysis
+      .to_a
+      .sort_by! { |_k, v| -v }
+      .take(1000)
+      .each { |string, count| body << "#{count} : #{string}\n" }
 
     [200, { 'Content-Type' => 'text/plain' }, body]
   ensure

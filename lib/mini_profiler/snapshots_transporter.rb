@@ -47,26 +47,26 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
   end
 
   def flush_buffer
-    buffer_content = @buffer_mutex.synchronize do
-      @buffer.dup if @buffer.size > 0
-    end
+    buffer_content =
+      @buffer_mutex.synchronize { @buffer.dup if @buffer.size > 0 }
     if buffer_content
       headers = {
         'Content-Type' => 'application/json',
         'Mini-Profiler-Transport-Auth' => @auth_key
       }
       json = { snapshots: buffer_content }.to_json
-      body = if @gzip_requests
-        require 'zlib'
-        io = StringIO.new
-        gzip_writer = Zlib::GzipWriter.new(io)
-        gzip_writer.write(json)
-        gzip_writer.close
-        headers['Content-Encoding'] = 'gzip'
-        io.string
-      else
-        json
-      end
+      body =
+        if @gzip_requests
+          require 'zlib'
+          io = StringIO.new
+          gzip_writer = Zlib::GzipWriter.new(io)
+          gzip_writer.write(json)
+          gzip_writer.close
+          headers['Content-Encoding'] = 'gzip'
+          io.string
+        else
+          json
+        end
       request = Net::HTTP::Post.new(@uri, headers)
       request.body = body
       http = Net::HTTP.new(@uri.hostname, @uri.port)
@@ -75,9 +75,7 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
       if res.code.to_i == 200
         @@successful_http_requests_count += 1
         @@transported_snapshots_count += buffer_content.size
-        @buffer_mutex.synchronize do
-          @buffer -= buffer_content
-        end
+        @buffer_mutex.synchronize { @buffer -= buffer_content }
         @consecutive_failures_count = 0
       else
         @@failed_http_requests_count += 1
@@ -99,11 +97,12 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
 
   def start_thread
     return if @thread&.alive? || @testing
-    @thread = Thread.new do
-      while true
-        sleep requests_interval
-        flush_buffer
+    @thread =
+      Thread.new do
+        while true
+          sleep requests_interval
+          flush_buffer
+        end
       end
-    end
   end
 end

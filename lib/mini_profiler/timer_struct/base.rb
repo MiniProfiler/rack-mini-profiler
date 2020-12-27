@@ -5,7 +5,6 @@ module Rack
     module TimerStruct
       # A base class for timing structures
       class Base
-
         def initialize(attrs = {})
           @attributes = attrs
         end

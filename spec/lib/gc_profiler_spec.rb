@@ -2,9 +2,7 @@
 
 describe Rack::MiniProfiler::GCProfiler do
   before :each do
-    @app = lambda do |env|
-      env
-    end
+    @app = lambda { |env| env }
     @env = {}
     @profiler = Rack::MiniProfiler::GCProfiler.new
   end
@@ -13,19 +11,14 @@ describe Rack::MiniProfiler::GCProfiler do
     it 'doesn\'t leave the GC enabled if it was disabled previously' do
       GC.disable
 
-      expect {
-        @profiler.profile_gc(@app, @env)
-      }.to_not change { GC.disable }
+      expect { @profiler.profile_gc(@app, @env) }.to_not change { GC.disable }
 
       # Let's re-enable the GC for the rest of the test suite
       GC.enable
     end
 
     it 'keeps the GC enabled if it was enabled previously' do
-      expect {
-        @profiler.profile_gc(@app, @env)
-      }.to_not change { GC.enable }
+      expect { @profiler.profile_gc(@app, @env) }.to_not change { GC.enable }
     end
-
   end
 end

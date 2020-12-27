@@ -2,10 +2,7 @@
 
 describe Rack::MiniProfiler do
   describe 'unique id' do
-
-    before do
-      @unique = Rack::MiniProfiler.generate_id
-    end
+    before { @unique = Rack::MiniProfiler.generate_id }
 
     it 'is not nil' do
       expect(@unique).not_to be_nil
@@ -16,7 +13,6 @@ describe Rack::MiniProfiler do
     end
 
     describe 'configuration' do
-
       it 'allows us to set configuration settings' do
         Rack::MiniProfiler.config.auto_inject = false
         expect(Rack::MiniProfiler.config.auto_inject).to eq(false)
@@ -35,17 +31,17 @@ describe Rack::MiniProfiler do
 
       describe 'base_url_path' do
         it 'adds a trailing slash onto the base_url_path' do
-          profiler = Rack::MiniProfiler.new(nil, base_url_path: "/test-resource")
-          expect(profiler.config.base_url_path).to eq("/test-resource/")
+          profiler =
+            Rack::MiniProfiler.new(nil, base_url_path: '/test-resource')
+          expect(profiler.config.base_url_path).to eq('/test-resource/')
         end
 
         it "doesn't add the trailing slash when it's already there" do
-          profiler = Rack::MiniProfiler.new(nil, base_url_path: "/test-resource/")
-          expect(profiler.config.base_url_path).to eq("/test-resource/")
+          profiler =
+            Rack::MiniProfiler.new(nil, base_url_path: '/test-resource/')
+          expect(profiler.config.base_url_path).to eq('/test-resource/')
         end
-
       end
-
     end
   end
 
@@ -60,30 +56,28 @@ describe Rack::MiniProfiler do
       end
     end
 
-    before do
-      Rack::MiniProfiler.create_current
-    end
+    before { Rack::MiniProfiler.create_current }
 
     it 'should not destroy a method' do
       Rack::MiniProfiler.profile_method TestClass, :foo
-      expect(TestClass.new.foo("a", "b") { "c" }).to eq(["a", "b", "c"])
+      expect(TestClass.new.foo('a', 'b') { 'c' }).to eq(%w[a b c])
       Rack::MiniProfiler.unprofile_method TestClass, :foo
     end
 
     it 'should not destroy a singleton method' do
       Rack::MiniProfiler.profile_singleton_method TestClass, :bar
-      expect(TestClass.bar("a", "b") { "c" }).to eq(["a", "b", "c"])
+      expect(TestClass.bar('a', 'b') { 'c' }).to eq(%w[a b c])
       Rack::MiniProfiler.unprofile_singleton_method TestClass, :bar
     end
-
   end
 
   describe 'step' do
-
     describe 'basic usage' do
       it 'yields the block given' do
         Rack::MiniProfiler.create_current
-        expect(Rack::MiniProfiler.step('test') { "mini profiler" }).to eq("mini profiler")
+        expect(Rack::MiniProfiler.step('test') { 'mini profiler' }).to eq(
+          'mini profiler'
+        )
       end
     end
 
@@ -94,13 +88,11 @@ describe Rack::MiniProfiler do
         Rack::MiniProfiler.create_current
         clock_set(start + 1)
 
-        Rack::MiniProfiler.step('outer') {
+        Rack::MiniProfiler.step('outer') do
           clock_set(start + 1 + 2)
-          Rack::MiniProfiler.step('inner') {
-            clock_set(start + 1 + 2 + 3)
-          }
+          Rack::MiniProfiler.step('inner') { clock_set(start + 1 + 2 + 3) }
           clock_set(start + 1 + 2 + 3 + 4)
-        }
+        end
 
         @page_struct = Rack::MiniProfiler.current.page_struct
         @root = @page_struct.root
@@ -110,9 +102,7 @@ describe Rack::MiniProfiler do
         @inner = @outer.children[0]
       end
 
-      after(:all) do
-        clock_back_to_normal
-      end
+      after(:all) { clock_back_to_normal }
 
       it 'measures total duration correctly' do
         expect(@page_struct.duration_ms).to be_within(0.1).of(10 * 1000)
@@ -138,36 +128,58 @@ describe Rack::MiniProfiler do
 
   describe '#ids' do
     let(:profiler) do
-      Rack::MiniProfiler.new(nil, base_url_path: "/test-resource",
-                                  storage: Rack::MiniProfiler::MemoryStore,
-                                  user_provider: Proc.new { |env| user_id },
-                            )
+      Rack::MiniProfiler.new(
+        nil,
+        base_url_path: '/test-resource',
+        storage: Rack::MiniProfiler::MemoryStore,
+        user_provider: Proc.new { |env| user_id }
+      )
     end
 
     let(:current) { Rack::MiniProfiler.create_current }
     let(:current_id) { current.page_struct[:id] }
-    let(:user_id) { "user1" }
+    let(:user_id) { 'user1' }
     let(:storage) { profiler.instance_variable_get(:@storage) } # not perfect but ...
-    before do
-      current
-    end
+    before { current }
 
-    it "returns current id" do
+    it 'returns current id' do
       expect(profiler.ids(user_id)).to eq([current_id])
     end
 
-    it "uses existing ids" do
+    it 'uses existing ids' do
       storage.set_unviewed(user_id, 1)
       storage.set_unviewed(user_id, 2)
 
       expect(profiler.ids(user_id)).to eq([current_id, 1, 2])
     end
 
-    it "caps at config.max_traces_to_show ids" do
+    it 'caps at config.max_traces_to_show ids' do
       25.times { |i| storage.set_unviewed(user_id, i + 1) }
 
-      expect(profiler.ids(user_id)).to eq([current_id, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                                           11, 12, 13, 14, 15, 16, 17, 18, 19])
+      expect(profiler.ids(user_id)).to eq(
+        [
+          current_id,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ]
+      )
     end
   end
 
@@ -175,14 +187,16 @@ describe Rack::MiniProfiler do
     it 'returns true only if both destination URL and auth key are set' do
       expect(Rack::MiniProfiler.snapshots_transporter?).to eq(false)
 
-      Rack::MiniProfiler.config.snapshots_transport_destination_url = 'http://example.com'
+      Rack::MiniProfiler.config.snapshots_transport_destination_url =
+        'http://example.com'
       expect(Rack::MiniProfiler.snapshots_transporter?).to eq(false)
 
       Rack::MiniProfiler.config.snapshots_transport_auth_key = 'somekeyhere'
       Rack::MiniProfiler.config.snapshots_transport_destination_url = nil
       expect(Rack::MiniProfiler.snapshots_transporter?).to eq(false)
 
-      Rack::MiniProfiler.config.snapshots_transport_destination_url = 'http://example.com'
+      Rack::MiniProfiler.config.snapshots_transport_destination_url =
+        'http://example.com'
       expect(Rack::MiniProfiler.snapshots_transporter?).to eq(true)
     end
   end

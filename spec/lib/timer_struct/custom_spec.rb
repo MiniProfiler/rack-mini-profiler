@@ -2,10 +2,11 @@
 
 describe Rack::MiniProfiler::TimerStruct::Custom do
   before do
-    @name    = 'cool request'
-    @page    = Rack::MiniProfiler::TimerStruct::Page.new({})
+    @name = 'cool request'
+    @page = Rack::MiniProfiler::TimerStruct::Page.new({})
     @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, @page)
-    @custom  = Rack::MiniProfiler::TimerStruct::Custom.new('a', 0.2, @page, @request)
+    @custom =
+      Rack::MiniProfiler::TimerStruct::Custom.new('a', 0.2, @page, @request)
   end
 
   it 'has an type' do
@@ -30,5 +31,4 @@ describe Rack::MiniProfiler::TimerStruct::Custom do
       expect(@deserialized['duration_milliseconds']).not_to be_nil
     end
   end
-
 end

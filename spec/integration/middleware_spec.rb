@@ -28,13 +28,21 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env|
+              [
+                200,
+                { 'Content-Type' => 'text/html' },
+                [+'<html><body><h1>Hi</h1></body></html>']
+              ]
+            }
       end
     end
     it 'advanced tools are disabled' do
-      %w{env analyze-memory profile-gc profile-memory}.each do |p|
+      %w[env analyze-memory profile-gc profile-memory].each do |p|
         do_get(pp: p)
-        expect(last_response.body).to eq(Rack::MiniProfiler.advanced_tools_message)
+        expect(last_response.body).to eq(
+          Rack::MiniProfiler.advanced_tools_message
+        )
       end
     end
   end
@@ -43,7 +51,13 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env|
+              [
+                200,
+                { 'Content-Type' => 'text/html' },
+                [+'<html><body><h1>Hi</h1></body></html>']
+              ]
+            }
       end
     end
 
@@ -59,7 +73,13 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::MiniProfiler
         use Rack::Deflater
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env|
+              [
+                200,
+                { 'Content-Type' => 'text/html' },
+                [+'<html><body><h1>Hi</h1></body></html>']
+              ]
+            }
       end
     end
 
@@ -68,7 +88,9 @@ describe Rack::MiniProfiler do
 
       it 'should inject script and *not* compress' do
         do_get
-        expect(last_response.body).to include('/mini-profiler-resources/includes.js')
+        expect(last_response.body).to include(
+          '/mini-profiler-resources/includes.js'
+        )
         expect(last_response.headers).not_to include('Content-Encoding')
       end
 
@@ -80,22 +102,28 @@ describe Rack::MiniProfiler do
 
       it 'should *not* inject script but should compress' do
         do_get
-        expect(decompressed_response).not_to include('/mini-profiler-resources/includes.js')
+        expect(decompressed_response).not_to include(
+          '/mini-profiler-resources/includes.js'
+        )
         expect(last_response.headers['Content-Encoding']).to eq('gzip')
       end
 
       include_examples 'should not affect a skipped requests'
     end
-
   end
 
   describe 'with Rack::Deflater before Rack::MiniProfiler' do
-
     def app
       Rack::Builder.new do
         use Rack::Deflater
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env|
+              [
+                200,
+                { 'Content-Type' => 'text/html' },
+                [+'<html><body><h1>Hi</h1></body></html>']
+              ]
+            }
       end
     end
 
@@ -104,7 +132,9 @@ describe Rack::MiniProfiler do
 
       it 'should inject script and compress' do
         do_get
-        expect(decompressed_response).to include('/mini-profiler-resources/includes.js')
+        expect(decompressed_response).to include(
+          '/mini-profiler-resources/includes.js'
+        )
         expect(last_response.headers['Content-Encoding']).to eq('gzip')
       end
 
@@ -116,12 +146,13 @@ describe Rack::MiniProfiler do
 
       it 'should inject script and compress' do
         do_get
-        expect(decompressed_response).to include('/mini-profiler-resources/includes.js')
+        expect(decompressed_response).to include(
+          '/mini-profiler-resources/includes.js'
+        )
         expect(last_response.headers['Content-Encoding']).to eq('gzip')
       end
 
       include_examples 'should not affect a skipped requests'
     end
   end
-
 end

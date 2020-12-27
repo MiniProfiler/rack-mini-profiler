@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples "snapshots storage" do |store|
+RSpec.shared_examples 'snapshots storage' do |store|
   describe '#should_take_snapshot?' do
     it 'returns true every N calls' do
       store.send(:wipe_snapshots_data)
@@ -33,7 +33,7 @@ RSpec.shared_examples "snapshots storage" do |store|
     end
   end
 
-  describe "#push_snapshot" do
+  describe '#push_snapshot' do
     it 'keeps the worst snapshots and respects the config limit' do
       store.send(:wipe_snapshots_data)
 
@@ -77,13 +77,17 @@ RSpec.shared_examples "snapshots storage" do |store|
     it 'respects the batch_size argument' do
       store.send(:wipe_snapshots_data)
 
-      snapshot_ids = 10.times.map do |n|
-        page = Rack::MiniProfiler::TimerStruct::Page.new({}).tap do |s|
-          s[:root].record_time(n)
-          store.push_snapshot(s, Rack::MiniProfiler::Config.default)
+      snapshot_ids =
+        10.times.map do |n|
+          page =
+            Rack::MiniProfiler::TimerStruct::Page
+              .new({})
+              .tap do |s|
+                s[:root].record_time(n)
+                store.push_snapshot(s, Rack::MiniProfiler::Config.default)
+              end
+          page[:id]
         end
-        page[:id]
-      end
 
       calls = 0
       store.fetch_snapshots(batch_size: 10) do |snapshots|
@@ -98,7 +102,9 @@ RSpec.shared_examples "snapshots storage" do |store|
         calls += 1
         fetched_snapshots.concat(snapshots)
       end
-      expect(fetched_snapshots.map { |s| s[:id] }).to contain_exactly(*snapshot_ids)
+      expect(fetched_snapshots.map { |s| s[:id] }).to contain_exactly(
+        *snapshot_ids
+      )
       expect(calls).to eq(2)
 
       calls = 0
@@ -107,7 +113,9 @@ RSpec.shared_examples "snapshots storage" do |store|
         calls += 1
         fetched_snapshots.concat(snapshots)
       end
-      expect(fetched_snapshots.map { |s| s[:id] }).to contain_exactly(*snapshot_ids)
+      expect(fetched_snapshots.map { |s| s[:id] }).to contain_exactly(
+        *snapshot_ids
+      )
       expect(calls).to eq(4)
     end
   end

@@ -16,17 +16,25 @@ module Rack
       end
 
       def log_with_miniprofiler(*args, &block)
-        return log_without_miniprofiler(*args, &block) unless SqlPatches.should_measure?
+        unless SqlPatches.should_measure?
+          return log_without_miniprofiler(*args, &block)
+        end
 
         sql, name, binds = args
-        start            = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        rval             = log_without_miniprofiler(*args, &block)
+        start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        rval = log_without_miniprofiler(*args, &block)
 
         # Don't log schema queries if the option is set
-        return rval if Rack::MiniProfiler.config.skip_schema_queries && name =~ (/SCHEMA/)
+        if Rack::MiniProfiler.config.skip_schema_queries && name =~ (/SCHEMA/)
+          return rval
+        end
 
         elapsed_time = SqlPatches.elapsed_time(start)
-        Rack::MiniProfiler.record_sql(sql, elapsed_time, Rack::MiniProfiler.binds_to_params(binds))
+        Rack::MiniProfiler.record_sql(
+          sql,
+          elapsed_time,
+          Rack::MiniProfiler.binds_to_params(binds)
+        )
         rval
       end
     end
@@ -38,7 +46,5 @@ module Rack
     end
   end
 
-  if defined?(::Rails)
-    insert_instrumentation
-  end
+  insert_instrumentation if defined?(::Rails)
 end

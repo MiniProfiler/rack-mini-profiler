@@ -2,19 +2,21 @@
 
 describe Rack::MiniProfiler::RedisStore do
   let(:store) { Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4) }
-  let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
-                        Rack::MiniProfiler::TimerStruct::Page.new({})] }
-
-  before do
-    store.send(:redis).flushdb
+  let(:page_structs) do
+    [
+      Rack::MiniProfiler::TimerStruct::Page.new({}),
+      Rack::MiniProfiler::TimerStruct::Page.new({})
+    ]
   end
 
+  before { store.send(:redis).flushdb }
+
   context 'establishing a connection to something other than the default' do
-    describe "connection" do
+    describe 'connection' do
       it 'can still store the resulting value' do
         page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
-        page_struct[:id] = "XYZ"
-        page_struct[:random] = "random"
+        page_struct[:id] = 'XYZ'
+        page_struct[:random] = 'random'
         store.save(page_struct)
       end
 
@@ -30,12 +32,12 @@ describe Rack::MiniProfiler::RedisStore do
   context 'passing in a Redis connection' do
     describe 'connection' do
       it 'uses the passed in object rather than creating a new one' do
-        connection = instance_double("redis-connection")
+        connection = instance_double('redis-connection')
         store = Rack::MiniProfiler::RedisStore.new(connection: connection)
 
         expect(connection).to receive(:get)
         expect(Redis).not_to receive(:new)
-        store.load("XYZ")
+        store.load('XYZ')
       end
     end
   end
@@ -43,14 +45,14 @@ describe Rack::MiniProfiler::RedisStore do
   context 'page struct' do
     describe 'storage' do
       it 'can store a PageStruct and retrieve it' do
-        page_structs.first[:id] = "XYZ"
-        page_structs.first[:random] = "random"
+        page_structs.first[:id] = 'XYZ'
+        page_structs.first[:random] = 'random'
         store.save(page_structs.first)
 
         page_struct = store.load(page_structs.first[:id])
 
-        expect(page_struct[:random]).to eq("random")
-        expect(page_struct[:id]).to eq("XYZ")
+        expect(page_struct[:random]).to eq('random')
+        expect(page_struct[:id]).to eq('XYZ')
       end
 
       it 'can list unviewed items for a user' do
@@ -59,16 +61,23 @@ describe Rack::MiniProfiler::RedisStore do
           store.set_unviewed('a', page_struct[:id])
         end
 
-        expect(store.get_unviewed_ids('a')).to match_array(page_structs.map { |page_struct| page_struct[:id] })
+        expect(store.get_unviewed_ids('a')).to match_array(
+          page_structs.map { |page_struct| page_struct[:id] }
+        )
       end
 
       it 'can set all unviewed items for a user' do
         page_structs.each { |page_struct| store.save(page_struct) }
         expect(store.get_unviewed_ids('a')).to be_empty
 
-        store.set_all_unviewed('a', page_structs.map { |page_struct| page_struct[:id] })
+        store.set_all_unviewed(
+          'a',
+          page_structs.map { |page_struct| page_struct[:id] }
+        )
 
-        expect(store.get_unviewed_ids('a')).to match_array(page_structs.map { |page_struct| page_struct[:id] })
+        expect(store.get_unviewed_ids('a')).to match_array(
+          page_structs.map { |page_struct| page_struct[:id] }
+        )
       end
 
       it 'can set an item to viewed once it is unviewed' do
@@ -78,7 +87,9 @@ describe Rack::MiniProfiler::RedisStore do
         end
 
         store.set_viewed('a', page_structs.first[:id])
-        expect(store.get_unviewed_ids('a')).to match_array(page_structs.drop(1).map { |page_struct| page_struct[:id] })
+        expect(store.get_unviewed_ids('a')).to match_array(
+          page_structs.drop(1).map { |page_struct| page_struct[:id] }
+        )
       end
     end
   end
@@ -122,33 +133,30 @@ describe Rack::MiniProfiler::RedisStore do
   end
 
   describe 'data resilience on upgrade' do
+    before { store.send(:redis).sadd('MPRedisStore-bob-v', 'test') }
 
-    before do
-      store.send(:redis).sadd("MPRedisStore-bob-v", "test")
+    it 'handles set_viewed' do
+      store.set_viewed('bob', 'x')
     end
 
-    it "handles set_viewed" do
-      store.set_viewed("bob", "x")
+    it 'handles get_unviewed_ids' do
+      store.get_unviewed_ids('bob')
     end
 
-    it "handles get_unviewed_ids" do
-      store.get_unviewed_ids("bob")
-    end
-
-    it "handles set_unviewed" do
+    it 'handles set_unviewed' do
       page_struct = Rack::MiniProfiler::TimerStruct::Page.new({})
-      page_struct[:id] = "XYZ"
+      page_struct[:id] = 'XYZ'
       store.save(page_struct)
 
-      store.set_unviewed("bob", "XYZ")
+      store.set_unviewed('bob', 'XYZ')
     end
-
   end
 
   describe 'diagnostics' do
-    it "returns useful info" do
+    it 'returns useful info' do
       res = store.diagnostics('a')
-      expected = "Redis prefix: MPRedisStore\nRedis location: 127.0.0.1:6379 db: 2\nunviewed_ids: []\n"
+      expected =
+        "Redis prefix: MPRedisStore\nRedis location: 127.0.0.1:6379 db: 2\nunviewed_ids: []\n"
       expect(res).to eq(expected)
     end
   end
@@ -182,11 +190,9 @@ describe Rack::MiniProfiler::RedisStore do
         pstruct3[:id],
         pstruct5[:id]
       )
-      expect(redis.zrange(store.send(:snapshot_zset_key), 0, -1)).to contain_exactly(
-        pstruct1[:id],
-        pstruct3[:id],
-        pstruct5[:id]
-      )
+      expect(
+        redis.zrange(store.send(:snapshot_zset_key), 0, -1)
+      ).to contain_exactly(pstruct1[:id], pstruct3[:id], pstruct5[:id])
     end
   end
 
@@ -205,15 +211,18 @@ describe Rack::MiniProfiler::RedisStore do
       store.push_snapshot(corrupt_page, Rack::MiniProfiler::Config.default)
 
       redis = store.send(:redis)
+
       # reach to redis and shuffle the data so it
       # becomes corrupted and snapshot fails to load
       redis.hset(
         store.send(:snapshot_hash_key),
         corrupt_page[:id],
-        redis.hget(
-          store.send(:snapshot_hash_key),
-          corrupt_page[:id]
-        ).b.split('').shuffle.join
+        redis
+          .hget(store.send(:snapshot_hash_key), corrupt_page[:id])
+          .b
+          .split('')
+          .shuffle
+          .join
       )
 
       calls = 0
@@ -226,7 +235,9 @@ describe Rack::MiniProfiler::RedisStore do
       expect(fetched_snapshots.size).to eq(1)
       expect(fetched_snapshots.first[:id]).to eq(page[:id])
       expect(redis.hkeys(store.send(:snapshot_hash_key))).to eq([page[:id]])
-      expect(redis.zrange(store.send(:snapshot_zset_key), 0, -1)).to eq([page[:id]])
+      expect(redis.zrange(store.send(:snapshot_zset_key), 0, -1)).to eq(
+        [page[:id]]
+      )
     end
   end
 
@@ -242,15 +253,18 @@ describe Rack::MiniProfiler::RedisStore do
       store.push_snapshot(corrupt_page, Rack::MiniProfiler::Config.default)
 
       redis = store.send(:redis)
+
       # reach to redis and shuffle the data so it
       # becomes corrupted and snapshot fails to load
       redis.hset(
         store.send(:snapshot_hash_key),
         corrupt_page[:id],
-        redis.hget(
-          store.send(:snapshot_hash_key),
-          corrupt_page[:id]
-        ).b.split('').shuffle.join
+        redis
+          .hget(store.send(:snapshot_hash_key), corrupt_page[:id])
+          .b
+          .split('')
+          .shuffle
+          .join
       )
 
       loaded = store.load_snapshot(corrupt_page[:id])
@@ -260,5 +274,6 @@ describe Rack::MiniProfiler::RedisStore do
     end
   end
 
-  include_examples "snapshots storage", Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4)
+  include_examples 'snapshots storage',
+                   Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4)
 end

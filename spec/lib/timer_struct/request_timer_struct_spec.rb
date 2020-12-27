@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 describe Rack::MiniProfiler::TimerStruct::Request do
-
   def new_page
     Rack::MiniProfiler::TimerStruct::Page.new({})
   end
@@ -12,7 +11,8 @@ describe Rack::MiniProfiler::TimerStruct::Request do
 
   before do
     @name = 'cool request'
-    @request = Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, new_page)
+    @request =
+      Rack::MiniProfiler::TimerStruct::Request.createRoot(@name, new_page)
   end
 
   it 'sets IsRoot to true' do
@@ -43,7 +43,7 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     expect(@request.depth).to eq(0)
   end
 
-  it "has start time" do
+  it 'has start time' do
     expect(@request.start).not_to be(0)
   end
 
@@ -60,10 +60,9 @@ describe Rack::MiniProfiler::TimerStruct::Request do
   end
 
   describe 'add SQL' do
-
     before do
       @page = new_page
-      @request.add_sql("SELECT 1 FROM users", 77, @page)
+      @request.add_sql('SELECT 1 FROM users', 77, @page)
     end
 
     it 'has a true HasSqlTimings attribute' do
@@ -85,24 +84,21 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     it "increases the page's " do
       expect(@page[:duration_milliseconds_in_sql]).to eq(77)
     end
-
   end
 
   describe 'add Custom' do
     before do
       @page = new_page
-      @request.add_custom("a", 77, @page)
+      @request.add_custom('a', 77, @page)
     end
-    it "will be added to custom timings" do
+    it 'will be added to custom timings' do
       expect(@request.custom_timings.size).to eq(1)
       expect(@request.custom_timings.first[0]).to eq('a')
     end
   end
 
   describe 'record time' do
-
     describe 'add children' do
-
       before do
         @child = @request.add_child('child')
         @child.record_time(1111)
@@ -138,11 +134,9 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       end
 
       describe 'record time on parent' do
-        before do
-          @request.record_time(1234)
-        end
+        before { @request.record_time(1234) }
 
-        it "is not a trivial query" do
+        it 'is not a trivial query' do
           expect(@request[:is_trivial]).to be(false)
         end
 
@@ -153,7 +147,6 @@ describe Rack::MiniProfiler::TimerStruct::Request do
         it 'calculates DurationWithoutChildrenMilliseconds without the children timings' do
           expect(@request[:duration_without_children_milliseconds]).to eq(123)
         end
-
       end
     end
   end
@@ -295,7 +288,9 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       expect(@origin[:custom_timings]).to eq({})
       expect(@origin[:custom_timing_stats]).to eq({})
       expect(@destination[:custom_timings]).to eq('tests' => [@custom])
-      expect(@destination[:custom_timing_stats]).to eq('tests' => { count: 1, duration: 30 })
+      expect(@destination[:custom_timing_stats]).to eq(
+        'tests' => { count: 1, duration: 30 }
+      )
     end
   end
 
@@ -310,9 +305,13 @@ describe Rack::MiniProfiler::TimerStruct::Request do
 
     it 'updates custom_timings and custom_timing_stats attributes' do
       expect(@origin[:custom_timings]).to eq('tests' => [@custom_2])
-      expect(@origin[:custom_timing_stats]).to eq('tests' => { count: 1, duration: 50 })
+      expect(@origin[:custom_timing_stats]).to eq(
+        'tests' => { count: 1, duration: 50 }
+      )
       expect(@destination[:custom_timings]).to eq('tests' => [@custom])
-      expect(@destination[:custom_timing_stats]).to eq('tests' => { count: 1, duration: 30 })
+      expect(@destination[:custom_timing_stats]).to eq(
+        'tests' => { count: 1, duration: 30 }
+      )
     end
   end
 
@@ -328,8 +327,12 @@ describe Rack::MiniProfiler::TimerStruct::Request do
     it 'updates custom_timings and custom_timing_stats attributes' do
       expect(@origin[:custom_timings]).to eq({})
       expect(@origin[:custom_timing_stats]).to eq({})
-      expect(@destination[:custom_timings]).to eq('tests' => [@custom_2, @custom])
-      expect(@destination[:custom_timing_stats]).to eq('tests' => { count: 2, duration: 80 })
+      expect(@destination[:custom_timings]).to eq(
+        'tests' => [@custom_2, @custom]
+      )
+      expect(@destination[:custom_timing_stats]).to eq(
+        'tests' => { count: 2, duration: 80 }
+      )
     end
   end
 
@@ -347,7 +350,9 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       it 'corrects the depth of the moved node and all its children' do
         expect(@level_2[:depth]).to eq(@level_1[:depth] + 1)
         expect(@moved[:depth]).to eq(@level_2[:depth] + 1)
-        @moved.children.each { |child| expect(child[:depth]).to eq(@moved[:depth] + 1) }
+        @moved.children.each do |child|
+          expect(child[:depth]).to eq(@moved[:depth] + 1)
+        end
       end
     end
   end

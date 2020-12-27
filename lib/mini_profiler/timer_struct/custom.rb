@@ -8,10 +8,14 @@ module Rack
       class Custom < TimerStruct::Base
         attr_accessor :parent
         def initialize(type, duration_ms, page, parent)
-          @parent      = parent
-          @page        = page
-          @type        = type
-          start_millis = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]) - duration_ms
+          @parent = parent
+          @page = page
+          @type = type
+          start_millis =
+            (
+              (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i -
+                page[:started]
+            ) - duration_ms
           super(
             type: type,
             start_milliseconds: start_millis,

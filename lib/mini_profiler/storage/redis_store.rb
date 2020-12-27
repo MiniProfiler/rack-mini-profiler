@@ -5,28 +5,29 @@ require 'digest'
 module Rack
   class MiniProfiler
     class RedisStore < AbstractStore
-
       attr_reader :prefix
 
       EXPIRES_IN_SECONDS = 60 * 60 * 24
 
       def initialize(args = nil)
-        @args               = args || {}
-        @prefix             = @args.delete(:prefix) || 'MPRedisStore'
-        @redis_connection   = @args.delete(:connection)
+        @args = args || {}
+        @prefix = @args.delete(:prefix) || 'MPRedisStore'
+        @redis_connection = @args.delete(:connection)
         @expires_in_seconds = @args.delete(:expires_in) || EXPIRES_IN_SECONDS
       end
 
       def save(page_struct)
-        redis.setex prefixed_id(page_struct[:id]), @expires_in_seconds, Marshal::dump(page_struct)
+        redis.setex prefixed_id(page_struct[:id]),
+                    @expires_in_seconds,
+                    Marshal.dump(page_struct)
       end
 
       def load(id)
         key = prefixed_id(id)
         raw = redis.get key
         begin
-          Marshal::load(raw) if raw
-        rescue
+          Marshal.load(raw) if raw
+        rescue StandardError
           # bad format, junk old data
           redis.del key
           nil
@@ -36,7 +37,9 @@ module Rack
       def set_unviewed(user, id)
         key = user_key(user)
         if redis.call([:exists, prefixed_id(id)]) == 1
-          expire_at = Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i + redis.ttl(prefixed_id(id))
+          expire_at =
+            Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i +
+              redis.ttl(prefixed_id(id))
           redis.zadd(key, expire_at, id)
         end
         redis.expire(key, @expires_in_seconds)
@@ -47,7 +50,9 @@ module Rack
         redis.del(key)
         ids.each do |id|
           if redis.call([:exists, prefixed_id(id)]) == 1
-            expire_at = Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i + redis.ttl(prefixed_id(id))
+            expire_at =
+              Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i +
+                redis.ttl(prefixed_id(id))
             redis.zadd(key, expire_at, id)
           end
         end
@@ -61,13 +66,17 @@ module Rack
       # Remove expired ids from the unviewed sorted set and return the remaining ids
       def get_unviewed_ids(user)
         key = user_key(user)
-        redis.zremrangebyscore(key, '-inf', Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i)
+        redis.zremrangebyscore(
+          key,
+          '-inf',
+          Process.clock_gettime(Process::CLOCK_MONOTONIC).to_i
+        )
         redis.zrevrangebyscore(key, '+inf', '-inf')
       end
 
       def diagnostics(user)
         client = (redis.respond_to? :_client) ? redis._client : redis.client
-"Redis prefix: #{@prefix}
+        "Redis prefix: #{@prefix}
 Redis location: #{client.host}:#{client.port} db: #{client.db}
 unviewed_ids: #{get_unviewed_ids(user)}
 "
@@ -83,11 +92,14 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       def allowed_tokens
-        key1, key1_old, key2 = redis.mget("#{@prefix}-key1", "#{@prefix}-key1_old", "#{@prefix}-key2")
+        key1, key1_old, key2 =
+          redis.mget(
+            "#{@prefix}-key1",
+            "#{@prefix}-key1_old",
+            "#{@prefix}-key2"
+          )
 
-        if key1 && (key1.length == 32)
-          return [key1, key2].compact
-        end
+        return [key1, key2].compact if key1 && (key1.length == 32)
 
         timeout = Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE
 
@@ -122,18 +134,19 @@ unviewed_ids: #{get_unviewed_ids(user)}
       COUNTER_LUA_SHA = Digest::SHA1.hexdigest(COUNTER_LUA)
 
       def should_take_snapshot?(period)
-        1 == cached_redis_eval(
-          COUNTER_LUA,
-          COUNTER_LUA_SHA,
-          reraise: false,
-          keys: [snapshot_counter_key()],
-          argv: [period]
-        )
+        1 ==
+          cached_redis_eval(
+            COUNTER_LUA,
+            COUNTER_LUA_SHA,
+            reraise: false,
+            keys: [snapshot_counter_key],
+            argv: [period]
+          )
       end
 
       def push_snapshot(page_struct, config)
-        zset_key = snapshot_zset_key()
-        hash_key = snapshot_hash_key()
+        zset_key = snapshot_zset_key
+        hash_key = snapshot_hash_key
 
         id = page_struct[:id]
         score = page_struct.duration_ms
@@ -163,22 +176,23 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       def fetch_snapshots(batch_size: 200, &blk)
-        zset_key = snapshot_zset_key()
-        hash_key = snapshot_hash_key()
+        zset_key = snapshot_zset_key
+        hash_key = snapshot_hash_key
         iteration = 0
         corrupt_snapshots = []
         while true
-          ids = redis.zrange(
-            zset_key,
-            batch_size * iteration,
-            batch_size * iteration + batch_size - 1
-          )
+          ids =
+            redis.zrange(
+              zset_key,
+              batch_size * iteration,
+              batch_size * iteration + batch_size - 1
+            )
           break if ids.size == 0
           batch = redis.mapped_hmget(hash_key, *ids).to_a
           batch.map! do |id, bytes|
             begin
               Marshal.load(bytes)
-            rescue
+            rescue StandardError
               corrupt_snapshots << id
               nil
             end
@@ -197,13 +211,13 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       def load_snapshot(id)
-        hash_key = snapshot_hash_key()
+        hash_key = snapshot_hash_key
         bytes = redis.hget(hash_key, id)
         begin
           Marshal.load(bytes)
-        rescue
+        rescue StandardError
           redis.pipelined do
-            redis.zrem(snapshot_zset_key(), id)
+            redis.zrem(snapshot_zset_key, id)
             redis.hdel(hash_key, id)
           end
           nil
@@ -221,10 +235,11 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       def redis
-        @redis_connection ||= begin
-          require 'redis' unless defined? Redis
-          Redis.new(@args)
-        end
+        @redis_connection ||=
+          begin
+            require 'redis' unless defined?(Redis)
+            Redis.new(@args)
+          end
       end
 
       def snapshot_counter_key
@@ -239,7 +254,13 @@ unviewed_ids: #{get_unviewed_ids(user)}
         @snapshot_hash_key ||= "#{@prefix}-mini-profiler-snapshots-hash"
       end
 
-      def cached_redis_eval(script, script_sha, reraise: true, argv: [], keys: [])
+      def cached_redis_eval(
+        script,
+        script_sha,
+        reraise: true,
+        argv: [],
+        keys: []
+      )
         begin
           redis.evalsha(script_sha, argv: argv, keys: keys)
         rescue ::Redis::CommandError => e
@@ -254,9 +275,9 @@ unviewed_ids: #{get_unviewed_ids(user)}
       # only used in tests
       def wipe_snapshots_data
         redis.pipelined do
-          redis.del(snapshot_counter_key())
-          redis.del(snapshot_zset_key())
-          redis.del(snapshot_hash_key())
+          redis.del(snapshot_counter_key)
+          redis.del(snapshot_zset_key)
+          redis.del(snapshot_hash_key)
         end
       end
     end
