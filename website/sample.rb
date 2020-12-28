@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'stackprof'
 require 'rack-mini-profiler'
 require 'sinatra'
 require 'sinatra/base'
@@ -88,6 +89,10 @@ end
 
 class Sample < Sinatra::Base
   use Rack::MiniProfiler
+  def fib(n)
+    return 1 if n <= 2
+    fib(n - 1) + fib(n - 2)
+  end
 
   get '/' do
     help = <<~TEXT
@@ -109,5 +114,10 @@ class Sample < Sinatra::Base
         </body>
       </html>
     HTML
+  end
+
+  get '/test_flamegraph' do
+    5.times { |n| fib(31 + n); sleep 0.1 }
+    +"This page is for testing flamegraphs. Append `?pp=flamegraph` to see a flamegraph for this page."
   end
 end

@@ -41,7 +41,6 @@ You can also include optional libraries to enable additional features.
 gem 'memory_profiler'
 
 # For call-stack profiling flamegraphs
-gem 'flamegraph'
 gem 'stackprof'
 ```
 
@@ -159,7 +158,7 @@ export RACK_MINI_PROFILER_PATCH="false"
 
 To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler):
 
-* add the [**flamegraph**](https://github.com/SamSaffron/flamegraph) gem to your Gemfile
+* add the [**stackprof**](https://rubygems.org/gems/stackprof) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
 ### Memory Profiling
