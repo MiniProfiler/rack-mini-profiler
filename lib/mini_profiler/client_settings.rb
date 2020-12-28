@@ -94,8 +94,8 @@ module Rack
           begin
             @allowed_tokens ||= @store.allowed_tokens
           rescue => e
-            if @config.storage_failure != nil
-              @config.storage_failure.call(e)
+            if MiniProfiler.config.storage_failure != nil
+              MiniProfiler.config.storage_failure.call(e)
             end
           end
 
