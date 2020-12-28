@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.3.0 - 2020-12-29
+
+- [FEATURE] flamegraphs are now based off speedscope
+
 ## 2.2.1 - 2020-12-23
 
 - [FIX] Turbolinks integration causing increasing number of GET requests
