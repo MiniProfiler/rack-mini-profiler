@@ -186,28 +186,28 @@ task :speedscope_upgrade do
       end
     end
     puts "Download completed."
-		kept_files = File.read(File.join(speedscope_dir, '.kept-files')).split("\n").reject { |n| n.strip.start_with?('//') }
+    kept_files = File.read(File.join(speedscope_dir, '.kept-files')).split("\n").reject { |n| n.strip.start_with?('//') }
     puts "Deleting existing speedscope files..."
-		Dir.foreach(speedscope_dir) do |name|
-			next if name == '.' || name == '..'
-			next if kept_files.include?(name)
-			full_path = File.join(speedscope_dir, name)
+    Dir.foreach(speedscope_dir) do |name|
+      next if name == '.' || name == '..'
+      next if kept_files.include?(name)
+      full_path = File.join(speedscope_dir, name)
       File.delete(full_path)
       msg = "Deleted #{full_path}"
       puts msg.rjust(msg.size + 4, ' ')
-		end
+    end
     puts "Extracting zip files..."
-		Zip::File.open(temp_zip_file) do |zip_file|
-			zip_file.each do |entry|
-				next if !entry.name.start_with?('speedscope/')
-				next if entry.name =~ /perf-vertx-stacks/
-				next if entry.name =~ /README/
-				dest_path = File.join(File.dirname(speedscope_dir), entry.name)
-				entry.extract(dest_path)
-				msg = "Extracted #{entry.name} to #{dest_path}"
+    Zip::File.open(temp_zip_file) do |zip_file|
+      zip_file.each do |entry|
+        next if !entry.name.start_with?('speedscope/')
+        next if entry.name =~ /perf-vertx-stacks/
+        next if entry.name =~ /README/
+        dest_path = File.join(File.dirname(speedscope_dir), entry.name)
+        entry.extract(dest_path)
+        msg = "Extracted #{entry.name} to #{dest_path}"
         puts msg.rjust(msg.size + 4, ' ')
-			end
-		end
+      end
+    end
     new_version = File.read(File.join(speedscope_dir, 'release.txt')).split("\n")[0].split("@")[-1]
     if new_version != latest_version
       puts "ERROR: Something went wrong. Expected the zip file to contain release #{latest_version.inspect}, "\
