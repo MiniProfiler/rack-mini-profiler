@@ -150,7 +150,7 @@ task :speedscope_upgrade do
     exit
   end
   puts "Current version is #{current_version.inspect} and latest version is: #{latest_version.inspect}"
-  asset = latest_release_info['assets'].find { |asset| asset['content_type'] == 'application/zip' }
+  asset = latest_release_info['assets'].find { |ast| ast['content_type'] == 'application/zip' }
   asset_id = asset && asset['id']
   if !asset_id
     puts "ERROR: Couldn't find any zip files in the #{latest_version.inspect} release. "\
