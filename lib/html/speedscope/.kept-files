@@ -1,0 +1,6 @@
+// the speedscope_upgrade rake task upgrades the speedscope files
+// in this directory. This file marks which files in this directory
+// that should not be deleted by an upgrade.
+fonts
+README.md
+.kept-files

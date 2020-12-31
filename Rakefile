@@ -122,3 +122,102 @@ task :client_dev do
 rescue Interrupt
   listener.stop
 end
+
+desc "Upgrade Speedscope to the latest version"
+task :speedscope_upgrade do
+  require 'net/http'
+  require 'json'
+  require 'tmpdir'
+  require 'zip'
+
+  puts "Checking GitHub for the latest version..."
+  releases_uri = URI('https://api.github.com/repos/jlfwong/speedscope/releases/latest')
+  req = Net::HTTP::Get.new(releases_uri, { 'Accept' => 'application/vnd.github.v3+json' })
+  http = Net::HTTP.new(releases_uri.hostname, releases_uri.port)
+  http.use_ssl = true
+  res = http.request(req)
+  if res.code.to_i != 200
+    puts "ERROR: GitHub responded with an unexpected status code: #{res.code.to_i}."
+    exit
+  end
+  latest_release_info = JSON.parse(res.body)
+  latest_version = latest_release_info['name'].sub('v', '')
+
+  speedscope_dir = File.expand_path('./lib/html/speedscope', __dir__)
+  current_version = File.read(File.join(speedscope_dir, 'release.txt')).split("\n")[0].split("@")[-1]
+  if latest_version == current_version
+    puts "Speedscope is already on the latest version (#{current_version.inspect})."
+    exit
+  end
+  puts "Current version is #{current_version.inspect} and latest version is: #{latest_version.inspect}"
+  asset = latest_release_info['assets'].find { |asset| asset['content_type'] == 'application/zip' }
+  asset_id = asset && asset['id']
+  if !asset_id
+    puts "ERROR: Couldn't find any zip files in the #{latest_version.inspect} release. "\
+         "Maybe the maintainer forgot to add one or the content type has changed. "\
+         "Please the check the releases page of the repository and/or contact the maintainer."
+    exit
+  end
+  Dir.mktmpdir do |temp_dir|
+    puts "Downloading zip file of latest release to #{temp_dir}..."
+    download_uri = URI("https://api.github.com/repos/jlfwong/speedscope/releases/assets/#{asset_id}")
+    req = Net::HTTP::Get.new(download_uri, { 'Accept' => 'application/octet-stream' })
+    http = Net::HTTP.new(download_uri.hostname, download_uri.port)
+    http.use_ssl = true
+    res = http.request(req)
+    if res.code.to_i != 302
+      puts "ERROR: Expected a 302 status code from GitHub download URL but instead got #{res.code.inspect}."
+      exit
+    end
+    aws_uri = URI(res['Location'])
+    http = Net::HTTP.new(aws_uri.host, aws_uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Get.new(aws_uri)
+    temp_zip_file = File.join(temp_dir, "speedscope-v#{latest_version}.zip")
+    http.request(request) do |response|
+      if response.code.to_i != 200
+        puts "ERROR: Expected a 200 status code from download URL but instead got #{res.code.inspect}."
+        exit
+      end
+      open(temp_zip_file, 'w') do |io|
+        response.read_body do |chunk|
+          io.write(chunk)
+        end
+      end
+    end
+    puts "Download completed."
+		kept_files = File.read(File.join(speedscope_dir, '.kept-files')).split("\n").reject { |n| n.strip.start_with?('//') }
+    puts "Deleting existing speedscope files..."
+		Dir.foreach(speedscope_dir) do |name|
+			next if name == '.' || name == '..'
+			next if kept_files.include?(name)
+			full_path = File.join(speedscope_dir, name)
+      File.delete(full_path)
+      msg = "Deleted #{full_path}"
+      puts msg.rjust(msg.size + 4, ' ')
+		end
+    puts "Extracting zip files..."
+		Zip::File.open(temp_zip_file) do |zip_file|
+			zip_file.each do |entry|
+				next if !entry.name.start_with?('speedscope/')
+				next if entry.name =~ /perf-vertx-stacks/
+				next if entry.name =~ /README/
+				dest_path = File.join(File.dirname(speedscope_dir), entry.name)
+				entry.extract(dest_path)
+				msg = "Extracted #{entry.name} to #{dest_path}"
+        puts msg.rjust(msg.size + 4, ' ')
+			end
+		end
+    new_version = File.read(File.join(speedscope_dir, 'release.txt')).split("\n")[0].split("@")[-1]
+    if new_version != latest_version
+      puts "ERROR: Something went wrong. Expected the zip file to contain release #{latest_version.inspect}, "\
+           "but instead it contained #{new_version.inspect}. You'll need to investigate what went wrong."
+      exit
+    end
+    puts "Replacing Google Fonts stylesheet URL with the URL of the local copy in index.html..."
+    index_html_content = File.read(File.join(speedscope_dir, 'index.html'))
+    index_html_content.sub!('https://fonts.googleapis.com/css?family=Source+Code+Pro', 'fonts/source-code-pro-regular.css')
+    File.write(File.join(speedscope_dir, 'index.html'), index_html_content)
+    puts "All done!"
+  end
+end
