@@ -55,6 +55,10 @@ describe Rack::MiniProfiler do
         [bar, baz, yield]
       end
 
+      def kwargs_test(a, b, c = 1, d: 4)
+        { a: a, b: b, c: c, d: d }
+      end
+
       def self.bar(baz, boo)
         [baz, boo, yield]
       end
@@ -76,6 +80,10 @@ describe Rack::MiniProfiler do
       Rack::MiniProfiler.unprofile_singleton_method TestClass, :bar
     end
 
+    it 'optional positional args and keyword args should not conflict' do
+      Rack::MiniProfiler.profile_method(TestClass, :kwargs_test)
+      expect(TestClass.new.kwargs_test(10, 20, d: 90)).to eq({ a: 10, b: 20, c: 1, d: 90 })
+    end
   end
 
   describe 'step' do
