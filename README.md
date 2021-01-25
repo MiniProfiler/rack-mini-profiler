@@ -78,6 +78,16 @@ gem 'rack-mini-profiler', require: ['prepend_net_http_patch']
 
 This conflict happens when a ruby method is patched twice, once using module prepend, and once using method aliasing. See this [ruby issue](https://bugs.ruby-lang.org/issues/11120) for details. The fix is to apply all patches the same way. Mini Profiler by default will apply its patch using method aliasing, but you can change that to module prepend by adding `require: ['prepend_net_http_patch']` to the gem line as shown above.
 
+#### `peek-mysql2` stack level too deep errors
+
+If you use peek-mysql2 with Rails >= 5, you'll need to use this gem spec in your Gemfile:
+
+```ruby
+gem 'rack-mini-profiler', require: ['prepend_mysql2_patch', 'rack-mini-profiler']
+```
+
+This should not be necessary with Rails < 5 because peek-mysql2 hooks into mysql2 gem in different ways depending on your Rails version.
+
 #### Rails and manual initialization
 
 In case you need to make sure rack_mini_profiler is initialized after all other gems, or you want to execute some code before rack_mini_profiler required:
