@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.3.1 - 2021-01-29
+
+- [FIX] compatability with Ruby 3.0
+- [FIX] compatability with peek-mysql2
+
 ## 2.3.0 - 2020-12-29
 
 - [FEATURE] flamegraphs are now based off speedscope
