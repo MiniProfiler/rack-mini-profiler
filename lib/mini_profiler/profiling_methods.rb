@@ -115,6 +115,9 @@ module Rack
             end
           end
         end
+        if klass.respond_to?(:ruby2_keywords, true)
+          klass.send(:ruby2_keywords, with_profiling)
+        end
         klass.send :alias_method, method, with_profiling
       end
 
@@ -154,7 +157,6 @@ module Rack
       def clean_method_name(method)
         method.to_s.gsub(/[\?\!]/, "")
       end
-
     end
   end
 end
