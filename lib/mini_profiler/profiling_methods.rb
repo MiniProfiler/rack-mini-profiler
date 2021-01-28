@@ -81,77 +81,42 @@ module Rack
         end
 
         klass.send :alias_method, without_profiling, method
-        # TODO: Remove when rubies < 2.7 are no longer supported
-        if ruby_2_7_or_higher?
-          klass.send :define_method, with_profiling do |*args, **kwargs, &orig|
-            return self.send without_profiling, *args, **kwargs, &orig unless Rack::MiniProfiler.current
+        klass.send :define_method, with_profiling do |*args, &orig|
+          return self.send without_profiling, *args, &orig unless Rack::MiniProfiler.current
 
-            name = default_name
-            if blk
-              name =
-                if respond_to?(:instance_exec)
-                  instance_exec(*args, **kwargs, &blk)
-                else
-                  # deprecated in Rails 4.x
-                  blk.bind(self).call(*args, **kwargs)
-                end
+          name = default_name
+          if blk
+            name =
+              if respond_to?(:instance_exec)
+                instance_exec(*args, &blk)
+              else
+                # deprecated in Rails 4.x
+                blk.bind(self).call(*args)
+              end
+          end
+
+          parent_timer = Rack::MiniProfiler.current.current_timer
+
+          if type == :counter
+            start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            begin
+              self.send without_profiling, *args, &orig
+            ensure
+              duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
+              parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct)
             end
-
-            parent_timer = Rack::MiniProfiler.current.current_timer
-
-            if type == :counter
-              start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-              begin
-                self.send without_profiling, *args, **kwargs, &orig
-              ensure
-                duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
-                parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct)
-              end
-            else
-              Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
-              begin
-                self.send without_profiling, *args, **kwargs, &orig
-              ensure
-                current_timer.record_time
-                Rack::MiniProfiler.current.current_timer = parent_timer
-              end
+          else
+            Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
+            begin
+              self.send without_profiling, *args, &orig
+            ensure
+              current_timer.record_time
+              Rack::MiniProfiler.current.current_timer = parent_timer
             end
           end
-        else
-          klass.send :define_method, with_profiling do |*args, &orig|
-            return self.send without_profiling, *args, &orig unless Rack::MiniProfiler.current
-
-            name = default_name
-            if blk
-              name =
-                if respond_to?(:instance_exec)
-                  instance_exec(*args, &blk)
-                else
-                  # deprecated in Rails 4.x
-                  blk.bind(self).call(*args)
-                end
-            end
-
-            parent_timer = Rack::MiniProfiler.current.current_timer
-
-            if type == :counter
-              start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-              begin
-                self.send without_profiling, *args, &orig
-              ensure
-                duration_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start).to_f * 1000
-                parent_timer.add_custom(name, duration_ms, Rack::MiniProfiler.current.page_struct)
-              end
-            else
-              Rack::MiniProfiler.current.current_timer = current_timer = parent_timer.add_child(name)
-              begin
-                self.send without_profiling, *args, &orig
-              ensure
-                current_timer.record_time
-                Rack::MiniProfiler.current.current_timer = parent_timer
-              end
-            end
-          end
+        end
+        if klass.respond_to?(:ruby2_keywords, true)
+          klass.send(:ruby2_keywords, with_profiling)
         end
         klass.send :alias_method, method, with_profiling
       end
@@ -191,10 +156,6 @@ module Rack
 
       def clean_method_name(method)
         method.to_s.gsub(/[\?\!]/, "")
-      end
-
-      def ruby_2_7_or_higher?
-        @ruby_2_7_or_higher ||= Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
       end
     end
   end

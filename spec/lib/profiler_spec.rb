@@ -81,8 +81,12 @@ describe Rack::MiniProfiler do
     end
 
     it 'optional positional args and keyword args should not conflict' do
-      Rack::MiniProfiler.profile_method(TestClass, :kwargs_test)
+      block_args = nil
+      Rack::MiniProfiler.profile_method(TestClass, :kwargs_test) do |a, b, c = 1, d: 4|
+        block_args = { a: a, b: b, c: c, d: d }
+      end
       expect(TestClass.new.kwargs_test(10, 20, d: 90)).to eq({ a: 10, b: 20, c: 1, d: 90 })
+      expect(block_args).to eq({ a: 10, b: 20, c: 1, d: 90 })
     end
   end
 
