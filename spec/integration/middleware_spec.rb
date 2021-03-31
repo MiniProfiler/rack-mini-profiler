@@ -39,7 +39,7 @@ describe Rack::MiniProfiler do
     end
   end
 
-  describe 'with analyze-memory query' do
+  describe 'when enable_advanced_debugging_tools is true' do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
@@ -47,10 +47,32 @@ describe Rack::MiniProfiler do
       end
     end
 
-    it 'should return ObjectSpace statistics if advanced tools are enabled' do
-      Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
-      do_get(pp: 'analyze-memory')
-      expect(last_response.body).to include('Largest strings:')
+    before(:each) { Rack::MiniProfiler.config.enable_advanced_debugging_tools = true }
+
+    describe 'with analyze-memory query' do
+      it 'should return ObjectSpace statistics' do
+        do_get(pp: 'analyze-memory')
+        expect(last_response.body).to include('Largest strings:')
+      end
+    end
+
+    describe 'with profile-memory query' do
+      it 'should return memory_profiler error message' do
+        do_get(pp: 'profile-memory')
+        expect(last_response.body).to eq(
+          'Please install the memory_profiler gem and require it: add gem \'memory_profiler\' to your Gemfile'
+        )
+      end
+    end
+
+    describe 'with flamegraph query' do
+      it 'should return stackprof error message' do
+        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+        do_get(pp: 'flamegraph')
+        expect(last_response.body).to eq(
+          'Please install the stackprof gem and require it: add gem \'stackprof\' to your Gemfile'
+        )
+      end
     end
   end
 
