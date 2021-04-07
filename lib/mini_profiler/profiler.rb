@@ -281,6 +281,15 @@ module Rack
       # profile memory
       if query_string =~ /pp=profile-memory/
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
+
+        unless defined?(MemoryProfiler) && MemoryProfiler.respond_to?(:report)
+          message = "Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"
+          _, _, body = @app.call(env)
+          body.close if body.respond_to? :close
+
+          return client_settings.handle_cookie(text_result(message))
+        end
+
         query_params = Rack::Utils.parse_nested_query(query_string)
         options = {
           ignore_files: query_params['memory_profiler_ignore_files'],
