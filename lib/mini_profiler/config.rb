@@ -86,6 +86,20 @@ module Rack
 
       attr_reader :assets_url
 
+      def authorization_mode=(mode)
+        if mode == :whitelist
+          warn "[DEPRECATION] `:whitelist` authorization mode is deprecated. Please use `:allow_authorized` instead."
+
+          mode = :allow_authorized
+        end
+
+        warn <<~DEP unless mode == :allow_authorized || mode == :allow_all
+          [DEPRECATION] unknown authorization mode #{mode}. Expected `:allow_all` or `:allow_authorized`.
+        DEP
+
+        @authorization_mode = mode
+      end
+
       def assets_url=(lmbda)
         if defined?(Rack::MiniProfilerRails)
           Rack::MiniProfilerRails.create_engine

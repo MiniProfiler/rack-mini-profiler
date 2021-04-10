@@ -235,21 +235,21 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
 
 Note:
 
-Out-of-the-box we will initialize the `authorization_mode` to `:whitelist` in production. However, in some cases we may not be able to do it:
+Out-of-the-box we will initialize the `authorization_mode` to `:allow_authorized` in production. However, in some cases we may not be able to do it:
 
-- If you are running in development or test we will not enable whitelist mode
+- If you are running in development or test we will not enable the explicit authorization mode
 - If you use `require: false` on rack_mini_profiler we are unlikely to be able to run the railtie
 - If you are running outside of rails we will not run the railtie
 
 In those cases use:
 
 ```ruby
-Rack::MiniProfiler.config.authorization_mode = :whitelist
+Rack::MiniProfiler.config.authorization_mode = :allow_authorized
 ```
 
 When deciding to fully profile a page mini profiler consults with the `authorization_mode`
 
-By default in production we attempt to set the authorization mode to `:whitelist` meaning that end user will only be able to see requests where somewhere `Rack::MiniProfiler.authorize_request` is invoked.
+By default in production we attempt to set the authorization mode to `:allow_authorized` meaning that end user will only be able to see requests where somewhere `Rack::MiniProfiler.authorize_request` is invoked.
 
 In development we run in the `:allow_all` authorization mode meaning every request is profiled and displayed to the end user.
 

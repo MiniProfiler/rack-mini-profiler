@@ -42,7 +42,7 @@ module Rack
       def handle_cookie(result)
         status, headers, _body = result
 
-        if (MiniProfiler.config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
+        if (MiniProfiler.config.authorization_mode == :allow_authorized && !MiniProfiler.request_authorized?)
           # this is non-obvious, don't kill the profiling cookie on errors or short requests
           # this ensures that stuff that never reaches the rails stack does not kill profiling
           if status.to_i >= 200 && status.to_i < 300 && ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start) > 0.1)
@@ -59,7 +59,7 @@ module Rack
 
         tokens_changed = false
 
-        if MiniProfiler.request_authorized? && MiniProfiler.config.authorization_mode == :whitelist
+        if MiniProfiler.request_authorized? && MiniProfiler.config.authorization_mode == :allow_authorized
           @allowed_tokens ||= @store.allowed_tokens
           tokens_changed = !@orig_auth_tokens || ((@allowed_tokens - @orig_auth_tokens).length > 0)
         end
@@ -90,7 +90,7 @@ module Rack
       def has_valid_cookie?
         valid_cookie = !@cookie.nil?
 
-        if (MiniProfiler.config.authorization_mode == :whitelist) && valid_cookie
+        if (MiniProfiler.config.authorization_mode == :allow_authorized) && valid_cookie
           begin
             @allowed_tokens ||= @store.allowed_tokens
           rescue => e
