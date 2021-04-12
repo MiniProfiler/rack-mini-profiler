@@ -30,7 +30,7 @@ describe Rack::MiniProfiler do
       map '/html' do
         run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
       end
-      map '/whitelisted-html' do
+      map '/explicitly-allowed-html' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
           [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
@@ -54,7 +54,7 @@ describe Rack::MiniProfiler do
           [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi</h1>']
         }
       end
-      map '/whitelisted' do
+      map '/explicitly-allowed' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
           [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>']
@@ -303,17 +303,17 @@ describe Rack::MiniProfiler do
         expect(last_response.body).to include('/mini-profiler-resources/includes.js')
       end
 
-      it "does not re-enable functionality if not whitelisted" do
-        Rack::MiniProfiler.config.authorization_mode = :whitelist
+      it "does not re-enable functionality if not explicitly allowed" do
+        Rack::MiniProfiler.config.authorization_mode = :allow_authorized
         get '/html?pp=enable'
         get '/html?pp=enable'
         expect(last_response.body).not_to include('/mini-profiler-resources/includes.js')
       end
 
-      it "re-enabled functionality if whitelisted" do
-        Rack::MiniProfiler.config.authorization_mode = :whitelist
-        get '/whitelisted-html?pp=enable'
-        get '/whitelisted-html?pp=enable'
+      it "re-enabled functionality if explicitly allowed" do
+        Rack::MiniProfiler.config.authorization_mode = :allow_authorized
+        get '/explicitly-allowed-html?pp=enable'
+        get '/explicitly-allowed-html?pp=enable'
         expect(last_response.body).to include('/mini-profiler-resources/includes.js')
       end
     end
@@ -339,21 +339,21 @@ describe Rack::MiniProfiler do
     end
   end
 
-  describe 'authorization mode whitelist' do
+  describe 'authorization mode :allow_authorized' do
     before do
-      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      Rack::MiniProfiler.config.authorization_mode = :allow_authorized
     end
 
-    it "should ban requests that are not whitelisted" do
+    it "should ban requests that are not explicitly allowed" do
       get '/html'
       expect(last_response.headers['X-MiniProfiler-Ids']).to be_nil
     end
 
-    it "should allow requests that are whitelisted" do
-      get '/whitelisted'
+    it "should allow requests that are explicitly allowed" do
+      get '/explicitly-allowed'
       # second time will ensure cookie is set
       # first time around there is no cookie, so no profiling
-      get '/whitelisted'
+      get '/explicitly-allowed'
       expect(last_response.headers['X-MiniProfiler-Ids']).not_to be_nil
     end
   end
@@ -392,7 +392,7 @@ describe Rack::MiniProfiler do
   context 'snapshots sampling' do
     before(:each) do
       Rack::MiniProfiler.config.tap do |c|
-        c.authorization_mode = :whitelist
+        c.authorization_mode = :allow_authorized
         c.snapshot_every_n_requests = 1
       end
     end
@@ -429,12 +429,12 @@ describe Rack::MiniProfiler do
 
     it 'does not take snapshots of requests that have valid token in cookie' do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
-      get '/whitelisted-html'
+      get '/explicitly-allowed-html'
       cookies = last_response.set_cookie_header
       get '/path2/a', nil, { cookie: cookies } # no snapshot here
       data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
       expect(data.size).to eq(1)
-      expect(data[0][:name]).to eq("GET /whitelisted-html")
+      expect(data[0][:name]).to eq("GET /explicitly-allowed-html")
     end
 
     it 'respects snapshot_every_n_requests config' do
@@ -488,12 +488,12 @@ describe Rack::MiniProfiler do
   context 'snapshots page' do
     it 'allows only authorized users to access it' do
       base_url = Rack::MiniProfiler.config.base_url_path
-      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      Rack::MiniProfiler.config.authorization_mode = :allow_authorized
       get "#{base_url}snapshots"
       expect(last_response.status).to eq(404)
       expect(last_response.body).to eq("Not Found: /mini-profiler-resources/snapshots")
 
-      get '/whitelisted-html'
+      get '/explicitly-allowed-html'
       cookies = last_response.set_cookie_header
       get "#{base_url}snapshots", nil, { cookie: cookies }
       expect(last_response.status).to eq(200)

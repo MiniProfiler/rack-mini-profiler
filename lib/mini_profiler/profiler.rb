@@ -213,7 +213,7 @@ module Rack
     def call(env)
       start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       client_settings = ClientSettings.new(env, @storage, start)
-      MiniProfiler.deauthorize_request if @config.authorization_mode == :whitelist
+      MiniProfiler.deauthorize_request if @config.authorization_mode == :allow_authorized
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
@@ -239,7 +239,7 @@ module Rack
       skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env))
 
       if skip_it || (
-        @config.authorization_mode == :whitelist &&
+        @config.authorization_mode == :allow_authorized &&
         !client_settings.has_valid_cookie?
       )
         if take_snapshot?(path)
@@ -388,7 +388,7 @@ module Rack
 
       skip_it = current.discard
 
-      if (config.authorization_mode == :whitelist && !MiniProfiler.request_authorized?)
+      if (config.authorization_mode == :allow_authorized && !MiniProfiler.request_authorized?)
         skip_it = true
       end
 

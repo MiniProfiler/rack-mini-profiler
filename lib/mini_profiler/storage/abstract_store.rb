@@ -36,7 +36,7 @@ module Rack
         ""
       end
 
-      # a list of tokens that are permitted to access profiler in whitelist mode
+      # a list of tokens that are permitted to access profiler in explicit mode
       def allowed_tokens
         raise NotImplementedError.new("allowed_tokens is not implemented")
       end

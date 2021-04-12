@@ -41,7 +41,7 @@ describe Rack::MiniProfiler::ClientSettings do
     end
 
     it 'writes auth token for authorized reqs' do
-      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      Rack::MiniProfiler.config.authorization_mode = :allow_authorized
       Rack::MiniProfiler.authorize_request
       hash = {}
       @settings.write!(hash)
@@ -49,7 +49,7 @@ describe Rack::MiniProfiler::ClientSettings do
     end
 
     it 'does nothing on short unauthed requests' do
-      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      Rack::MiniProfiler.config.authorization_mode = :allow_authorized
       Rack::MiniProfiler.deauthorize_request
       hash = {}
       @settings.handle_cookie([200, hash, []])
@@ -58,7 +58,7 @@ describe Rack::MiniProfiler::ClientSettings do
     end
 
     it 'discards on long unauthed requests' do
-      Rack::MiniProfiler.config.authorization_mode = :whitelist
+      Rack::MiniProfiler.config.authorization_mode = :allow_authorized
       Rack::MiniProfiler.deauthorize_request
       hash = {}
       clock_travel(Process.clock_gettime(Process::CLOCK_MONOTONIC) + 1) do

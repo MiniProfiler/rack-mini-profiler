@@ -35,7 +35,7 @@ module Rack::MiniProfilerRails
     end
 
     unless Rails.env.development? || Rails.env.test?
-      c.authorization_mode = :whitelist
+      c.authorization_mode = :allow_authorized
     end
 
     if Rails.logger
