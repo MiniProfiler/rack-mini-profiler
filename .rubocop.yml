@@ -3,3 +3,6 @@ inherit_gem:
 
 RSpec/MessageSpies:
   Enabled: false
+
+AllCops:
+  SuggestExtensions: false

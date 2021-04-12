@@ -86,6 +86,8 @@ module Rack
 
       attr_reader :assets_url
 
+      # redefined - since the accessor defines it first
+      undef :authorization_mode=
       def authorization_mode=(mode)
         if mode == :whitelist
           warn "[DEPRECATION] `:whitelist` authorization mode is deprecated. Please use `:allow_authorized` instead."
