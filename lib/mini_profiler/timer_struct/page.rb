@@ -87,7 +87,8 @@ module Rack
             executed_non_queries: 0,
             custom_timing_names: [],
             custom_timing_stats: {},
-            custom_fields: {}
+            custom_fields: {},
+            flamegraph: nil
           )
           self[:request_method] = env['REQUEST_METHOD']
           self[:request_path] = env['PATH_INFO']
