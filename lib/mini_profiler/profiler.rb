@@ -832,7 +832,7 @@ Append the following to your query string:
       request     = Rack::Request.new(env)
       id          = request.params['id']
       page_struct = @storage.load(id)
-      
+
       if !page_struct
         id        = ERB::Util.html_escape(id)
         user_info = ERB::Util.html_escape(user(env))
