@@ -41,4 +41,19 @@ describe Rack::MiniProfiler::TimerStruct::Page do
       expect(page.to_json).to eq(from_json_page.to_json)
     end
   end
+
+  describe '.to_json' do
+    it 'does not include the flamegraph itself' do
+      page = described_class.new({
+        'REQUEST_METHOD' => 'POST',
+        'PATH_INFO' => '/some/path',
+        'SERVER_NAME' => 'server001',
+      })
+      page[:has_flamegraph] = true
+      page[:flamegraph] = { fake: "data" }
+      result = JSON.parse(page.to_json)
+      expect(result["flamegraph"]).to eq(nil)
+      expect(result["has_flamegraph"]).to eq(true)
+    end
+  end
 end

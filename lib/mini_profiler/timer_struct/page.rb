@@ -87,7 +87,9 @@ module Rack
             executed_non_queries: 0,
             custom_timing_names: [],
             custom_timing_stats: {},
-            custom_fields: {}
+            custom_fields: {},
+            has_flamegraph: false,
+            flamegraph: nil
           )
           self[:request_method] = env['REQUEST_METHOD']
           self[:request_path] = env['PATH_INFO']
@@ -111,12 +113,16 @@ module Rack
           @attributes[:root]
         end
 
+        def attributes_to_serialize
+          @attributes.keys - [:flamegraph]
+        end
+
         def to_json(*a)
-          ::JSON.generate(@attributes.merge(self.extra_json))
+          ::JSON.generate(@attributes.slice(*attributes_to_serialize).merge(extra_json))
         end
 
         def as_json(options = nil)
-          super(options).merge!(extra_json)
+          super(options).slice(*attributes_to_serialize.map(&:to_s)).merge!(extra_json)
         end
 
         def extra_json

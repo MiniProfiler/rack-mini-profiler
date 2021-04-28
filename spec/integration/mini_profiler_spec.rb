@@ -141,6 +141,38 @@ describe Rack::MiniProfiler do
     end
   end
 
+  it 'works with async-flamegraph' do
+    pid = fork do # Avoid polluting main process with stackprof
+      require 'stackprof'
+
+      # Should store flamegraph for ?pp=async-flamegraph
+      get '/html?pp=async-flamegraph'
+      expect(last_response).to be_ok
+      id = last_response.headers['X-MiniProfiler-Ids'].split(",")[0]
+      get "/mini-profiler-resources/flamegraph?id=#{id}"
+      expect(last_response).to be_ok
+      expect(last_response.body).to include("var graph = {")
+
+      # Should store flamegraph based on REFERER
+      get '/html', nil, { "HTTP_REFERER" => "/origin?pp=async-flamegraph" }
+      expect(last_response).to be_ok
+      id = last_response.headers['X-MiniProfiler-Ids'].split(",")[0]
+      get "/mini-profiler-resources/flamegraph?id=#{id}"
+      expect(last_response).to be_ok
+      expect(last_response.body).to include("var graph = {")
+
+      # Should not store/return flamegraph for regular requests
+      get '/html'
+      expect(last_response).to be_ok
+      id = last_response.headers['X-MiniProfiler-Ids'].split(",")[0]
+      get "/mini-profiler-resources/flamegraph?id=#{id}"
+      expect(last_response.status).to eq(404)
+    end
+
+    Process.wait(pid)
+    expect($?.exitstatus).to eq(0)
+  end
+
   describe 'with an implicit body tag' do
 
     before do

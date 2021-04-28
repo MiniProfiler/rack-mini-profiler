@@ -171,6 +171,10 @@ To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-
 * add the [**stackprof**](https://rubygems.org/gems/stackprof) gem to your Gemfile
 * visit a page in your app with `?pp=flamegraph`
 
+To store flamegraph data for later viewing, append the `?pp=async-flamegraph` parameter. The request will return as normal.
+Flamegraph data for this request, and all subsequent requests made by this page (based on the `REFERER` header) will be stored.
+'flamegraph' links will appear for these requests in the MiniProfiler UI.
+
 ### Memory Profiling
 
 Memory allocations can be measured (using the [memory_profiler](https://github.com/SamSaffron/memory_profiler) gem)
