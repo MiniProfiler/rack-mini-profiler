@@ -348,9 +348,10 @@ module Rack
 
         if query_string =~ /pp=(async-)?flamegraph/ || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
           unless defined?(StackProf) && StackProf.respond_to?(:run)
-
-            flamegraph = "Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"
-            status, headers, body = @app.call(env)
+            headers = { 'Content-Type' => 'text/html' }
+            message = "Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"
+            body.close if body.respond_to? :close
+            return client_settings.handle_cookie([500, headers, message])
           else
             # do not sully our profile with mini profiler timings
             current.measure = false
@@ -670,35 +671,31 @@ Append the following to your query string:
 
     def flamegraph(graph, path)
       headers = { 'Content-Type' => 'text/html' }
-      if Hash === graph
-        html = <<~HTML
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-                body { margin: 0; height: 100vh; }
-                #speedscope-iframe { width: 100%; height: 100%; border: none; }
-              </style>
-            </head>
-            <body>
-              <script type="text/javascript">
-                var graph = #{JSON.generate(graph)};
-                var json = JSON.stringify(graph);
-                var blob = new Blob([json], { type: 'text/plain' });
-                var objUrl = encodeURIComponent(URL.createObjectURL(blob));
-                var iframe = document.createElement('IFRAME');
-                iframe.setAttribute('id', 'speedscope-iframe');
-                document.body.appendChild(iframe);
-                var iframeUrl = '#{@config.base_url_path}speedscope/index.html#profileURL=' + objUrl + '&title=' + 'Flamegraph for #{CGI.escape(path)}';
-                iframe.setAttribute('src', iframeUrl);
-              </script>
-            </body>
-          </html>
-        HTML
-        [200, headers, [html]]
-      else
-        [200, headers, [graph]]
-      end
+      html = <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { margin: 0; height: 100vh; }
+              #speedscope-iframe { width: 100%; height: 100%; border: none; }
+            </style>
+          </head>
+          <body>
+            <script type="text/javascript">
+              var graph = #{JSON.generate(graph)};
+              var json = JSON.stringify(graph);
+              var blob = new Blob([json], { type: 'text/plain' });
+              var objUrl = encodeURIComponent(URL.createObjectURL(blob));
+              var iframe = document.createElement('IFRAME');
+              iframe.setAttribute('id', 'speedscope-iframe');
+              document.body.appendChild(iframe);
+              var iframeUrl = '#{@config.base_url_path}speedscope/index.html#profileURL=' + objUrl + '&title=' + 'Flamegraph for #{CGI.escape(path)}';
+              iframe.setAttribute('src', iframeUrl);
+            </script>
+          </body>
+        </html>
+      HTML
+      [200, headers, [html]]
     end
 
     def ids(env)

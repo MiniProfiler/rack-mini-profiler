@@ -74,6 +74,16 @@ describe Rack::MiniProfiler do
         )
       end
     end
+
+    describe 'with async-flamegraph query' do
+      it 'should return stackprof error message' do
+        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+        do_get(pp: 'async-flamegraph')
+        expect(last_response.body).to eq(
+          'Please install the stackprof gem and require it: add gem \'stackprof\' to your Gemfile'
+        )
+      end
+    end
   end
 
   describe 'with Rack::MiniProfiler before Rack::Deflater' do

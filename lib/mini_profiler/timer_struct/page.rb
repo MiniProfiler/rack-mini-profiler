@@ -122,7 +122,7 @@ module Rack
         end
 
         def as_json(options = nil)
-          super(options).slice(*attributes_to_serialize).merge!(extra_json)
+          super(options).slice(*attributes_to_serialize.map(&:to_s)).merge!(extra_json)
         end
 
         def extra_json

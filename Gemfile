@@ -5,7 +5,10 @@ ruby '>= 2.4.0'
 
 gemspec
 
-gem 'codecov', require: false, group: :test
+group :test do
+  gem 'codecov', require: false
+  gem 'stackprof', require: false
+end
 
 group :development do
   gem 'guard', platforms: [:mri_22, :mri_23]
