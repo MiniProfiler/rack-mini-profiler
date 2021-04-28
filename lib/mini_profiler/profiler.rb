@@ -434,6 +434,7 @@ module Rack
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(self.flamegraph(flamegraph, path))
       elsif flamegraph # async-flamegraph
+        page_struct[:has_flamegraph] = true
         page_struct[:flamegraph] = flamegraph
       end
 
