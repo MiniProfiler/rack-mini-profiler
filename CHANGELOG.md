@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- [FEATURE] Introduce `pp=async-flamegraph` for asynchronous flamegraphs
+
 ## 2.3.1 - 2021-01-29
 
 - [FIX] compatability with Ruby 3.0
