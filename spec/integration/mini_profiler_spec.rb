@@ -173,7 +173,6 @@ describe Rack::MiniProfiler do
     expect($?.exitstatus).to eq(0)
   end
 
-
   describe 'with an implicit body tag' do
 
     before do
