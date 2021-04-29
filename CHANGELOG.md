@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 2.3.2 - 2021-04-30
 
 - [FEATURE] Introduce `pp=async-flamegraph` for asynchronous flamegraphs
 
