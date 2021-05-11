@@ -127,11 +127,6 @@ module Rack
       @config.user_provider.call(env)
     end
 
-    def content_security_policy_nonce(env)
-      config_csp_nonce = @config.content_security_policy_nonce
-      config_csp_nonce.is_a?(String) ? config_csp_nonce : config_csp_nonce.call(env)
-    end
-
     def serve_results(env)
       request     = Rack::Request.new(env)
       id          = request.params['id']
@@ -733,6 +728,10 @@ Append the following to your query string:
       url = "#{path}includes.js?v=#{version}" if !url
       css_url = "#{path}includes.css?v=#{version}" if !css_url
 
+      content_security_policy_nonce = @config.content_security_policy_nonce ||
+                                      env["action_dispatch.content_security_policy_nonce"] ||
+                                      env["secure_headers_content_security_policy_nonce"]
+
       settings = {
        path: path,
        url: url,
@@ -751,7 +750,7 @@ Append the following to your query string:
        collapseResults: @config.collapse_results,
        htmlContainer: @config.html_container,
        hiddenCustomFields: @config.snapshot_hidden_custom_fields.join(','),
-       cspNonce: content_security_policy_nonce(env)
+       cspNonce: content_security_policy_nonce,
       }
 
       if current && current.page_struct

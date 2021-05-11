@@ -39,8 +39,6 @@ module Rack
           @enable_advanced_debugging_tools = false
           @snapshot_every_n_requests = -1
           @snapshots_limit = 1000
-          @content_security_policy_nonce = Proc.new { |env| env["action_dispatch.content_security_policy_nonce"] ||
-                                                            env["secure_headers_content_security_policy_nonce"] }
 
           # ui parameters
           @autorized            = true
