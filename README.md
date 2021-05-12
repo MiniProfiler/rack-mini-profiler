@@ -412,13 +412,14 @@ snapshots_transport_destination_url|`nil`|Set this config to a valid URL to enab
 snapshots_transport_auth_key|`nil`|`POST` requests made by the snapshots transporter to the destination URL will have a `Mini-Profiler-Transport-Auth` header with the value of this config. Make sure you use a secure and random key for this config.
 snapshots_redact_sql_queries|`true`|When this is true, SQL queries will be redacted from sampling snapshots, but the backtrace and duration of each SQL query will be saved with the snapshot to keep debugging performance issues possible.
 snapshots_transport_gzip_requests|`false`|Make the snapshots transporter gzip the requests it makes to `snapshots_transport_destination_url`.
+content_security_policy_nonce|Rails: Current nonce<br>Rack: nil|Set the content security policy nonce to use when inserting MiniProfiler's script block.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 
 If you are using `Rack::Deflate` with Rails and `rack-mini-profiler` in its default configuration,
 `Rack::MiniProfiler` will be injected (as always) at position 0 in the middleware stack,
 which means it will run after `Rack::Deflate` on response processing. To prevent attempting to inject
-HTML in already compressed response body MiniProfiler will suppress compression by setting 
+HTML in already compressed response body MiniProfiler will suppress compression by setting
 `identity` encoding in `Accept-Encoding` request header.
 
 ## Special query strings

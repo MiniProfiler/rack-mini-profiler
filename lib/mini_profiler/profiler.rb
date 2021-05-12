@@ -728,6 +728,10 @@ Append the following to your query string:
       url = "#{path}includes.js?v=#{version}" if !url
       css_url = "#{path}includes.css?v=#{version}" if !css_url
 
+      content_security_policy_nonce = @config.content_security_policy_nonce ||
+                                      env["action_dispatch.content_security_policy_nonce"] ||
+                                      env["secure_headers_content_security_policy_nonce"]
+
       settings = {
        path: path,
        url: url,
@@ -745,7 +749,8 @@ Append the following to your query string:
        startHidden: @config.start_hidden,
        collapseResults: @config.collapse_results,
        htmlContainer: @config.html_container,
-       hiddenCustomFields: @config.snapshot_hidden_custom_fields.join(',')
+       hiddenCustomFields: @config.snapshot_hidden_custom_fields.join(','),
+       cspNonce: content_security_policy_nonce,
       }
 
       if current && current.page_struct
