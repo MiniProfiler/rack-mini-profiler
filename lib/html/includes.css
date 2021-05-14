@@ -71,6 +71,14 @@
     color: #555;
     font: Helvetica, Arial, sans-serif;
     font-size: 14px; }
+  .mp-snapshots .ta-left,
+  .profiler-result .ta-left,
+  .profiler-queries .ta-left {
+    text-align: left; }
+  .mp-snapshots .ta-right,
+  .profiler-result .ta-right,
+  .profiler-queries .ta-right {
+    text-align: right; }
 
 .profiler-result {
   font-family: Helvetica, Arial, sans-serif; }
