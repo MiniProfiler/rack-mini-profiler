@@ -61,6 +61,8 @@ $zindex: 2147483640; // near 32bit max 2147483647
     font: $normalFonts;
     font-size: 14px;
   }
+  .ta-left  { text-align: left;  }
+  .ta-right { text-align: right; }
 }
 
 // styles shared between popup view and full view
