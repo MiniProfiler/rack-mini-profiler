@@ -630,7 +630,7 @@ module Rack
     end
 
     def text_result(body)
-      headers = { 'Content-Type' => 'text/plain' }
+      headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
       [200, headers, [body]]
     end
 
