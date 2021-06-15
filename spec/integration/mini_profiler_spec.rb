@@ -393,7 +393,7 @@ describe Rack::MiniProfiler do
   describe 'gc profiler' do
     it "should return a report" do
       get '/html?pp=profile-gc'
-      expect(last_response.header['Content-Type']).to eq('text/plain')
+      expect(last_response.header['Content-Type']).to include('text/plain')
     end
   end
 
