@@ -751,6 +751,7 @@ Append the following to your query string:
        htmlContainer: @config.html_container,
        hiddenCustomFields: @config.snapshot_hidden_custom_fields.join(','),
        cspNonce: content_security_policy_nonce,
+       hotwireTurboDriveSupport: @config.enable_hotwire_turbo_drive_support,
       }
 
       if current && current.page_struct

@@ -257,6 +257,17 @@ describe Rack::MiniProfiler do
       expect(last_response.status).to equal(200)
     end
 
+    describe 'with hotwire turbo drive support enabled' do
+      before do
+        Rack::MiniProfiler.config.enable_hotwire_turbo_drive_support = true
+      end
+
+      it 'should define data-turbo-permanent as true' do
+        get '/html'
+        expect(last_response.body).to include('data-turbo-permanent="true"')
+      end
+    end
+
     describe 'with caching re-enabled' do
       before :each do
         Rack::MiniProfiler.config.disable_caching = false
