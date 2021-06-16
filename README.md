@@ -413,6 +413,7 @@ snapshots_transport_auth_key|`nil`|`POST` requests made by the snapshots transpo
 snapshots_redact_sql_queries|`true`|When this is true, SQL queries will be redacted from sampling snapshots, but the backtrace and duration of each SQL query will be saved with the snapshot to keep debugging performance issues possible.
 snapshots_transport_gzip_requests|`false`|Make the snapshots transporter gzip the requests it makes to `snapshots_transport_destination_url`.
 content_security_policy_nonce|Rails: Current nonce<br>Rack: nil|Set the content security policy nonce to use when inserting MiniProfiler's script block.
+enable_hotwire_turbo_drive_support| `false` | Enable support for Hotwire TurboDrive page transitions.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 
