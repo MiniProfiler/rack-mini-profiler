@@ -463,19 +463,20 @@ end
 If you want to contribute to this project, that's great, thank you! You can run the following rake task:
 
 ```
+$ BUNDLE_GEMFILE=website/Gemfile bundle install
 $ bundle exec rake client_dev
 ```
 
-which will start a local Sinatra server at `http://localhost:9292` where you'll be able to preview your changes. Refreshing the page should be enough to see any changes you make to files in the `lib/html` directory.
+This will start a local Sinatra server at `http://localhost:9292` where you'll be able to preview your changes. Refreshing the page should be enough to see any changes you make to files in the `lib/html` directory.
 
 ## Running the Specs
+
+You need Memcached and Redis services running for the specs.
 
 ```
 $ rake build
 $ rake spec
 ```
-
-Additionally you can also run `autotest` if you like.
 
 ## Licence
 
