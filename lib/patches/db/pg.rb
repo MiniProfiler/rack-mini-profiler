@@ -39,6 +39,20 @@ class PG::Connection
     alias_method :exec_params_without_profiling, :exec_params
   end
 
+  def prepare_parameterized_statement(args)
+    if Array === args[1] && args[1].length > 0
+      query = args[0]
+      parameters = args[1]
+      counter = 0
+      loop do
+        break if !query.include? "$#{counter+=1}"
+        parameter = parameters[counter-1].is_a?(String) ? "'#{parameters[counter-1].gsub("'","''")}'" : parameters[counter-1]
+        query = query.sub("$#{counter}",parameter.to_s)
+      end
+    end
+    query
+  end
+
   def prepare(*args, &blk)
     # we have no choice but to do this here,
     # if we do the check for profiling first, our cache may miss critical stuff
@@ -58,7 +72,8 @@ class PG::Connection
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_without_profiling(*args, &blk)
     elapsed_time = SqlPatches.elapsed_time(start)
-    record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+    query_with_params = prepare_parameterized_statement(args)
+    record       = ::Rack::MiniProfiler.record_sql(query_with_params, elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
     result
