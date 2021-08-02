@@ -1,6 +1,4 @@
 @mixin box-shadow($dx, $dy, $radius, $color) {
-  -moz-box-shadow: $dx $dy $radius $color;
-  -webkit-box-shadow: $dx $dy $radius $color;
   box-shadow: $dx $dy $radius $color;
 }
 
@@ -58,7 +56,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
   }
   .custom-fields-title {
     color: $textColor;
-    font: $normalFonts;
+    font-family: $normalFonts;
     font-size: 14px;
   }
   .ta-left  { text-align: left;  }
@@ -328,8 +326,6 @@ $zindex: 2147483640; // near 32bit max 2147483647
       &.profiler-no-controls .profiler-totals,
       &.profiler-no-controls .profiler-result:last-child .profiler-button,
       .profiler-controls {
-        -webkit-border-bottom-right-radius: $radius;
-        -moz-border-radius-bottomright: $radius;
         border-bottom-right-radius: $radius;
       }
 
@@ -345,8 +341,6 @@ $zindex: 2147483640; // near 32bit max 2147483647
       &.profiler-no-controls .profiler-totals,
       &.profiler-no-controls .profiler-result:last-child .profiler-button,
       .profiler-controls {
-        -webkit-border-bottom-left-radius: $radius;
-        -moz-border-radius-bottomleft: $radius;
         border-bottom-left-radius: $radius;
       }
 
@@ -366,8 +360,6 @@ $zindex: 2147483640; // near 32bit max 2147483647
       &.profiler-no-controls .profiler-totals,
       &.profiler-no-controls .profiler-result:first-child .profiler-button,
       .profiler-controls {
-        -webkit-border-top-right-radius: $radius;
-        -moz-border-radius-topright: $radius;
         border-top-right-radius: $radius;
       }
 
@@ -383,8 +375,6 @@ $zindex: 2147483640; // near 32bit max 2147483647
       &.profiler-no-controls .profiler-totals,
       &.profiler-no-controls .profiler-result:first-child .profiler-button,
       .profiler-controls {
-        -webkit-border-bottom-top-radius: $radius;
-        -moz-border-radius-topleft: $radius;
         border-top-left-radius: $radius;
       }
 

@@ -469,6 +469,8 @@ $ bundle exec rake client_dev
 
 This will start a local Sinatra server at `http://localhost:9292` where you'll be able to preview your changes. Refreshing the page should be enough to see any changes you make to files in the `lib/html` directory.
 
+Make sure to prepend `bundle exec` before any Rake tasks you run.
+
 ## Running the Specs
 
 You need Memcached and Redis services running for the specs.
