@@ -69,7 +69,7 @@
   .profiler-result .custom-fields-title,
   .profiler-queries .custom-fields-title {
     color: #555;
-    font: Helvetica, Arial, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
     font-size: 14px; }
   .mp-snapshots .ta-left,
   .profiler-result .ta-left,

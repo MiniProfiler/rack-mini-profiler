@@ -56,7 +56,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
   }
   .custom-fields-title {
     color: $textColor;
-    font: $normalFonts;
+    font-family: $normalFonts;
     font-size: 14px;
   }
   .ta-left  { text-align: left;  }
