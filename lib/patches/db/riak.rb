@@ -2,7 +2,7 @@
 
 # riak-client 2.2.2 patches
 class Riak::Multiget
-  class <<self
+  class << self
     alias_method :get_all_without_profiling, :get_all
     def get_all(client, fetch_list)
       return get_all_without_profiling(client, fetch_list) unless SqlPatches.should_measure?
