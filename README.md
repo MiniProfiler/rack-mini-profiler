@@ -401,6 +401,7 @@ toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility
 start_hidden|`false`|`false` to make mini_profiler visible on page load.
 backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded.
 flamegraph_sample_rate|`0.5`|How often to capture stack traces for flamegraphs in milliseconds.
+flamegraph_mode|`:wall`|The [StackProf mode](https://github.com/tmm1/stackprof#all-options) to pass to `StackProf.run`.
 base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
 collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
 max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page

@@ -28,6 +28,7 @@ module Rack
           @authorization_mode     = :allow_all
           @backtrace_threshold_ms = 0
           @flamegraph_sample_rate = 0.5
+          @flamegraph_mode = :wall
           @storage_failure = Proc.new do |exception|
             if @logger
               @logger.warn("MiniProfiler storage failure: #{exception.message}")
@@ -70,7 +71,8 @@ module Rack
         :skip_schema_queries, :storage, :storage_failure, :storage_instance,
         :storage_options, :user_provider, :enable_advanced_debugging_tools,
         :skip_sql_param_names, :suppress_encoding, :max_sql_param_length,
-        :content_security_policy_nonce, :enable_hotwire_turbo_drive_support
+        :content_security_policy_nonce, :enable_hotwire_turbo_drive_support,
+        :flamegraph_mode
 
       # ui accessors
       attr_accessor :collapse_results, :max_traces_to_show, :position,

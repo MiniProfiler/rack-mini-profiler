@@ -362,8 +362,17 @@ module Rack
             else
               sample_rate = config.flamegraph_sample_rate
             end
+
+            mode_match_data = query_string.match(/flamegraph_mode=([a-zA-Z]+)/)
+
+            if mode_match_data && [:cpu, :wall, :object, :custom].include?(mode_match_data[1].to_sym)
+              mode = mode_match_data[1].to_sym
+            else
+              mode = config.flamegraph_mode
+            end
+
             flamegraph = StackProf.run(
-              mode: :wall,
+              mode: mode,
               raw: true,
               aggregate: false,
               interval: (sample_rate * 1000).to_i
@@ -658,6 +667,7 @@ Append the following to your query string:
   #{make_link "flamegraph", env} : a graph representing sampled activity (requires the stackprof gem).
   #{make_link "async-flamegraph", env} : store flamegraph data for this page and all its AJAX requests. Flamegraph links will be available in the mini-profiler UI (requires the stackprof gem).
   #{make_link "flamegraph&flamegraph_sample_rate=1", env}: creates a flamegraph with the specified sample rate (in ms). Overrides value set in config
+  #{make_link "flamegraph&flamegraph_mode=cpu", env}: creates a flamegraph with the specified mode (one of cpu, wall, object, or custom). Overrides value set in config
   #{make_link "flamegraph_embed", env} : a graph representing sampled activity (requires the stackprof gem), embedded resources for use on an intranet.
   #{make_link "trace-exceptions", env} : will return all the spots where your application raises exceptions
   #{make_link "analyze-memory", env} : will perform basic memory analysis of heap
