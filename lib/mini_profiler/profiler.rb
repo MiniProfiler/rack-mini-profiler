@@ -652,7 +652,7 @@ module Rack
       headers = { 'Content-Type' => 'text/html' }
       body = "<html><body>
 <pre style='line-height: 30px; font-size: 16px;'>
-Append the following to your query string:
+This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>rack-mini-profiler</a> gem, append the following to your query string for more options:
 
   #{make_link "help", env} : display this screen
   #{make_link "env", env} : display the rack environment

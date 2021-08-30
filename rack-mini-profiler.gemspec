@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.4.0'
 
   s.metadata = {
-    'source_code_uri' => 'https://github.com/MiniProfiler/rack-mini-profiler',
+    'source_code_uri' => Rack::MiniProfiler::SOURCE_CODE_URI,
     'changelog_uri' => 'https://github.com/MiniProfiler/rack-mini-profiler/blob/master/CHANGELOG.md'
   }
 
