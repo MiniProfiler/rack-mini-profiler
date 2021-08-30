@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.3.3 - 2021-08-30
+
+- [FEATURE] Introduce `pp=flamegraph_mode`
+- [FEATURE] Richer CSP configuration options
+- [FEATURE] Add support for Hotwire Turbo Drive
+
 ## 2.3.2 - 2021-04-30
 
 - [FEATURE] Introduce `pp=async-flamegraph` for asynchronous flamegraphs
