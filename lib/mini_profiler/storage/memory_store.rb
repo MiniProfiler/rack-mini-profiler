@@ -53,6 +53,7 @@ module Rack
 
         @token1, @token2, @cycle_at = nil
         @snapshots_cycle = 0
+        @snapshot_groups = {}
         @snapshots = []
 
         initialize_locks
@@ -152,28 +153,78 @@ module Rack
         end
       end
 
-      def push_snapshot(page_struct, config)
+      def push_snapshot(page_struct, group_name, config)
         @snapshots_lock.synchronize do
-          @snapshots << page_struct
-          @snapshots.sort_by! { |s| s.duration_ms }
-          @snapshots.reverse!
-          if @snapshots.size > config.snapshots_limit
-            @snapshots.slice!(-1)
+          group = @snapshot_groups[group_name]
+          if !group
+            below_limit = @snapshot_groups.size < config.max_snapshot_groups
+            if !below_limit
+              @snapshot_groups.keys.each do |name|
+                if @snapshot_groups[name][:worst_score] < page_struct.duration_ms
+                  @snapshot_groups.delete(name)
+                  below_limit = true
+                  break
+                end
+              end
+            end
+            if below_limit
+              @snapshot_groups[group_name] = {
+                worst_score: page_struct.duration_ms,
+                best_score: page_struct.duration_ms,
+                snapshots: [page_struct]
+              }
+            end
+          else
+            snapshots = group[:snapshots]
+            below_limit = snapshots.size < config.max_snapshots_per_group
+            if !below_limit
+              if snapshots[-1].duration_ms < page_struct.duration_ms
+                snapshots.slice!(-1)
+                below_limit = true
+              end
+            end
+            if below_limit
+              snapshots << page_struct
+              snapshots.sort_by!(&:duration_ms)
+              snapshots.reverse!
+              group[:worst_score] = snapshots[0].duration_ms
+              group[:best_score] = snapshots[-1].duration_ms
+            end
           end
         end
       end
 
-      def fetch_snapshots(batch_size: 200, &blk)
+      def fetch_snapshots_overview
         @snapshots_lock.synchronize do
-          @snapshots.each_slice(batch_size) do |batch|
-            blk.call(batch)
+          groups = {}
+          @snapshot_groups.each do |name, group|
+            groups[name] = {
+              worst_score: group[:worst_score],
+              best_score: group[:best_score],
+              snapshots_count: group[:snapshots].size
+            }
+          end
+          groups
+        end
+      end
+
+      def fetch_snapshots_group(group_name)
+        @snapshots_lock.synchronize do
+          group = @snapshot_groups[group_name]
+          if group
+            group[:snapshots].dup
+          else
+            []
           end
         end
       end
 
-      def load_snapshot(id)
+      def load_snapshot(id, group_name)
         @snapshots_lock.synchronize do
-          @snapshots.find { |s| s[:id] == id }
+          group = @snapshot_groups[group_name]
+          if group
+            group[:snapshots].find { |s| s[:id] == id }
+          end
         end
       end
 
@@ -182,7 +233,7 @@ module Rack
       # used in tests only
       def wipe_snapshots_data
         @snapshots_cycle = 0
-        @snapshots = []
+        @snapshot_groups = {}
       end
     end
   end

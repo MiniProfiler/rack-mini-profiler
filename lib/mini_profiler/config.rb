@@ -40,7 +40,8 @@ module Rack
           @skip_sql_param_names = /password/ # skips parameters with the name password by default
           @enable_advanced_debugging_tools = false
           @snapshot_every_n_requests = -1
-          @snapshots_limit = 1000
+          @max_snapshot_groups = 50
+          @max_snapshots_per_group = 15
 
           # ui parameters
           @autorized            = true
@@ -81,10 +82,10 @@ module Rack
         :start_hidden, :toggle_shortcut, :html_container
 
       # snapshot related config
-      attr_accessor :snapshot_every_n_requests, :snapshots_limit,
+      attr_accessor :snapshot_every_n_requests, :max_snapshots_per_group,
         :snapshot_hidden_custom_fields, :snapshots_transport_destination_url,
         :snapshots_transport_auth_key, :snapshots_redact_sql_queries,
-        :snapshots_transport_gzip_requests
+        :snapshots_transport_gzip_requests, :max_snapshot_groups
 
       # Deprecated options
       attr_accessor :use_existing_jquery

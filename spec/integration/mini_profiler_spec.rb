@@ -448,13 +448,13 @@ describe Rack::MiniProfiler do
       config = Rack::MiniProfiler.config
       config.skip_paths = ['/path2/a']
       get '/path2/a'
-      expect(Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview).to eq([])
+      expect(Rack::MiniProfiler.config.storage_instance.snapshots_overview).to eq([])
     end
 
     it 'takes snapshots of requests that fail the pre_authorize_cb check' do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| false }
       get '/path2/a'
-      data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
+      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
       expect(data.size).to eq(1)
       expect(last_response.body.include?('/mini-profiler-resources/includes.js')).to be(false)
       expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(false)
@@ -464,7 +464,7 @@ describe Rack::MiniProfiler do
     it 'takes snapshots of requests that do not have valid token in cookie' do
       Rack::MiniProfiler.config.pre_authorize_cb = lambda { |env| true }
       get '/path2/a'
-      data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
+      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
       expect(last_response.body.include?('/mini-profiler-resources/includes.js')).to be(false)
       expect(last_response.headers.has_key?('X-MiniProfiler-Ids')).to be(false)
       expect(data.size).to eq(1)
@@ -475,7 +475,7 @@ describe Rack::MiniProfiler do
       get '/explicitly-allowed-html'
       cookies = last_response.set_cookie_header
       get '/path2/a', nil, { cookie: cookies } # no snapshot here
-      data = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
+      data = Rack::MiniProfiler.config.storage_instance.snapshots_overview
       expect(data.size).to eq(1)
       expect(data[0][:name]).to eq("GET /explicitly-allowed-html")
     end
@@ -487,11 +487,11 @@ describe Rack::MiniProfiler do
       get '/path2/a'
       get '/path2/a'
       store = Rack::MiniProfiler.config.storage_instance
-      groups = store.snapshot_groups_overview
+      groups = store.snapshots_overview
       expect(groups.size).to eq(1)
       group_name = "GET /path2/a"
       expect(groups[0][:name]).to eq(group_name)
-      expect(store.find_snapshots_group(group_name).size).to eq(2)
+      expect(store.snapshots_group(group_name).size).to eq(2)
     end
 
     it 'does not take snapshots for non-2xx requests' do
@@ -501,7 +501,7 @@ describe Rack::MiniProfiler do
       get '/notallowed' # 403
       get '/whoopsie-daisy' # 500
       post '/create' # 201
-      groups = Rack::MiniProfiler.config.storage_instance.snapshot_groups_overview
+      groups = Rack::MiniProfiler.config.storage_instance.snapshots_overview
       expect(groups.size).to eq(1)
       expect(groups[0][:name]).to eq("POST /create")
     end
@@ -512,12 +512,12 @@ describe Rack::MiniProfiler do
 
       group_name = "GET /test-snapshots-custom-fields"
 
-      id1 = store.find_snapshots_group(group_name).first[:id]
-      snapshot1 = store.load_snapshot(id1)
+      id1 = store.snapshots_group(group_name).first[:id]
+      snapshot1 = store.load_snapshot(id1, group_name)
 
       get '/test-snapshots-custom-fields?field3=value3&field4=value4'
-      id2 = store.find_snapshots_group(group_name).find { |s| s[:id] != id1 }[:id]
-      snapshot2 = store.load_snapshot(id2)
+      id2 = store.snapshots_group(group_name).find { |s| s[:id] != id1 }[:id]
+      snapshot2 = store.load_snapshot(id2, group_name)
 
       expect(snapshot1[:custom_fields]).to eq(
         { "field1" => "value1", "field2" => "value2" }
@@ -554,11 +554,12 @@ describe Rack::MiniProfiler do
         'REQUEST_METHOD' => 'POST'
       })
       struct[:root].record_time(1342.314242)
-      store.push_snapshot(struct, Rack::MiniProfiler.config)
+      group_name = "POST /some/path/here"
+      store.push_snapshot(struct, group_name, Rack::MiniProfiler.config)
       get "#{base_url}snapshots"
       expect(last_response.body).to include('id="snapshots-data"')
       expect(last_response.body).to include("/some/path/here")
-      expect(last_response.body).to include("POST /some/path/here")
+      expect(last_response.body).to include(group_name)
       expect(last_response.body).to include("1342.314242")
     end
 
@@ -586,9 +587,21 @@ describe Rack::MiniProfiler do
       })
       struct3[:root].record_time(3084.803185)
 
-      store.push_snapshot(struct1, Rack::MiniProfiler.config)
-      store.push_snapshot(struct2, Rack::MiniProfiler.config)
-      store.push_snapshot(struct3, Rack::MiniProfiler.config)
+      store.push_snapshot(
+        struct1,
+        "POST /some/path/here",
+        Rack::MiniProfiler.config
+      )
+      store.push_snapshot(
+        struct2,
+        "DELETE /another/path/here",
+        Rack::MiniProfiler.config
+      )
+      store.push_snapshot(
+        struct3,
+        "DELETE /another/path/here",
+        Rack::MiniProfiler.config
+      )
 
       qs = Rack::Utils.build_query({ group_name: "DELETE /another/path/here" })
       get "#{base_url}snapshots?#{qs}"
@@ -613,9 +626,10 @@ describe Rack::MiniProfiler do
         'REQUEST_METHOD' => 'POST'
       })
       struct[:root].record_time(1342.314242)
-      store.push_snapshot(struct, Rack::MiniProfiler.config)
+      group_name = "POST /some/path/here"
+      store.push_snapshot(struct, group_name, Rack::MiniProfiler.config)
 
-      get "#{base_url}results?id=#{struct[:id]}&snapshot=true"
+      get "#{base_url}results?id=#{struct[:id]}&group=#{group_name}"
       expect(last_response.status).to eq(200)
       expect(last_response.body).to include(struct[:id])
       expect(last_response.body).to include("1342.314242")
@@ -623,11 +637,11 @@ describe Rack::MiniProfiler do
 
     it 'when snapshot is not found a 404 response is given' do
       base_url = Rack::MiniProfiler.config.base_url_path
-      get "#{base_url}results?id=nonsenseidhere&snapshot=true"
+      get "#{base_url}results?id=nonsenseidhere&group=groupdoesnotexist"
       expect(last_response.status).to eq(404)
       expect(last_response.body).to eq("Snapshot with id 'nonsenseidhere' not found")
 
-      get "#{base_url}results?id=%22%3E%3Cqss%3E&snapshot=true"
+      get "#{base_url}results?id=%22%3E%3Cqss%3E&group=groupdoesnotexist"
       expect(last_response.status).to eq(404)
       expect(last_response.body).to eq("Snapshot with id '&quot;&gt;&lt;qss&gt;' not found"), "id should be escaped to prevent XSS"
     end

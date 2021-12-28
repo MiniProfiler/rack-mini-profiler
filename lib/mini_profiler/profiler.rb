@@ -130,10 +130,10 @@ module Rack
     def serve_results(env)
       request     = Rack::Request.new(env)
       id          = request.params['id']
-      is_snapshot = request.params['snapshot']
-      is_snapshot = [true, "true"].include?(is_snapshot)
+      group_name  = request.params['group']
+      is_snapshot = group_name && group_name.size > 0
       if is_snapshot
-        page_struct = @storage.load_snapshot(id)
+        page_struct = @storage.load_snapshot(id, group_name)
       else
         page_struct = @storage.load(id)
       end
@@ -802,16 +802,16 @@ This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>ra
       headers = { 'Content-Type' => 'text/html' }
       qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
       if group_name = qp["group_name"]
-        list = @storage.find_snapshots_group(group_name)
+        list = @storage.snapshots_group(group_name)
         list.each do |snapshot|
-          snapshot[:url] = url_for_snapshot(snapshot[:id])
+          snapshot[:url] = url_for_snapshot(snapshot[:id], group_name)
         end
         data = {
           group_name: group_name,
           list: list
         }
       else
-        list = @storage.snapshot_groups_overview
+        list = @storage.snapshots_overview
         list.each do |group|
           group[:url] = url_for_snapshots_group(group[:name])
         end
@@ -864,7 +864,7 @@ This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>ra
       if defined?(Rails) && defined?(ActionController::RoutingError)
         hash = Rails.application.routes.recognize_path(path, method: method)
         if hash && hash[:controller] && hash[:action]
-          "#{method} #{hash[:controller]}##{hash[:action]}"
+          "#{hash[:controller]}##{hash[:action]}"
         end
       end
     rescue ActionController::RoutingError
@@ -876,8 +876,8 @@ This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>ra
       "/#{@config.base_url_path.gsub('/', '')}/snapshots?#{qs}"
     end
 
-    def url_for_snapshot(id)
-      qs = Rack::Utils.build_query({ id: id, snapshot: true })
+    def url_for_snapshot(id, group_name)
+      qs = Rack::Utils.build_query({ id: id, group: group_name })
       "/#{@config.base_url_path.gsub('/', '')}/results?#{qs}"
     end
 
@@ -902,8 +902,12 @@ This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>ra
         if Rack::MiniProfiler.snapshots_transporter?
           Rack::MiniProfiler::SnapshotsTransporter.transport(page_struct)
         else
+          group_name = rails_route_from_path(page_struct[:request_path], page_struct[:request_method])
+          group_name ||= page_struct[:request_path]
+          group_name = "#{page_struct[:request_method]} #{group_name}"
           @storage.push_snapshot(
             page_struct,
+            group_name,
             @config
           )
         end
