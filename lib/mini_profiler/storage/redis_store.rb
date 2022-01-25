@@ -189,9 +189,9 @@ unviewed_ids: #{get_unviewed_ids(user)}
           iteration += 1
         end
         if corrupt_snapshots.size > 0
-          redis.pipelined do
-            redis.zrem(zset_key, corrupt_snapshots)
-            redis.hdel(hash_key, corrupt_snapshots)
+          redis.pipelined do |pipeline|
+            pipeline.zrem(zset_key, corrupt_snapshots)
+            pipeline.hdel(hash_key, corrupt_snapshots)
           end
         end
       end
@@ -202,9 +202,9 @@ unviewed_ids: #{get_unviewed_ids(user)}
         begin
           Marshal.load(bytes)
         rescue
-          redis.pipelined do
-            redis.zrem(snapshot_zset_key(), id)
-            redis.hdel(hash_key, id)
+          redis.pipelined do |pipeline|
+            pipeline.zrem(snapshot_zset_key(), id)
+            pipeline.hdel(hash_key, id)
           end
           nil
         end
@@ -253,11 +253,11 @@ unviewed_ids: #{get_unviewed_ids(user)}
 
       # only used in tests
       def wipe_snapshots_data
-        redis.pipelined do
-          redis.del(snapshot_counter_key())
-          redis.del(snapshot_zset_key())
-          redis.del(snapshot_hash_key())
-        end
+        redis.del(
+          snapshot_counter_key(),
+          snapshot_zset_key(), 
+          snapshot_hash_key(),
+        )
       end
     end
   end
