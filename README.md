@@ -347,7 +347,9 @@ Single page applications built using Ember, Angular or other frameworks need som
 On route transition always call:
 
 ```
-window.MiniProfiler.pageTransition();
+if (window.MiniProfiler !== undefined) {
+  window.MiniProfiler.pageTransition();
+}
 ```
 
 This method will remove profiling information that was related to previous page and clear aggregate statistics.
