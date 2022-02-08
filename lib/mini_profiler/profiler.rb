@@ -391,6 +391,7 @@ module Rack
           status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]]
         else
           status, headers, body = @app.call(env)
+          status = status.to_i
         end
       ensure
         trace.disable if trace
