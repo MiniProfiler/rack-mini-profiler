@@ -426,7 +426,7 @@ collapse_results|`true`|If multiple timing results exist in a single page, colla
 max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page
 html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
 show_total_sql_count|`false`|Displays the total number of SQL executions.
-enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords.
+enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords. Defaults to `true` in development.
 assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
 snapshot_every_n_requests|`-1`|Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
 snapshots_limit|`1000`|Determines how many snapshots Mini Profiler is allowed to keep.
