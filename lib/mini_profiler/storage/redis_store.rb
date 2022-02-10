@@ -25,7 +25,9 @@ module Rack
         key = prefixed_id(id)
         raw = redis.get key
         begin
-          Marshal::load(raw) if raw
+          # rubocop:disable Security/MarshalLoad
+          Marshal.load(raw) if raw
+          # rubocop:enable Security/MarshalLoad
         rescue
           # bad format, junk old data
           redis.del key
@@ -177,7 +179,9 @@ unviewed_ids: #{get_unviewed_ids(user)}
           batch = redis.mapped_hmget(hash_key, *ids).to_a
           batch.map! do |id, bytes|
             begin
+              # rubocop:disable Security/MarshalLoad
               Marshal.load(bytes)
+              # rubocop:enable Security/MarshalLoad
             rescue
               corrupt_snapshots << id
               nil
@@ -200,7 +204,9 @@ unviewed_ids: #{get_unviewed_ids(user)}
         hash_key = snapshot_hash_key()
         bytes = redis.hget(hash_key, id)
         begin
+          # rubocop:disable Security/MarshalLoad
           Marshal.load(bytes)
+          # rubocop:enable Security/MarshalLoad
         rescue
           redis.pipelined do |pipeline|
             pipeline.zrem(snapshot_zset_key(), id)
@@ -255,7 +261,7 @@ unviewed_ids: #{get_unviewed_ids(user)}
       def wipe_snapshots_data
         redis.del(
           snapshot_counter_key(),
-          snapshot_zset_key(), 
+          snapshot_zset_key(),
           snapshot_hash_key(),
         )
       end

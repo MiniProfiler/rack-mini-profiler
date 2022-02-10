@@ -17,7 +17,9 @@ module Rack
         def [](key)
           begin
             data = ::File.open(path(key), "rb") { |f| f.read }
+            # rubocop:disable Security/MarshalLoad
             Marshal.load data
+            # rubocop:enable Security/MarshalLoad
           rescue
             nil
           end

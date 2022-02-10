@@ -11,7 +11,7 @@ describe Rack::MiniProfiler::TimerStruct::Client do
   end
 
   def fixture(name)
-    YAML.load(File.open(File.dirname(__FILE__) + "/../../fixtures/#{name}.yml"))
+    YAML.safe_load(File.open(File.dirname(__FILE__) + "/../../fixtures/#{name}.yml"))
   end
 
   before do

@@ -773,7 +773,7 @@ This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>ra
       end
 
       # TODO : cache this snippet
-      script = IO.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
+      script = File.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
       # replace the variables
       settings.each do |k, v|
         regex = Regexp.new("\\{#{k.to_s}\\}")

@@ -24,7 +24,9 @@ module Rack
 
       def load(id)
         raw = @client.get("#{@prefix}#{id}")
-        Marshal::load(raw) if raw
+        # rubocop:disable Security/MarshalLoad
+        Marshal.load(raw) if raw
+        # rubocop:enable Security/MarshalLoad
       end
 
       def set_unviewed(user, id)
@@ -65,14 +67,16 @@ module Rack
         key1, key2, cycle_at = nil
 
         if token_info
-          key1, key2, cycle_at = Marshal::load(token_info)
+          # rubocop:disable Security/MarshalLoad
+          key1, key2, cycle_at = Marshal.load(token_info)
+          # rubocop:enable Security/MarshalLoad
 
-           key1 = nil unless key1 && key1.length == 32
-           key2 = nil unless key2 && key2.length == 32
+          key1 = nil unless key1 && key1.length == 32
+          key2 = nil unless key2 && key2.length == 32
 
-           if key1 && cycle_at && (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
-             return [key1, key2].compact
-           end
+          if key1 && cycle_at && (cycle_at > Process.clock_gettime(Process::CLOCK_MONOTONIC))
+            return [key1, key2].compact
+          end
         end
 
         timeout = Rack::MiniProfiler::AbstractStore::MAX_TOKEN_AGE

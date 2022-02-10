@@ -138,7 +138,7 @@ task :speedscope_upgrade do
   res = http.request(req)
   if res.code.to_i != 200
     puts "ERROR: GitHub responded with an unexpected status code: #{res.code.to_i}."
-    exit
+    exit 1
   end
   latest_release_info = JSON.parse(res.body)
   latest_version = latest_release_info['name'].sub('v', '')
@@ -147,7 +147,7 @@ task :speedscope_upgrade do
   current_version = File.read(File.join(speedscope_dir, 'release.txt')).split("\n")[0].split("@")[-1]
   if latest_version == current_version
     puts "Speedscope is already on the latest version (#{current_version.inspect})."
-    exit
+    exit 1
   end
   puts "Current version is #{current_version.inspect} and latest version is: #{latest_version.inspect}"
   asset = latest_release_info['assets'].find { |ast| ast['content_type'] == 'application/zip' }
@@ -156,7 +156,7 @@ task :speedscope_upgrade do
     puts "ERROR: Couldn't find any zip files in the #{latest_version.inspect} release. "\
          "Maybe the maintainer forgot to add one or the content type has changed. "\
          "Please the check the releases page of the repository and/or contact the maintainer."
-    exit
+    exit 1
   end
   Dir.mktmpdir do |temp_dir|
     puts "Downloading zip file of latest release to #{temp_dir}..."
@@ -167,7 +167,7 @@ task :speedscope_upgrade do
     res = http.request(req)
     if res.code.to_i != 302
       puts "ERROR: Expected a 302 status code from GitHub download URL but instead got #{res.code.inspect}."
-      exit
+      exit 1
     end
     aws_uri = URI(res['Location'])
     http = Net::HTTP.new(aws_uri.host, aws_uri.port)
@@ -177,9 +177,9 @@ task :speedscope_upgrade do
     http.request(request) do |response|
       if response.code.to_i != 200
         puts "ERROR: Expected a 200 status code from download URL but instead got #{res.code.inspect}."
-        exit
+        exit 1
       end
-      open(temp_zip_file, 'w') do |io|
+      File.open(temp_zip_file, 'wb') do |io|
         response.read_body do |chunk|
           io.write(chunk)
         end
@@ -212,7 +212,7 @@ task :speedscope_upgrade do
     if new_version != latest_version
       puts "ERROR: Something went wrong. Expected the zip file to contain release #{latest_version.inspect}, "\
            "but instead it contained #{new_version.inspect}. You'll need to investigate what went wrong."
-      exit
+      exit 1
     end
     puts "Replacing Google Fonts stylesheet URL with the URL of the local copy in index.html..."
     index_html_content = File.read(File.join(speedscope_dir, 'index.html'))
