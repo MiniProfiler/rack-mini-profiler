@@ -40,6 +40,21 @@ describe Rack::MiniProfiler::ClientSettings do
       expect(hash).not_to eq({})
     end
 
+    it 'sets cookie path to / by default' do
+      @settings.disable_profiling = false
+      hash = {}
+      @settings.write!(hash)
+      expect(hash["Set-Cookie"]).to include("path=/;")
+    end
+
+    it 'should correctly set cookie with correct path' do
+      Rack::MiniProfiler.config.cookie_path = '/test'
+      @settings.disable_profiling = false
+      hash = {}
+      @settings.write!(hash)
+      expect(hash["Set-Cookie"]).to include("path=/test;")
+    end
+
     it 'writes auth token for authorized reqs' do
       Rack::MiniProfiler.config.authorization_mode = :allow_authorized
       Rack::MiniProfiler.authorize_request

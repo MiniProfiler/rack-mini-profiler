@@ -74,7 +74,7 @@ module Rack
           settings["bt"] = @backtrace_level     if @backtrace_level
           settings["a"] = @allowed_tokens.join("|") if @allowed_tokens && MiniProfiler.request_authorized?
           settings_string = settings.map { |k, v| "#{k}=#{v}" }.join(",")
-          cookie = { value: settings_string, path: '/', httponly: true }
+          cookie = { value: settings_string, path: MiniProfiler.config.cookie_path, httponly: true }
           cookie[:secure] = true if @request.ssl?
           cookie[:same_site] = 'Lax'
           Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
@@ -83,7 +83,7 @@ module Rack
 
       def discard_cookie!(headers)
         if @cookie
-          Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, path: '/')
+          Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, path: MiniProfiler.config.cookie_path)
         end
       end
 
