@@ -207,7 +207,7 @@ After enabling snapshots sampling, you can see the snapshots that have been coll
 
 Access to the snapshots page is restricted to only those who can see the speed badge on their own requests, see the section below this one about access control.
 
-Mini Profiler will keep a maximum of 1000 snapshots by default, and you can change that via the `snapshots_limit` config. When snapshots reach the configured limit, Mini Profiler will save a new snapshot only if it's worse than at least one of the existing snapshots and delete the best one (i.e. the snapshot whose request took the least time compared to other snapshots).
+Mini Profiler will keep a maximum of 50 snapshot groups and a maximum of 15 snapshots per group making the default maximum number of snapshots in the system 750. The default group and per group limits can be changed via the `max_snapshot_groups` and `max_snapshots_per_group` configuration options, see the configurations table below.
 
 #### Snapshots Transporter
 
@@ -430,7 +430,8 @@ show_total_sql_count|`false`|Displays the total number of SQL executions.
 enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords. Defaults to `true` in development.
 assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
 snapshot_every_n_requests|`-1`|Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
-snapshots_limit|`1000`|Determines how many snapshots Mini Profiler is allowed to keep.
+max_snapshot_groups|`50`|Determines how many snapshot groups Mini Profiler is allowed to keep.
+max_snapshots_per_group|`15`|Determines how many snapshots per group Mini Profiler is allowed to keep.
 snapshot_hidden_custom_fields|`[]`|Each snapshot custom field will have a dedicated column in the UI by default. Use this config to exclude certain custom fields from having their own columns.
 snapshots_transport_destination_url|`nil`|Set this config to a valid URL to enable snapshots transporter which will `POST` snapshots to the given URL. The transporter requires `snapshots_transport_auth_key` config to be set as well.
 snapshots_transport_auth_key|`nil`|`POST` requests made by the snapshots transporter to the destination URL will have a `Mini-Profiler-Transport-Auth` header with the value of this config. Make sure you use a secure and random key for this config.
