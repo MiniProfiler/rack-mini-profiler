@@ -157,39 +157,30 @@ module Rack
         @snapshots_lock.synchronize do
           group = @snapshot_groups[group_name]
           if !group
-            below_limit = @snapshot_groups.size < config.max_snapshot_groups
-            if !below_limit
-              @snapshot_groups.keys.each do |name|
-                if @snapshot_groups[name][:worst_score] < page_struct.duration_ms
-                  @snapshot_groups.delete(name)
-                  below_limit = true
-                  break
-                end
+            @snapshot_groups[group_name] = {
+              worst_score: page_struct.duration_ms,
+              best_score: page_struct.duration_ms,
+              snapshots: [page_struct]
+            }
+            if @snapshot_groups.size > config.max_snapshot_groups
+              group_keys = @snapshot_groups.keys
+              group_keys.sort_by! do |key|
+                @snapshot_groups[key][:worst_score]
               end
-            end
-            if below_limit
-              @snapshot_groups[group_name] = {
-                worst_score: page_struct.duration_ms,
-                best_score: page_struct.duration_ms,
-                snapshots: [page_struct]
-              }
+              group_keys.reverse!
+              group_keys.pop(group_keys.size - config.max_snapshot_groups)
+              @snapshot_groups = @snapshot_groups.slice(*group_keys)
             end
           else
             snapshots = group[:snapshots]
-            below_limit = snapshots.size < config.max_snapshots_per_group
-            if !below_limit
-              if snapshots[-1].duration_ms < page_struct.duration_ms
-                snapshots.slice!(-1)
-                below_limit = true
-              end
+            snapshots << page_struct
+            snapshots.sort_by!(&:duration_ms)
+            snapshots.reverse!
+            if snapshots.size > config.max_snapshots_per_group
+              snapshots.pop(snapshots.size - config.max_snapshots_per_group)
             end
-            if below_limit
-              snapshots << page_struct
-              snapshots.sort_by!(&:duration_ms)
-              snapshots.reverse!
-              group[:worst_score] = snapshots[0].duration_ms
-              group[:best_score] = snapshots[-1].duration_ms
-            end
+            group[:worst_score] = snapshots[0].duration_ms
+            group[:best_score] = snapshots[-1].duration_ms
           end
         end
       end

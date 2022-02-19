@@ -94,6 +94,58 @@ RSpec.shared_examples "snapshots storage" do |store|
       expect(store.snapshots_group('group4').size).to be == 0
     end
 
+    it 'deletes as many snapshot groups as needed to stay within the configured limit' do
+      config.max_snapshot_groups = 3
+      pstruct1 = page_class.new({}).tap { |s| s[:root].record_time(10.0) }
+      store.push_snapshot(pstruct1, 'group1', config)
+
+      pstruct2 = page_class.new({}).tap { |s| s[:root].record_time(20.0) }
+      store.push_snapshot(pstruct2, 'group2', config)
+
+      pstruct3 = page_class.new({}).tap { |s| s[:root].record_time(30.0) }
+      store.push_snapshot(pstruct3, 'group3', config)
+
+      expect(store.snapshots_overview.size).to eq(3)
+
+      config.max_snapshot_groups = 1
+
+      pstruct4 = page_class.new({}).tap { |s| s[:root].record_time(40.0) }
+      store.push_snapshot(pstruct4, 'group4', config)
+
+      worst_scores = store.snapshots_overview.map { |group| group[:worst_score] }
+      expect(worst_scores).to contain_exactly(40.0)
+      expect(store.snapshots_group('group1').size).to be == 0
+      expect(store.snapshots_group('group2').size).to be == 0
+      expect(store.snapshots_group('group3').size).to be == 0
+      expect(store.snapshots_group('group4').size).to be == 1
+
+      store.send(:wipe_snapshots_data)
+
+      config.max_snapshot_groups = 3
+      pstruct1 = page_class.new({}).tap { |s| s[:root].record_time(10.0) }
+      store.push_snapshot(pstruct1, 'group1', config)
+
+      pstruct2 = page_class.new({}).tap { |s| s[:root].record_time(20.0) }
+      store.push_snapshot(pstruct2, 'group2', config)
+
+      pstruct3 = page_class.new({}).tap { |s| s[:root].record_time(30.0) }
+      store.push_snapshot(pstruct3, 'group3', config)
+
+      expect(store.snapshots_overview.size).to eq(3)
+
+      config.max_snapshot_groups = 1
+
+      pstruct4 = page_class.new({}).tap { |s| s[:root].record_time(5.0) }
+      store.push_snapshot(pstruct4, 'group4', config)
+
+      worst_scores = store.snapshots_overview.map { |group| group[:worst_score] }
+      expect(worst_scores).to contain_exactly(30.0)
+      expect(store.snapshots_group('group1').size).to be == 0
+      expect(store.snapshots_group('group2').size).to be == 0
+      expect(store.snapshots_group('group3').size).to be == 1
+      expect(store.snapshots_group('group4').size).to be == 0
+    end
+
     it 'deletes the snapshot of the best perf in the group when the per-group limit is exceeded' do
       config.max_snapshots_per_group = 2
       pstruct1 = page_class.new({}).tap { |s| s[:root].record_time(10.0) }
@@ -116,6 +168,50 @@ RSpec.shared_examples "snapshots storage" do |store|
 
       durations = store.snapshots_group('group1').map { |s| s[:duration] }
       expect(durations).to contain_exactly(30.0, 20.0)
+    end
+
+    it 'deletes as many snapshot in the group as needed to stay within the configured limit per group' do
+      config.max_snapshots_per_group = 3
+      pstruct1 = page_class.new({}).tap { |s| s[:root].record_time(10.0) }
+      store.push_snapshot(pstruct1, 'group1', config)
+
+      pstruct2 = page_class.new({}).tap { |s| s[:root].record_time(20.0) }
+      store.push_snapshot(pstruct2, 'group1', config)
+
+      pstruct3 = page_class.new({}).tap { |s| s[:root].record_time(30.0) }
+      store.push_snapshot(pstruct3, 'group1', config)
+
+      expect(store.snapshots_group('group1').size).to eq(3)
+
+      config.max_snapshots_per_group = 1
+
+      pstruct4 = page_class.new({}).tap { |s| s[:root].record_time(40.0) }
+      store.push_snapshot(pstruct4, 'group1', config)
+
+      durations = store.snapshots_group('group1').map { |s| s[:duration] }
+      expect(durations).to contain_exactly(40.0)
+
+      store.send(:wipe_snapshots_data)
+
+      config.max_snapshots_per_group = 3
+      pstruct1 = page_class.new({}).tap { |s| s[:root].record_time(10.0) }
+      store.push_snapshot(pstruct1, 'group1', config)
+
+      pstruct2 = page_class.new({}).tap { |s| s[:root].record_time(20.0) }
+      store.push_snapshot(pstruct2, 'group1', config)
+
+      pstruct3 = page_class.new({}).tap { |s| s[:root].record_time(30.0) }
+      store.push_snapshot(pstruct3, 'group1', config)
+
+      expect(store.snapshots_group('group1').size).to eq(3)
+
+      config.max_snapshots_per_group = 1
+
+      pstruct4 = page_class.new({}).tap { |s| s[:root].record_time(5.0) }
+      store.push_snapshot(pstruct4, 'group1', config)
+
+      durations = store.snapshots_group('group1').map { |s| s[:duration] }
+      expect(durations).to contain_exactly(30.0)
     end
   end
 

@@ -164,26 +164,32 @@ unviewed_ids: #{get_unviewed_ids(user)}
           end
 
           local do_save = true
-          if redis.call("ZCARD", overview_zset_key) > groups_limit then
+          local overview_size = redis.call("ZCARD", overview_zset_key)
+          while (overview_size > groups_limit) do
             local lowest_group = redis.call("ZRANGE", overview_zset_key, 0, 0)[1]
             redis.call("ZREM", overview_zset_key, lowest_group)
-            do_save = lowest_group ~= group_name
-            if do_save then
+            if lowest_group == group_name then
+              do_save = false
+            else
               local lowest_group_zset_key = prefix .. "-mp-group-snapshot-zset-key-" .. lowest_group
               local lowest_group_hash_key = prefix .. "-mp-group-snapshot-hash-key-" .. lowest_group
               redis.call("DEL", lowest_group_zset_key, lowest_group_hash_key)
             end
+            overview_size = overview_size - 1
           end
 
           if do_save then
             redis.call("ZADD", group_zset_key, score, id)
-            if redis.call("ZCARD", group_zset_key) > per_group_limit then
+            local group_size = redis.call("ZCARD", group_zset_key)
+            while (group_size > per_group_limit) do
               local lowest_snapshot_id = redis.call("ZRANGE", group_zset_key, 0, 0)[1]
               redis.call("ZREM", group_zset_key, lowest_snapshot_id)
-              do_save = lowest_snapshot_id ~= id
-              if do_save then
+              if lowest_snapshot_id == id then
+                do_save = false
+              else
                 redis.call("HDEL", group_hash_key, lowest_snapshot_id)
               end
+              group_size = group_size - 1
             end
             if do_save then
               redis.call("HSET", group_hash_key, id, bytes)
@@ -274,10 +280,14 @@ unviewed_ids: #{get_unviewed_ids(user)}
       end
 
       def group_snapshot_zset_key(group_name)
+        # if you change this key, remember to change it in the LUA script in
+        # the push_snapshot method as well
         "#{@prefix}-mp-group-snapshot-zset-key-#{group_name}"
       end
 
       def group_snapshot_hash_key(group_name)
+        # if you change this key, remember to change it in the LUA script in
+        # the push_snapshot method as well
         "#{@prefix}-mp-group-snapshot-hash-key-#{group_name}"
       end
 
@@ -331,7 +341,7 @@ unviewed_ids: #{get_unviewed_ids(user)}
       def wipe_snapshots_data
         keys = redis.keys(group_snapshot_hash_key('*'))
         keys += redis.keys(group_snapshot_zset_key('*'))
-        pipeline.del(
+        redis.del(
           keys,
           snapshot_overview_zset_key,
           snapshot_counter_key
