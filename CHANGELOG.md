@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.3.4 - 2022-02-23
+
+- [FEATURE] Add cookie path support for subfolder sites
+- [FIX] Remove deprecated uses of Redis#pipelined
+
 ## 2.3.3 - 2021-08-30
 
 - [FEATURE] Introduce `pp=flamegraph_mode`
