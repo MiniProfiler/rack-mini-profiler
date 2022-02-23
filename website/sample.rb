@@ -30,11 +30,36 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
   def get_unviewed_ids(*args)
   end
 
-  def fetch_snapshots(batch_size: 200, &blk)
-    if @snapshots
-      @snapshots.each_slice(batch_size) { |batch| blk.call(batch) }
-      return
+  def fetch_snapshots_overview
+    overview = {}
+    snapshots.shuffle.each do |ss|
+      group_name = "#{ss[:request_method]} #{ss[:request_path]}"
+      group = overview[group_name]
+      if group
+        group[:worst_score] = ss.duration_ms if ss.duration_ms > group[:worst_score]
+        group[:best_score] = ss.duration_ms if ss.duration_ms < group[:best_score]
+        group[:snapshots_count] += 1
+      else
+        overview[group_name] = {
+          worst_score: ss.duration_ms,
+          best_score: ss.duration_ms,
+          snapshots_count: 1
+        }
+      end
     end
+    overview
+  end
+
+  def fetch_snapshots_group(group_name)
+    snapshots.select do |snapshot|
+      group_name == "#{snapshot[:request_method]} #{snapshot[:request_path]}"
+    end
+  end
+
+  private
+
+  def snapshots
+    return @snapshots if @snapshots
     methods = %w[POST GET DELETE PUT PATCH]
     paths = %w[
       topics#index
@@ -53,11 +78,7 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
         ((Time.now.to_f - @time_units.sample * @time_multipliers.sample) * 1000).round
       )
     end
-    @snapshots.each_slice(batch_size) { |batch| blk.call(batch) }
-    nil
   end
-
-  private
 
   def create_fake_snapshot(method, path, duration, started_at)
     page = Rack::MiniProfiler::TimerStruct::Page.new({

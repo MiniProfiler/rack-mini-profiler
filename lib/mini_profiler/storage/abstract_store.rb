@@ -45,79 +45,52 @@ module Rack
         raise NotImplementedError.new("should_take_snapshot? is not implemented")
       end
 
-      def push_snapshot(page_struct, config)
+      def push_snapshot(page_struct, group_name, config)
         raise NotImplementedError.new("push_snapshot is not implemented")
       end
 
-      def fetch_snapshots(batch_size: 200, &blk)
-        raise NotImplementedError.new("fetch_snapshots is not implemented")
+      # returns a hash where the keys are group names and the values
+      # are hashes that contain 3 keys:
+      #   1. `:worst_score` => the duration of the worst/slowest snapshot in the group (float)
+      #   2. `:best_score` => the duration of the best/fastest snapshot in the group (float)
+      #   3. `:snapshots_count` => the number of snapshots in the group (integer)
+      def fetch_snapshots_overview
+        raise NotImplementedError.new("fetch_snapshots_overview is not implemented")
       end
 
-      def snapshot_groups_overview
-        groups = {}
-        fetch_snapshots do |batch|
-          batch.each do |snapshot|
-            group_name = default_snapshot_grouping(snapshot)
-            hash = groups[group_name] ||= {}
-            hash[:snapshots_count] ||= 0
-            hash[:snapshots_count] += 1
-            if !hash[:worst_score] || hash[:worst_score] < snapshot.duration_ms
-              groups[group_name][:worst_score] = snapshot.duration_ms
-            end
-            if !hash[:best_score] || hash[:best_score] > snapshot.duration_ms
-              groups[group_name][:best_score] = snapshot.duration_ms
-            end
-          end
-        end
-        groups = groups.to_a
+      # @param group_name [String]
+      # @return [Array<Rack::MiniProfiler::TimerStruct::Page>] list of snapshots of the group. Blank array if the group doesn't exist.
+      def fetch_snapshots_group(group_name)
+        raise NotImplementedError.new("fetch_snapshots_group is not implemented")
+      end
+
+      def load_snapshot(id, group_name)
+        raise NotImplementedError.new("load_snapshot is not implemented")
+      end
+
+      def snapshots_overview
+        groups = fetch_snapshots_overview.to_a
         groups.sort_by! { |name, hash| hash[:worst_score] }
         groups.reverse!
         groups.map! { |name, hash| hash.merge(name: name) }
         groups
       end
 
-      def find_snapshots_group(group_name)
+      def snapshots_group(group_name)
+        snapshots = fetch_snapshots_group(group_name)
         data = []
-        fetch_snapshots do |batch|
-          batch.each do |snapshot|
-            snapshot_group_name = default_snapshot_grouping(snapshot)
-            if group_name == snapshot_group_name
-              data << {
-                id: snapshot[:id],
-                duration: snapshot.duration_ms,
-                sql_count: snapshot[:sql_count],
-                timestamp: snapshot[:started_at],
-                custom_fields: snapshot[:custom_fields]
-              }
-            end
-          end
+        snapshots.each do |snapshot|
+          data << {
+            id: snapshot[:id],
+            duration: snapshot.duration_ms,
+            sql_count: snapshot[:sql_count],
+            timestamp: snapshot[:started_at],
+            custom_fields: snapshot[:custom_fields]
+          }
         end
         data.sort_by! { |s| s[:duration] }
         data.reverse!
         data
-      end
-
-      def load_snapshot(id)
-        raise NotImplementedError.new("load_snapshot is not implemented")
-      end
-
-      private
-
-      def default_snapshot_grouping(snapshot)
-        group_name = rails_route_from_path(snapshot[:request_path], snapshot[:request_method])
-        group_name ||= snapshot[:request_path]
-        "#{snapshot[:request_method]} #{group_name}"
-      end
-
-      def rails_route_from_path(path, method)
-        if defined?(Rails) && defined?(ActionController::RoutingError)
-          hash = Rails.application.routes.recognize_path(path, method: method)
-          if hash && hash[:controller] && hash[:action]
-            "#{hash[:controller]}##{hash[:action]}"
-          end
-        end
-      rescue ActionController::RoutingError
-        nil
       end
     end
   end

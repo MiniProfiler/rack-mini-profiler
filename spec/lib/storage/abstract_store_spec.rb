@@ -1,25 +1,45 @@
 # frozen_string_literal: true
 
 describe Rack::MiniProfiler::AbstractStore do
-  def get_config
-    Rack::MiniProfiler::Config.default
-  end
+  TestStore = Class.new(Rack::MiniProfiler::AbstractStore) do
+    def fetch_snapshots_overview
+      overview = {}
+      snapshots.shuffle.each do |ss|
+        group_name = "#{ss[:request_method]} #{ss[:request_path]}"
+        group = overview[group_name]
+        if group
+          group[:worst_score] = ss.duration_ms if ss.duration_ms > group[:worst_score]
+          group[:best_score] = ss.duration_ms if ss.duration_ms < group[:best_score]
+          group[:snapshots_count] += 1
+        else
+          overview[group_name] = {
+            worst_score: ss.duration_ms,
+            best_score: ss.duration_ms,
+            snapshots_count: 1
+          }
+        end
+      end
+      overview
+    end
 
-  test_store = Class.new(Rack::MiniProfiler::AbstractStore) do
-    def fetch_snapshots(batch_size: 3, &blk)
-      blk.call([
-        get_page_struct("topics#index", "GET", 50.314, 4, f1: 15),
-        get_page_struct("topics#delete", "DELETE", 15.424, 7, f2: 'val'),
-        get_page_struct("topics#delete", "DELETE", 63.984, 13, f4: '1')
-      ])
-      blk.call([
-        get_page_struct("users#delete", "DELETE", 24.243, 9, f5: 98),
-        get_page_struct("users#delete", "DELETE", 831.4232, 15, f3: 82),
-        get_page_struct("/some/path", "POST", 75.3793, 20, f6: 10)
-      ])
+    def fetch_snapshots_group(group_name)
+      snapshots.select do |snapshot|
+        group_name == "#{snapshot[:request_method]} #{snapshot[:request_path]}"
+      end
     end
 
     private
+
+    def snapshots
+      @snapshots ||= [
+        get_page_struct("topics#index", "GET", 50.314, 4, f1: 15),
+        get_page_struct("topics#delete", "DELETE", 15.424, 7, f2: 'val'),
+        get_page_struct("topics#delete", "DELETE", 63.984, 13, f4: '1'),
+        get_page_struct("users#delete", "DELETE", 24.243, 9, f5: 98),
+        get_page_struct("users#delete", "DELETE", 831.4232, 15, f3: 82),
+        get_page_struct("/some/path", "POST", 75.3793, 20, f6: 10)
+      ]
+    end
 
     def get_page_struct(path, method, duration, sql_count, **custom_fields)
       page = Rack::MiniProfiler::TimerStruct::Page.new({
@@ -31,35 +51,30 @@ describe Rack::MiniProfiler::AbstractStore do
       page[:custom_fields] = custom_fields
       page
     end
-  end.new
+  end
 
-  describe '#snapshot_groups_overview' do
-    let(:groups) { test_store.snapshot_groups_overview }
+  let(:test_store) { TestStore.new }
 
-    it 'groups snapshots by request method and request path' do
-      expect(groups.size).to eq(4)
-      expect(groups.map { |g| g[:name] }).to eq(%w[
-        DELETE\ users#delete
-        POST\ /some/path
-        DELETE\ topics#delete
-        GET\ topics#index
-      ])
+  describe '#snapshots_overview' do
+    let(:groups) { test_store.snapshots_overview }
+
+    it 'returns an array of hashes' do
+      groups.each do |group|
+        expect(group).to be_instance_of(Hash)
+        expect(group.keys).to contain_exactly(:worst_score, :best_score, :name, :snapshots_count)
+      end
     end
 
     it 'sorts groups from worst to best' do
       expect(groups.map { |g| g[:worst_score] }).to eq([831.4232, 75.3793, 63.984, 50.314])
     end
-
-    it 'includes best_score' do
-      expect(groups.map { |g| g[:best_score] }).to eq([24.243, 75.3793, 15.424, 50.314])
-    end
   end
 
-  describe '#find_snapshots_group' do
-    let(:g1) { test_store.find_snapshots_group("DELETE users#delete") }
-    let(:g2) { test_store.find_snapshots_group("POST /some/path") }
-    let(:g3) { test_store.find_snapshots_group("DELETE topics#delete") }
-    let(:g4) { test_store.find_snapshots_group("GET topics#index") }
+  describe '#snapshots_group' do
+    let(:g1) { test_store.snapshots_group("DELETE users#delete") }
+    let(:g2) { test_store.snapshots_group("POST /some/path") }
+    let(:g3) { test_store.snapshots_group("DELETE topics#delete") }
+    let(:g4) { test_store.snapshots_group("GET topics#index") }
 
     it 'finds group by name' do
       expect(g1.size).to eq(2)

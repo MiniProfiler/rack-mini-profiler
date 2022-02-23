@@ -1,13 +1,18 @@
 # frozen_string_literal: true
 
 describe Rack::MiniProfiler::RedisStore do
+  let(:config) { Rack::MiniProfiler::Config.default }
+  let(:page_class) { Rack::MiniProfiler::TimerStruct::Page }
   let(:store) { Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4) }
-  let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
-                        Rack::MiniProfiler::TimerStruct::Page.new({})] }
 
   before do
     store.send(:redis).flushdb
   end
+
+  let(:page_structs) { [Rack::MiniProfiler::TimerStruct::Page.new({}),
+                        Rack::MiniProfiler::TimerStruct::Page.new({})] }
+
+  include_examples "snapshots storage", Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4)
 
   context 'establishing a connection to something other than the default' do
     describe "connection" do
@@ -153,112 +158,94 @@ describe Rack::MiniProfiler::RedisStore do
     end
   end
 
-  describe '#push_snapshot' do
-    # testing implementation details here (specifically the LUA script
-    # in the push_snapshot method). If you've changed the script and
-    # these tests start failing, it probably makes sense to remove them
-    # entirely.
-    it 'keeps the worst snapshots and respects the config limit' do
-      store.send(:wipe_snapshots_data)
-
-      config = Rack::MiniProfiler::Config.default
-      config.snapshots_limit = 3
-      pstruct_class = Rack::MiniProfiler::TimerStruct::Page
-      pstruct1 = pstruct_class.new({}).tap { |s| s[:root].record_time(30) }
-      pstruct2 = pstruct_class.new({}).tap { |s| s[:root].record_time(20) }
-      pstruct3 = pstruct_class.new({}).tap { |s| s[:root].record_time(40) }
-      pstruct4 = pstruct_class.new({}).tap { |s| s[:root].record_time(10) }
-      pstruct5 = pstruct_class.new({}).tap { |s| s[:root].record_time(50) }
-
-      store.push_snapshot(pstruct1, config)
-      store.push_snapshot(pstruct2, config)
-      store.push_snapshot(pstruct3, config)
-      store.push_snapshot(pstruct4, config)
-      store.push_snapshot(pstruct5, config)
-
-      redis = store.send(:redis)
-      expect(redis.hkeys(store.send(:snapshot_hash_key))).to contain_exactly(
-        pstruct1[:id],
-        pstruct3[:id],
-        pstruct5[:id]
-      )
-      expect(redis.zrange(store.send(:snapshot_zset_key), 0, -1)).to contain_exactly(
-        pstruct1[:id],
-        pstruct3[:id],
-        pstruct5[:id]
-      )
-    end
-  end
-
-  describe '#fetch_snapshots' do
+  describe '#fetch_snapshots_group' do
     # testing implementation details; feel free to remove
     # if/when it becomes irrelevant
-    it 'deletes keys of corrupt/invalid snapshots' do
-      store.send(:wipe_snapshots_data)
+    it 'deletes corrupt/invalid snapshots' do
+      config.max_snapshots_per_group = 3
+      page1 = page_class.new({}).tap { |s| s[:root].record_time(1.0) }
+      store.push_snapshot(page1, 'group1', config)
 
-      page = Rack::MiniProfiler::TimerStruct::Page.new({})
-      page[:root].record_time(400)
-      store.push_snapshot(page, Rack::MiniProfiler::Config.default)
+      page2 = page_class.new({}).tap { |s| s[:root].record_time(2.0) }
+      store.push_snapshot(page2, 'group1', config)
 
-      corrupt_page = Rack::MiniProfiler::TimerStruct::Page.new({})
-      corrupt_page[:root].record_time(100)
-      store.push_snapshot(corrupt_page, Rack::MiniProfiler::Config.default)
+      snapshots = store.fetch_snapshots_group('group1')
+      expect(snapshots.map { |s| s[:id] }).to contain_exactly(
+        page1[:id],
+        page2[:id]
+      )
+      overview = store.snapshots_overview
+      expect(overview.size).to eq(1)
+      expect(overview.first[:worst_score]).to eq(2.0)
 
+      # reach to redis and shuffle the data so it becomes corrupted and
+      # snapshot fails to load
       redis = store.send(:redis)
-      # reach to redis and shuffle the data so it
-      # becomes corrupted and snapshot fails to load
       redis.hset(
-        store.send(:snapshot_hash_key),
-        corrupt_page[:id],
+        store.send(:group_snapshot_hash_key, 'group1'),
+        page2[:id],
         redis.hget(
-          store.send(:snapshot_hash_key),
-          corrupt_page[:id]
+          store.send(:group_snapshot_hash_key, 'group1'),
+          page2[:id]
         ).b.split('').shuffle.join
       )
 
-      calls = 0
-      fetched_snapshots = []
-      store.fetch_snapshots(batch_size: 1) do |snapshots|
-        calls += 1
-        fetched_snapshots.concat(snapshots)
-      end
-      expect(calls).to eq(1)
-      expect(fetched_snapshots.size).to eq(1)
-      expect(fetched_snapshots.first[:id]).to eq(page[:id])
-      expect(redis.hkeys(store.send(:snapshot_hash_key))).to eq([page[:id]])
-      expect(redis.zrange(store.send(:snapshot_zset_key), 0, -1)).to eq([page[:id]])
+      snapshots = store.fetch_snapshots_group('group1')
+      expect(snapshots.map { |s| s[:id] }).to contain_exactly(page1[:id])
+
+      overview = store.snapshots_overview
+      expect(overview.size).to eq(1)
+      expect(overview.first[:worst_score]).to eq(1.0)
+
+      redis.hset(
+        store.send(:group_snapshot_hash_key, 'group1'),
+        page1[:id],
+        redis.hget(
+          store.send(:group_snapshot_hash_key, 'group1'),
+          page1[:id]
+        ).b.split('').shuffle.join
+      )
+
+      snapshots = store.fetch_snapshots_group('group1')
+      expect(snapshots.size).to eq(0)
+
+      overview = store.snapshots_overview
+      expect(overview.size).to eq(0)
+      expect(redis.hgetall(store.send(:group_snapshot_hash_key, 'group1'))).to eq({})
+      expect(redis.zrange(store.send(:group_snapshot_zset_key, 'group1'), 0, -1)).to eq([])
     end
   end
 
   describe '#load_snapshot' do
-    # testing some implementation details
-    # feel free to remove if this becomes
-    # irrelevant
+    # testing some implementation details feel free to remove if this
+    # becomes irrelevant
     it 'deletes corrupt/invalid snapshots' do
       store.send(:wipe_snapshots_data)
 
       corrupt_page = Rack::MiniProfiler::TimerStruct::Page.new({})
       corrupt_page[:root].record_time(100)
-      store.push_snapshot(corrupt_page, Rack::MiniProfiler::Config.default)
+      store.push_snapshot(corrupt_page, 'group1', Rack::MiniProfiler::Config.default)
 
       redis = store.send(:redis)
-      # reach to redis and shuffle the data so it
-      # becomes corrupted and snapshot fails to load
+      # reach to redis and shuffle the data so it becomes corrupted
+      # and snapshot fails to load
       redis.hset(
-        store.send(:snapshot_hash_key),
+        store.send(:group_snapshot_hash_key, 'group1'),
         corrupt_page[:id],
         redis.hget(
-          store.send(:snapshot_hash_key),
+          store.send(:group_snapshot_hash_key, 'group1'),
           corrupt_page[:id]
         ).b.split('').shuffle.join
       )
 
-      loaded = store.load_snapshot(corrupt_page[:id])
+      loaded = store.load_snapshot(corrupt_page[:id], 'group1')
       expect(loaded).to eq(nil)
-      expect(redis.hkeys(store.send(:snapshot_hash_key))).to eq([])
-      expect(redis.zrange(store.send(:snapshot_zset_key), 0, -1)).to eq([])
+      overview = store.snapshots_overview
+      expect(overview.size).to eq(0)
+      snapshots = store.fetch_snapshots_group('group1')
+      expect(snapshots.size).to eq(0)
+      expect(redis.hgetall(store.send(:group_snapshot_hash_key, 'group1'))).to eq({})
+      expect(redis.zrange(store.send(:group_snapshot_zset_key, 'group1'), 0, -1)).to eq([])
     end
   end
-
-  include_examples "snapshots storage", Rack::MiniProfiler::RedisStore.new(db: 2, expires_in: 4)
 end

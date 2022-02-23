@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 describe Rack::MiniProfiler::MemoryStore do
+  let(:config) { Rack::MiniProfiler::Config.default }
+  let(:page_class) { Rack::MiniProfiler::TimerStruct::Page }
+
+  include_examples "snapshots storage", Rack::MiniProfiler::MemoryStore.new
 
   context 'page struct' do
 
@@ -84,6 +88,4 @@ describe Rack::MiniProfiler::MemoryStore do
 
     end
   end
-
-  include_examples "snapshots storage", Rack::MiniProfiler::MemoryStore.new
 end
