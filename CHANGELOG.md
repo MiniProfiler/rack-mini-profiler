@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.0 - 2022-02-24
+
+- PERF: Improve snapshots page performance (#518) (introduces breaking changes to the API of `AbstractStore`, `MemoryStore` and `RedisStore`, and removes the `snapshots_limit` config option.)
+
 ## 2.3.4 - 2022-02-23
 
 - [FEATURE] Add cookie path support for subfolder sites
