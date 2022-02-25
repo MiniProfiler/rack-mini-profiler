@@ -27,7 +27,7 @@ If you feel like taking on any of this start an issue and update us on your prog
 
 ## Installation
 
-Install/add to Gemfile in Ruby 2.5+
+Install/add to Gemfile in Ruby 2.6+
 
 ```ruby
 gem 'rack-mini-profiler'
