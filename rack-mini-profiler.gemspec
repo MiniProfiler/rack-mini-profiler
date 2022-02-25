@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     "CHANGELOG.md"
   ]
   s.add_runtime_dependency 'rack', '>= 1.2.0'
-  s.required_ruby_version = '>= 2.4.0'
+  s.required_ruby_version = '>= 2.5.0'
 
   s.metadata = {
     'source_code_uri' => Rack::MiniProfiler::SOURCE_CODE_URI,
