@@ -538,7 +538,8 @@ module Rack
 
         body << "\nBacktraces\n"
         exceptions.each_with_index do |e, i|
-          body << "##{i + 1}: #{e.class} - \"#{e.message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
+          message = Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.1") ? e.message : e.original_message
+          body << "##{i + 1}: #{e.class} - \"#{message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
         end
       end
       text_result(body)
