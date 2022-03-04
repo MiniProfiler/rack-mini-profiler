@@ -538,7 +538,7 @@ module Rack
 
         body << "\nBacktraces\n"
         exceptions.each_with_index do |e, i|
-          body << "##{i + 1}: #{e.class} - \"#{e.message}\"\n  #{e.backtrace.join("\n  ")}\n\n"
+          body << "##{i + 1}: #{e.class} - \"#{e.message.lines.first.chomp}\"\n  #{e.backtrace.join("\n  ")}\n\n"
         end
       end
       text_result(body)
