@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+gem "rails", ">= 6.0"
+
 require 'fileutils'
 require_relative './railtie_methods'
 
@@ -154,13 +156,7 @@ module Rack::MiniProfilerRails
       return false
     end
 
-    if ::Rails.version >= "5.0.0"
-      ::Rails.configuration.public_file_server.enabled
-    elsif ::Rails.version >= "4.2.0"
-      ::Rails.configuration.serve_static_files
-    else
-      ::Rails.configuration.serve_static_assets
-    end
+    ::Rails.configuration.public_file_server.enabled
   end
 
   class Railtie < ::Rails::Railtie
