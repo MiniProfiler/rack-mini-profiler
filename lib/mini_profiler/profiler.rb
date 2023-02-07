@@ -285,10 +285,12 @@ module Rack
 
         unless defined?(MemoryProfiler) && MemoryProfiler.respond_to?(:report)
           message = "Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"
-          _, _, body = @app.call(env)
+          status, headers, body = @app.call(env)
           body.close if body.respond_to? :close
 
-          return client_settings.handle_cookie(text_result(message))
+          return client_settings.handle_cookie(
+            text_result(message, status: status, headers: headers)
+          )
         end
 
         query_params = Rack::Utils.parse_nested_query(query_string)
@@ -347,7 +349,15 @@ module Rack
         env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
         if query_string =~ /pp=(async-)?flamegraph/ || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
-          if defined?(StackProf) && StackProf.respond_to?(:run)
+          unless defined?(StackProf) && StackProf.respond_to?(:run)
+            message = "Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"
+            status, headers, body = @app.call(env)
+            body.close if body.respond_to? :close
+
+            return client_settings.handle_cookie(
+              text_result(message, status: status, headers: headers)
+            )
+          else
             # do not sully our profile with mini profiler timings
             current.measure = false
             match_data      = query_string.match(/flamegraph_sample_rate=([\d\.]+)/)
@@ -642,9 +652,9 @@ module Rack
       text_result(body)
     end
 
-    def text_result(body)
-      headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
-      [200, headers, [body]]
+    def text_result(body, status: 200, headers: nil)
+      headers = (headers || {}).merge('Content-Type' => 'text/plain; charset=utf-8')
+      [status, headers, [body]]
     end
 
     def make_link(postfix, env)
