@@ -29,8 +29,7 @@ require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
 require 'mini_profiler/snapshots_transporter'
 require 'mini_profiler/profiler'
-require 'patches/sql_patches'
-require 'patches/net_patches'
+require 'mini_profiler/patches'
 
 if defined?(::Rails) && defined?(::Rails::VERSION) && ::Rails::VERSION::MAJOR.to_i >= 3
   require 'mini_profiler_rails/railtie'

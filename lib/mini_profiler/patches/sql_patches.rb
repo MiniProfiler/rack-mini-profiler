@@ -66,7 +66,7 @@ class SqlPatches
 
   def self.patch(patch_files = all_patch_files)
     patch_files.each do |patch_file|
-      require "patches/db/#{patch_file}"
+      require "mini_profiler/patches/db/#{patch_file}"
     end
   end
 end
