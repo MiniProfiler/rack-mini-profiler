@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sequel"
+
 module Sequel
   class Database
     alias_method :log_duration_original, :log_duration

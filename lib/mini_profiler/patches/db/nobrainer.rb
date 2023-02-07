@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-class Rack::MiniProfiler::NoBrainerProfiler
+require "nobrainer"
 
+class Rack::MiniProfiler::NoBrainerProfiler
   def on_query(env)
     if SqlPatches.should_measure?
       not_indexed = env[:criteria] && env[:criteria].where_present? &&

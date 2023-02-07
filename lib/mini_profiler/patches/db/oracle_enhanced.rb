@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "activerecord-oracle_enhanced-adapter"
+
 class ActiveRecord::Result
   alias_method :each_without_profiling, :each
   def each(&blk)

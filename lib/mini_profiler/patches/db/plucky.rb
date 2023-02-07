@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "plucky"
+
 # mongo_mapper patches
 # TODO: Include overrides for distinct, update, cursor, and create
 class Plucky::Query

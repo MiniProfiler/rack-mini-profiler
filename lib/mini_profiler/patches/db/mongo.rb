@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "mongo"
+
 # Mongo/Mongoid 5 patches
 class Mongo::Server::Connection
   def dispatch_with_timing(*args, &blk)
@@ -14,5 +16,4 @@ class Mongo::Server::Connection
   # TODO: change to Module#prepend as soon as Ruby 1.9.3 support is dropped
   alias_method :dispatch_without_timing, :dispatch
   alias_method :dispatch, :dispatch_with_timing
-
 end

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "mysql2"
+
 class Mysql2::Result
   module MiniProfiler
     def each(*args, &blk)

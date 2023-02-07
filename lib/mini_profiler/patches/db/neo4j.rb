@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "neo4j"
+
 class Neo4j::Core::Query
   alias_method :response_without_miniprofiler, :response
 

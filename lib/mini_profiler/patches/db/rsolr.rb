@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rsolvr"
+
 class RSolr::Connection
   alias_method :execute_without_profiling, :execute
   def execute_with_profiling(client, request_context)

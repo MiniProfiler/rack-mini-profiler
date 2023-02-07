@@ -2,6 +2,8 @@
 
 # The best kind of instrumentation is in the actual db provider, however we don't want to double instrument
 
+require "mysql2"
+
 class Mysql2::Result
   alias_method :each_without_profiling, :each
   def each(*args, &blk)

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "riak-client"
+
 # riak-client 2.2.2 patches
 class Riak::Multiget
   class << self
@@ -18,7 +20,6 @@ class Riak::Multiget
 end
 
 class Riak::Client
-
   alias_method :buckets_without_profiling, :buckets
   def buckets(options = {}, &blk)
     profile("buckets #{options}") { buckets_without_profiling(options, &blk) }
@@ -101,5 +102,4 @@ class Riak::Client
 
     result
   end
-
 end

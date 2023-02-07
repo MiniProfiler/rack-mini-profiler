@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "pg"
+
 # PG patches, keep in mind exec and async_exec have a exec{|r| } semantics that is yet to be implemented
 class PG::Result
   alias_method :each_without_profiling, :each
