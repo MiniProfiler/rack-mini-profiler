@@ -43,7 +43,15 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run(
+          lambda do |_env|
+            [
+              201,
+              { 'Content-Type' => 'text/html', 'X-CUSTOM' => "1" },
+              [+'<html><body><h1>Hi</h1></body></html>'],
+            ]
+          end
+        )
       end
     end
 
@@ -59,29 +67,37 @@ describe Rack::MiniProfiler do
     describe 'with profile-memory query' do
       it 'should return memory_profiler error message' do
         do_get(pp: 'profile-memory')
+
         expect(last_response.body).to eq(
           'Please install the memory_profiler gem and require it: add gem \'memory_profiler\' to your Gemfile'
         )
+        expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
+        expect(last_response.headers['X-CUSTOM']).to eq('1')
+        expect(last_response.status).to eq(201)
       end
     end
 
     describe 'with flamegraph query' do
       it 'should return stackprof error message' do
-        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
         do_get(pp: 'flamegraph')
         expect(last_response.body).to eq(
           'Please install the stackprof gem and require it: add gem \'stackprof\' to your Gemfile'
         )
+        expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
+        expect(last_response.headers['X-CUSTOM']).to eq('1')
+        expect(last_response.status).to eq(201)
       end
     end
 
     describe 'with async-flamegraph query' do
       it 'should return stackprof error message' do
-        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
         do_get(pp: 'async-flamegraph')
         expect(last_response.body).to eq(
           'Please install the stackprof gem and require it: add gem \'stackprof\' to your Gemfile'
         )
+        expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
+        expect(last_response.headers['X-CUSTOM']).to eq('1')
+        expect(last_response.status).to eq(201)
       end
     end
   end
