@@ -16,6 +16,52 @@ describe Rack::MiniProfiler do
     Zlib::GzipReader.new(StringIO.new(last_response.body)).read
   end
 
+  describe '/rack-mini-profiler/requests page' do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+      end
+    end
+    it 'is an empty page' do
+      get '/rack-mini-profiler/requests', {}, 'HTTP_ACCEPT_ENCODING' => 'gzip, compress'
+
+      expect(last_response.body).to include('<title>Rack::MiniProfiler Requests</title>')
+      expect(last_response.body).to match('.*<body>\n  <script .*></script>\n</body>/*')
+    end
+  end
+
+  describe '?pp=help page' do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+      end
+    end
+    it 'shows commands' do
+      do_get(pp: 'help')
+
+      expect(last_response.body).to include('<title>Rack::MiniProfiler Help</title>')
+      expect(last_response.body).to include("help")
+      expect(last_response.body).to include("env")
+      expect(last_response.body).to include("skip")
+      expect(last_response.body).to include("no-backtrace")
+      expect(last_response.body).to include("normal-backtrace")
+      expect(last_response.body).to include("full-backtrace")
+      expect(last_response.body).to include("disable")
+      expect(last_response.body).to include("enable")
+      expect(last_response.body).to include("profile-gc")
+      expect(last_response.body).to include("profile-memory")
+      expect(last_response.body).to include("flamegraph")
+      expect(last_response.body).to include("async-flamegraph")
+      expect(last_response.body).to include("flamegraph&flamegraph_sample_rate=1")
+      expect(last_response.body).to include("flamegraph&flamegraph_mode=cpu")
+      expect(last_response.body).to include("flamegraph_embed")
+      expect(last_response.body).to include("trace-exceptions")
+      expect(last_response.body).to include("analyze-memory")
+    end
+  end
+
   shared_examples 'should not affect a skipped requests' do
     it 'should not affect a skipped requests' do
       do_get(pp: 'skip')
