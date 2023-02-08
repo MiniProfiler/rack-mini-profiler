@@ -33,7 +33,7 @@ Install/add to Gemfile in Ruby 2.6+
 gem 'rack-mini-profiler'
 ```
 
-NOTE: Be sure to require rack_mini_profiler below the `pg` and `mysql` gems in your Gemfile. rack_mini_profiler will identify these gems if they are loaded to insert instrumentation. If included too early no SQL will show up.
+NOTE: If you're using `pg`, `mysql`, or other database client gems, be sure to require the correct [patches](lib/mini_profiler/patches/db) (eg. `require 'mini_profiler/patches/db/mysql'`) to receive instrumentation support. Instrumentation patching for net/http must also be applied manually via `require 'mini_profiler/patches/net/http'`.
 
 You can also include optional libraries to enable additional features.
 ```ruby
@@ -139,29 +139,6 @@ require 'rack-mini-profiler'
 Rack::MiniProfiler.profile_method(Hanami::View::Rendering::Partial, :render) { "Render partial #{@options[:partial]}" }
 
 use Rack::MiniProfiler
-```
-
-#### Patching ActiveRecord
-
-A typical web application spends a lot of time querying the database. rack_mini_profiler will detect the ORM that is available
-and apply patches to properly collect query statistics.
-
-To make this work, declare the orm's gem before declaring `rack-mini-profiler` in the `Gemfile`:
-
-```ruby
-gem 'pg'
-gem 'mongoid'
-gem 'rack-mini-profiler'
-
-```
-
-If you wish to override this behavior, the environment variable `RACK_MINI_PROFILER_PATCH` is available.
-
-```bash
-export RACK_MINI_PROFILER_PATCH="pg,mongoid"
-# or
-export RACK_MINI_PROFILER_PATCH="false"
-# initializers/rack_profiler.rb: SqlPatches.patch %w(mongo)
 ```
 
 ### Flamegraphs

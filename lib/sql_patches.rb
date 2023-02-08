@@ -43,6 +43,8 @@ class SqlPatches
   end
 
   def self.patch(patch_files = all_patch_files)
+    warn("SqlPatches.patch is deprecated. Please patch libraries manually.")
+
     patch_files.each do |patch_file|
       require "mini_profiler/patches/db/#{patch_file}"
     end
