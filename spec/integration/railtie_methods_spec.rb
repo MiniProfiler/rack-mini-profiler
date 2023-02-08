@@ -4,12 +4,13 @@ require 'securerandom'
 require 'rack/test'
 require File.expand_path('../../../lib/mini_profiler_rails/railtie_methods', __FILE__)
 
-def to_seconds(array)
-  array.map! { |n, s, f| [n, s / 1000.0, f / 1000.0] }
-  array
-end
-
 describe Rack::MiniProfilerRailsMethods do
+  def to_seconds(array)
+    array.map! { |n, s, f| [n, s / 1000.0, f / 1000.0] }
+    array
+  end
+
+
   describe '#render_notification_handler' do
     before do
       allow(Process).to receive(:clock_gettime).and_return(0)
