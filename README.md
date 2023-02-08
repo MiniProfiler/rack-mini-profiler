@@ -449,6 +449,7 @@ snapshots_redact_sql_queries|`true`|When this is true, SQL queries will be redac
 snapshots_transport_gzip_requests|`false`|Make the snapshots transporter gzip the requests it makes to `snapshots_transport_destination_url`.
 content_security_policy_nonce|Rails: Current nonce<br>Rack: nil|Set the content security policy nonce to use when inserting MiniProfiler's script block.
 enable_hotwire_turbo_drive_support| `false` | Enable support for Hotwire TurboDrive page transitions.
+profile_parameter|`'pp'`|The query parameter used to interact with this gem.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 
