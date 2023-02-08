@@ -48,5 +48,3 @@ class SqlPatches
     end
   end
 end
-
-SqlPatches.patch
