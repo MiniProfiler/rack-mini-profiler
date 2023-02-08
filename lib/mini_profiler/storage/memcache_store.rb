@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'dalli'
+
 module Rack
   class MiniProfiler
     class MemcacheStore < AbstractStore
@@ -8,7 +10,6 @@ module Rack
       MAX_RETRIES        = 10
 
       def initialize(args = nil)
-        require 'dalli' unless defined? Dalli
         args ||= {}
 
         @prefix = args[:prefix] || "MPMemcacheStore"
