@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'erb'
+
 module Rack
   class MiniProfiler
 

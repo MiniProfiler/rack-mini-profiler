@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 module Rack
   class MiniProfiler
     module TimerStruct

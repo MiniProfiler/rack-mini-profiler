@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 module Rack
   class MiniProfiler
     class FileStore < AbstractStore

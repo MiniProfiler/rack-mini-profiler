@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 require 'cgi'
+require 'json'
+require 'erb'
+
+require 'mini_profiler/timer_struct'
+require 'mini_profiler/storage'
+require 'mini_profiler/config'
+require 'mini_profiler/profiling_methods'
+require 'mini_profiler/context'
+require 'mini_profiler/client_settings'
+require 'mini_profiler/gc_profiler'
+require 'mini_profiler/snapshots_transporter'
 
 module Rack
   class MiniProfiler
