@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rack-test'
   s.add_development_dependency 'dalli'
-  s.add_development_dependency 'rspec', '~> 3.6.0'
+  s.add_development_dependency 'rspec', '~> 3.12.0'
   s.add_development_dependency 'redis'
   s.add_development_dependency 'sassc'
   s.add_development_dependency 'stackprof'
