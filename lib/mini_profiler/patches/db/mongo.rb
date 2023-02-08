@@ -5,9 +5,9 @@ require "mongo"
 # Mongo/Mongoid 5 patches
 class Mongo::Server::Connection
   def dispatch_with_timing(*args, &blk)
-    return dispatch_without_timing(*args, &blk) unless SqlPatches.should_measure?
+    return dispatch_without_timing(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
-    result, _record = SqlPatches.record_sql(args[0][0].payload.inspect) do
+    result, _record = Rack::MiniProfiler::Sql.record_sql(args[0][0].payload.inspect) do
       dispatch_without_timing(*args, &blk)
     end
     result

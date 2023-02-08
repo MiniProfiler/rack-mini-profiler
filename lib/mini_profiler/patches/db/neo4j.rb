@@ -9,7 +9,7 @@ class Neo4j::Core::Query
     return @response if @response
     start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     rval = response_without_miniprofiler
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     Rack::MiniProfiler.record_sql(to_cypher, elapsed_time)
     rval
   end

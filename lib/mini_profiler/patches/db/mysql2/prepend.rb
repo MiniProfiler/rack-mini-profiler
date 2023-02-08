@@ -9,7 +9,7 @@ class Mysql2::Result
 
       start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result       = super
-      elapsed_time = SqlPatches.elapsed_time(start)
+      elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
 
       @miniprofiler_sql_id.report_reader_duration(elapsed_time)
       result
@@ -22,9 +22,9 @@ end
 class Mysql2::Client
   module MiniProfiler
     def query(*args, &blk)
-      return super unless SqlPatches.should_measure?
+      return super unless Rack::MiniProfiler::Sql.should_measure?
 
-      result, record = SqlPatches.record_sql(args[0]) do
+      result, record = Rack::MiniProfiler::Sql.record_sql(args[0]) do
         super
       end
       result.instance_variable_set("@miniprofiler_sql_id", record) if result

@@ -29,11 +29,11 @@ class Plucky::Query
   private
 
   def profile_database_operation(method, message, *args, &blk)
-    return self.send("#{method.id2name}_without_profiling", *args, &blk) unless SqlPatches.should_measure?
+    return self.send("#{method.id2name}_without_profiling", *args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = self.send("#{method.id2name}_without_profiling", *args, &blk)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
 
     query_message = "#{@collection.name}.#{method.id2name} => #{message}"
     ::Rack::MiniProfiler.record_sql(query_message, elapsed_time)

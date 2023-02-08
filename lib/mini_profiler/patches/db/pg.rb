@@ -24,7 +24,7 @@ class PG::Result
   def mp_report_sql(&block)
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = yield
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     @miniprofiler_sql_id.report_reader_duration(elapsed_time)
     result
   end
@@ -50,16 +50,16 @@ class PG::Connection
     # dont leak more than 10k ever
     @prepare_map = {} if @prepare_map.length > 1000
 
-    return prepare_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+    return prepare_without_profiling(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
     prepare_without_profiling(*args, &blk)
   end
 
   def exec(*args, &blk)
-    return exec_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+    return exec_without_profiling(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_without_profiling(*args, &blk)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
@@ -68,11 +68,11 @@ class PG::Connection
 
   if Gem::Version.new(PG::VERSION) >= Gem::Version.new("1.1.0")
     def exec_params(*args, &blk)
-      return exec_params_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+      return exec_params_without_profiling(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
       start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result       = exec_params_without_profiling(*args, &blk)
-      elapsed_time = SqlPatches.elapsed_time(start)
+      elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
       record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
@@ -81,11 +81,11 @@ class PG::Connection
   end
 
   def exec_prepared(*args, &blk)
-    return exec_prepared_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+    return exec_prepared_without_profiling(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_prepared_without_profiling(*args, &blk)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
     record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
@@ -95,11 +95,11 @@ class PG::Connection
   end
 
   def send_query_prepared(*args, &blk)
-    return send_query_prepared_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+    return send_query_prepared_without_profiling(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = send_query_prepared_without_profiling(*args, &blk)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     mapped       = args[0]
     mapped       = @prepare_map[mapped] || args[0] if @prepare_map
     record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
@@ -109,11 +109,11 @@ class PG::Connection
   end
 
   def async_exec(*args, &blk)
-    return async_exec_without_profiling(*args, &blk) unless SqlPatches.should_measure?
+    return async_exec_without_profiling(*args, &blk) unless Rack::MiniProfiler::Sql.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = exec_without_profiling(*args, &blk)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
     result.instance_variable_set("@miniprofiler_sql_id", record) if result
 

@@ -1,28 +1,6 @@
 # frozen_string_literal: true
 
 class SqlPatches
-  def self.correct_version?(required_version, klass)
-    Gem::Dependency.new('', required_version).match?('', klass::VERSION)
-  rescue NameError
-    false
-  end
-
-  def self.record_sql(statement, parameters = nil, &block)
-    start  = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result = yield
-    record = ::Rack::MiniProfiler.record_sql(statement, elapsed_time(start), parameters)
-    [result, record]
-  end
-
-  def self.should_measure?
-    current = ::Rack::MiniProfiler.current
-    (current && current.measure)
-  end
-
-  def self.elapsed_time(start_time)
-    ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time).to_f * 1000).round(1)
-  end
-
   def self.patch_rails?
     ::Rack::MiniProfiler.patch_rails?
   end

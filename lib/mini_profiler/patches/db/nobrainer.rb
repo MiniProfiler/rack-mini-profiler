@@ -4,7 +4,7 @@ require "nobrainer"
 
 class Rack::MiniProfiler::NoBrainerProfiler
   def on_query(env)
-    if SqlPatches.should_measure?
+    if Rack::MiniProfiler::Sql.should_measure?
       not_indexed = env[:criteria] && env[:criteria].where_present? &&
                         !env[:criteria].where_indexed? &&
                         !env[:criteria].model.try(:perf_warnings_disabled)

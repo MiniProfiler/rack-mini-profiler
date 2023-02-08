@@ -9,7 +9,7 @@ class ActiveRecord::Result
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = each_without_profiling(&blk)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     @miniprofiler_sql_id.report_reader_duration(elapsed_time)
 
     result
@@ -51,7 +51,7 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = yield
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
     record       = ::Rack::MiniProfiler.record_sql(sql, elapsed_time)
 
     # Some queries return the row count as a Fixnum and will be frozen, don't save a record
@@ -65,7 +65,7 @@ class ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter
   # When skip_schema_queries is set to true, it will ignore any query of the types
   # in the schema_query_types array
   def mp_should_measure?(name)
-    return false unless SqlPatches.should_measure?
+    return false unless Rack::MiniProfiler::Sql.should_measure?
 
     !(Rack::MiniProfiler.config.skip_schema_queries && SCHEMA_QUERY_TYPES.include?(name))
   end

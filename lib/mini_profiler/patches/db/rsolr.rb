@@ -5,11 +5,11 @@ require "rsolvr"
 class RSolr::Connection
   alias_method :execute_without_profiling, :execute
   def execute_with_profiling(client, request_context)
-    return execute_without_profiling(client, request_context) unless SqlPatches.should_measure?
+    return execute_without_profiling(client, request_context) unless Rack::MiniProfiler::Sql.should_measure?
 
     start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result       = execute_without_profiling(client, request_context)
-    elapsed_time = SqlPatches.elapsed_time(start)
+    elapsed_time = Rack::MiniProfiler::Sql.elapsed_time(start)
 
     data = "#{request_context[:method].upcase} #{request_context[:uri]}".dup
     if (request_context[:method] == :post) && request_context[:data]
