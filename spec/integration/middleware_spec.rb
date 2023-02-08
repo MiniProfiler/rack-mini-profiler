@@ -218,4 +218,28 @@ describe Rack::MiniProfiler do
     end
   end
 
+  context 'when using a different profile parameter' do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+      end
+    end
+
+    def with_profile_parameter(param)
+      old_param = Rack::MiniProfiler.config.profile_parameter
+      Rack::MiniProfiler.config.profile_parameter = param
+      yield
+    ensure
+      Rack::MiniProfiler.config.profile_parameter = old_param
+    end
+
+
+    it 'show help page' do
+      with_profile_parameter('profile') do
+        do_get(profile: 'help')
+        expect(last_response.body).to include('This is the help menu')
+      end
+    end
+  end
 end
