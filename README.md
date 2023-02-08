@@ -416,40 +416,40 @@ Rack::MiniProfiler.config.start_hidden = true
 ```
 The available configuration options are:
 
-Option|Default|Description
--------|---|--------
-pre_authorize_cb|Rails: dev only<br>Rack: always on|A lambda callback that returns true to make mini_profiler visible on a given request.
-position|`'top-left'`|Display mini_profiler on `'top-right'`, `'top-left'`, `'bottom-right'` or `'bottom-left'`.
-skip_paths|`[]`|An array of paths that skip profiling. Both `String` and `Regexp` are acceptable in the array.
-skip_schema_queries|Rails dev: `true`<br>Othwerwise: `false`|`true` to skip schema queries.
-auto_inject|`true`|`true` to inject the miniprofiler script in the page.
-backtrace_ignores|`[]`|Regexes of lines to be removed from backtraces.
-backtrace_includes|Rails: `[/^\/?(app\|config\|lib\|test)/]`<br>Rack: `[]`|Regexes of lines to keep in backtraces.
-backtrace_remove|rails: `Rails.root`<br>Rack: `nil`|A string or regex to remove part of each line in the backtrace.
-toggle_shortcut|Alt+P|Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
-start_hidden|`false`|`false` to make mini_profiler visible on page load.
-backtrace_threshold_ms|`0`|Minimum SQL query elapsed time before a backtrace is recorded.
-flamegraph_sample_rate|`0.5`|How often to capture stack traces for flamegraphs in milliseconds.
-flamegraph_mode|`:wall`|The [StackProf mode](https://github.com/tmm1/stackprof#all-options) to pass to `StackProf.run`.
-base_url_path|`'/mini-profiler-resources/'`|Path for assets; added as a prefix when naming assets and sought when responding to requests.
-cookie_path|`'/'`|Set-Cookie header path for profile cookie
-collapse_results|`true`|If multiple timing results exist in a single page, collapse them till clicked.
-max_traces_to_show|20|Maximum number of mini profiler timing blocks to show on one page
-html_container|`body`|The HTML container (as a jQuery selector) to inject the mini_profiler UI into
-show_total_sql_count|`false`|Displays the total number of SQL executions.
-enable_advanced_debugging_tools|`false`|Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords. Defaults to `true` in development.
-assets_url|`nil`|See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
-snapshot_every_n_requests|`-1`|Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
-max_snapshot_groups|`50`|Determines how many snapshot groups Mini Profiler is allowed to keep.
-max_snapshots_per_group|`15`|Determines how many snapshots per group Mini Profiler is allowed to keep.
-snapshot_hidden_custom_fields|`[]`|Each snapshot custom field will have a dedicated column in the UI by default. Use this config to exclude certain custom fields from having their own columns.
-snapshots_transport_destination_url|`nil`|Set this config to a valid URL to enable snapshots transporter which will `POST` snapshots to the given URL. The transporter requires `snapshots_transport_auth_key` config to be set as well.
-snapshots_transport_auth_key|`nil`|`POST` requests made by the snapshots transporter to the destination URL will have a `Mini-Profiler-Transport-Auth` header with the value of this config. Make sure you use a secure and random key for this config.
-snapshots_redact_sql_queries|`true`|When this is true, SQL queries will be redacted from sampling snapshots, but the backtrace and duration of each SQL query will be saved with the snapshot to keep debugging performance issues possible.
-snapshots_transport_gzip_requests|`false`|Make the snapshots transporter gzip the requests it makes to `snapshots_transport_destination_url`.
-content_security_policy_nonce|Rails: Current nonce<br>Rack: nil|Set the content security policy nonce to use when inserting MiniProfiler's script block.
-enable_hotwire_turbo_drive_support| `false` | Enable support for Hotwire TurboDrive page transitions.
-profile_parameter|`'pp'`|The query parameter used to interact with this gem.
+Option                              | Default                                                 | Description
+------------------------------------|---------------------------------------------------------|------------------------
+pre_authorize_cb                    | Rails: dev only<br>Rack: always on                      | A lambda callback that returns true to make mini_profiler visible on a given request.
+position                            | `'top-left'`                                            | Display mini_profiler on `'top-right'`, `'top-left'`, `'bottom-right'` or `'bottom-left'`.
+skip_paths                          | `[]`                                                    | An array of paths that skip profiling. Both `String` and `Regexp` are acceptable in the array.
+skip_schema_queries                 | Rails dev: `true`<br>Othwerwise: `false`                | `true` to skip schema queries.
+auto_inject                         | `true`                                                  | `true` to inject the miniprofiler script in the page.
+backtrace_ignores                   | `[]`                                                    | Regexes of lines to be removed from backtraces.
+backtrace_includes                  | Rails: `[/^\/?(app\|config\|lib\|test)/]`<br>Rack: `[]` | Regexes of lines to keep in backtraces.
+backtrace_remove                    | rails: `Rails.root`<br>Rack: `nil`                      | A string or regex to remove part of each line in the backtrace.
+toggle_shortcut                     | Alt+P                                                   | Keyboard shortcut to toggle the mini_profiler's visibility. See [jquery.hotkeys](https://github.com/jeresig/jquery.hotkeys).
+start_hidden                        | `false`                                                 | `false` to make mini_profiler visible on page load.
+backtrace_threshold_ms              | `0`                                                     | Minimum SQL query elapsed time before a backtrace is recorded.
+flamegraph_sample_rate              | `0.5`                                                   | How often to capture stack traces for flamegraphs in milliseconds.
+flamegraph_mode                     | `:wall`                                                 | The [StackProf mode](https://github.com/tmm1/stackprof#all-options) to pass to `StackProf.run`.
+base_url_path                       | `'/mini-profiler-resources/'`                           | Path for assets; added as a prefix when naming assets and sought when responding to requests.
+cookie_path                         | `'/'`                                                   | Set-Cookie header path for profile cookie
+collapse_results                    | `true`                                                  | If multiple timing results exist in a single page, collapse them till clicked.
+max_traces_to_show                  | 20                                                      | Maximum number of mini profiler timing blocks to show on one page
+html_container                      | `body`                                                  | The HTML container (as a jQuery selector) to inject the mini_profiler UI into
+show_total_sql_count                | `false`                                                 | Displays the total number of SQL executions.
+enable_advanced_debugging_tools     | `false`                                                 | Enables sensitive debugging tools that can be used via the UI. In production we recommend keeping this disabled as memory and environment debugging tools can expose contents of memory that may contain passwords. Defaults to `true` in development.
+assets_url                          | `nil`                                                   | See the "Register MiniProfiler's assets in the Rails assets pipeline" section above.
+snapshot_every_n_requests           | `-1`                                                    | Determines how frequently snapshots are taken. See the "Snapshots Sampling" above for more details.
+max_snapshot_groups                 | `50`                                                    | Determines how many snapshot groups Mini Profiler is allowed to keep.
+max_snapshots_per_group             | `15`                                                    | Determines how many snapshots per group Mini Profiler is allowed to keep.
+snapshot_hidden_custom_fields       | `[]`                                                    | Each snapshot custom field will have a dedicated column in the UI by default. Use this config to exclude certain custom fields from having their own columns.
+snapshots_transport_destination_url | `nil`                                                   | Set this config to a valid URL to enable snapshots transporter which will `POST` snapshots to the given URL. The transporter requires `snapshots_transport_auth_key` config to be set as well.
+snapshots_transport_auth_key        | `nil`                                                   | `POST` requests made by the snapshots transporter to the destination URL will have a `Mini-Profiler-Transport-Auth` header with the value of this config. Make sure you use a secure and random key for this config.
+snapshots_redact_sql_queries        | `true`                                                  | When this is true, SQL queries will be redacted from sampling snapshots, but the backtrace and duration of each SQL query will be saved with the snapshot to keep debugging performance issues possible.
+snapshots_transport_gzip_requests   | `false`                                                 | Make the snapshots transporter gzip the requests it makes to `snapshots_transport_destination_url`.
+content_security_policy_nonce       | Rails: Current nonce<br>Rack: nil                       | Set the content security policy nonce to use when inserting MiniProfiler's script block.
+enable_hotwire_turbo_drive_support  | `false`                                                 | Enable support for Hotwire TurboDrive page transitions.
+profile_parameter                   | `'pp'`                                                  | The query parameter used to interact with this gem.
 
 ### Using MiniProfiler with `Rack::Deflate` middleware
 
