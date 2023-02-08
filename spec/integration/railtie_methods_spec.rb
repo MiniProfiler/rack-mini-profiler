@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'securerandom'
 require 'rack/test'
 require File.expand_path('../../../lib/mini_profiler_rails/railtie_methods', __FILE__)
 
