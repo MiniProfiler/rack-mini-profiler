@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 require 'cgi'
+require 'json'
+require 'erb'
+
+require 'mini_profiler/timer_struct'
+require 'mini_profiler/storage'
+require 'mini_profiler/config'
+require 'mini_profiler/profiling_methods'
+require 'mini_profiler/context'
+require 'mini_profiler/client_settings'
+require 'mini_profiler/gc_profiler'
+require 'mini_profiler/snapshots_transporter'
 
 module Rack
   class MiniProfiler
@@ -27,11 +38,11 @@ module Rack
       end
 
       def resources_root
-        @resources_root ||= ::File.expand_path("../../html", __FILE__)
+        @resources_root ||= ::File.expand_path("../html", __FILE__)
       end
 
       def share_template
-        @share_template ||= ERB.new(::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__))))
+        @share_template ||= ERB.new(::File.read(::File.expand_path("html/share.html", ::File.dirname(__FILE__))))
       end
 
       def current
@@ -773,7 +784,7 @@ This is the help menu of the <a href='#{Rack::MiniProfiler::SOURCE_CODE_URI}'>ra
       end
 
       # TODO : cache this snippet
-      script = ::File.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
+      script = ::File.read(::File.expand_path('html/profile_handler.js', ::File.dirname(__FILE__)))
       # replace the variables
       settings.each do |k, v|
         regex = Regexp.new("\\{#{k.to_s}\\}")

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'digest'
+require 'securerandom'
+require 'redis'
 
 module Rack
   class MiniProfiler
@@ -270,7 +272,6 @@ unviewed_ids: #{get_unviewed_ids(user)}
 
       def redis
         @redis_connection ||= begin
-          require 'redis' unless defined? Redis
           Redis.new(@args)
         end
       end
