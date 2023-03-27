@@ -483,6 +483,20 @@ if JSON.const_defined?(:Pure)
 end
 ```
 
+## Using MiniProfiler with Heroku Redis
+
+If you are using Heroku Redis, you may need to add the following to your `config/initializers/mini_profiler.rb`, in order to get Mini Profiler to work:
+
+```ruby
+if Rails.env.production?
+  Rack::MiniProfiler.config.storage_options = { 
+    url: ENV["REDIS_URL"],
+    ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }
+  }
+  Rack::MiniProfiler.config.storage = Rack::MiniProfiler::RedisStore
+end
+```
+
 ## Development
 
 If you want to contribute to this project, that's great, thank you! You can run the following rake task:
