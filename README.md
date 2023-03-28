@@ -452,37 +452,6 @@ HTML in already compressed response body MiniProfiler will suppress compression 
 
 If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
 
-
-## Rails 2.X support
-
-To get MiniProfiler working with Rails 2.3.X you need to do the initialization manually as well as monkey patch away an incompatibility between activesupport and json_pure.
-
-Add the following code to your environment.rb (or just in a specific environment such as development.rb) for initialization and configuration of MiniProfiler.
-
-```ruby
-# configure and initialize MiniProfiler
-require 'rack-mini-profiler'
-c = ::Rack::MiniProfiler.config
-c.pre_authorize_cb = lambda { |env|
-  Rails.env.development? || Rails.env.production?
-}
-tmp = Rails.root.to_s + "/tmp/miniprofiler"
-FileUtils.mkdir_p(tmp) unless File.exist?(tmp)
-c.storage_options = {:path => tmp}
-c.storage = ::Rack::MiniProfiler::FileStore
-config.middleware.use(::Rack::MiniProfiler)
-::Rack::MiniProfiler.profile_method(ActionController::Base, :process) {|action| "Executing action: #{action}"}
-::Rack::MiniProfiler.profile_method(ActionView::Template, :render) {|x,y| "Rendering: #{path_without_format_and_extension}"}
-
-# monkey patch away an activesupport and json_pure incompatability
-# http://pivotallabs.com/users/alex/blog/articles/1332-monkey-patch-of-the-day-activesupport-vs-json-pure-vs-ruby-1-8
-if JSON.const_defined?(:Pure)
-  class JSON::Pure::Generator::State
-    include ActiveSupport::CoreExtensions::Hash::Except
-  end
-end
-```
-
 ## Development
 
 If you want to contribute to this project, that's great, thank you! You can run the following rake task:
