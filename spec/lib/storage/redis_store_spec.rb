@@ -153,7 +153,7 @@ describe Rack::MiniProfiler::RedisStore do
   describe 'diagnostics' do
     it "returns useful info" do
       res = store.diagnostics('a')
-      expected = "Redis prefix: MPRedisStore\nRedis location: 127.0.0.1:6379 db: 2\nunviewed_ids: []\n"
+      expected = "Redis prefix: MPRedisStore\nRedis location: localhost:6379 db: 2\nunviewed_ids: []\n"
       expect(res).to eq(expected)
     end
   end
