@@ -3,6 +3,6 @@
 if Rails.env.development?
   require "rack-mini-profiler"
 
-  # initialization is skipped so trigger it
+  # The initializer was required late, so initialize it manually.
   Rack::MiniProfilerRails.initialize!(Rails.application)
 end
