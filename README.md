@@ -462,7 +462,7 @@ if Rails.env.production?
 end
 ```
 
-Look at https://help.heroku.com/HC0F8CUS/redis-connection-issues for more information.
+The above code snippet is [Heroku's officially suggested workaround](Look at https://help.heroku.com/HC0F8CUS/redis-connection-issues).
 
 ## Special query strings
 
