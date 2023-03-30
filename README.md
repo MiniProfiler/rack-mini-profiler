@@ -101,7 +101,7 @@ be loaded outright, and an attempt to re-initialize it manually will raise an ex
 Then run the generator which will set up rack-mini-profiler in development:
 
 ```bash
-bundle exec rails g rack_mini_profiler:install
+bundle exec rails g rack_profiler:install
 ```
 
 #### Rack Builder
@@ -452,6 +452,7 @@ HTML in already compressed response body MiniProfiler will suppress compression 
 
 If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
 
+
 ## Rails 2.X support
 
 To get MiniProfiler working with Rails 2.3.X you need to do the initialization manually as well as monkey patch away an incompatibility between activesupport and json_pure.
@@ -495,6 +496,8 @@ if Rails.env.production?
   Rack::MiniProfiler.config.storage = Rack::MiniProfiler::RedisStore
 end
 ```
+
+Look at https://help.heroku.com/HC0F8CUS/redis-connection-issues for more information.
 
 ## Development
 
