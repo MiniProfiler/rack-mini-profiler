@@ -101,7 +101,7 @@ be loaded outright, and an attempt to re-initialize it manually will raise an ex
 Then run the generator which will set up rack-mini-profiler in development:
 
 ```bash
-bundle exec rails g rack_profiler:install
+bundle exec rails g rack_mini_profiler:install
 ```
 
 #### Rack Builder
@@ -451,7 +451,6 @@ HTML in already compressed response body MiniProfiler will suppress compression 
 ## Special query strings
 
 If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
-
 
 ## Rails 2.X support
 

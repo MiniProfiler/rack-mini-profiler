@@ -100,7 +100,7 @@ describe Rack::MiniProfiler do
     end
 
     describe 'typical usage' do
-      before(:all) do
+      before do
         start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         clock_set(start)
         Rack::MiniProfiler.create_current
@@ -122,7 +122,7 @@ describe Rack::MiniProfiler do
         @inner = @outer.children[0]
       end
 
-      after(:all) do
+      after do
         clock_back_to_normal
       end
 
