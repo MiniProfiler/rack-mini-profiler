@@ -448,6 +448,22 @@ which means it will run after `Rack::Deflate` on response processing. To prevent
 HTML in already compressed response body MiniProfiler will suppress compression by setting
 `identity` encoding in `Accept-Encoding` request header.
 
+### Using MiniProfiler with Heroku Redis
+
+If you are using Heroku Redis, you may need to add the following to your `config/initializers/mini_profiler.rb`, in order to get Mini Profiler to work:
+
+```ruby
+if Rails.env.production?
+  Rack::MiniProfiler.config.storage_options = { 
+    url: ENV["REDIS_URL"],
+    ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }
+  }
+  Rack::MiniProfiler.config.storage = Rack::MiniProfiler::RedisStore
+end
+```
+
+The above code snippet is [Heroku's officially suggested workaround](https://help.heroku.com/HC0F8CUS/redis-connection-issues).
+
 ## Special query strings
 
 If you include the query string `pp=help` at the end of your request you will see the various options available. You can use these options to extend or contract the amount of diagnostics rack-mini-profiler gathers.
