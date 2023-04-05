@@ -486,8 +486,8 @@ Make sure to prepend `bundle exec` before any Rake tasks you run.
 You need Memcached and Redis services running for the specs.
 
 ```
-$ rake build
-$ rake spec
+$ bundle exec rake build
+$ bundle exec rake spec
 ```
 
 ## Licence
