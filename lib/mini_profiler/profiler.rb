@@ -349,15 +349,7 @@ module Rack
         env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
         if query_string =~ /pp=(async-)?flamegraph/ || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
-          unless defined?(StackProf) && StackProf.respond_to?(:run)
-            message = "Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"
-            status, headers, body = @app.call(env)
-            body.close if body.respond_to? :close
-
-            return client_settings.handle_cookie(
-              text_result(message, status: status, headers: headers)
-            )
-          else
+          if defined?(StackProf) && StackProf.respond_to?(:run)
             # do not sully our profile with mini profiler timings
             current.measure = false
             match_data      = query_string.match(/flamegraph_sample_rate=([\d\.]+)/)
@@ -384,6 +376,14 @@ module Rack
             ) do
               status, headers, body = @app.call(env)
             end
+          else
+            message = "Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"
+            status, headers, body = @app.call(env)
+            body.close if body.respond_to? :close
+
+            return client_settings.handle_cookie(
+              text_result(message, status: status, headers: headers)
+            )
           end
         elsif path == '/rack-mini-profiler/requests'
           blank_page_html = <<~HTML
