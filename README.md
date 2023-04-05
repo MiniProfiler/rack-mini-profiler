@@ -1,6 +1,8 @@
 # rack-mini-profiler
 
-Middleware that displays speed badge for every html page. Designed to work both in production and in development.
+Middleware that displays speed badge for every HTML page, along with (optional) flamegraphs and memory profiling. Designed to work both in production and in development.
+
+![Screenshot 2023-04-05 at 3 13 52 PM](https://user-images.githubusercontent.com/845662/229996538-0f2d9c48-23d9-4d53-a1de-8b4c84c87fbd.png)
 
 #### Features
 
