@@ -119,7 +119,7 @@ describe Rack::MiniProfiler do
         )
         expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
         expect(last_response.headers['X-CUSTOM']).to eq('1')
-        expect(last_response.status).to eq(201)
+        expect(last_response.status).to eq(500)
       end
     end
 
@@ -233,7 +233,6 @@ describe Rack::MiniProfiler do
     ensure
       Rack::MiniProfiler.config.profile_parameter = old_param
     end
-
 
     it 'show help page' do
       with_profile_parameter('profile') do

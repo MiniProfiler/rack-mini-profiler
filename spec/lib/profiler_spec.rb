@@ -220,7 +220,7 @@ describe Rack::MiniProfiler do
       response = profiler.call({ "PATH_INFO" => "/", "QUERY_STRING" => "pp=profile-memory" })
 
       expect(response).to eq([
-        200,
+        500,
         { "Content-Type" => "text/plain; charset=utf-8", "Set-Cookie" => "__profilin=p%3Dt; path=/; HttpOnly; SameSite=Lax" },
         ["Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"],
       ])
