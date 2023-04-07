@@ -166,6 +166,14 @@ export RACK_MINI_PROFILER_PATCH="false"
 # initializers/rack_profiler.rb: SqlPatches.patch %w(mongo)
 ```
 
+#### Patching Net::HTTP
+
+Other than databases, `rack-mini-profiler` applies a patch to `Net::HTTP`. You may want to disable this patch:
+
+```bash
+export RACK_MINI_PROFILER_PATCH_NET_HTTP="false"
+```
+
 ### Flamegraphs
 
 To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-in-ruby-miniprofiler), add the [**stackprof**](https://rubygems.org/gems/stackprof) gem to your Gemfile.
