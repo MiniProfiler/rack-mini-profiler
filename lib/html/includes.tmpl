@@ -141,7 +141,7 @@
 
 <script id="linksTemplate" type="text/x-dot-tmpl">
   <a href="{{= MiniProfiler.shareUrl(it.page.id) }}" class="profiler-share-profiler-results" target="_blank">share</a>
-  <a href="{{= MiniProfiler.moreUrl(it.timing.name) }}" class="profiler-more-actions">more</a>
+  <a href="{{= MiniProfiler.moreUrl(it.page.name) }}" class="profiler-more-actions">more</a>
   {{? it.page.has_flamegraph}}
     <a href="{{= MiniProfiler.flamegraphUrl(it.page.id) }}" class="profiler-show-flamegraph" target="_blank">flamegraph</a>
   {{?}}
