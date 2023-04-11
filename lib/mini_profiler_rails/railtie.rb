@@ -75,7 +75,8 @@ module Rack::MiniProfilerRails
         next if !should_measure?
 
         current = Rack::MiniProfiler.current
-        description = "Executing action: #{payload[:action]}"
+        controller_name = payload[:controller].sub(/Controller\z/, '').downcase
+        description = "Executing: #{controller_name}##{payload[:action]}"
         Thread.current[get_key(payload)] = current.current_timer
         Rack::MiniProfiler.current.current_timer = current.current_timer.add_child(description)
       end
