@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.1.0 - 2023-04-11
+
+- [FEATURE] The query parameter that RMP uses (by default, pp) is now configurable [#553](https://github.com/MiniProfiler/rack-mini-profiler/pull/553)
+- [FEATURE] You can now opt-out of the Net::HTTP patch by using RACK_MINI_PROFILER_PATCH_NET_HTTP="false"
+- [FIX] Error responses now include header values from the app, and stackprof not installed message now has correct content [#547](https://github.com/MiniProfiler/rack-mini-profiler/pull/547)
+- [FIX] RMP pages now have more valid HTML, with title elements [#562](https://github.com/MiniProfiler/rack-mini-profiler/pull/562)
+- [BREAKING CHANGE] Ruby 2.4 and Ruby 2.5 are no longer supported.
+- [FIX] Now works with apps that don't otherwise require erb [#531](https://github.com/MiniProfiler/rack-mini-profiler/pull/531)
+- [DOCS] Added Heroku Redis instructions
+- [DEPRECATION] We are changing the name of the generators to `rack_mini_profiler`, e.g. `rack_mini_profiler:install` [#550](https://github.com/MiniProfiler/rack-mini-profiler/pull/550)
+
 ## 3.0.0 - 2022-02-24
 
 - PERF: Improve snapshots page performance (#518) (introduces breaking changes to the API of `AbstractStore`, `MemoryStore` and `RedisStore`, and removes the `snapshots_limit` config option.)
