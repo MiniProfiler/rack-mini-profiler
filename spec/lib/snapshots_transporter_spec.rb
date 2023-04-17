@@ -138,22 +138,16 @@ describe Rack::MiniProfiler::SnapshotsTransporter do
   it 'can gzip requests' do
     snapshot = Rack::MiniProfiler::TimerStruct::Page.new({})
     json = { snapshots: [snapshot] }.to_json
-    compressed = compress(json)
-    stub_request(:post, url)
-      .with(
-        body: compressed,
-        headers: {
-          'Mini-Profiler-Transport-Auth' => 'somepasswordhere',
-          'Content-Encoding' => 'gzip'
-        }
-      )
-      .to_return(status: 200, body: "", headers: {})
+    stub_request(:post, url).to_return(status: 200, body: "", headers: {})
     expect(gzip_transporter.gzip_requests).to eq(true)
     gzip_transporter.ship(snapshot)
     gzip_transporter.flush_buffer
     expect(gzip_transporter.buffer.size).to eq(0)
-    expect(compressed.bytes.size < json.bytes.size).to eq(true)
-    expect(decompress(compressed)).to eq(json)
+    assert_requested(:post, url,
+      headers: {
+        'Mini-Profiler-Transport-Auth' => 'somepasswordhere',
+        'Content-Encoding' => 'gzip'
+      }, times: 1) { |req| decompress(req.body) == json }
   end
 
   def compress(body)
