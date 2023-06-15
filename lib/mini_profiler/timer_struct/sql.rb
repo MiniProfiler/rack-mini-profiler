@@ -51,12 +51,14 @@ module Rack
           )
         end
 
-        def report_reader_duration(elapsed_ms)
+        def report_reader_duration(elapsed_ms, row_count = nil, class_name = nil)
           return if @reported
           @reported = true
           self[:duration_milliseconds]                += elapsed_ms
           @parent[:sql_timings_duration_milliseconds] += elapsed_ms
           @page[:duration_milliseconds_in_sql]        += elapsed_ms
+          self[:row_count] = self[:row_count].to_i + row_count if row_count
+          self[:class_name] = class_name if class_name
         end
 
         def trim_binds(binds)

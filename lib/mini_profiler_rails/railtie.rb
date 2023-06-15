@@ -114,6 +114,16 @@ module Rack::MiniProfilerRails
             Rack::MiniProfiler.binds_to_params(payload[:binds])
           )
         end
+
+        subscribe("instantiation.active_record") do |name, start, finish, id, payload|
+          next if !should_measure?
+
+          Rack::MiniProfiler.report_reader_duration(
+            (finish - start) * 1000,
+            payload[:record_count],
+            payload[:class_name]
+          )
+        end
       end
     end
     @already_initialized = true
