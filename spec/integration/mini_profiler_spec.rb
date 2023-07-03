@@ -162,6 +162,12 @@ describe Rack::MiniProfiler do
       expect(last_response.body).to include("<title>Rack::MiniProfiler Flamegraph</title>")
       expect(last_response.body).to include("var graph = {")
 
+      # Should have correct iframe URL when the base URL changes
+      get "/mini-profiler-resources/flamegraph?id=#{id}", nil, { 'SCRIPT_NAME' => '/my/base/url' }
+      expect(last_response).to be_ok
+      expect(last_response.body).to include("<title>Rack::MiniProfiler Flamegraph</title>")
+      expect(last_response.body).to include("iframeUrl = '/my/base/url/mini-profiler-resources/speedscope/")
+
       # Should not store/return flamegraph for regular requests
       get '/html'
       expect(last_response).to be_ok

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- [FIX] Include configured base path in speedscope iframe URL
+
 ## 3.1.0 - 2023-04-11
 
 - [FEATURE] The query parameter that RMP uses (by default, pp) is now configurable [#553](https://github.com/MiniProfiler/rack-mini-profiler/pull/553)
