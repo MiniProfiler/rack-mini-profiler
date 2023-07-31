@@ -462,7 +462,7 @@ module Rack
 
       if flamegraph && query_string =~ /#{@config.profile_parameter}=flamegraph/
         body.close if body.respond_to? :close
-        return client_settings.handle_cookie(self.flamegraph(flamegraph, path))
+        return client_settings.handle_cookie(self.flamegraph(flamegraph, path, env))
       elsif flamegraph # async-flamegraph
         page_struct[:has_flamegraph] = true
         page_struct[:flamegraph] = flamegraph
@@ -705,8 +705,9 @@ module Rack
       [200, headers, [html]]
     end
 
-    def flamegraph(graph, path)
+    def flamegraph(graph, path, env)
       headers = { 'Content-Type' => 'text/html' }
+      iframe_src = "#{public_base_path(env)}speedscope/index.html"
       html = <<~HTML
         <!DOCTYPE html>
         <html>
@@ -726,7 +727,7 @@ module Rack
               var iframe = document.createElement('IFRAME');
               iframe.setAttribute('id', 'speedscope-iframe');
               document.body.appendChild(iframe);
-              var iframeUrl = '#{@config.base_url_path}speedscope/index.html#profileURL=' + objUrl + '&title=' + 'Flamegraph for #{CGI.escape(path)}';
+              var iframeUrl = '#{iframe_src}#profileURL=' + objUrl + '&title=' + 'Flamegraph for #{CGI.escape(path)}';
               iframe.setAttribute('src', iframeUrl);
             </script>
           </body>
@@ -755,7 +756,7 @@ module Rack
     # * you have disabled auto append behaviour throught :auto_inject => false flag
     # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
     def get_profile_script(env)
-      path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+      path = public_base_path(env)
       version = MiniProfiler::ASSET_VERSION
       if @config.assets_url
         url = @config.assets_url.call('rack-mini-profiler.js', version, env)
@@ -887,7 +888,7 @@ module Rack
         return [404, {}, ["No flamegraph available for #{ERB::Util.html_escape(id)}"]]
       end
 
-      self.flamegraph(page_struct[:flamegraph], page_struct[:request_path])
+      self.flamegraph(page_struct[:flamegraph], page_struct[:request_path], env)
     end
 
     def rails_route_from_path(path, method)
@@ -944,6 +945,10 @@ module Rack
       end
       self.current = nil
       results
+    end
+
+    def public_base_path(env)
+      "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
     end
   end
 end
