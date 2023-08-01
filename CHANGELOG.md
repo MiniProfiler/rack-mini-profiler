@@ -1,8 +1,11 @@
 # CHANGELOG
 
-## Unreleased
+## 3.1.1 - 2023-08-01
 
-- [FIX] Include configured base path in speedscope iframe URL
+- [FIX] Include configured base path in speedscope iframe URL [#587](https://github.com/MiniProfiler/rack-mini-profiler/pull/587)
+- [FIX] Race condition starting CacheCleanupThread [#586](https://github.com/MiniProfiler/rack-mini-profiler/pull/586)
+- [FEATURE] Add controller name to description [#567](https://github.com/MiniProfiler/rack-mini-profiler/pull/567)
+- [FIX] 'more' link w/HTTPS [#574](https://github.com/MiniProfiler/rack-mini-profiler/pull/574)
 
 ## 3.1.0 - 2023-04-11
 
