@@ -23,6 +23,7 @@ module Rack
     class QuerySettings
       def initialize(query_string, profile_parameter, skip_paths, path)
         @query_string = query_string
+        @query_params = Rack::Utils.parse_nested_query(query_string)
 
         @profile_parameter = profile_parameter
         @skip_paths = skip_paths
@@ -66,6 +67,30 @@ module Rack
 
       def trace_exceptions?
         @query_string.match?(/#{@profile_parameter}=trace-exceptions/)
+      end
+
+      def flamegraph?
+        @query_string.match?(/pp=(async-)?flamegraph/ )
+      end
+
+      def flamegraph_sample_rate
+        match_data = @query_string.match(/flamegraph_sample_rate=([\d\.]+)/)
+        if match_data && !match_data[1].to_f.zero?
+          match_data[1].to_f
+        end
+      end
+
+      VALID_MODES = [:cpu, :wall, :object, :custom].freeze
+      def flamegraph_mode
+        mode_match_data = @query_string.match(/flamegraph_mode=([a-zA-Z]+)/)
+
+        if mode_match_data && VALID_MODES.include?(mode_match_data[1].to_sym)
+          mode_match_data[1].to_sym
+        end
+      end
+
+      def trace_exceptions_filter
+        @query_params['trace_exceptions_filter']
       end
     end
 
@@ -304,25 +329,14 @@ module Rack
         # Prevent response body from being compressed
         env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
-        if matches_action?('flamegraph', env) || matches_action?('async-flamegraph', env) || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
+        if query_settings.flamegraph? || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
           if defined?(StackProf) && StackProf.respond_to?(:run)
             # do not sully our profile with mini profiler timings
             current.measure = false
             match_data      = action_parameters(env)['flamegraph_sample_rate']
 
-            if match_data && !match_data[1].to_f.zero?
-              sample_rate = match_data[1].to_f
-            else
-              sample_rate = config.flamegraph_sample_rate
-            end
-
-            mode_match_data = action_parameters(env)['flamegraph_mode']
-
-            if mode_match_data && [:cpu, :wall, :object, :custom].include?(mode_match_data[1].to_sym)
-              mode = mode_match_data[1].to_sym
-            else
-              mode = config.flamegraph_mode
-            end
+            sample_rate = query_settings.flamegraph_sample_rate || config.flamegraph_sample_rate 
+            mode = query_settings.flamegraph_mode || config.flamegraph_mode
 
             ignore_gc_match_data = action_parameters(env)['flamegraph_ignore_gc']
 
@@ -372,8 +386,7 @@ module Rack
       if trace_exceptions
         body.close if body.respond_to? :close
 
-        query_params = action_parameters(env)
-        trace_exceptions_filter = query_params['trace_exceptions_filter']
+        trace_exceptions_filter = query_settings.trace_exceptions_filter
         if trace_exceptions_filter
           trace_exceptions_regex = Regexp.new(trace_exceptions_filter)
           exceptions.reject! { |ex| ex.class.name =~ trace_exceptions_regex }
