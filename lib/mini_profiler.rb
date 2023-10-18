@@ -198,7 +198,7 @@ module Rack
         skip_it = true
       end
 
-      if matches_action?('enable', env)
+      if matches_action?('enable', env) || manual_enable?(query_string: query_string)
         skip_it = false
         config.enabled = true
       end
@@ -675,6 +675,10 @@ module Rack
 
     def manual_disable?(query_string:, client_settings:)
       query_string.match?(/#{@config.profile_parameter}=disable/) || client_settings.disable_profiling?
+    end
+
+    def manual_enable?(query_string:)
+      query_string.match?(/#{@config.profile_parameter}=enable/)
     end
 
     def unauthorized?(client_settings)
