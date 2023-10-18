@@ -15,6 +15,50 @@ require 'mini_profiler/snapshots_transporter'
 
 module Rack
   class MiniProfiler
+    module HTML
+      def generate_html(page_struct, env, result_json = page_struct.to_json)
+        # double-assigning to suppress "assigned but unused variable" warnings
+        path = path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+        version = version = MiniProfiler::ASSET_VERSION
+        json = json = result_json
+        includes = includes = get_profile_script(env)
+        name = name = page_struct[:name]
+        duration = duration = page_struct.duration_ms.round(1).to_s
+
+        MiniProfiler.share_template.result(binding)
+      end
+
+      def serve_html(env)
+        path      = env['PATH_INFO'].sub('//', '/')
+        file_name = path.sub(@config.base_url_path, '')
+
+        return serve_results(env) if file_name.eql?('results')
+        return handle_snapshots_request(env) if file_name.eql?('snapshots')
+        return serve_flamegraph(env) if file_name.eql?('flamegraph')
+
+        resources_env = env.dup
+        resources_env['PATH_INFO'] = file_name
+
+        rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+        rack_file.call(resources_env)
+      end
+
+      BLANK_PAGE = <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Rack::MiniProfiler Requests</title>
+          </head>
+          <body>
+          </body>
+        </html>
+      HTML
+      def blank_page_html
+        BLANK_PAGE
+      end
+    end
+    include HTML
+
     class << self
 
       include Rack::MiniProfiler::ProfilingMethods
@@ -173,33 +217,6 @@ module Rack
         html = generate_html(page_struct, env)
         [200, { 'Content-Type' => 'text/html' }, [html]]
       end
-    end
-
-    def generate_html(page_struct, env, result_json = page_struct.to_json)
-      # double-assigning to suppress "assigned but unused variable" warnings
-      path = path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-      version = version = MiniProfiler::ASSET_VERSION
-      json = json = result_json
-      includes = includes = get_profile_script(env)
-      name = name = page_struct[:name]
-      duration = duration = page_struct.duration_ms.round(1).to_s
-
-      MiniProfiler.share_template.result(binding)
-    end
-
-    def serve_html(env)
-      path      = env['PATH_INFO'].sub('//', '/')
-      file_name = path.sub(@config.base_url_path, '')
-
-      return serve_results(env) if file_name.eql?('results')
-      return handle_snapshots_request(env) if file_name.eql?('snapshots')
-      return serve_flamegraph(env) if file_name.eql?('flamegraph')
-
-      resources_env = env.dup
-      resources_env['PATH_INFO'] = file_name
-
-      rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
-      rack_file.call(resources_env)
     end
 
     def current
@@ -397,18 +414,7 @@ module Rack
             )
           end
         elsif path == '/rack-mini-profiler/requests'
-          blank_page_html = <<~HTML
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>Rack::MiniProfiler Requests</title>
-              </head>
-              <body>
-              </body>
-            </html>
-          HTML
-
-          status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]]
+          status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html]]
         else
           status, headers, body = @app.call(env)
         end
