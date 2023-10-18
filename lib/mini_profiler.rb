@@ -165,26 +165,11 @@ module Rack
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      skip_it = matches_action?('skip', env) || (
-        @config.skip_paths &&
-        @config.skip_paths.any? do |p|
-          if p.instance_of?(String)
-            path.start_with?(p)
-          elsif p.instance_of?(Regexp)
-            p.match?(path)
-          end
-        end
-      )
-      if skip_it
+      if matches_action?('skip', env) || skip_via_parameter?(query_string) || skip_via_path?(path)
         return client_settings.handle_cookie(@app.call(env))
       end
 
-      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env))
-
-      if skip_it || (
-        @config.authorization_mode == :allow_authorized &&
-        !client_settings.has_valid_cookie?
-      )
+      if skip_via_preauthorize?(env) || unauthorized?(client_settings)
         if take_snapshot?(path)
           return client_settings.handle_cookie(take_snapshot(env, start))
         else
@@ -665,6 +650,33 @@ module Rack
       end
       self.current = nil
       results
+    end
+
+    def public_base_path(env)
+      "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
+    end
+
+    def skip_via_parameter?(query_string)
+      /#{@config.profile_parameter}=skip/.match?(query_string)
+    end
+
+    def skip_via_path?(path)
+      @config.skip_paths &&
+      @config.skip_paths.any? do |p|
+        if p.instance_of?(String)
+          path.start_with?(p)
+        elsif p.instance_of?(Regexp)
+          p.match?(path)
+        end
+      end
+    end
+
+    def skip_via_preauthorize?(env)
+      @config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)
+    end
+
+    def unauthorized?(client_settings)
+      @config.authorization_mode == :allow_authorized && !client_settings.has_valid_cookie?
     end
   end
 end
