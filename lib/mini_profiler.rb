@@ -45,28 +45,32 @@ module Rack
         end
       end
 
+      def profile_value
+        @query_params[@profile_parameter]
+      end
+
       def manual_enable?
-        @query_string.match?(/#{@profile_parameter}=enable/)
+        profile_value == 'enable'
       end
 
       def manual_disable?
-        @query_string.match?(/#{@profile_parameter}=disable/)
+        profile_value == 'disable'
       end
 
       def normal_backtrace?
-        @query_string.match?(/#{@profile_parameter}=normal-backtrace/)
+        profile_value == 'normal-backtrace'
       end
 
       def no_backtrace?
-        @query_string.match?(/#{@profile_parameter}=no-backtrace/)
+        profile_value == 'no-backtrace'
       end
 
       def full_backtrace?
-        @query_string.match?(/#{@profile_parameter}=full-backtrace/)
+        profile_value == 'full-backtrace'
       end
 
       def trace_exceptions?
-        @query_string.match?(/#{@profile_parameter}=trace-exceptions/)
+        profile_value == 'trace-exceptions'
       end
 
       def flamegraph?
