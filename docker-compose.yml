@@ -1,0 +1,6 @@
+# convenient way to start memcached for specs that need it: docker-compose up -d
+services:
+  memcached:
+    image: memcached
+    ports:
+      - "11211:11211"
