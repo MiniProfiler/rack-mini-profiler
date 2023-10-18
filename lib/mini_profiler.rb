@@ -45,11 +45,27 @@ module Rack
       end
 
       def manual_enable?
-        query_string.match?(/#{@config.profile_parameter}=enable/)
+        @query_string.match?(/#{@profile_parameter}=enable/)
       end
 
       def manual_disable?
-        query_string.match?(/#{@config.profile_parameter}=disable/)
+        @query_string.match?(/#{@profile_parameter}=disable/)
+      end
+
+      def normal_backtrace?
+        @query_string.match?(/#{@profile_parameter}=normal-backtrace/)
+      end
+
+      def no_backtrace?
+        @query_string.match?(/#{@profile_parameter}=no-backtrace/)
+      end
+
+      def full_backtrace?
+        @query_string.match?(/#{@profile_parameter}=full-backtrace/)
+      end
+
+      def trace_exceptions?
+        @query_string.match?(/#{@profile_parameter}=trace-exceptions/)
       end
     end
 
@@ -249,12 +265,13 @@ module Rack
 
       MiniProfiler.create_current(env, @config)
 
-      if matches_action?('normal-backtrace', env)
+      if query_settings.normal_backtrace?
         client_settings.backtrace_level = ClientSettings::BACKTRACE_DEFAULT
       elsif matches_action?('no-backtrace', env)
+      elsif query_settings.no_backtrace?
         current.skip_backtrace = true
         client_settings.backtrace_level = ClientSettings::BACKTRACE_NONE
-      elsif matches_action?('full-backtrace', env) || client_settings.backtrace_full?
+      elsif query_settings.full_backtrace? || client_settings.backtrace_full?
         current.full_backtrace = true
         client_settings.backtrace_level = ClientSettings::BACKTRACE_FULL
       elsif client_settings.backtrace_none?
@@ -263,7 +280,7 @@ module Rack
 
       flamegraph = nil
 
-      trace_exceptions = matches_action?('trace-exceptions', env) && defined? TracePoint
+      trace_exceptions = query_settings.trace_exceptions? && defined? TracePoint
       status, headers, body, exceptions, trace = nil
 
       if trace_exceptions
