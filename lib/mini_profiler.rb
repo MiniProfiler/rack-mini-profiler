@@ -113,6 +113,25 @@ module Rack
       def flamegraph?
         profile_value == 'flamegraph'
       end
+
+      def profile_gc?
+        profile_value == 'profile-gc'
+      end
+
+      def profile_memory?
+        profile_value == 'profile-memory'
+      end
+
+      def memory_profiler_options
+        options = {
+          ignore_files: @query_params['memory_profiler_ignore_files'],
+          allow_files: @query_params['memory_profiler_allow_files'],
+        }
+
+        options[:top] = Integer(@query_params['memory_profiler_top']) if @query_params.key?('memory_profiler_top')
+
+        options
+      end
     end
 
     class << self
@@ -297,14 +316,33 @@ module Rack
       client_settings.disable_profiling = false
 
       # profile gc
-      if matches_action?('profile-gc', env)
+      if query_settings.profile_gc?
+        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         current.measure = false if current
         return serve_profile_gc(env, client_settings)
       end
 
       # profile memory
-      if matches_action?('profile-memory', env)
-        return serve_profile_memory(env, client_settings)
+      if query_settings.profile_memory?
+        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
+
+        unless defined?(MemoryProfiler) && MemoryProfiler.respond_to?(:report)
+          message = "Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"
+          status, headers, body = @app.call(env)
+          body.close if body.respond_to? :close
+
+          return client_settings.handle_cookie(
+            text_result(message, status: 500, headers: headers)
+          )
+        end
+
+        result = StringIO.new
+        report = MemoryProfiler.report(query_settings.memory_profiler_options) do
+          _, _, body = @app.call(env)
+          body.close if body.respond_to? :close
+        end
+        report.pretty_print(result)
+        return client_settings.handle_cookie(text_result(result.string))
       end
 
       # any other requests past this point are going to the app to be profiled
@@ -354,7 +392,6 @@ module Rack
           if defined?(StackProf) && StackProf.respond_to?(:run)
             # do not sully our profile with mini profiler timings
             current.measure = false
-            match_data      = action_parameters(env)['flamegraph_sample_rate']
 
             sample_rate = query_settings.flamegraph_sample_rate || config.flamegraph_sample_rate 
             mode = query_settings.flamegraph_mode || config.flamegraph_mode
