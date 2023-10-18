@@ -194,9 +194,7 @@ module Rack
         return client_settings.handle_cookie(serve_file(env, file_name: file_name))
       end
 
-      has_disable_cookie = client_settings.disable_profiling?
-      # manual session disable / enable
-      if matches_action?('disable', env) || has_disable_cookie
+      if matches_action?('disable', env) || manual_disable?(query_string: query_string, client_settings: client_settings)
         skip_it = true
       end
 
@@ -673,6 +671,10 @@ module Rack
 
     def skip_via_preauthorize?(env)
       @config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)
+    end
+
+    def manual_disable?(query_string:, client_settings:)
+      query_string.match?(/#{@config.profile_parameter}=disable/) || client_settings.disable_profiling?
     end
 
     def unauthorized?(client_settings)
