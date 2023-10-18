@@ -20,6 +20,17 @@ module Rack
     include Actions
     include Views
 
+    class QuerySettings
+      def initialize(query_string, profile_parameter)
+        @query_string = query_string
+        @profile_parameter = profile_parameter
+      end
+
+      def skip?
+        @query_string.match?(/#{@profile_parameter}=skip/)
+      end
+    end
+
     class << self
       include Rack::MiniProfiler::ProfilingMethods
       attr_accessor :subscribe_sql_active_record
@@ -160,12 +171,15 @@ module Rack
       MiniProfiler.deauthorize_request if @config.authorization_mode == :allow_authorized
 
       status = headers = body = nil
+      query_string = env['QUERY_STRING']
+      query_settings = QuerySettings.new(query_string, @config.profile_parameter)
       path         = env['PATH_INFO'].sub('//', '/')
+
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      if matches_action?('skip', env) || skip_via_parameter?(query_string) || skip_via_path?(path)
+      if matches_action?('skip', env) || query_settings.skip? || skip_via_path?(path)
         return client_settings.handle_cookie(@app.call(env))
       end
 
@@ -652,10 +666,6 @@ module Rack
 
     def public_base_path(env)
       "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-    end
-
-    def skip_via_parameter?(query_string)
-      /#{@config.profile_parameter}=skip/.match?(query_string)
     end
 
     def skip_via_path?(path)
