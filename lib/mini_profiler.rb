@@ -43,6 +43,14 @@ module Rack
           end
         end
       end
+
+      def manual_enable?
+        query_string.match?(/#{@config.profile_parameter}=enable/)
+      end
+
+      def manual_disable?
+        query_string.match?(/#{@config.profile_parameter}=disable/)
+      end
     end
 
     class << self
@@ -208,24 +216,11 @@ module Rack
       if path.start_with? @config.base_url_path
         file_name = path.sub(@config.base_url_path, '')
 
-        case file_name
-        when 'results'
-          return serve_results(env)
-        when 'snapshots'
-          self.current = nil
-          return serve_snapshot(env)
-        when 'flamegraph'
-          return serve_flamegraph(env)
-        end
-
-        return client_settings.handle_cookie(serve_file(env, file_name: file_name))
-      end
-
-      if matches_action?('disable', env) || manual_disable?(query_string: query_string, client_settings: client_settings)
+      if query_settings.manual_disable? || client_settings.disable_profiling?
         skip_it = true
       end
 
-      if matches_action?('enable', env) || manual_enable?(query_string: query_string)
+      if matches_action?('enable', env) || query_settings.manual_enable?
         skip_it = false
         config.enabled = true
       end
@@ -679,14 +674,6 @@ module Rack
 
     def public_base_path(env)
       "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-    end
-
-    def manual_disable?(query_string:, client_settings:)
-      query_string.match?(/#{@config.profile_parameter}=disable/) || client_settings.disable_profiling?
-    end
-
-    def manual_enable?(query_string:)
-      query_string.match?(/#{@config.profile_parameter}=enable/)
     end
 
     def unauthorized?(client_settings)
