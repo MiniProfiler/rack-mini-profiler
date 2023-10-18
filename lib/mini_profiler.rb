@@ -21,13 +21,27 @@ module Rack
     include Views
 
     class QuerySettings
-      def initialize(query_string, profile_parameter)
+      def initialize(query_string, profile_parameter, skip_paths, path)
         @query_string = query_string
+
         @profile_parameter = profile_parameter
+        @skip_paths = skip_paths
+
+        @path = path
       end
 
       def skip?
         @query_string.match?(/#{@profile_parameter}=skip/)
+      end
+
+      def skip_path?
+        @skip_paths && @skip_paths.any? do |p|
+          if p.instance_of?(String)
+            @path.start_with?(p)
+          elsif p.instance_of?(Regexp)
+            p.match?(@path)
+          end
+        end
       end
     end
 
@@ -172,18 +186,17 @@ module Rack
 
       status = headers = body = nil
       query_string = env['QUERY_STRING']
-      query_settings = QuerySettings.new(query_string, @config.profile_parameter)
       path         = env['PATH_INFO'].sub('//', '/')
-
+      query_settings = QuerySettings.new(query_string, @config.profile_parameter, @config.skip_paths, path)
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      if matches_action?('skip', env) || query_settings.skip? || skip_via_path?(path)
+      if matches_action?('skip', env) || query_settings.skip? || query_settings.skip_path?
         return client_settings.handle_cookie(@app.call(env))
       end
 
-      if skip_via_preauthorize?(env) || unauthorized?(client_settings)
+      if @config.pre_authorized?(env) || unauthorized?(client_settings)
         if take_snapshot?(path)
           return client_settings.handle_cookie(take_snapshot(env, start))
         else
@@ -666,21 +679,6 @@ module Rack
 
     def public_base_path(env)
       "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-    end
-
-    def skip_via_path?(path)
-      @config.skip_paths &&
-      @config.skip_paths.any? do |p|
-        if p.instance_of?(String)
-          path.start_with?(p)
-        elsif p.instance_of?(Regexp)
-          p.match?(path)
-        end
-      end
-    end
-
-    def skip_via_preauthorize?(env)
-      @config.pre_authorize_cb && !@config.pre_authorize_cb.call(env)
     end
 
     def manual_disable?(query_string:, client_settings:)

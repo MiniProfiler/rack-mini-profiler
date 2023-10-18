@@ -141,6 +141,9 @@ module Rack
         end
       end
 
+      def pre_authorized?(env)
+        @pre_authorize_cb && !@pre_authorize_cb.call(env)
+      end
     end
   end
 end
