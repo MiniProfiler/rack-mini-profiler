@@ -144,6 +144,10 @@ module Rack
       def pre_authorized?(env)
         @pre_authorize_cb && !@pre_authorize_cb.call(env)
       end
+
+      def allow_authorized?
+        @authorization_mode == :allow_authorized
+      end
     end
   end
 end

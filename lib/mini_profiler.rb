@@ -285,7 +285,7 @@ module Rack
         return client_settings.handle_cookie(@app.call(env))
       end
 
-      if @config.pre_authorized?(env) || unauthorized?(client_settings)
+      if @config.pre_authorized?(env) || (config.allow_authorized? && !client_settings.has_valid_cookie?)
         if take_snapshot?(path)
           return client_settings.handle_cookie(take_snapshot(env, start))
         else
@@ -762,10 +762,6 @@ module Rack
 
     def public_base_path(env)
       "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
-    end
-
-    def unauthorized?(client_settings)
-      @config.authorization_mode == :allow_authorized && !client_settings.has_valid_cookie?
     end
   end
 end
