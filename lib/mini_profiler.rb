@@ -73,7 +73,8 @@ module Rack
         profile_value == 'trace-exceptions'
       end
 
-      def flamegraph?
+      # FIXME this should use profile_parameter and be the same as flamegraph?
+      def pp_flamegraph?
         @query_string.match?(/pp=(async-)?flamegraph/ )
       end
 
@@ -95,6 +96,22 @@ module Rack
 
       def trace_exceptions_filter
         @query_params['trace_exceptions_filter']
+      end
+
+      def env?
+        profile_value == 'env'
+      end
+
+      def analyze_memory?
+        profile_value == 'analyze-memory'
+      end
+
+      def help?
+        profile_value == 'help'
+      end
+
+      def flamegraph?
+        profile_value == 'flamegraph'
       end
     end
 
@@ -333,7 +350,7 @@ module Rack
         # Prevent response body from being compressed
         env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
-        if query_settings.flamegraph? || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
+        if query_settings.pp_flamegraph? || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
           if defined?(StackProf) && StackProf.respond_to?(:run)
             # do not sully our profile with mini profiler timings
             current.measure = false
@@ -399,19 +416,19 @@ module Rack
         return client_settings.handle_cookie(dump_exceptions exceptions)
       end
 
-      if matches_action?("env", env)
+      if query_settings.env?
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(dump_env env)
       end
 
-      if matches_action?("analyze-memory", env)
+      if query_settings.analyze_memory?
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(analyze_memory)
       end
 
-      if matches_action?("help", env)
+      if query_settings.help?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(help(client_settings, env))
       end
@@ -420,7 +437,7 @@ module Rack
       page_struct[:user] = user(env)
       page_struct[:root].record_time((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000)
 
-      if flamegraph && matches_action?("flamegraph", env)
+      if flamegraph && query_settings.flamegraph? 
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(self.flamegraph(flamegraph, path, env))
       elsif flamegraph # async-flamegraph
