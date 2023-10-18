@@ -13,7 +13,7 @@ module Rack
         MiniProfiler.share_template.result(binding)
       end
 
-      def serve_snapshot_request(env)
+      def serve_snapshot(env)
         self.current = nil
         MiniProfiler.authorize_request
         status = 200
@@ -63,14 +63,7 @@ module Rack
         response.finish
       end
 
-      def serve_html(env)
-        path      = env['PATH_INFO'].sub('//', '/')
-        file_name = path.sub(@config.base_url_path, '')
-
-        return serve_results(env) if file_name.eql?('results')
-        return serve_snapshot_request(env) if file_name.eql?('snapshots')
-        return serve_flamegraph(env) if file_name.eql?('flamegraph')
-
+      def serve_file(env, file_name:)
         resources_env = env.dup
         resources_env['PATH_INFO'] = file_name
 

@@ -13,13 +13,14 @@ require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
 require 'mini_profiler/snapshots_transporter'
 require 'mini_profiler/html'
+require 'mini_profiler/actions'
 
 module Rack
   class MiniProfiler
+    include Actions
     include HTML
 
     class << self
-
       include Rack::MiniProfiler::ProfilingMethods
       attr_accessor :subscribe_sql_active_record
 
@@ -141,42 +142,6 @@ module Rack
       @config.user_provider.call(env)
     end
 
-    def serve_results(env)
-      request     = Rack::Request.new(env)
-      id          = request.params['id']
-      group_name  = request.params['group']
-      is_snapshot = group_name && group_name.size > 0
-      if is_snapshot
-        page_struct = @storage.load_snapshot(id, group_name)
-      else
-        page_struct = @storage.load(id)
-      end
-      if !page_struct && is_snapshot
-        id = ERB::Util.html_escape(id)
-        return [404, {}, ["Snapshot with id '#{id}' not found"]]
-      elsif !page_struct
-        @storage.set_viewed(user(env), id)
-        id        = ERB::Util.html_escape(id)
-        user_info = ERB::Util.html_escape(user(env))
-        return [404, {}, ["Request not found: #{id} - user #{user_info}"]]
-      end
-      if !page_struct[:has_user_viewed] && !is_snapshot
-        page_struct[:client_timings]  = TimerStruct::Client.init_from_form_data(env, page_struct)
-        page_struct[:has_user_viewed] = true
-        @storage.save(page_struct)
-        @storage.set_viewed(user(env), id)
-      end
-
-      # If we're an XMLHttpRequest, serve up the contents as JSON
-      if request.xhr?
-        result_json = page_struct.to_json
-        [200, { 'Content-Type' => 'application/json' }, [result_json]]
-      else
-        # Otherwise give the HTML back
-        html = generate_html(page_struct, env)
-        [200, { 'Content-Type' => 'text/html' }, [html]]
-      end
-    end
 
     def current
       MiniProfiler.current
@@ -238,7 +203,16 @@ module Rack
       end
 
       # handle all /mini-profiler requests here
-      return client_settings.handle_cookie(serve_html(env)) if path.start_with? @config.base_url_path
+      if path.start_with? @config.base_url_path
+        file_name = path.sub(@config.base_url_path, '')
+
+        return serve_results(env) if file_name.eql?('results')
+        return serve_snapshot(env) if file_name.eql?('snapshots')
+        return serve_flamegraph(env) if file_name.eql?('flamegraph')
+
+        return client_settings.handle_cookie(serve_file(env, file_name: file_name)) 
+      end
+      # any other requests past this point are going to the app to be profiled
 
       has_disable_cookie = client_settings.disable_profiling?
       # manual session disable / enable
