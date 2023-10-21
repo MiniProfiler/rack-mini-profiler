@@ -12,13 +12,13 @@ require 'mini_profiler/context'
 require 'mini_profiler/client_settings'
 require 'mini_profiler/gc_profiler'
 require 'mini_profiler/snapshots_transporter'
-require 'mini_profiler/html'
+require 'mini_profiler/views'
 require 'mini_profiler/actions'
 
 module Rack
   class MiniProfiler
     include Actions
-    include HTML
+    include View
 
     class << self
       include Rack::MiniProfiler::ProfilingMethods
@@ -400,7 +400,6 @@ module Rack
       end
 
       client_settings.handle_cookie([status, headers, body])
-
     ensure
       # Make sure this always happens
       self.current = nil
