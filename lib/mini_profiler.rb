@@ -18,7 +18,7 @@ require 'mini_profiler/actions'
 module Rack
   class MiniProfiler
     include Actions
-    include View
+    include Views
 
     class << self
       include Rack::MiniProfiler::ProfilingMethods
@@ -39,14 +39,6 @@ module Rack
       # So we can change the configuration if we want
       def config
         @config ||= Config.default
-      end
-
-      def resources_root
-        @resources_root ||= ::File.expand_path("../html", __FILE__)
-      end
-
-      def share_template
-        @share_template ||= ERB.new(::File.read(::File.expand_path("html/share.html", ::File.dirname(__FILE__))))
       end
 
       def current
@@ -235,12 +227,12 @@ module Rack
 
       # profile gc
       if query_string =~ /#{@config.profile_parameter}=profile-gc/
-        return serve_profile_gc(env)
+        return serve_profile_gc(env, client_settings)
       end
 
       # profile memory
       if query_string =~ /#{@config.profile_parameter}=profile-memory/
-        return serve_profile_memory(env)
+        return serve_profile_memory(env, client_settings)
       end
 
       # any other requests past this point are going to the app to be profiled

@@ -1,6 +1,14 @@
 module Rack
   class MiniProfiler
     module Views
+      def resources_root
+        @resources_root ||= ::File.expand_path("../../html", __FILE__)
+      end
+
+      def share_template
+        @share_template ||= ERB.new(::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__))))
+      end
+
       def generate_html(page_struct, env, result_json = page_struct.to_json)
         # double-assigning to suppress "assigned but unused variable" warnings
         path = path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
@@ -10,7 +18,7 @@ module Rack
         name = name = page_struct[:name]
         duration = duration = page_struct.duration_ms.round(1).to_s
 
-        MiniProfiler.share_template.result(binding)
+        share_template.result(binding)
       end
 
       # get_profile_script returns script to be injected inside current html page

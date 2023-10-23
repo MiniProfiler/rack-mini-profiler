@@ -55,7 +55,7 @@ module Rack
         resources_env = env.dup
         resources_env['PATH_INFO'] = file_name
 
-        rack_file = Rack::File.new(MiniProfiler.resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+        rack_file = Rack::File.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
         rack_file.call(resources_env)
       end
       
@@ -114,13 +114,13 @@ module Rack
         self.flamegraph(page_struct[:flamegraph], page_struct[:request_path], env)
       end
 
-      def serve_profile_gc(env)
+      def serve_profile_gc(env, client_settings)
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         current.measure = false if current
         return client_settings.handle_cookie(Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env))
       end
 
-      def serve_profile_memory(env)
+      def serve_profile_memory(env, client_settings)
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
 
         unless defined?(MemoryProfiler) && MemoryProfiler.respond_to?(:report)
