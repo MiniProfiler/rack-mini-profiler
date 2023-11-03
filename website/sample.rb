@@ -94,6 +94,7 @@ class SampleStorage < Rack::MiniProfiler::AbstractStore
   end
 end
 
+Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
 Rack::MiniProfiler.config.storage = SampleStorage
 Rack::MiniProfiler.config.snapshot_hidden_custom_fields += ["application Version"]
 Rack::MiniProfiler.config.storage_failure = ->(e) do
