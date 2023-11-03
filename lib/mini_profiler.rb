@@ -75,7 +75,7 @@ module Rack
 
       # FIXME this should use profile_parameter and be the same as flamegraph?
       def pp_flamegraph?
-        @query_string.match?(/pp=(async-)?flamegraph/ )
+        @query_string.match?(/pp=(async-)?flamegraph/)
       end
 
       def flamegraph_sample_rate
@@ -392,8 +392,7 @@ module Rack
           if defined?(StackProf) && StackProf.respond_to?(:run)
             # do not sully our profile with mini profiler timings
             current.measure = false
-
-            sample_rate = query_settings.flamegraph_sample_rate || config.flamegraph_sample_rate 
+            sample_rate = query_settings.flamegraph_sample_rate || config.flamegraph_sample_rate
             mode = query_settings.flamegraph_mode || config.flamegraph_mode
 
             ignore_gc_match_data = action_parameters(env)['flamegraph_ignore_gc']
@@ -474,7 +473,7 @@ module Rack
       page_struct[:user] = user(env)
       page_struct[:root].record_time((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000)
 
-      if flamegraph && query_settings.flamegraph? 
+      if flamegraph && query_settings.flamegraph?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(self.flamegraph(flamegraph, path, env))
       elsif flamegraph # async-flamegraph
