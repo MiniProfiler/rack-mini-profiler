@@ -2,7 +2,6 @@ module Rack
   class MiniProfiler
     module Actions
       def serve_snapshot(env)
-        self.current = nil
         MiniProfiler.authorize_request
         status = 200
         headers = { 'Content-Type' => 'text/html' }
@@ -116,8 +115,8 @@ module Rack
 
       def serve_profile_gc(env, client_settings)
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
-        current.measure = false if current
-        return client_settings.handle_cookie(Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env))
+
+        client_settings.handle_cookie(Rack::MiniProfiler::GCProfiler.new.profile_gc(@app, env))
       end
 
       def serve_profile_memory(env, client_settings)

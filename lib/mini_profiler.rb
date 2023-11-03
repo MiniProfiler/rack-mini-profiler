@@ -202,6 +202,7 @@ module Rack
         when 'results'
           return serve_results(env)
         when 'snapshots'
+          self.current = nil
           return serve_snapshot(env)
         when 'flamegraph'
           return serve_flamegraph(env)
@@ -232,6 +233,7 @@ module Rack
 
       # profile gc
       if query_string =~ /#{@config.profile_parameter}=profile-gc/
+        current.measure = false if current
         return serve_profile_gc(env, client_settings)
       end
 
