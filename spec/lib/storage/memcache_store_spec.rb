@@ -7,7 +7,7 @@ describe Rack::MiniProfiler::MemcacheStore do
     before do
       @store = Rack::MiniProfiler::MemcacheStore.new
       unless @store.alive?
-        fail 'Memcached does not appear to be running on localhost:11211. Use your favorite package manage to install and run it, or `docker-compose up -d`'
+        fail 'Memcached does not appear to be running on localhost:11211. Use your favorite package manager to install and run it, use Docker with: `docker run -it --rm memcached`'
       end
     end
 
