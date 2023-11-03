@@ -198,9 +198,14 @@ module Rack
       if path.start_with? @config.base_url_path
         file_name = path.sub(@config.base_url_path, '')
 
-        return serve_results(env) if file_name.eql?('results')
-        return serve_snapshot(env) if file_name.eql?('snapshots')
-        return serve_flamegraph(env) if file_name.eql?('flamegraph')
+        case file_name
+        when 'results'
+          return serve_results(env)
+        when 'snapshots'
+          return serve_snapshot(env)
+        when 'flamegraph'
+          return serve_flamegraph(env)
+        end
 
         return client_settings.handle_cookie(serve_file(env, file_name: file_name)) 
       end
