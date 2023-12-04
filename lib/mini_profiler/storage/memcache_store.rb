@@ -18,6 +18,15 @@ module Rack
         @expires_in_seconds = args[:expires_in] || EXPIRES_IN_SECONDS
       end
 
+      def alive?
+        begin
+          @client.alive!
+          true
+        rescue Dalli::RingError
+          false
+        end
+      end
+
       def save(page_struct)
         @client.set("#{@prefix}#{page_struct[:id]}", Marshal::dump(page_struct), @expires_in_seconds)
       end
