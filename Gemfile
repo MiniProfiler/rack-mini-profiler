@@ -14,4 +14,7 @@ group :development do
   gem 'guard', platforms: [:mri_22, :mri_23]
   gem 'guard-rspec', platforms: [:mri_22, :mri_23]
   gem 'rubocop', '>=0.77.0', require: false
+  gem 'puma'
+  gem 'byebug'
+  gem 'sinatra'
 end
