@@ -376,6 +376,14 @@ describe Rack::MiniProfiler do
         expect(last_response.body).to include('QUERY_STRING')
         expect(last_response.body).to include('CONTENT_LENGTH')
       end
+
+      it 'works via HTTP header' do 
+        Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+        get '/html', nil, { 'HTTP_X_RACK_MINI_PROFILER' => 'env' }
+
+        expect(last_response.body).to include('QUERY_STRING')
+        expect(last_response.body).to include('CONTENT_LENGTH')
+      end 
     end
   end
 
@@ -413,6 +421,11 @@ describe Rack::MiniProfiler do
       get '/html?pp=profile-gc'
       expect(last_response.header['Content-Type']).to include('text/plain')
     end
+
+    it "should return a report when an HTTP header is used" do 
+      get '/html', nil, { 'HTTP_X_RACK_MINI_PROFILER' => 'profile-gc' }
+      expect(last_response.header['Content-Type']).to include('text/plain')
+    end 
   end
 
   describe 'error handling when storage_instance fails to save' do
@@ -652,6 +665,13 @@ describe Rack::MiniProfiler do
       get "#{base_url}results?id=%22%3E%3Cqss%3E&group=groupdoesnotexist"
       expect(last_response.status).to eq(404)
       expect(last_response.body).to eq("Snapshot with id '&quot;&gt;&lt;qss&gt;' not found"), "id should be escaped to prevent XSS"
+    end
+  end
+  
+  describe 'when triggering via HTTP header' do
+    it 'can trigger the help option via an HTTP header' do
+      get '/html', nil, { 'HTTP_X_RACK_MINI_PROFILER' => 'help' }
+      expect(last_response.body).to include('This is the help menu')
     end
   end
 end

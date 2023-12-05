@@ -164,6 +164,8 @@ module Rack
                 #{make_link "flamegraph_embed", env} : a graph representing sampled activity (requires the stackprof gem), embedded resources for use on an intranet.
                 #{make_link "trace-exceptions", env} : will return all the spots where your application raises exceptions
                 #{make_link "analyze-memory", env} : will perform basic memory analysis of heap
+
+                All features can also be accessed by adding the X-Rack-Mini-Profiler header to the request, with any of the values above (e.g. 'X-Rack-Mini-Profiler: flamegraph')
               </pre>
             </body>
           </html>
