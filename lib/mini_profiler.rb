@@ -409,7 +409,7 @@ module Rack
 
     def action_parameters(env)
       query_params = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
-    end 
+    end
 
     def inject_profiler(env, status, headers, body)
       # mini profiler is meddling with stuff, we can not cache cause we will get incorrect data
