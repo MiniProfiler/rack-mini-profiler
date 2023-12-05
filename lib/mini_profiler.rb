@@ -134,7 +134,6 @@ module Rack
       @config.user_provider.call(env)
     end
 
-
     def current
       MiniProfiler.current
     end
@@ -208,7 +207,7 @@ module Rack
           return serve_flamegraph(env)
         end
 
-        return client_settings.handle_cookie(serve_file(env, file_name: file_name)) 
+        return client_settings.handle_cookie(serve_file(env, file_name: file_name))
       end
 
       has_disable_cookie = client_settings.disable_profiling?

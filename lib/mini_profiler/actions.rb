@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Rack
   class MiniProfiler
     module Actions
@@ -57,7 +58,7 @@ module Rack
         rack_file = Rack::File.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
         rack_file.call(resources_env)
       end
-      
+
       def serve_results(env)
         request     = Rack::Request.new(env)
         id          = request.params['id']
@@ -144,9 +145,8 @@ module Rack
           body.close if body.respond_to? :close
         end
         report.pretty_print(result)
-        return client_settings.handle_cookie(text_result(result.string))
+        client_settings.handle_cookie(text_result(result.string))
       end
     end
   end
 end
-

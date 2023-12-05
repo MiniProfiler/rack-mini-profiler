@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Rack
   class MiniProfiler
     module Views
@@ -84,7 +85,6 @@ module Rack
         script
       end
 
-
       BLANK_PAGE = <<~HTML
         <!DOCTYPE html>
         <html>
@@ -134,7 +134,6 @@ module Rack
         HTML
         [200, headers, [html]]
       end
-
 
       def help(client_settings, env)
         headers = { 'Content-Type' => 'text/html' }
