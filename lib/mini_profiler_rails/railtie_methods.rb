@@ -52,7 +52,7 @@ module Rack::MiniProfilerRailsMethods
   end
 
   def get_webpacker_assets_path
-    if defined?(Webpacker) && Webpacker.config.config_path.exist?
+    if defined?(Webpacker) && Webpacker.try(:config)&.config_path&.exist?
       Webpacker.config.public_output_path.to_s.gsub(Webpacker.config.public_path.to_s, "")
     end
   end
