@@ -17,6 +17,10 @@ module Rack
         )
       end
 
+      def report_reader_duration(elapsed_ms, row_count = nil, class_name = nil)
+        current&.current_timer&.report_reader_duration(elapsed_ms, row_count, class_name)
+      end
+
       def start_step(name)
         return unless current
         parent_timer          = current.current_timer
