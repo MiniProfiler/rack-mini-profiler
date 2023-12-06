@@ -56,6 +56,7 @@ describe Rack::MiniProfiler do
       expect(last_response.body).to include("async-flamegraph")
       expect(last_response.body).to include("flamegraph&flamegraph_sample_rate=1")
       expect(last_response.body).to include("flamegraph&flamegraph_mode=cpu")
+      expect(last_response.body).to include("flamegraph&flamegraph_ignore_gc=true")
       expect(last_response.body).to include("flamegraph_embed")
       expect(last_response.body).to include("trace-exceptions")
       expect(last_response.body).to include("analyze-memory")

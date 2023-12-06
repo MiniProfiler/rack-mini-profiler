@@ -161,6 +161,7 @@ module Rack
                 #{make_link "async-flamegraph", env} : store flamegraph data for this page and all its AJAX requests. Flamegraph links will be available in the mini-profiler UI (requires the stackprof gem).
                 #{make_link "flamegraph&flamegraph_sample_rate=1", env}: creates a flamegraph with the specified sample rate (in ms). Overrides value set in config
                 #{make_link "flamegraph&flamegraph_mode=cpu", env}: creates a flamegraph with the specified mode (one of cpu, wall, object, or custom). Overrides value set in config
+                #{make_link "flamegraph&flamegraph_ignore_gc=true", env}: ignore garbage collection frames in flamegraphs. Overrides value set in config
                 #{make_link "flamegraph_embed", env} : a graph representing sampled activity (requires the stackprof gem), embedded resources for use on an intranet.
                 #{make_link "trace-exceptions", env} : will return all the spots where your application raises exceptions
                 #{make_link "analyze-memory", env} : will perform basic memory analysis of heap
