@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.2.0 - 2023-12-06
+- [BREAKING CHANGE] Ruby version 2.7.0 or later is required.
+- [FEATURE] All RMP actions can be chosen by including a X-Rack-Mini-Profiler header as well as by query parameter. [#578](https://github.com/MiniProfiler/rack-mini-profiler/pull/578)
+- [FEATURE] Speedscope 1.12 -> 1.16
+- [FIX] If patch_rails is false, do not patch mysql2 or pg [#583](https://github.com/MiniProfiler/rack-mini-profiler/pull/583)
+- [FIX] vertical position bottom now aligns the detail window correctly [#581](https://github.com/MiniProfiler/rack-mini-profiler/pull/581)
+- [FIX] Webpacker hiccup in some setups [#582](https://github.com/MiniProfiler/rack-mini-profiler/pull/582)
+- [INTERNAL] Capture rows instantiated by ActiveRecord, UI to be added later [#585](https://github.com/MiniProfiler/rack-mini-profiler/pull/585)
+- [INTERNAL] Lots of refactoring.
+
+
 ## 3.1.1 - 2023-08-01
 
 - [FIX] Include configured base path in speedscope iframe URL [#587](https://github.com/MiniProfiler/rack-mini-profiler/pull/587)
