@@ -133,7 +133,7 @@ module Rack
           )
         end
 
-        query_params = Rack::Utils.parse_nested_query(query_string)
+        query_params = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
         options = {
           ignore_files: query_params['memory_profiler_ignore_files'],
           allow_files: query_params['memory_profiler_allow_files'],
