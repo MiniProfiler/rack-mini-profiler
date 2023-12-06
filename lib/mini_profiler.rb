@@ -306,7 +306,8 @@ module Rack
               mode: mode,
               raw: true,
               aggregate: false,
-              interval: (sample_rate * 1000).to_i
+              interval: (sample_rate * 1000).to_i,
+              ignore_gc: config.flamegraph_ignore_gc
             ) do
               status, headers, body = @app.call(env)
             end
