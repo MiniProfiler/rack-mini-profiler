@@ -141,6 +141,34 @@ describe Rack::MiniProfiler do
     end
   end
 
+  it 'works with memory_profiler' do
+    pid = fork do # Avoid polluting main process with stackprof
+      require 'memory_profiler'
+
+      # Should store flamegraph for ?pp=profile-memory
+      Rack::MiniProfiler.config.enable_advanced_debugging_tools = true
+      get '/html?pp=profile-memory'
+      expect(last_response).to be_ok
+      expect(last_response.body).to match(/allocated memory by gem/)
+      expect(last_response.body).to match(/allocated memory by file/)
+      expect(last_response.body).to match(/allocated memory by location/)
+      expect(last_response.body).to match(/allocated memory by class/)
+      expect(last_response.body).to match(/allocated objects by gem/)
+      expect(last_response.body).to match(/allocated objects by file/)
+      expect(last_response.body).to match(/allocated objects by location/)
+      expect(last_response.body).to match(/allocated objects by class/)
+      expect(last_response.body).to match(/retained objects by gem/)
+      expect(last_response.body).to match(/retained objects by file/)
+      expect(last_response.body).to match(/retained objects by location/)
+      expect(last_response.body).to match(/retained objects by class/)
+      expect(last_response.body).to match(/Allocated String Report/)
+      expect(last_response.body).to match(/Retained String Report/)
+    end
+
+    Process.wait(pid)
+    expect($?.exitstatus).to eq(0)
+  end
+
   it 'works with async-flamegraph' do
     pid = fork do # Avoid polluting main process with stackprof
       require 'stackprof'

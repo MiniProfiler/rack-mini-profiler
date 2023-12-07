@@ -8,6 +8,7 @@ gemspec
 group :test do
   gem 'codecov', require: false
   gem 'stackprof', require: false
+  gem 'memory_profiler', require: false
 end
 
 group :development do
