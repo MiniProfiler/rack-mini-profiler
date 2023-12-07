@@ -302,11 +302,20 @@ module Rack
               mode = config.flamegraph_mode
             end
 
+            ignore_gc_match_data = action_parameters(env)['flamegraph_ignore_gc']
+
+            if ignore_gc_match_data
+              ignore_gc = ignore_gc_match_data == 'true'
+            else
+              ignore_gc = config.flamegraph_ignore_gc
+            end
+
             flamegraph = StackProf.run(
               mode: mode,
               raw: true,
               aggregate: false,
-              interval: (sample_rate * 1000).to_i
+              interval: (sample_rate * 1000).to_i,
+              ignore_gc: ignore_gc
             ) do
               status, headers, body = @app.call(env)
             end
