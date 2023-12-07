@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.2.1 - 2023-12-07
+- [FIX] memory_profiler was broken due to an undefined local [#597](https://github.com/MiniProfiler/rack-mini-profiler/pull/597)
+
 ## 3.2.0 - 2023-12-06
 - [BREAKING CHANGE] Ruby version 2.7.0 or later is required.
 - [FEATURE] All RMP actions can be chosen by including a X-Rack-Mini-Profiler header as well as by query parameter. [#578](https://github.com/MiniProfiler/rack-mini-profiler/pull/578)
