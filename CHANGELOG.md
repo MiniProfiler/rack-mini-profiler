@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.3.0 - 2023-12-07
+- [FEATURE] Use `?pp=flamegraph?ignore_gc=true` or `config.flamegraph_ignore_gc` to ignore gc in flamegraphs. [#599](https://github.com/MiniProfiler/rack-mini-profiler/pull/599)
+
 ## 3.2.1 - 2023-12-07
 - [FIX] memory_profiler was broken due to an undefined local [#597](https://github.com/MiniProfiler/rack-mini-profiler/pull/597)
 
