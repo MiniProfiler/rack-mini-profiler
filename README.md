@@ -180,7 +180,7 @@ To generate [flamegraphs](http://samsaffron.com/archive/2013/03/19/flame-graphs-
 
 Then, to view the flamegraph as a direct HTML response from your request, just visit any page in your app with `?pp=flamegraph` appended to the URL, or add the header `X-Rack-Mini-Profiler` to the request with the value `flamegraph`.
 
-Conversely, if you want your regular response instead (which is specially useful for JSON and/or XHR requests), just append the `?pp=async-flamegraph` parameter to your request/fetch URL; the request will then return as normal, and the flamegraph data will be stored for later *async* viewing, both for this request and for all subsequent requests made by this page (based on the `REFERER` header). For viewing these async flamegraphs, use the 'flamegraph' link that will appear inside the MiniProfiler UI for these requests.
+Conversely, if you want your regular response instead (which is specially useful for JSON and/or XHR requests), just append the `?pp=async-flamegraph` parameter to your request/fetch URL; the request will then return as normal, and the flamegraph data will be stored for later *async* viewing, both for this request and for all subsequent requests made by this page (based on the `REFERER` header). For viewing these async flamegraphs, use the 'flamegraph' link that will appear inside the MiniProfiler UI for these requests or path returned in the `X-MiniProfiler-Flamegraph-Path` header.
 
 Note: Mini Profiler will not record SQL timings for a request if it asks for a flamegraph. The rationale behind this is to keep
 Mini Profiler's methods that are responsible for generating the timings data out of the flamegraph.
@@ -466,7 +466,7 @@ If you are using Heroku Redis, you may need to add the following to your `config
 
 ```ruby
 if Rails.env.production?
-  Rack::MiniProfiler.config.storage_options = { 
+  Rack::MiniProfiler.config.storage_options = {
     url: ENV["REDIS_URL"],
     ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }
   }
