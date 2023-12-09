@@ -177,7 +177,9 @@ describe Rack::MiniProfiler do
       get '/html?pp=async-flamegraph'
       expect(last_response).to be_ok
       id = last_response.headers['X-MiniProfiler-Ids'].split(",")[0]
-      get "/mini-profiler-resources/flamegraph?id=#{id}"
+      flamegraph_path = last_response.headers['X-MiniProfiler-Flamegraph-Path']
+      expect(flamegraph_path).to eq("/mini-profiler-resources/flamegraph?id=#{id}")
+      get flamegraph_path
       expect(last_response).to be_ok
       expect(last_response.body).to include("var graph = {")
 

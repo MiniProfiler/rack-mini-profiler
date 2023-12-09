@@ -436,6 +436,7 @@ module Rack
       # inject header
       if headers.is_a? Hash
         headers['X-MiniProfiler-Ids'] = ids_comma_separated(env)
+        headers['X-MiniProfiler-Flamegraph-Path'] = flamegraph_path(env) if current.page_struct[:has_flamegraph]
       end
 
       if current.inject_js && content_type =~ /text\/html/
@@ -603,6 +604,10 @@ module Rack
 
     def ids_comma_separated(env)
       ids(env).join(",")
+    end
+
+    def flamegraph_path(env)
+      @config.base_url_path + 'flamegraph?id=' + current.page_struct[:id]
     end
 
     # cancels automatic injection of profile script for the current page
