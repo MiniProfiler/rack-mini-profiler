@@ -2,14 +2,21 @@
   <div class="profiler-result">
     <div class="profiler-button {{? it.has_duplicate_sql_timings}}profiler-warning{{?}}">
     {{? it.has_duplicate_sql_timings}}<span class="profiler-nuclear">!</span>{{?}}
-      <span class="profiler-number">
+      <span class="profiler-number profiler-duration-milliseconds">
         {{= MiniProfiler.formatDuration(it.duration_milliseconds)}} <span class="profiler-unit">ms</span>
       </span>
       {{? MiniProfiler.showTotalSqlCount()}}
-        <span class="profiler-number">
+        <span class="profiler-number profiler-sql-count">
           {{= it.sql_count}} <span class="profiler-unit">sql</span>
         </span>
       {{?}}
+      <span class="profiler-name">
+        {{? it.name.length >= 30 }}
+          {{= it.name.substring(0,15) + "..." + it.name.slice(-15) }}
+        {{??}}
+          {{= it.name}}
+        {{?}}
+      </span>
     </div>
 
     <div class="profiler-popup">

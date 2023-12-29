@@ -103,6 +103,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
 
   .profiler-number {
     color: $numberColor;
+    display: inline-block;
   }
 
   .profiler-info {
@@ -317,6 +318,34 @@ $zindex: 2147483640; // near 32bit max 2147483647
 
   $radius: 10px;
 
+  &.profiler-left {
+    .profiler-button {
+      text-align: left;
+    }
+  }
+
+  &.profiler-right {
+    .profiler-button {
+      text-align: right;
+    }
+  }
+
+  .profiler-button {
+    > .profiler-duration-milliseconds {
+      min-width: 70px;
+    }
+    > .profiler-sql-count {
+      min-width: 55px;
+    }
+    > .profiler-name {
+      min-width: 190px;
+      margin-left: 3px;
+    }
+    > .profiler-number {
+      text-align: right;
+    }
+  }
+
   &.profiler-top {
     top: 0px;
 
@@ -399,7 +428,8 @@ $zindex: 2147483640; // near 32bit max 2147483647
       background-color: maroon;
 
       .profiler-number,
-      .profiler-nuclear {
+      .profiler-nuclear,
+      .profiler-name {
         color: #fff;
         font-weight: bold;
       }

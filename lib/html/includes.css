@@ -105,7 +105,8 @@
   .profiler-result .profiler-unit {
     font-family: Consolas, monospace, serif; }
   .profiler-result .profiler-number {
-    color: #111; }
+    color: #111;
+    display: inline-block; }
   .profiler-result .profiler-info {
     text-align: right; }
     .profiler-result .profiler-info .profiler-name {
@@ -235,6 +236,19 @@
 .profiler-results {
   z-index: 2147483643;
   position: fixed; }
+  .profiler-results.profiler-left .profiler-button {
+    text-align: left; }
+  .profiler-results.profiler-right .profiler-button {
+    text-align: right; }
+  .profiler-results .profiler-button > .profiler-duration-milliseconds {
+    min-width: 70px; }
+  .profiler-results .profiler-button > .profiler-sql-count {
+    min-width: 55px; }
+  .profiler-results .profiler-button > .profiler-name {
+    min-width: 190px;
+    margin-left: 3px; }
+  .profiler-results .profiler-button > .profiler-number {
+    text-align: right; }
   .profiler-results.profiler-top {
     top: 0px; }
     .profiler-results.profiler-top.profiler-left {
@@ -285,8 +299,10 @@
       background-color: maroon; }
       .profiler-results .profiler-button.profiler-button-active .profiler-number,
       .profiler-results .profiler-button.profiler-button-active .profiler-nuclear,
+      .profiler-results .profiler-button.profiler-button-active .profiler-name,
       .profiler-results .profiler-controls.profiler-button-active .profiler-number,
-      .profiler-results .profiler-controls.profiler-button-active .profiler-nuclear {
+      .profiler-results .profiler-controls.profiler-button-active .profiler-nuclear,
+      .profiler-results .profiler-controls.profiler-button-active .profiler-name {
         color: #fff;
         font-weight: bold; }
       .profiler-results .profiler-button.profiler-button-active .profiler-unit,
