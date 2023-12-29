@@ -59,7 +59,7 @@ module Rack
 
         def initialize(env)
           timer_id     = MiniProfiler.generate_id
-          page_name    = env['PATH_INFO']
+          page_name    = env['QUERY_STRING'] != "" ? env['PATH_INFO'] + "?" + env['QUERY_STRING'] : env['PATH_INFO']
           started_at   = (Time.now.to_f * 1000).to_i
           started      = (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i
           machine_name = env['SERVER_NAME']
