@@ -22,7 +22,6 @@ module Rack
 
         def []=(name, val)
           attributes[name] = val
-          self
         end
 
         def to_json(*a)

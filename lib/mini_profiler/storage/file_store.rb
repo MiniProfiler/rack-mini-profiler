@@ -91,8 +91,6 @@ module Rack
         end
 
         at_exit { t[:should_exit] = true }
-
-        t
       end
 
       def save(page_struct)

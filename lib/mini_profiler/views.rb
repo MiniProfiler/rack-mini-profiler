@@ -77,7 +77,7 @@ module Rack
         script = ::File.read(::File.expand_path('../html/profile_handler.js', ::File.dirname(__FILE__)))
         # replace the variables
         settings.each do |k, v|
-          regex = Regexp.new("\\{#{k.to_s}\\}")
+          regex = Regexp.new("\\{#{k}\\}")
           script.gsub!(regex, v.to_s)
         end
 
