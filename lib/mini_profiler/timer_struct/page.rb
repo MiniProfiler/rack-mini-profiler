@@ -103,10 +103,10 @@ module Rack
         def page_name(env)
           if env['QUERY_STRING'] && env['QUERY_STRING'] != ""
             env['PATH_INFO'] + "?" + env['QUERY_STRING']
-          else 
+          else
             env['PATH_INFO']
           end
-        end 
+        end
 
         def duration_ms
           @attributes[:root][:duration_milliseconds]
