@@ -64,7 +64,7 @@ module Rack
           machine_name = env['SERVER_NAME']
           super(
             id: timer_id,
-            name: page_name,
+            name: page_name(env),
             started: started,
             started_at: started_at,
             machine_name: machine_name,
@@ -92,7 +92,7 @@ module Rack
           )
           self[:request_method] = env['REQUEST_METHOD']
           self[:request_path] = env['PATH_INFO']
-          name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
+          name = "#{env['REQUEST_METHOD']} http://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{env['SCRIPT_NAME']}#{page_name(env)}"
           self[:root] = TimerStruct::Request.createRoot(name, self)
         end
 
@@ -100,7 +100,7 @@ module Rack
           @attributes[:name]
         end
 
-        def page_name 
+        def page_name(env)
           if env['QUERY_STRING'] && env['QUERY_STRING'] != ""
             env['PATH_INFO'] + "?" + env['QUERY_STRING']
           else 
