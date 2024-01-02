@@ -55,7 +55,12 @@ module Rack
         resources_env = env.dup
         resources_env['PATH_INFO'] = file_name
 
-        rack_file = Rack::File.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+        if Gem::Version.new(Rack.release) >= Gem::Version.new("2.1.0")
+          rack_file = Rack::Files.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+        else
+          rack_file = Rack::File.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+        end
+
         rack_file.call(resources_env)
       end
 
