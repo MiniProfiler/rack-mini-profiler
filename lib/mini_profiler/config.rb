@@ -97,7 +97,9 @@ module Rack
 
       # redefined - since the accessor defines it first
       undef :authorization_mode=
+      # rubocop:disable Lint/DuplicateMethods
       def authorization_mode=(mode)
+        # rubocop:enable Lint/DuplicateMethods
         if mode == :whitelist
           warn "[DEPRECATION] `:whitelist` authorization mode is deprecated. Please use `:allow_authorized` instead."
 

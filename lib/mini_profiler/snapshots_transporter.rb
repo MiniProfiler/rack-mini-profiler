@@ -9,9 +9,11 @@ class ::Rack::MiniProfiler::SnapshotsTransporter
     def transported_snapshots_count
       @@transported_snapshots_count
     end
+
     def successful_http_requests_count
       @@successful_http_requests_count
     end
+
     def failed_http_requests_count
       @@failed_http_requests_count
     end
