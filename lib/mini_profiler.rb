@@ -469,7 +469,7 @@ module Rack
           safe_script = script.html_safe
         end
 
-        fragment.insert(index, safe_script)
+        (+fragment).insert(index, safe_script)
       else
         fragment
       end
