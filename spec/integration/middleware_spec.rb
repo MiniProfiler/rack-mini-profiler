@@ -242,4 +242,43 @@ describe Rack::MiniProfiler do
       end
     end
   end
+
+  context "with CSP nonce" do
+    def app
+      Rack::Builder.new do
+        use Rack::MiniProfiler
+        run lambda { |env|
+          env["action_dispatch.content_security_policy_nonce"] = "railsnonce"
+          [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hello world</h1></body></html>']]
+        }
+      end
+    end
+
+    it 'uses Rails value when available' do
+      do_get
+      expect(last_response.body).to include("nonce=\"railsnonce\"")
+    end
+
+    it 'uses configured string when available' do
+      Rack::MiniProfiler.config.content_security_policy_nonce = "configurednonce"
+      do_get
+      expect(last_response.body).to include("nonce=\"configurednonce\"")
+    end
+
+    it 'calls configured block when available' do
+      proc_arguments = nil
+
+      Rack::MiniProfiler.config.content_security_policy_nonce = Proc.new do |env, response_headers|
+        proc_arguments = [env, response_headers]
+        "dynamicnonce"
+      end
+
+      do_get
+      expect(last_response.body).to include("nonce=\"dynamicnonce\"")
+
+      (env, response_headers) = proc_arguments
+      expect(env["REQUEST_METHOD"]).to eq("GET")
+      expect(response_headers["Content-Type"]).to eq("text/html")
+    end
+  end
 end

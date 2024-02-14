@@ -28,7 +28,7 @@ module Rack
       # Use it when:
       # * you have disabled auto append behaviour throught :auto_inject => false flag
       # * you do not want script to be automatically appended for the current page. You can also call cancel_auto_inject
-      def get_profile_script(env)
+      def get_profile_script(env, response_headers = {})
         path = public_base_path(env)
         version = MiniProfiler::ASSET_VERSION
         if @config.assets_url
@@ -39,7 +39,12 @@ module Rack
         url = "#{path}includes.js?v=#{version}" if !url
         css_url = "#{path}includes.css?v=#{version}" if !css_url
 
-        content_security_policy_nonce = @config.content_security_policy_nonce ||
+        configured_nonce = @config.content_security_policy_nonce
+        if configured_nonce && !configured_nonce.is_a?(String)
+          configured_nonce = configured_nonce.call(env, response_headers)
+        end
+
+        content_security_policy_nonce = configured_nonce ||
                                         env["action_dispatch.content_security_policy_nonce"] ||
                                         env["secure_headers_content_security_policy_nonce"]
 
