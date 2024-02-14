@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+- [FEATURE] Support dynamic `config.content_security_policy_nonce` [#609](https://github.com/MiniProfiler/rack-mini-profiler/pull/609)
+
+
 ## 3.3.0 - 2023-12-07
 - [FEATURE] Use `?pp=flamegraph?ignore_gc=true` or `config.flamegraph_ignore_gc` to ignore gc in flamegraphs. [#599](https://github.com/MiniProfiler/rack-mini-profiler/pull/599)
 

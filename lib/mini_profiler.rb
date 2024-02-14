@@ -440,7 +440,7 @@ module Rack
 
       if current.inject_js && content_type =~ /text\/html/
         response = Rack::Response.new([], status, headers)
-        script   = self.get_profile_script(env)
+        script   = self.get_profile_script(env, headers)
 
         if String === body
           response.write inject(body, script)

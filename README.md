@@ -448,7 +448,7 @@ snapshots_transport_destination_url | `nil`                                     
 snapshots_transport_auth_key        | `nil`                                                   | `POST` requests made by the snapshots transporter to the destination URL will have a `Mini-Profiler-Transport-Auth` header with the value of this config. Make sure you use a secure and random key for this config.
 snapshots_redact_sql_queries        | `true`                                                  | When this is true, SQL queries will be redacted from sampling snapshots, but the backtrace and duration of each SQL query will be saved with the snapshot to keep debugging performance issues possible.
 snapshots_transport_gzip_requests   | `false`                                                 | Make the snapshots transporter gzip the requests it makes to `snapshots_transport_destination_url`.
-content_security_policy_nonce       | Rails: Current nonce<br>Rack: nil                       | Set the content security policy nonce to use when inserting MiniProfiler's script block.
+content_security_policy_nonce       | Rails: Current nonce<br>Rack: nil                       | Set the content security policy nonce to use when inserting MiniProfiler's script block. Can be set to a static string, or a Proc which receives `env` and `response_headers` as arguments and returns the nonce.
 enable_hotwire_turbo_drive_support  | `false`                                                 | Enable support for Hotwire TurboDrive page transitions.
 profile_parameter                   | `'pp'`                                                  | The query parameter used to interact with this gem.
 
