@@ -182,6 +182,18 @@ module Rack
       # handle all /mini-profiler requests here
       if path.start_with? @config.base_url_path
         file_name = path.sub(@config.base_url_path, '')
+
+        case file_name
+        when 'results'
+          return serve_results(env)
+        when 'snapshots'
+          self.current = nil
+          return serve_snapshot(env)
+        when 'flamegraph'
+          return serve_flamegraph(env)
+        else
+          return client_settings.handle_cookie(serve_file(env, file_name: file_name))
+        end
       end
 
       if query_settings.manual_disable? || client_settings.disable_profiling?
@@ -202,7 +214,6 @@ module Rack
       # remember that profiling is not disabled (ie enabled)
       client_settings.disable_profiling = false
 
-      # profile gc
       if query_settings.profile_gc?
         current.measure = false if current
         return serve_profile_gc(env, client_settings)
