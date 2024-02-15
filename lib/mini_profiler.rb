@@ -14,6 +14,7 @@ require 'mini_profiler/gc_profiler'
 require 'mini_profiler/snapshots_transporter'
 require 'mini_profiler/views'
 require 'mini_profiler/actions'
+require 'mini_profiler/query_settings'
 
 module Rack
   class MiniProfiler
@@ -160,31 +161,17 @@ module Rack
       MiniProfiler.deauthorize_request if @config.authorization_mode == :allow_authorized
 
       status = headers = body = nil
-      path         = env['PATH_INFO'].sub('//', '/')
+      path = env['PATH_INFO'].sub('//', '/')
+      query_settings = QuerySettings.new(env['QUERY_STRING'], @config.profile_parameter, @config.skip_paths, path)
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      skip_it = matches_action?('skip', env) || (
-        @config.skip_paths &&
-        @config.skip_paths.any? do |p|
-          if p.instance_of?(String)
-            path.start_with?(p)
-          elsif p.instance_of?(Regexp)
-            p.match?(path)
-          end
-        end
-      )
-      if skip_it
+      if query_settings.skip? || query_settings.skip_path?
         return client_settings.handle_cookie(@app.call(env))
       end
 
-      skip_it = (@config.pre_authorize_cb && !@config.pre_authorize_cb.call(env))
-
-      if skip_it || (
-        @config.authorization_mode == :allow_authorized &&
-        !client_settings.has_valid_cookie?
-      )
+      if @config.pre_authorized?(env) || (config.allow_authorized? && !client_settings.has_valid_cookie?)
         if take_snapshot?(path)
           return client_settings.handle_cookie(take_snapshot(env, start))
         else
@@ -204,18 +191,16 @@ module Rack
           return serve_snapshot(env)
         when 'flamegraph'
           return serve_flamegraph(env)
+        else
+          return client_settings.handle_cookie(serve_file(env, file_name: file_name))
         end
-
-        return client_settings.handle_cookie(serve_file(env, file_name: file_name))
       end
 
-      has_disable_cookie = client_settings.disable_profiling?
-      # manual session disable / enable
-      if matches_action?('disable', env) || has_disable_cookie
+      if query_settings.manual_disable? || client_settings.disable_profiling?
         skip_it = true
       end
 
-      if matches_action?('enable', env)
+      if query_settings.manual_enable?
         skip_it = false
         config.enabled = true
       end
@@ -229,27 +214,25 @@ module Rack
       # remember that profiling is not disabled (ie enabled)
       client_settings.disable_profiling = false
 
-      # profile gc
-      if matches_action?('profile-gc', env)
+      if query_settings.profile_gc?
         current.measure = false if current
         return serve_profile_gc(env, client_settings)
       end
 
-      # profile memory
-      if matches_action?('profile-memory', env)
+      if query_settings.profile_memory?
         return serve_profile_memory(env, client_settings)
       end
 
       # any other requests past this point are going to the app to be profiled
-
       MiniProfiler.create_current(env, @config)
 
-      if matches_action?('normal-backtrace', env)
+      if query_settings.normal_backtrace?
         client_settings.backtrace_level = ClientSettings::BACKTRACE_DEFAULT
       elsif matches_action?('no-backtrace', env)
+      elsif query_settings.no_backtrace?
         current.skip_backtrace = true
         client_settings.backtrace_level = ClientSettings::BACKTRACE_NONE
-      elsif matches_action?('full-backtrace', env) || client_settings.backtrace_full?
+      elsif query_settings.full_backtrace? || client_settings.backtrace_full?
         current.full_backtrace = true
         client_settings.backtrace_level = ClientSettings::BACKTRACE_FULL
       elsif client_settings.backtrace_none?
@@ -258,7 +241,7 @@ module Rack
 
       flamegraph = nil
 
-      trace_exceptions = matches_action?('trace-exceptions', env) && defined? TracePoint
+      trace_exceptions = query_settings.trace_exceptions? && defined? TracePoint
       status, headers, body, exceptions, trace = nil
 
       if trace_exceptions
@@ -270,7 +253,6 @@ module Rack
       end
 
       begin
-
         # Strip all the caching headers so we don't get 304s back
         #  This solves a very annoying bug where rack mini profiler never shows up
         if config.disable_caching
@@ -282,25 +264,12 @@ module Rack
         # Prevent response body from being compressed
         env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
-        if matches_action?('flamegraph', env) || matches_action?('async-flamegraph', env) || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
+        if query_settings.pp_flamegraph? || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
           if defined?(StackProf) && StackProf.respond_to?(:run)
             # do not sully our profile with mini profiler timings
             current.measure = false
-            match_data      = action_parameters(env)['flamegraph_sample_rate']
-
-            if match_data && !match_data[1].to_f.zero?
-              sample_rate = match_data[1].to_f
-            else
-              sample_rate = config.flamegraph_sample_rate
-            end
-
-            mode_match_data = action_parameters(env)['flamegraph_mode']
-
-            if mode_match_data && [:cpu, :wall, :object, :custom].include?(mode_match_data[1].to_sym)
-              mode = mode_match_data[1].to_sym
-            else
-              mode = config.flamegraph_mode
-            end
+            sample_rate = query_settings.flamegraph_sample_rate || config.flamegraph_sample_rate
+            mode = query_settings.flamegraph_mode || config.flamegraph_mode
 
             ignore_gc_match_data = action_parameters(env)['flamegraph_ignore_gc']
 
@@ -350,8 +319,7 @@ module Rack
       if trace_exceptions
         body.close if body.respond_to? :close
 
-        query_params = action_parameters(env)
-        trace_exceptions_filter = query_params['trace_exceptions_filter']
+        trace_exceptions_filter = query_settings.trace_exceptions_filter
         if trace_exceptions_filter
           trace_exceptions_regex = Regexp.new(trace_exceptions_filter)
           exceptions.reject! { |ex| ex.class.name =~ trace_exceptions_regex }
@@ -360,19 +328,19 @@ module Rack
         return client_settings.handle_cookie(dump_exceptions exceptions)
       end
 
-      if matches_action?("env", env)
+      if query_settings.env?
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(dump_env env)
       end
 
-      if matches_action?("analyze-memory", env)
+      if query_settings.analyze_memory?
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(analyze_memory)
       end
 
-      if matches_action?("help", env)
+      if query_settings.help?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(help(client_settings, env))
       end
@@ -381,7 +349,7 @@ module Rack
       page_struct[:user] = user(env)
       page_struct[:root].record_time((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000)
 
-      if flamegraph && matches_action?("flamegraph", env)
+      if flamegraph && query_settings.flamegraph?
         body.close if body.respond_to? :close
         return client_settings.handle_cookie(self.flamegraph(flamegraph, path, env))
       elsif flamegraph # async-flamegraph
