@@ -295,6 +295,7 @@ module Rack
       # handle all /mini-profiler requests here
       if path.start_with? @config.base_url_path
         file_name = path.sub(@config.base_url_path, '')
+      end
 
       if query_settings.manual_disable? || client_settings.disable_profiling?
         skip_it = true
