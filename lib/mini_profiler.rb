@@ -274,14 +274,13 @@ module Rack
       MiniProfiler.deauthorize_request if @config.authorization_mode == :allow_authorized
 
       status = headers = body = nil
-      query_string = env['QUERY_STRING']
       path         = env['PATH_INFO'].sub('//', '/')
-      query_settings = QuerySettings.new(query_string, @config.profile_parameter, @config.skip_paths, path)
+      query_settings = QuerySettings.new(env['QUERY_STRING'], @config.profile_parameter, @config.skip_paths, path)
 
       # Someone (e.g. Rails engine) could change the SCRIPT_NAME so we save it
       env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME'] = ENV['PASSENGER_BASE_URI'] || env['SCRIPT_NAME']
 
-      if matches_action?('skip', env) || query_settings.skip? || query_settings.skip_path?
+      if query_settings.skip? || query_settings.skip_path?
         return client_settings.handle_cookie(@app.call(env))
       end
 
@@ -301,7 +300,7 @@ module Rack
         skip_it = true
       end
 
-      if matches_action?('enable', env) || query_settings.manual_enable?
+      if query_settings.manual_enable?
         skip_it = false
         config.enabled = true
       end
@@ -318,35 +317,16 @@ module Rack
       # profile gc
       if query_settings.profile_gc?
         return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
+
         current.measure = false if current
         return serve_profile_gc(env, client_settings)
       end
 
-      # profile memory
       if query_settings.profile_memory?
-        return tool_disabled_message(client_settings) if !advanced_debugging_enabled?
-
-        unless defined?(MemoryProfiler) && MemoryProfiler.respond_to?(:report)
-          message = "Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"
-          status, headers, body = @app.call(env)
-          body.close if body.respond_to? :close
-
-          return client_settings.handle_cookie(
-            text_result(message, status: 500, headers: headers)
-          )
-        end
-
-        result = StringIO.new
-        report = MemoryProfiler.report(query_settings.memory_profiler_options) do
-          _, _, body = @app.call(env)
-          body.close if body.respond_to? :close
-        end
-        report.pretty_print(result)
-        return client_settings.handle_cookie(text_result(result.string))
+        return serve_profile_memory(env, client_settings)
       end
 
       # any other requests past this point are going to the app to be profiled
-
       MiniProfiler.create_current(env, @config)
 
       if query_settings.normal_backtrace?
@@ -376,7 +356,6 @@ module Rack
       end
 
       begin
-
         # Strip all the caching headers so we don't get 304s back
         #  This solves a very annoying bug where rack mini profiler never shows up
         if config.disable_caching
@@ -757,10 +736,6 @@ module Rack
       end
       self.current = nil
       results
-    end
-
-    def public_base_path(env)
-      "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
     end
   end
 end
