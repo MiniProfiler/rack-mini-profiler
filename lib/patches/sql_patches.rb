@@ -30,11 +30,10 @@ class SqlPatches
   def self.sql_patches
     patches = []
 
-    patches << 'mysql2' if defined?(Mysql2::Client) && Mysql2::Client.class == Class && patch_rails?
-    patches << 'pg' if defined?(PG::Result) && PG::Result.class == Class && patch_rails?
+    patches << 'mysql2' if defined?(Mysql2::Client) && Mysql2::Client.class == Class
+    patches << 'pg' if defined?(PG::Result) && PG::Result.class == Class
     patches << 'oracle_enhanced' if defined?(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter) && ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter.class == Class &&
-                                    SqlPatches.correct_version?('~> 1.5.0', ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter) &&
-                                    patch_rails?
+                                    SqlPatches.correct_version?('~> 1.5.0', ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter)
     # if the adapters were directly patched, don't patch again
     if !patches.empty?
       Rack::MiniProfiler.subscribe_sql_active_record = false
