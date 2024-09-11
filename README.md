@@ -368,25 +368,32 @@ This method will remove profiling information that was related to previous page 
 You need to inject the following in your SPA to load MiniProfiler's speed badge ([extra details surrounding this script](https://github.com/MiniProfiler/rack-mini-profiler/issues/139#issuecomment-192880706) and [credit for the script tag](https://github.com/MiniProfiler/rack-mini-profiler/issues/479#issue-782488320) to [@ivanyv](https://github.com/ivanyv)):
 
 ```html
- <script type="text/javascript" id="mini-profiler"
-        src="/mini-profiler-resources/includes.js?v=12b4b45a3c42e6e15503d7a03810ff33"
-        data-css-url="/mini-profiler-resources/includes.css?v=12b4b45a3c42e6e15503d7a03810ff33"
-        data-version="12b4b45a3c42e6e15503d7a03810ff33"
-        data-path="/mini-profiler-resources/"
-        data-horizontal-position="left"
-        data-vertical-position="top"
-        data-ids=""
-        data-trivial="false"
-        data-children="false"
-        data-max-traces="20"
-        data-controls="false"
-        data-total-sql-count="false"
-        data-authorized="true"
-        data-toggle-shortcut="alt+p"
-        data-start-hidden="false"
-        data-collapse-results="true"
-        data-html-container="body"
-        data-hidden-custom-fields></script>
+<script
+      async=""
+      nonce=""
+      type="text/javascript"
+      id="mini-profiler"
+      src="<%= process.env.API_HOST %>/assets/rack-mini-profiler-4edd7ee8c294cc64ae2efb74e36d4aeba22b7281cfd7196ae3d2698c2b9a85a2.js"
+      data-css-url="<%= process.env.API_HOST %>/assets/rack-mini-profiler-e14fa04c38aa0fbc2298dba783152741800d436045fe9f688fc6d754ef438c4d.css"
+      data-version="116e2a6fd81c286e004e2a0afb03baa1"
+      data-path="<%= process.env.API_HOST %>/mini-profiler-resources/"
+      data-current-id="8lyzbr00gjq81djm1n1s"
+      data-ids="8lyzbr00gjq81djm1n1s,c0y00w7wlsuesgp6mbde"
+      data-horizontal-position="left"
+      data-vertical-position="top"
+      data-trivial="false"
+      data-children="false"
+      data-max-traces="20"
+      data-controls="false"
+      data-total-sql-count="false"
+      data-authorized="true"
+      data-toggle-shortcut="alt+p"
+      data-start-hidden="false"
+      data-collapse-results="true"
+      data-html-container="body"
+      data-hidden-custom-fields=""
+      data-turbo-permanent="false"
+    ></script>
 ```
 
 See an [example of how to do this in a React useEffect](https://gist.github.com/katelovescode/01cfc2b962c165193b160fd10af6c4d5).
