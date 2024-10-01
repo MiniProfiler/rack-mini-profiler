@@ -228,5 +228,13 @@ describe Rack::MiniProfiler do
     ensure
       Rack::MiniProfiler.config.enable_advanced_debugging_tools = original_enable_advanced_debugging_tools
     end
+
+    it 'passes flamegraph_mode parameter to StackProf.run' do
+      stackprof = double
+      stub_const('StackProf', stackprof)
+      expect(stackprof).to receive(:respond_to?).with(:run).and_return(true)
+      expect(stackprof).to receive(:run).with(hash_including(mode: :cpu)).and_return({})
+      profiler.call({ "PATH_INFO" => "/", "QUERY_STRING" => "pp=flamegraph&flamegraph_mode=cpu" })
+    end
   end
 end
