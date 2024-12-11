@@ -90,6 +90,20 @@ gem 'rack-mini-profiler', require: ['prepend_mysql2_patch', 'rack-mini-profiler'
 
 This should not be necessary with Rails < 5 because peek-mysql2 hooks into mysql2 gem in different ways depending on your Rails version.
 
+#### `pg` stack level too deep errors
+
+If you encounter `SystemStackError (stack level too deep)` from PG, you'll need to use this gem spec in your Gemfile:
+
+```ruby
+gem 'rack-mini-profiler', require: ['prepend_pg_patch', 'rack-mini-profiler']
+```
+
+Or if you initially have `require: false`, then use
+
+```ruby
+gem 'rack-mini-profiler', require: ['prepend_pg_patch']
+```
+
 #### Rails and manual initialization
 
 In case you need to make sure rack_mini_profiler is initialized after all other gems, or you want to execute some code before rack_mini_profiler required:
