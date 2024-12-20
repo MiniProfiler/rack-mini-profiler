@@ -117,7 +117,7 @@ be loaded outright, and an attempt to re-initialize it manually will raise an ex
 Then run the generator which will set up rack-mini-profiler in development:
 
 ```bash
-bundle exec rails g rack_mini_profiler:install
+bundle exec rails g rack_profiler:install
 ```
 
 #### Rack Builder
