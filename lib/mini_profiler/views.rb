@@ -110,7 +110,7 @@ module Rack
       end
 
       def flamegraph(graph, path, env)
-        headers = { 'Content-Type' => 'text/html' }
+        headers = { 'content-type' => 'text/html' }
         iframe_src = "#{public_base_path(env)}speedscope/index.html"
         html = <<~HTML
           <!DOCTYPE html>
@@ -141,7 +141,7 @@ module Rack
       end
 
       def help(client_settings, env)
-        headers = { 'Content-Type' => 'text/html' }
+        headers = { 'content-type' => 'text/html' }
         html = <<~HTML
           <!DOCTYPE html>
           <html>

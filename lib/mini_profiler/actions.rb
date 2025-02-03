@@ -5,7 +5,7 @@ module Rack
       def serve_snapshot(env)
         MiniProfiler.authorize_request
         status = 200
-        headers = { 'Content-Type' => 'text/html' }
+        headers = { 'content-type' => 'text/html' }
         qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
         if group_name = qp["group_name"]
           list = @storage.snapshots_group(group_name)
@@ -56,9 +56,9 @@ module Rack
         resources_env['PATH_INFO'] = file_name
 
         if Gem::Version.new(Rack.release) >= Gem::Version.new("2.1.0")
-          rack_file = Rack::Files.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+          rack_file = Rack::Files.new(resources_root, 'cache-control' => "max-age=#{cache_control_value}")
         else
-          rack_file = Rack::File.new(resources_root, 'Cache-Control' => "max-age=#{cache_control_value}")
+          rack_file = Rack::File.new(resources_root, 'cache-control' => "max-age=#{cache_control_value}")
         end
 
         rack_file.call(resources_env)
@@ -93,11 +93,11 @@ module Rack
         # If we're an XMLHttpRequest, serve up the contents as JSON
         if request.xhr?
           result_json = page_struct.to_json
-          [200, { 'Content-Type' => 'application/json' }, [result_json]]
+          [200, { 'content-type' => 'application/json' }, [result_json]]
         else
           # Otherwise give the HTML back
           html = generate_html(page_struct, env)
-          [200, { 'Content-Type' => 'text/html' }, [html]]
+          [200, { 'content-type' => 'text/html' }, [html]]
         end
       end
 
