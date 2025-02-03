@@ -113,6 +113,8 @@
       float: left; }
     .profiler-result .profiler-info .profiler-server-time {
       white-space: nowrap; }
+    .profiler-result .profiler-info .profiler-number {
+      display: block; }
   .profiler-result .profiler-timings th {
     background-color: #fff;
     color: #767676;

@@ -114,6 +114,9 @@ $zindex: 2147483640; // near 32bit max 2147483647
     .profiler-server-time {
       white-space: nowrap;
     }
+    .profiler-number {
+      display: block;
+    }
   }
 
   .profiler-timings {
