@@ -296,8 +296,8 @@ module Rack
 
             mode_match_data = action_parameters(env)['flamegraph_mode']
 
-            if mode_match_data && [:cpu, :wall, :object, :custom].include?(mode_match_data[1].to_sym)
-              mode = mode_match_data[1].to_sym
+            if mode_match_data && [:cpu, :wall, :object, :custom].include?(mode_match_data.to_sym)
+              mode = mode_match_data.to_sym
             else
               mode = config.flamegraph_mode
             end

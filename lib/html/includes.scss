@@ -485,6 +485,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
     text-align: left;
     line-height: 18px;
     overflow: auto;
+    max-width: 800px;
 
     @include box-shadow(0px, 1px, 15px, $textColor);
 
@@ -492,14 +493,23 @@ $zindex: 2147483640; // near 32bit max 2147483647
       margin-bottom: 3px;
       padding-bottom: 2px;
       border-bottom: 1px solid #ddd;
+      display: flex;
+      width: inherit;
 
       .profiler-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+        white-space: nowrap;
         font-size: 110%;
         font-weight: bold;
+        padding-right: 10px;
+
         .profiler-overall-duration {
           display: none;
         }
       }
+
       .profiler-server-time {
         font-size: 95%;
       }

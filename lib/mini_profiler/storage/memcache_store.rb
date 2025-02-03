@@ -42,7 +42,7 @@ module Rack
         @client.add("#{@prefix}-#{user}-v", [], @expires_in_seconds)
         MAX_RETRIES.times do
           break if @client.cas("#{@prefix}-#{user}-v", @expires_in_seconds) do |ids|
-            ids << id unless ids.include?(id)
+            ids << id if !ids.include?(id)
             ids
           end
         end
