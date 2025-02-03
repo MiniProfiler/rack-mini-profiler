@@ -41,7 +41,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rubocop-discourse'
   s.add_development_dependency 'listen'
   s.add_development_dependency 'webpacker'
-  s.add_development_dependency 'rails', '~> 6.0'
+  s.add_development_dependency 'rails', '~> 7.0'
   s.add_development_dependency 'webmock', '3.9.1'
   s.add_development_dependency 'rubyzip'
 
