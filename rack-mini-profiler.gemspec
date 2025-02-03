@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+$LOAD_PATH.unshift(lib) if !$LOAD_PATH.include?(lib)
 require 'mini_profiler/version'
 
 Gem::Specification.new do |s|
@@ -41,7 +41,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rubocop-discourse'
   s.add_development_dependency 'listen'
   s.add_development_dependency 'webpacker'
-  s.add_development_dependency 'rails', '~> 6.0'
+  s.add_development_dependency 'rails', '>= 7.1'
   s.add_development_dependency 'webmock', '3.9.1'
   s.add_development_dependency 'rubyzip'
 

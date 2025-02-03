@@ -44,7 +44,7 @@ describe Rack::MiniProfiler::ClientSettings do
       @settings.disable_profiling = false
       hash = {}
       @settings.write!(hash)
-      expect(hash["Set-Cookie"]).to include("path=/;")
+      expect(hash["set-cookie"]).to include("path=/;")
     end
 
     it 'should correctly set cookie with correct path' do
@@ -52,7 +52,7 @@ describe Rack::MiniProfiler::ClientSettings do
       @settings.disable_profiling = false
       hash = {}
       @settings.write!(hash)
-      expect(hash["Set-Cookie"]).to include("path=/test;")
+      expect(hash["set-cookie"]).to include("path=/test;")
     end
 
     it 'writes auth token for authorized reqs' do
@@ -60,7 +60,7 @@ describe Rack::MiniProfiler::ClientSettings do
       Rack::MiniProfiler.authorize_request
       hash = {}
       @settings.write!(hash)
-      expect(hash["Set-Cookie"]).to include(@store.allowed_tokens.join("|"))
+      expect(hash["set-cookie"]).to include(@store.allowed_tokens.join("|"))
     end
 
     it 'does nothing on short unauthed requests' do
@@ -80,7 +80,7 @@ describe Rack::MiniProfiler::ClientSettings do
         @settings.handle_cookie([200, hash, []])
       end
 
-      expect(hash["Set-Cookie"]).to include("max-age=0")
+      expect(hash["set-cookie"]).to include("max-age=0")
     end
   end
 
