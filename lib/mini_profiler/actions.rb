@@ -130,7 +130,7 @@ module Rack
 
         unless defined?(MemoryProfiler) && MemoryProfiler.respond_to?(:report)
           message = "Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"
-          status, headers, body = @app.call(env)
+          _status, headers, body = @app.call(env)
           body.close if body.respond_to? :close
 
           return client_settings.handle_cookie(
