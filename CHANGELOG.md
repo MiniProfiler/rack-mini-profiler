@@ -5,6 +5,7 @@
 - [BREAKING CHANGE] Ruby version 3.1.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/632)
 - [FIX] Truncate long profiler name in profiler popup. [#634](https://github.com/MiniProfiler/rack-mini-profiler/pull/634)
 - [FIX] `flamegraph_mode` query param having no effect. [#635](https://github.com/MiniProfiler/rack-mini-profiler/pull/635)
+- [FIX] missing badge for Turbo Drive page loads. [#631](https://github.com/MiniProfiler/rack-mini-profiler/pull/631)
 
 ## 3.3.1 - 2024-02-15
 - [FEATURE] Support dynamic `config.content_security_policy_nonce` [#609](https://github.com/MiniProfiler/rack-mini-profiler/pull/609)
