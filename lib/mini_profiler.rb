@@ -417,7 +417,7 @@ module Rack
     end
 
     def action_parameters(env)
-      query_params = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
+      Rack::Utils.parse_nested_query(env['QUERY_STRING'])
     end
 
     def inject_profiler(env, status, headers, body)
