@@ -7,5 +7,11 @@ RSpec/ContextWording:
 RSpec/MessageSpies:
   Enabled: false
 
+Discourse/Plugins/NoMonkeyPatching:
+  Enabled: false
+
+Discourse/Plugins/NamespaceMethods:
+  Enabled: false
+
 AllCops:
   SuggestExtensions: false

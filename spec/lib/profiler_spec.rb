@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rack'
+
 describe Rack::MiniProfiler do
   describe 'unique id' do
 
@@ -208,7 +210,7 @@ describe Rack::MiniProfiler do
 
       expect(response).to eq([
         200,
-        { "Content-Type" => "text/plain; charset=utf-8", "Set-Cookie" => "__profilin=p%3Dt; path=/; HttpOnly; SameSite=Lax" },
+        { "Content-Type" => "text/plain; charset=utf-8", "set-cookie" => "__profilin=p%3Dt; path=/; httponly; samesite=lax" },
         ["Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"],
       ])
     end
@@ -221,12 +223,20 @@ describe Rack::MiniProfiler do
 
       expect(response).to eq([
         500,
-        { "Content-Type" => "text/plain; charset=utf-8", "Set-Cookie" => "__profilin=p%3Dt; path=/; HttpOnly; SameSite=Lax" },
+        { "Content-Type" => "text/plain; charset=utf-8", "set-cookie" => "__profilin=p%3Dt; path=/; httponly; samesite=lax" },
         ["Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"],
       ])
 
     ensure
       Rack::MiniProfiler.config.enable_advanced_debugging_tools = original_enable_advanced_debugging_tools
+    end
+
+    it 'passes flamegraph_mode parameter to StackProf.run' do
+      stackprof = double
+      stub_const('StackProf', stackprof)
+      expect(stackprof).to receive(:respond_to?).with(:run).and_return(true)
+      expect(stackprof).to receive(:run).with(hash_including(mode: :cpu)).and_return({})
+      profiler.call({ "PATH_INFO" => "/", "QUERY_STRING" => "pp=flamegraph&flamegraph_mode=cpu" })
     end
   end
 end
