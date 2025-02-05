@@ -225,8 +225,6 @@
       <div title="{{? it.s.execute_type == 3}}first result fetched: {{= it.s.first_fetch_duration_milliseconds }}ms{{?}}">{{= MiniProfiler.formatDuration(it.s.duration_milliseconds) }} <span class="profiler-unit">ms</span></div>
       {{? it.s.row_count > 0  }}
         <div title="number and type of records instantiated by query">{{= it.s.class_name }}: {{= it.s.row_count }}</div>
-      {{??}}
-        <div title="number and type of records instantiated by query">0</div>
       {{?}}
     </td>
     <td>
