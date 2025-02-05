@@ -60,10 +60,11 @@ describe Rack::MiniProfiler::TimerStruct::Request do
   end
 
   describe 'add SQL' do
+    let(:params) { ["SELECT 1 FROM users", 77, @page] }
 
     before do
       @page = new_page
-      @request.add_sql("SELECT 1 FROM users", 77, @page)
+      @request.add_sql(*params)
     end
 
     it 'has a true HasSqlTimings attribute' do
@@ -82,10 +83,21 @@ describe Rack::MiniProfiler::TimerStruct::Request do
       expect(@request[:sql_timings_duration_milliseconds]).to eq(77)
     end
 
-    it "increases the page's " do
+    it "increases the page's duration_milliseconds_in_sql" do
       expect(@page[:duration_milliseconds_in_sql]).to eq(77)
     end
 
+    it "does not increment the page's cached_sql_count" do
+      expect(@page[:cached_sql_count]).to eq(0)
+    end
+
+    context "with cached sql query" do
+      let(:params) { ["SELECT 1 FROM users", 77, @page, nil, false, false, true] }
+
+      it "increments the page's cached_sql_count" do
+        expect(@page[:cached_sql_count]).to eq(1)
+      end
+    end
   end
 
   describe 'add Custom' do

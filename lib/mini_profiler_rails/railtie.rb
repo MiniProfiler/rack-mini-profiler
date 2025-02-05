@@ -111,7 +111,8 @@ module Rack::MiniProfilerRails
           Rack::MiniProfiler.record_sql(
             payload[:sql],
             (finish - start) * 1000,
-            Rack::MiniProfiler.binds_to_params(payload[:binds])
+            Rack::MiniProfiler.binds_to_params(payload[:binds]),
+            payload[:cached]
           )
         end
 

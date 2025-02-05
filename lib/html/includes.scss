@@ -147,27 +147,28 @@ $zindex: 2147483640; // near 32bit max 2147483647
     }
     .profiler-percent-in-sql {
       white-space: nowrap;
+    }
+    tfoot tr td:last-child {
       text-align: right;
     }
+  }
 
-    tfoot {
-      td {
-        padding-top: 10px;
-        text-align: right;
+  .profiler-timings-summary {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
 
-        a {
-          font-size: 95%;
-          display: inline-block;
-          margin-left: 12px;
+    a {
+      font-size: 95%;
+      display: inline-block;
+      margin-left: 12px;
 
-          &:first-child {
-            float: left;
-            margin-left: 0px;
-          }
-          &.profiler-custom-link {
-            float: left;
-          }
-        }
+      &:first-child {
+        float: left;
+        margin-left: 0px;
+      }
+      &.profiler-custom-link {
+        float: left;
       }
     }
   }
@@ -200,6 +201,18 @@ $zindex: 2147483640; // near 32bit max 2147483647
 
     tr.very-very-slow {
       background-color: #fcc;
+    }
+
+    tr.cached {
+      background-color: #f2f0ef;
+    }
+
+    span.cached {
+      color: #818589;
+    }
+
+    span.cached + pre {
+      display: inline;
     }
 
     pre {

@@ -4,7 +4,7 @@ module Rack
   class MiniProfiler
     module ProfilingMethods
 
-      def record_sql(query, elapsed_ms, params = nil)
+      def record_sql(query, elapsed_ms, params = nil, cached = nil)
         return unless current && current.current_timer
         c = current
         c.current_timer.add_sql(
@@ -13,7 +13,8 @@ module Rack
           c.page_struct,
           redact_sql_queries? ? nil : params,
           c.skip_backtrace,
-          c.full_backtrace
+          c.full_backtrace,
+          cached
         )
       end
 
