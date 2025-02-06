@@ -46,6 +46,8 @@ module Rack
             duration_milliseconds: duration_ms,
             first_fetch_duration_milliseconds: duration_ms,
             parameters: query ? trim_binds(params) : nil,
+            row_count: 0,
+            class_name: nil,
             parent_timing_id: nil,
             cached: cached,
             is_duplicate: false
