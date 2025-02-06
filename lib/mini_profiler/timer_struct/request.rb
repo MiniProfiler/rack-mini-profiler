@@ -101,14 +101,15 @@ module Rack
           end
         end
 
-        def add_sql(query, elapsed_ms, page, params = nil, skip_backtrace = false, full_backtrace = false)
-          TimerStruct::Sql.new(query, elapsed_ms, page, self, params, skip_backtrace, full_backtrace).tap do |timer|
+        def add_sql(query, elapsed_ms, page, params = nil, skip_backtrace = false, full_backtrace = false, cached = false)
+          TimerStruct::Sql.new(query, elapsed_ms, page, self, params, skip_backtrace, full_backtrace, cached).tap do |timer|
             self[:sql_timings].push(timer)
             timer[:parent_timing_id] = self[:id]
             self[:has_sql_timings]   = true
             self[:sql_timings_duration_milliseconds] += elapsed_ms
             page[:duration_milliseconds_in_sql]      += elapsed_ms
             page[:sql_count] += 1
+            page[:cached_sql_count] += 1 if cached
           end
         end
 
