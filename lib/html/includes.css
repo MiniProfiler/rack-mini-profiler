@@ -133,19 +133,21 @@
   .profiler-result .profiler-timings .profiler-queries-duration {
     padding-left: 6px; }
   .profiler-result .profiler-timings .profiler-percent-in-sql {
-    white-space: nowrap;
+    white-space: nowrap; }
+  .profiler-result .profiler-timings tfoot tr td:last-child {
     text-align: right; }
-  .profiler-result .profiler-timings tfoot td {
-    padding-top: 10px;
-    text-align: right; }
-    .profiler-result .profiler-timings tfoot td a {
+  .profiler-result .profiler-timings-summary {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px; }
+    .profiler-result .profiler-timings-summary a {
       font-size: 95%;
       display: inline-block;
       margin-left: 12px; }
-      .profiler-result .profiler-timings tfoot td a:first-child {
+      .profiler-result .profiler-timings-summary a:first-child {
         float: left;
         margin-left: 0px; }
-      .profiler-result .profiler-timings tfoot td a.profiler-custom-link {
+      .profiler-result .profiler-timings-summary a.profiler-custom-link {
         float: left; }
   .profiler-result .profiler-queries {
     font-family: Helvetica, Arial, sans-serif; }
@@ -163,6 +165,12 @@
       background-color: #fdd; }
     .profiler-result .profiler-queries tr.very-very-slow {
       background-color: #fcc; }
+    .profiler-result .profiler-queries tr.cached {
+      background-color: #f2f0ef; }
+    .profiler-result .profiler-queries span.cached {
+      color: #818589; }
+    .profiler-result .profiler-queries span.cached + pre {
+      display: inline; }
     .profiler-result .profiler-queries pre {
       font-family: Consolas, monospace, serif;
       white-space: pre-wrap; }

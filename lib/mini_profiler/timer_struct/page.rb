@@ -78,6 +78,7 @@ module Rack
             trivial_duration_threshold_milliseconds: 2,
             head: nil,
             sql_count: 0,
+            cached_sql_count: 0,
             duration_milliseconds_in_sql: 0,
             has_sql_timings: true,
             has_duplicate_sql_timings: false,

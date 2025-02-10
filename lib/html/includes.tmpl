@@ -45,33 +45,42 @@
           <tbody>
             {{= MiniProfiler.templates.timingTemplate({timing: it.root, page: it}) }}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3">
-                {{? !it.client_timings}}
-                   {{= MiniProfiler.templates.linksTemplate({timing: it.root, page: it}) }}
-                {{?}}
-                <a class="profiler-toggle-duration-with-children" title="toggles column with aggregate child durations">show time with children</a>
-                <a
-                  class="profiler-snapshots-page-link"
-                  title="Go to snapshots page"
-                  href="{{= MiniProfiler.options.path }}snapshots">snapshots</a>
-              </td>
-              {{? it.has_sql_timings}}
-                <td colspan="2" class="profiler-number profiler-percent-in-sql" title="{{= MiniProfiler.getSqlTimingsCount(it.root) }} queries spent {{= MiniProfiler.formatDuration(it.duration_milliseconds_in_sql) }} ms of total request time">
-                  {{= MiniProfiler.formatDuration(it.duration_milliseconds_in_sql / it.duration_milliseconds * 100) }}
-                  <span class="profiler-unit">% in sql</span>
+          {{? it.has_sql_timings}}
+            <tfoot>
+              <tr>
+                <td colspan="1">
+                  SQL Summary:
                 </td>
-              {{?}}
-              {{~ it.custom_timing_names :value}}
-                <td colspan="2" class="profiler-number profiler-percentage-in-sql" title="{{= it.custom_timing_stats[value].count }} {{= value.toLowerCase() }} invocations spent {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration) }} ms of total request time">
-                  {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration / it.duration_milliseconds * 100) }}
-                  <span class="profiler-unit">% in {{= value.toLowerCase() }}</span>
+                <td colspan="5" title="percent of total request time spent in SQL">
+                  {{=it.sql_count}} {{? it.cached_sql_count > 0 }} ({{=it.cached_sql_count}} cached) {{?}}
+                  <span class="profiler-unit" title="percent of total request time spent in SQL"> -
+                  {{= MiniProfiler.formatDuration(it.duration_milliseconds_in_sql / it.duration_milliseconds * 100) }}% in sql
+                  </span>
                 </td>
-              {{~}}
-            </tr>
-          </tfoot>
+              </tr>
+            </tfoot>
+          {{?}}
         </table>
+
+        <div class="profiler-timings-summary">
+          <div>
+            {{? !it.client_timings}}
+                {{= MiniProfiler.templates.linksTemplate({timing: it.root, page: it}) }}
+            {{?}}
+            <a class="profiler-toggle-duration-with-children" title="toggles column with aggregate child durations">show time with children</a>
+            <a
+              class="profiler-snapshots-page-link"
+              title="Go to snapshots page"
+              href="{{= MiniProfiler.options.path }}snapshots">snapshots</a>
+          </div>
+          {{~ it.custom_timing_names :value}}
+            <div class="profiler-number profiler-percentage-in-sql" title="{{= it.custom_timing_stats[value].count }} {{= value.toLowerCase() }} invocations spent {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration) }} ms of total request time">
+              {{= MiniProfiler.formatDuration(it.custom_timing_stats[value].duration / it.duration_milliseconds * 100) }}
+              <span class="profiler-unit">% in {{= value.toLowerCase() }}</span>
+            </div>
+          {{~}}
+        </div>
+
         {{? it.client_timings}}
           <table class="profiler-timings profiler-client-timings">
             <thead>
@@ -124,7 +133,7 @@
         <table>
         <thead>
           <tr>
-            <th class="ta-right">step<br />time from start<br />query type<br />duration</th>
+            <th class="ta-right">step<br />time from start<br />query type<br />duration<br />records</th>
             <th class="ta-left">call stack<br />query</th>
           </tr>
         </thead>
@@ -223,10 +232,16 @@
         {{= MiniProfiler.renderExecuteType(it.s.execute_type) }}
       </div>
       <div title="{{? it.s.execute_type == 3}}first result fetched: {{= it.s.first_fetch_duration_milliseconds }}ms{{?}}">{{= MiniProfiler.formatDuration(it.s.duration_milliseconds) }} <span class="profiler-unit">ms</span></div>
+      {{? it.s.row_count > 0  }}
+        <div title="number and type of records instantiated by query">{{= it.s.class_name }}: {{= it.s.row_count }}</div>
+      {{?}}
     </td>
     <td>
       <div class="query">
         <pre class="profiler-stack-trace">{{= it.s.stack_trace_snippet }}</pre>
+        {{? it.s.cached }}
+          <span class="cached"> [CACHE] </span>
+        {{?}}
         {{? it.s.formatted_command_string}}
           <pre class="prettyprint lang-sql"><code>{{= it.s.formatted_command_string }}; {{= MiniProfiler.formatParameters(it.s.parameters) }}</code></pre>
         {{??}}
