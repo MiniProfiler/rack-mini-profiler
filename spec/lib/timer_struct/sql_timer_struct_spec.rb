@@ -7,12 +7,12 @@ describe Rack::MiniProfiler::TimerStruct::Sql do
 
   describe 'valid sql timer' do
     before do
-      @sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil)
+      @sql = Rack::MiniProfiler::TimerStruct::Sql.new("SELECT * FROM users", 200, @page, nil, true)
     end
 
     [
       :execute_type, :formatted_command_string, :stack_trace_snippet, :start_milliseconds, :duration_milliseconds,
-      :first_fetch_duration_milliseconds, :is_duplicate
+      :first_fetch_duration_milliseconds, :is_duplicate, :cached
     ].each do |attr_type|
       it "has an #{attr_type}" do
         expect(@sql[attr_type]).not_to be_nil
