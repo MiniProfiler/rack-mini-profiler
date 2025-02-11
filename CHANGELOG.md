@@ -3,6 +3,7 @@
 ## Unreleased
 
 - [BREAKING CHANGE] Ruby version 3.1.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/632)
+- [FIX] alignment of SQL query start times. [#627](https://github.com/MiniProfiler/rack-mini-profiler/pull/627)
 - [FIX] Lower case HTTP response headers to be compatible with Rack 3 [#628](https://github.com/MiniProfiler/rack-mini-profiler/pull/628)
 - [FIX] Truncate long profiler name in profiler popup. [#634](https://github.com/MiniProfiler/rack-mini-profiler/pull/634)
 - [FIX] `flamegraph_mode` query param having no effect. [#635](https://github.com/MiniProfiler/rack-mini-profiler/pull/635)
