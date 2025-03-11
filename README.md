@@ -259,6 +259,7 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
   end
 ```
 
+> [!WARNING]
 > If your production application is running on more than one server (or more than one dyno) you will need to configure rack mini profiler's storage to use Redis or Memcache. See [storage](#storage) for information on changing the storage backend.
 
 Note:
