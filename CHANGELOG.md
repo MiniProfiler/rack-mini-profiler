@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.3.2 - 2025-03-28
+- [FIX] max_traces_to_show had chance to break the profiler frontend [#297](https://github.com/MiniProfiler/rack-mini-profiler/issues/297)
+
 ## 3.3.1 - 2024-02-15
 - [FEATURE] Support dynamic `config.content_security_policy_nonce` [#609](https://github.com/MiniProfiler/rack-mini-profiler/pull/609)
 - [FEATURE] Add flamgraph path to response header: [#601](https://github.com/MiniProfiler/rack-mini-profiler/pull/601)
