@@ -10,7 +10,7 @@ module Rack
       class Sql < TimerStruct::Base
         attr_accessor :parent
 
-        def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false)
+        def initialize(query, duration_ms, page, parent, params = nil, skip_backtrace = false, full_backtrace = false, cached = false)
 
           stack_trace = nil
           unless skip_backtrace || duration_ms < Rack::MiniProfiler.config.backtrace_threshold_ms
@@ -46,7 +46,10 @@ module Rack
             duration_milliseconds: duration_ms,
             first_fetch_duration_milliseconds: duration_ms,
             parameters: query ? trim_binds(params) : nil,
+            row_count: 0,
+            class_name: nil,
             parent_timing_id: nil,
+            cached: cached,
             is_duplicate: false
           )
         end

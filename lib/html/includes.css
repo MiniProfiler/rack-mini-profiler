@@ -113,6 +113,8 @@
       float: left; }
     .profiler-result .profiler-info .profiler-server-time {
       white-space: nowrap; }
+    .profiler-result .profiler-info .profiler-number {
+      display: block; }
   .profiler-result .profiler-timings th {
     background-color: #fff;
     color: #767676;
@@ -133,19 +135,21 @@
   .profiler-result .profiler-timings .profiler-queries-duration {
     padding-left: 6px; }
   .profiler-result .profiler-timings .profiler-percent-in-sql {
-    white-space: nowrap;
+    white-space: nowrap; }
+  .profiler-result .profiler-timings tfoot tr td:last-child {
     text-align: right; }
-  .profiler-result .profiler-timings tfoot td {
-    padding-top: 10px;
-    text-align: right; }
-    .profiler-result .profiler-timings tfoot td a {
+  .profiler-result .profiler-timings-summary {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px; }
+    .profiler-result .profiler-timings-summary a {
       font-size: 95%;
       display: inline-block;
       margin-left: 12px; }
-      .profiler-result .profiler-timings tfoot td a:first-child {
+      .profiler-result .profiler-timings-summary a:first-child {
         float: left;
         margin-left: 0px; }
-      .profiler-result .profiler-timings tfoot td a.profiler-custom-link {
+      .profiler-result .profiler-timings-summary a.profiler-custom-link {
         float: left; }
   .profiler-result .profiler-queries {
     font-family: Helvetica, Arial, sans-serif; }
@@ -163,6 +167,12 @@
       background-color: #fdd; }
     .profiler-result .profiler-queries tr.very-very-slow {
       background-color: #fcc; }
+    .profiler-result .profiler-queries tr.cached {
+      background-color: #f2f0ef; }
+    .profiler-result .profiler-queries span.cached {
+      color: #818589; }
+    .profiler-result .profiler-queries span.cached + pre {
+      display: inline; }
     .profiler-result .profiler-queries pre {
       font-family: Consolas, monospace, serif;
       white-space: pre-wrap; }
@@ -340,14 +350,22 @@
     text-align: left;
     line-height: 18px;
     overflow: auto;
+    max-width: 800px;
     box-shadow: 0px 1px 15px #555; }
     .profiler-results .profiler-popup .profiler-info {
       margin-bottom: 3px;
       padding-bottom: 2px;
-      border-bottom: 1px solid #ddd; }
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      width: inherit; }
       .profiler-results .profiler-popup .profiler-info .profiler-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+        white-space: nowrap;
         font-size: 110%;
-        font-weight: bold; }
+        font-weight: bold;
+        padding-right: 10px; }
         .profiler-results .profiler-popup .profiler-info .profiler-name .profiler-overall-duration {
           display: none; }
       .profiler-results .profiler-popup .profiler-info .profiler-server-time {

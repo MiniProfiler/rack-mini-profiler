@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'rack'
 require 'rack/test'
 
 describe Rack::MiniProfiler do
@@ -404,7 +405,7 @@ describe Rack::MiniProfiler do
         get '/html?pp=env'
 
         expect(last_response.body).to include('QUERY_STRING')
-        expect(last_response.body).to include('CONTENT_LENGTH')
+        expect(last_response.body).to include('HTTP_HOST')
       end
 
       it 'works via HTTP header' do
@@ -412,7 +413,7 @@ describe Rack::MiniProfiler do
         get '/html', nil, { 'HTTP_X_RACK_MINI_PROFILER' => 'env' }
 
         expect(last_response.body).to include('QUERY_STRING')
-        expect(last_response.body).to include('CONTENT_LENGTH')
+        expect(last_response.body).to include('HTTP_HOST')
       end
     end
   end
@@ -449,12 +450,12 @@ describe Rack::MiniProfiler do
   describe 'gc profiler' do
     it "should return a report" do
       get '/html?pp=profile-gc'
-      expect(last_response.header['Content-Type']).to include('text/plain')
+      expect(last_response['Content-Type']).to include('text/plain')
     end
 
     it "should return a report when an HTTP header is used" do
       get '/html', nil, { 'HTTP_X_RACK_MINI_PROFILER' => 'profile-gc' }
-      expect(last_response.header['Content-Type']).to include('text/plain')
+      expect(last_response['Content-Type']).to include('text/plain')
     end
   end
 

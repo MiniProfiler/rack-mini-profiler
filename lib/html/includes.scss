@@ -114,6 +114,9 @@ $zindex: 2147483640; // near 32bit max 2147483647
     .profiler-server-time {
       white-space: nowrap;
     }
+    .profiler-number {
+      display: block;
+    }
   }
 
   .profiler-timings {
@@ -147,27 +150,28 @@ $zindex: 2147483640; // near 32bit max 2147483647
     }
     .profiler-percent-in-sql {
       white-space: nowrap;
+    }
+    tfoot tr td:last-child {
       text-align: right;
     }
+  }
 
-    tfoot {
-      td {
-        padding-top: 10px;
-        text-align: right;
+  .profiler-timings-summary {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
 
-        a {
-          font-size: 95%;
-          display: inline-block;
-          margin-left: 12px;
+    a {
+      font-size: 95%;
+      display: inline-block;
+      margin-left: 12px;
 
-          &:first-child {
-            float: left;
-            margin-left: 0px;
-          }
-          &.profiler-custom-link {
-            float: left;
-          }
-        }
+      &:first-child {
+        float: left;
+        margin-left: 0px;
+      }
+      &.profiler-custom-link {
+        float: left;
       }
     }
   }
@@ -200,6 +204,18 @@ $zindex: 2147483640; // near 32bit max 2147483647
 
     tr.very-very-slow {
       background-color: #fcc;
+    }
+
+    tr.cached {
+      background-color: #f2f0ef;
+    }
+
+    span.cached {
+      color: #818589;
+    }
+
+    span.cached + pre {
+      display: inline;
     }
 
     pre {
@@ -482,6 +498,7 @@ $zindex: 2147483640; // near 32bit max 2147483647
     text-align: left;
     line-height: 18px;
     overflow: auto;
+    max-width: 800px;
 
     @include box-shadow(0px, 1px, 15px, $textColor);
 
@@ -489,14 +506,23 @@ $zindex: 2147483640; // near 32bit max 2147483647
       margin-bottom: 3px;
       padding-bottom: 2px;
       border-bottom: 1px solid #ddd;
+      display: flex;
+      width: inherit;
 
       .profiler-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+        white-space: nowrap;
         font-size: 110%;
         font-weight: bold;
+        padding-right: 10px;
+
         .profiler-overall-duration {
           display: none;
         }
       }
+
       .profiler-server-time {
         font-size: 95%;
       }
