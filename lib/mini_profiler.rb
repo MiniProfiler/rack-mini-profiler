@@ -329,7 +329,7 @@ module Rack
             )
           end
         elsif path == '/rack-mini-profiler/requests'
-          status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html]]
+          status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]] # important to dup here!
         else
           status, headers, body = @app.call(env)
         end
@@ -470,7 +470,7 @@ module Rack
           safe_script = script.html_safe
         end
 
-        fragment.dup.insert(index, safe_script)
+        fragment.insert(index, safe_script)
       else
         fragment
       end
