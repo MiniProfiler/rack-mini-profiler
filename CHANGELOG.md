@@ -9,6 +9,7 @@
 - [FIX] `flamegraph_mode` query param having no effect. [#635](https://github.com/MiniProfiler/rack-mini-profiler/pull/635)
 - [FEATURE] Show record type and count in SQL query UI. [#638](https://github.com/MiniProfiler/rack-mini-profiler/pull/638)
 - [FEATURE] Show Active Record QueryCache hits in UI. [#640](https://github.com/MiniProfiler/rack-mini-profiler/pull/640)
+- [FIX] max_traces_to_show had chance to break the profiler frontend [#297](https://github.com/MiniProfiler/rack-mini-profiler/issues/297)
 
 ## 3.3.1 - 2024-02-15
 - [FEATURE] Support dynamic `config.content_security_policy_nonce` [#609](https://github.com/MiniProfiler/rack-mini-profiler/pull/609)
