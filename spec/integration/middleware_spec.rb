@@ -27,7 +27,7 @@ describe Rack::MiniProfiler do
       get '/rack-mini-profiler/requests', {}, 'HTTP_ACCEPT_ENCODING' => 'gzip, compress'
 
       expect(last_response.body).to include('<title>Rack::MiniProfiler Requests</title>')
-      expect(last_response.body).to match('<body>\n  </body>')
+      expect(last_response.body).to match('<body>\n  <script async nonce="" type="text/javascript" id="mini-profiler"')
     end
   end
 
