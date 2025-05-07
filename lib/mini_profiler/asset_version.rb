@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Rack
   class MiniProfiler
-    ASSET_VERSION = '6b13136c854b67ed12d949d9a599d925'
+    ASSET_VERSION = '5b33967a307f940e28670fdeabb510b1'
   end
 end

@@ -3,11 +3,15 @@
 ## Unreleased
 
 - [BREAKING CHANGE] Ruby version 3.1.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/632)
+- [FIX] alignment of SQL query start times. [#627](https://github.com/MiniProfiler/rack-mini-profiler/pull/627)
+- [FIX] Lower case HTTP response headers to be compatible with Rack 3 [#628](https://github.com/MiniProfiler/rack-mini-profiler/pull/628)
 - [FIX] Truncate long profiler name in profiler popup. [#634](https://github.com/MiniProfiler/rack-mini-profiler/pull/634)
 - [FIX] `flamegraph_mode` query param having no effect. [#635](https://github.com/MiniProfiler/rack-mini-profiler/pull/635)
 - [FEATURE] Show record type and count in SQL query UI. [#638](https://github.com/MiniProfiler/rack-mini-profiler/pull/638)
 - [FEATURE] Show Active Record QueryCache hits in UI. [#640](https://github.com/MiniProfiler/rack-mini-profiler/pull/640)
+- [FIX] max_traces_to_show had chance to break the profiler frontend [#297](https://github.com/MiniProfiler/rack-mini-profiler/issues/297)
 - [FIX] missing badge for Turbo Drive page loads. [#631](https://github.com/MiniProfiler/rack-mini-profiler/pull/631)
+
 
 ## 3.3.1 - 2024-02-15
 - [FEATURE] Support dynamic `config.content_security_policy_nonce` [#609](https://github.com/MiniProfiler/rack-mini-profiler/pull/609)
