@@ -59,7 +59,6 @@ module Rack::MiniProfilerRails
 
     # Install the Middleware
     app.middleware.insert(0, Rack::MiniProfiler)
-    c.enable_advanced_debugging_tools = Rails.env.development?
 
     if ::Rack::MiniProfiler.patch_rails?
       # Attach to various Rails methods
