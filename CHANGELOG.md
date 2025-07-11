@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- [FIX] Add CSP nonce support to flamegraph rendering [#](https://github.com/MiniProfiler/rack-mini-profiler/pull/)
+- [FIX] Add CSP nonce support to flamegraph rendering [#648](https://github.com/MiniProfiler/rack-mini-profiler/pull/648)
 
 ## 4.0 - 2025-06-11
 
