@@ -30,6 +30,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          rubygems: latest # `gem update --system` is run to update to the latest compatible RubyGems version.
       - name: Setup redis
         uses: shogo82148/actions-setup-redis@v1
         with:
