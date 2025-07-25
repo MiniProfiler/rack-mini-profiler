@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'rack'
 require 'rack/test'
 require 'zlib'
 
@@ -279,6 +280,69 @@ describe Rack::MiniProfiler do
       (env, response_headers) = proc_arguments
       expect(env["REQUEST_METHOD"]).to eq("GET")
       expect(response_headers["Content-Type"]).to eq("text/html")
+    end
+
+  end
+
+  context 'flamegraph with CSP nonce' do
+    class CSPMiddleware
+      def initialize(app)
+        @app = app
+      end
+
+      def call(env)
+        env["action_dispatch.content_security_policy_nonce"] = "railsflamenonce"
+        @app.call(env)
+      end
+    end
+
+    def app
+      Rack::Builder.new do
+        use CSPMiddleware
+        use Rack::MiniProfiler
+        run lambda { |env|
+          [200, { 'Content-Type' => 'text/html' }, ['<html><body><h1>Hello</h1></body></html>']]
+        }
+      end
+    end
+
+    def do_flamegraph_test
+      pid = fork do # Avoid polluting main process with stackprof
+        require 'stackprof'
+
+        get '/html?pp=async-flamegraph'
+        expect(last_response).to be_ok
+        flamegraph_path = last_response.headers['X-MiniProfiler-Flamegraph-Path']
+
+        get flamegraph_path
+        expect(last_response).to be_ok
+        yield last_response.body
+      end
+
+      Process.wait(pid)
+      expect($?.exitstatus).to eq(0)
+    end
+
+    it 'uses Rails value when available' do
+      do_flamegraph_test do |body|
+        expect(body).to include('<script type="text/javascript" nonce="railsflamenonce">')
+      end
+    end
+
+    it 'uses configured string when available' do
+      Rack::MiniProfiler.config.content_security_policy_nonce = "configuredflamenonce"
+
+      do_flamegraph_test do |body|
+        expect(body).to include('<script type="text/javascript" nonce="configuredflamenonce">')
+      end
+    end
+
+    it 'calls configured block when available' do
+      Rack::MiniProfiler.config.content_security_policy_nonce = Proc.new { "dynamicflamenonce" }
+
+      do_flamegraph_test do |body|
+        expect(body).to include('<script type="text/javascript" nonce="dynamicflamenonce">')
+      end
     end
   end
 end

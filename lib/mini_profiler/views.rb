@@ -10,6 +10,18 @@ module Rack
         @share_template ||= ERB.new(::File.read(::File.expand_path("../html/share.html", ::File.dirname(__FILE__))))
       end
 
+      def get_csp_nonce(env, response_headers = {})
+        configured_nonce = @config.content_security_policy_nonce
+        if configured_nonce && !configured_nonce.is_a?(String)
+          configured_nonce = configured_nonce.call(env, response_headers)
+        end
+
+        configured_nonce ||
+          env["action_dispatch.content_security_policy_nonce"] ||
+          env["secure_headers_content_security_policy_nonce"] ||
+          ""
+      end
+
       def generate_html(page_struct, env, result_json = page_struct.to_json)
         # double-assigning to suppress "assigned but unused variable" warnings
         path = path = "#{env['RACK_MINI_PROFILER_ORIGINAL_SCRIPT_NAME']}#{@config.base_url_path}"
@@ -39,15 +51,6 @@ module Rack
         url = "#{path}includes.js?v=#{version}" if !url
         css_url = "#{path}includes.css?v=#{version}" if !css_url
 
-        configured_nonce = @config.content_security_policy_nonce
-        if configured_nonce && !configured_nonce.is_a?(String)
-          configured_nonce = configured_nonce.call(env, response_headers)
-        end
-
-        content_security_policy_nonce = configured_nonce ||
-                                        env["action_dispatch.content_security_policy_nonce"] ||
-                                        env["secure_headers_content_security_policy_nonce"]
-
         settings = {
          path: path,
          url: url,
@@ -66,7 +69,7 @@ module Rack
          collapseResults: @config.collapse_results,
          htmlContainer: @config.html_container,
          hiddenCustomFields: @config.snapshot_hidden_custom_fields.join(','),
-         cspNonce: content_security_policy_nonce,
+         cspNonce: get_csp_nonce(env, response_headers),
          hotwireTurboDriveSupport: @config.enable_hotwire_turbo_drive_support,
         }
 
@@ -112,6 +115,8 @@ module Rack
       def flamegraph(graph, path, env)
         headers = { 'content-type' => 'text/html' }
         iframe_src = "#{public_base_path(env)}speedscope/index.html"
+        csp_nonce = get_csp_nonce(env, headers)
+
         html = <<~HTML
           <!DOCTYPE html>
           <html>
@@ -123,7 +128,7 @@ module Rack
               </style>
             </head>
             <body>
-              <script type="text/javascript">
+              <script type="text/javascript" nonce="#{csp_nonce}">
                 var graph = #{JSON.generate(graph)};
                 var json = JSON.stringify(graph);
                 var blob = new Blob([json], { type: 'text/plain' });
