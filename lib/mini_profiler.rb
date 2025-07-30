@@ -329,7 +329,7 @@ module Rack
             )
           end
         elsif path == '/rack-mini-profiler/requests'
-          status, headers, body = [200, { 'Content-Type' => 'text/html' }, [blank_page_html.dup]] # important to dup here!
+          status, headers, body = [200, { Rack::CONTENT_TYPE => 'text/html' }, [blank_page_html.dup]] # important to dup here!
         else
           status, headers, body = @app.call(env)
         end
@@ -423,20 +423,20 @@ module Rack
     def inject_profiler(env, status, headers, body)
       # mini profiler is meddling with stuff, we can not cache cause we will get incorrect data
       # Rack::ETag has already inserted some nonesense in the chain
-      content_type = headers['Content-Type']
+      content_type = headers[Rack::CONTENT_TYPE]
 
       if config.disable_caching
-        headers.delete('ETag')
-        headers.delete('Date')
+        headers.delete(Rack::ETAG)
+        headers.delete('date') || headers.delete('Date')
       end
 
-      headers['X-MiniProfiler-Original-Cache-Control'] = headers['Cache-Control'] unless headers['Cache-Control'].nil?
-      headers['Cache-Control'] = "#{"no-store, " if config.disable_caching}must-revalidate, private, max-age=0"
+      headers['x-miniprofiler-original-cache-control'] = headers[Rack::CACHE_CONTROL] unless headers[Rack::CACHE_CONTROL].nil?
+      headers[Rack::CACHE_CONTROL] = "#{"no-store, " if config.disable_caching}must-revalidate, private, max-age=0"
 
       # inject header
       if headers.is_a? Hash
-        headers['X-MiniProfiler-Ids'] = ids_comma_separated(env)
-        headers['X-MiniProfiler-Flamegraph-Path'] = flamegraph_path(env) if current.page_struct[:has_flamegraph]
+        headers['x-miniprofiler-ids'] = ids_comma_separated(env)
+        headers['x-miniprofiler-flamegraph-path'] = flamegraph_path(env) if current.page_struct[:has_flamegraph]
       end
 
       if current.inject_js && content_type =~ /text\/html/
@@ -589,7 +589,7 @@ module Rack
     end
 
     def text_result(body, status: 200, headers: nil)
-      headers = (headers || {}).merge('Content-Type' => 'text/plain; charset=utf-8')
+      headers = (headers || {}).merge(Rack::CONTENT_TYPE => 'text/plain; charset=utf-8')
       [status, headers, [body]]
     end
 

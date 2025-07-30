@@ -12,8 +12,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }}
+    name: Ruby ${{ matrix.ruby }} (Rack ~> ${{ matrix.rack }})
     services:
+      redis:
+        image: "redis"
+        ports:
+          - 6379:6379
       memcached:
         image: memcached:1.6.9
         ports:
@@ -22,8 +26,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.4", "3.3", "3.2", "3.1"]
-        redis: ["5.x"]
+        ruby: ["3.4", "3.3", "3.2"]
+        rack: ["2.0", "3.0"]
+    env:
+      RACK_VERSION: ${{ matrix.rack }}
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
@@ -31,10 +37,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           rubygems: latest # `gem update --system` is run to update to the latest compatible RubyGems version.
-      - name: Setup redis
-        uses: shogo82148/actions-setup-redis@v1
-        with:
-          redis-version: ${{ matrix.redis }}
       - name: Tests
         run: bundle exec rspec
       - name: Rubocop
