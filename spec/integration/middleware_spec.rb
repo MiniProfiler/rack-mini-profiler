@@ -20,7 +20,7 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
     it 'is an empty page' do
@@ -35,7 +35,7 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
     it 'shows commands' do
@@ -75,7 +75,7 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
     it 'advanced tools are disabled' do
@@ -94,7 +94,7 @@ describe Rack::MiniProfiler do
           lambda do |_env|
             [
               201,
-              { 'Content-Type' => 'text/html', 'X-CUSTOM' => "1" },
+              { Rack::CONTENT_TYPE => 'text/html', 'X-CUSTOM' => "1" },
               [+'<html><body><h1>Hi</h1></body></html>'],
             ]
           end
@@ -118,7 +118,7 @@ describe Rack::MiniProfiler do
         expect(last_response.body).to eq(
           'Please install the memory_profiler gem and require it: add gem \'memory_profiler\' to your Gemfile'
         )
-        expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain; charset=utf-8')
         expect(last_response.headers['X-CUSTOM']).to eq('1')
         expect(last_response.status).to eq(500)
       end
@@ -130,7 +130,7 @@ describe Rack::MiniProfiler do
         expect(last_response.body).to eq(
           'Please install the stackprof gem and require it: add gem \'stackprof\' to your Gemfile'
         )
-        expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain; charset=utf-8')
         expect(last_response.headers['X-CUSTOM']).to eq('1')
         expect(last_response.status).to eq(201)
       end
@@ -142,7 +142,7 @@ describe Rack::MiniProfiler do
         expect(last_response.body).to eq(
           'Please install the stackprof gem and require it: add gem \'stackprof\' to your Gemfile'
         )
-        expect(last_response.headers['Content-Type']).to eq('text/plain; charset=utf-8')
+        expect(last_response.headers[Rack::CONTENT_TYPE]).to eq('text/plain; charset=utf-8')
         expect(last_response.headers['X-CUSTOM']).to eq('1')
         expect(last_response.status).to eq(201)
       end
@@ -154,7 +154,7 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::MiniProfiler
         use Rack::Deflater
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
@@ -190,7 +190,7 @@ describe Rack::MiniProfiler do
       Rack::Builder.new do
         use Rack::Deflater
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
@@ -223,7 +223,7 @@ describe Rack::MiniProfiler do
     def app
       Rack::Builder.new do
         use Rack::MiniProfiler
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hi</h1></body></html>']] }
       end
     end
 
@@ -249,7 +249,7 @@ describe Rack::MiniProfiler do
         use Rack::MiniProfiler
         run lambda { |env|
           env["action_dispatch.content_security_policy_nonce"] = "railsnonce"
-          [200, { 'Content-Type' => 'text/html' }, [+'<html><body><h1>Hello world</h1></body></html>']]
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, [+'<html><body><h1>Hello world</h1></body></html>']]
         }
       end
     end
@@ -278,7 +278,7 @@ describe Rack::MiniProfiler do
 
       (env, response_headers) = proc_arguments
       expect(env["REQUEST_METHOD"]).to eq("GET")
-      expect(response_headers["Content-Type"]).to eq("text/html")
+      expect(response_headers[Rack::CONTENT_TYPE]).to eq("text/html")
     end
   end
 end

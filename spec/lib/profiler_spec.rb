@@ -208,9 +208,9 @@ describe Rack::MiniProfiler do
     it "returns error response when stackprof isn't installed" do
       response = profiler.call({ "PATH_INFO" => "/", "QUERY_STRING" => "pp=flamegraph" })
 
-      expect(response).to eq([
+      expect(response).to match([
         200,
-        { "Content-Type" => "text/plain; charset=utf-8", "set-cookie" => "__profilin=p%3Dt; path=/; httponly; samesite=lax" },
+        { Rack::CONTENT_TYPE => "text/plain; charset=utf-8", Rack::SET_COOKIE => %r{^__profilin=p%3Dt; path=/; httponly; samesite=lax$}i },
         ["Please install the stackprof gem and require it: add gem 'stackprof' to your Gemfile"],
       ])
     end
@@ -221,9 +221,9 @@ describe Rack::MiniProfiler do
 
       response = profiler.call({ "PATH_INFO" => "/", "QUERY_STRING" => "pp=profile-memory" })
 
-      expect(response).to eq([
+      expect(response).to match([
         500,
-        { "Content-Type" => "text/plain; charset=utf-8", "set-cookie" => "__profilin=p%3Dt; path=/; httponly; samesite=lax" },
+        { Rack::CONTENT_TYPE => "text/plain; charset=utf-8", Rack::SET_COOKIE => %r{^__profilin=p%3Dt; path=/; httponly; samesite=lax$}i },
         ["Please install the memory_profiler gem and require it: add gem 'memory_profiler' to your Gemfile"],
       ])
 

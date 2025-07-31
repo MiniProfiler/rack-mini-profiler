@@ -10,88 +10,88 @@ describe Rack::MiniProfiler do
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
       map '/path2/a' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>'] }
+        run lambda { |env| [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>path1</h1>'] }
       end
       map '/path1/a' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +'<h1>path2</h1>'] }
+        run lambda { |env| [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>path2</h1>'] }
       end
       map '/cached-resource' do
         run lambda { |env|
           ims = env['HTTP_IF_MODIFIED_SINCE'] || ""
           if ims.size > 0
-            [304, { 'Content-Type' => 'application/json' }, '']
+            [304, { Rack::CONTENT_TYPE => 'application/json' }, '']
           else
-            [200, { 'Content-Type' => 'application/json', 'Cache-Control' => 'original-cache-control' }, '{"name": "Ryan"}']
+            [200, { Rack::CONTENT_TYPE => 'application/json', Rack::CACHE_CONTROL => 'original-cache-control' }, '{"name": "Ryan"}']
           end
         }
       end
       map '/post' do
-        run lambda { |env| [302, { 'Content-Type' => 'text/html' }, +'<h1>POST</h1>'] }
+        run lambda { |env| [302, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>POST</h1>'] }
       end
       map '/html' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
+        run lambda { |env| [200, { Rack::CONTENT_TYPE => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"] }
       end
       map '/explicitly-allowed-html' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
-          [200, { 'Content-Type' => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +"<html><BODY><h1>Hi</h1></BODY>\n \t</html>"]
         }
       end
       map '/implicitbody' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<html><h1>Hi</h1></html>"] }
+        run lambda { |env| [200, { Rack::CONTENT_TYPE => 'text/html' }, +"<html><h1>Hi</h1></html>"] }
       end
       map '/implicitbodyhtml' do
-        run lambda { |env| [200, { 'Content-Type' => 'text/html' }, +"<h1>Hi</h1>"] }
+        run lambda { |env| [200, { Rack::CONTENT_TYPE => 'text/html' }, +"<h1>Hi</h1>"] }
       end
       map '/db' do
         run lambda { |env|
           ::Rack::MiniProfiler.record_sql("I want to be, in a db", 10)
-          [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi+db</h1>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>Hi+db</h1>']
         }
       end
       map '/3ms' do
         run lambda { |env|
           sleep(0.003)
-          [200, { 'Content-Type' => 'text/html' }, +'<h1>Hi</h1>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>Hi</h1>']
         }
       end
       map '/explicitly-allowed' do
         run lambda { |env|
           Rack::MiniProfiler.authorize_request
-          [200, { 'Content-Type' => 'text/html' }, +'<h1>path1</h1>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>path1</h1>']
         }
       end
       map '/rails_engine' do
         run lambda { |env|
           env['SCRIPT_NAME'] = '/rails_engine'  # Rails engines do that
-          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>Hi</h1></html>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><h1>Hi</h1></html>']
         }
       end
       map '/under_passenger' do
         run lambda { |env|
-          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>and I ride and I ride</h1></html>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><h1>and I ride and I ride</h1></html>']
         }
       end
       map '/create' do
         run lambda { |env|
-          [201, { 'Content-Type' => 'text/html' }, +'<html><h1>success</h1></html>']
+          [201, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><h1>success</h1></html>']
         }
       end
       map '/notallowed' do
         run lambda { |env|
-          [403, { 'Content-Type' => 'text/html' }, +'<html><h1>you are not allowed here</h1></html>']
+          [403, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><h1>you are not allowed here</h1></html>']
         }
       end
       map '/whoopsie-daisy' do
         run lambda { |env|
-          [500, { 'Content-Type' => 'text/html' }, +'<html><h1>whoopsie daisy</h1></html>']
+          [500, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><h1>whoopsie daisy</h1></html>']
         }
       end
       map '/test-snapshots-custom-fields' do
         run lambda { |env|
           qp = Rack::Utils.parse_nested_query(env['QUERY_STRING'])
           qp.each { |k, v| Rack::MiniProfiler.add_snapshot_custom_field(k, v) }
-          [200, { 'Content-Type' => 'text/html' }, +'<html><h1>custom fields</h1></html>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><h1>custom fields</h1></html>']
         }
       end
     }.to_app
@@ -450,12 +450,12 @@ describe Rack::MiniProfiler do
   describe 'gc profiler' do
     it "should return a report" do
       get '/html?pp=profile-gc'
-      expect(last_response['Content-Type']).to include('text/plain')
+      expect(last_response[Rack::CONTENT_TYPE]).to include('text/plain')
     end
 
     it "should return a report when an HTTP header is used" do
       get '/html', nil, { 'HTTP_X_RACK_MINI_PROFILER' => 'profile-gc' }
-      expect(last_response['Content-Type']).to include('text/plain')
+      expect(last_response[Rack::CONTENT_TYPE]).to include('text/plain')
     end
   end
 
