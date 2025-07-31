@@ -2,7 +2,7 @@
 
 ## 4.0.1 - 2025-07-31
 
-- [FIX] Ensure Rack 2 / 3 cross compatibility [#654](https://github/com/MiniProfiler/rack-mini-profiler/pull/654)
+- [FIX] Ensure Rack 2 / 3 cross compatibility [#653](https://github.com/MiniProfiler/rack-mini-profiler/pull/653)
 ## 4.0 - 2025-06-11
 
 - [BREAKING CHANGE] Ruby version 3.1.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/632)
