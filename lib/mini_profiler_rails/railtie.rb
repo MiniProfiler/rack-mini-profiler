@@ -166,7 +166,9 @@ module Rack::MiniProfilerRails
       return false
     end
 
-    if ::Rails.version >= "5.0.0"
+    if ::Rails.version >= "5.1.0"
+      ::Rails.configuration.public_file_server.enabled || ::Rails.configuration.assets.unknown_asset_fallback
+    elsif ::Rails.version >= "5.0.0"
       ::Rails.configuration.public_file_server.enabled
     elsif ::Rails.version >= "4.2.0"
       ::Rails.configuration.serve_static_files
