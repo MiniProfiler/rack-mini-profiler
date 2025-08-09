@@ -233,12 +233,13 @@ unviewed_ids: #{get_unviewed_ids(user)}
         snapshots = []
         corrupt_snapshots = []
         redis.hgetall(group_hash_key).each do |id, bytes|
-          # rubocop:disable Security/MarshalLoad
-          snapshots << Marshal.load(bytes)
-          # rubocop:enable Security/MarshalLoad
-        rescue
-          corrupt_snapshots << id
-        end
+          begin
+            # rubocop:disable Security/MarshalLoad
+            snapshots << Marshal.load(bytes)
+            # rubocop:enable Security/MarshalLoad
+          rescue
+            corrupt_snapshots << id
+          end
         if corrupt_snapshots.size > 0
           cleanup_corrupt_snapshots(corrupt_snapshots, group_name)
         end
