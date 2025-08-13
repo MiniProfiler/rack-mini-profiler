@@ -18,7 +18,8 @@ module Rack
             stack_trace = "".dup
             # Clean up the stack trace if there are options to do so
             Kernel.caller.each do |ln|
-              ln.gsub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove && !full_backtrace
+              ln.sub!(Rack::MiniProfiler.config.backtrace_remove, '') if Rack::MiniProfiler.config.backtrace_remove && !full_backtrace
+
               if    full_backtrace ||
                     (
                       (
@@ -38,6 +39,7 @@ module Rack
           @parent      = parent
           @page        = page
           start_millis = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000).to_i - page[:started]) - duration_ms
+
           super(
             execute_type: 3, # TODO
             formatted_command_string: query ? ERB::Util.html_escape(query) : nil,
