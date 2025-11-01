@@ -15,12 +15,12 @@ module Rack
         end
       end
 
-      def log_with_miniprofiler(*args, &block)
-        return log_without_miniprofiler(*args, &block) unless SqlPatches.should_measure?
+      def log_with_miniprofiler(*args, **kwargs, &block)
+        return log_without_miniprofiler(*args, **kwargs, &block) unless SqlPatches.should_measure?
 
         sql, name, binds = args
         start            = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        rval             = log_without_miniprofiler(*args, &block)
+        rval             = log_without_miniprofiler(*args, **kwargs, &block)
 
         # Don't log schema queries if the option is set
         return rval if Rack::MiniProfiler.config.skip_schema_queries && name =~ (/SCHEMA/)

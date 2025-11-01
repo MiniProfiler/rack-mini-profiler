@@ -151,7 +151,7 @@ String stats:
       body << "#{count} : #{string}\n"
     end
 
-    [200, { 'Content-Type' => 'text/plain' }, body]
+    [200, { Rack::CONTENT_TYPE => 'text/plain' }, body]
   ensure
     prev_gc_state ? GC.disable : GC.enable
   end

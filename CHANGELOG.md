@@ -1,14 +1,19 @@
 # CHANGELOG
 
-## Unreleased
+## 4.0.1 - 2025-07-31
+
+- [FIX] Ensure Rack 2 / 3 cross compatibility [#653](https://github.com/MiniProfiler/rack-mini-profiler/pull/653)
+## 4.0 - 2025-06-11
 
 - [BREAKING CHANGE] Ruby version 3.1.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/632)
+- [FEATURE] Implement prepend patch for postgres [#625](https://github.com/MiniProfiler/rack-mini-profiler/pull/625)
+- [FEATURE] Show Active Record QueryCache hits in UI. [#640](https://github.com/MiniProfiler/rack-mini-profiler/pull/640)
+- [FEATURE] Show record type and count in SQL query UI. [#638](https://github.com/MiniProfiler/rack-mini-profiler/pull/638)
+- [FIX] Requests page fails due to trying to modify a frozen string. [#630](https://github.com/MiniProfiler/rack-mini-profiler/pull/630)
 - [FIX] alignment of SQL query start times. [#627](https://github.com/MiniProfiler/rack-mini-profiler/pull/627)
 - [FIX] Lower case HTTP response headers to be compatible with Rack 3 [#628](https://github.com/MiniProfiler/rack-mini-profiler/pull/628)
 - [FIX] Truncate long profiler name in profiler popup. [#634](https://github.com/MiniProfiler/rack-mini-profiler/pull/634)
 - [FIX] `flamegraph_mode` query param having no effect. [#635](https://github.com/MiniProfiler/rack-mini-profiler/pull/635)
-- [FEATURE] Show record type and count in SQL query UI. [#638](https://github.com/MiniProfiler/rack-mini-profiler/pull/638)
-- [FEATURE] Show Active Record QueryCache hits in UI. [#640](https://github.com/MiniProfiler/rack-mini-profiler/pull/640)
 - [FIX] max_traces_to_show had chance to break the profiler frontend [#297](https://github.com/MiniProfiler/rack-mini-profiler/issues/297)
 - [FIX] missing badge for Turbo Drive page loads. [#631](https://github.com/MiniProfiler/rack-mini-profiler/pull/631)
 

@@ -29,7 +29,7 @@ If you feel like taking on any of this start an issue and update us on your prog
 
 ## Installation
 
-Install/add to Gemfile in Ruby 2.6+
+Install/add to Gemfile in Ruby 3.1+
 
 ```ruby
 gem 'rack-mini-profiler'
@@ -259,6 +259,7 @@ rack-mini-profiler is designed with production profiling in mind. To enable that
   end
 ```
 
+> [!WARNING]
 > If your production application is running on more than one server (or more than one dyno) you will need to configure rack mini profiler's storage to use Redis or Memcache. See [storage](#storage) for information on changing the storage backend.
 
 Note:

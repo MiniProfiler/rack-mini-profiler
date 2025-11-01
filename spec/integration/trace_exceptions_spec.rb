@@ -14,7 +14,7 @@ describe 'Rack::MiniProfiler - trace_exceptions' do
     @app ||= Rack::Builder.new {
       use Rack::MiniProfiler
       map '/no_exceptions' do
-        run lambda { |_env| [200, { 'Content-Type' => 'text/html' }, '<h1>Success</h1>'] }
+        run lambda { |_env| [200, { Rack::CONTENT_TYPE => 'text/html' }, '<h1>Success</h1>'] }
       end
       map '/raise_exceptions' do
         # This route raises 3 exceptions, catches them, and returns a successful response
@@ -34,7 +34,7 @@ describe 'Rack::MiniProfiler - trace_exceptions' do
           rescue
             # Ignore the exception
           end
-          [200, { 'Content-Type' => 'text/html' }, '<h1>Exception raised but success returned</h1>']
+          [200, { Rack::CONTENT_TYPE => 'text/html' }, '<h1>Exception raised but success returned</h1>']
         }
       end
     }.to_app

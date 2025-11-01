@@ -5,6 +5,10 @@ ruby '>= 2.7.0'
 
 gemspec
 
+if ENV["CI"]
+  gem "rack", "~> #{ENV['RACK_VERSION']}"
+end
+
 group :test do
   gem 'codecov', require: false
   gem 'stackprof', require: false
