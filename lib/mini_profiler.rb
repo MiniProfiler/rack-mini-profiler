@@ -682,15 +682,15 @@ module Rack
       end
 
       {
-        "$schema"  => "https://www.speedscope.app/file-format-schema.json",
+        "$schema" => "https://www.speedscope.app/file-format-schema.json",
         "profiles" => [{
-          "type"       => "sampled",
-          "name"       => "rperf #{data[:mode]}",
-          "unit"       => "nanoseconds",
+          "type" => "sampled",
+          "name" => "rperf #{data[:mode]}",
+          "unit" => "nanoseconds",
           "startValue" => 0,
-          "endValue"   => (data[:duration_ns] || 0).to_i,
-          "samples"    => samples,
-          "weights"    => weights,
+          "endValue" => (data[:duration_ns] || 0).to_i,
+          "samples" => samples,
+          "weights" => weights,
         }],
         "shared" => { "frames" => frames },
       }

@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "rperf flamegraph integration" do
+RSpec.describe "rperf flamegraph integration" do # rubocop:disable RSpec/DescribeClass
   before do
     skip "rperf not available" unless defined?(Rperf) && Rperf.respond_to?(:start)
   end
