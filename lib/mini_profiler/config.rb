@@ -31,6 +31,7 @@ module Rack
           @flamegraph_sample_rate = 0.5
           @flamegraph_mode = :wall
           @flamegraph_ignore_gc = false
+          @flamegraph_profiler = :auto
           @storage_failure = Proc.new do |exception|
             if @logger
               @logger.warn("MiniProfiler storage failure: #{exception.message}")
@@ -77,7 +78,7 @@ module Rack
         :storage_options, :user_provider, :enable_advanced_debugging_tools,
         :skip_sql_param_names, :suppress_encoding, :max_sql_param_length,
         :content_security_policy_nonce, :enable_hotwire_turbo_drive_support,
-        :flamegraph_mode, :flamegraph_ignore_gc, :profile_parameter
+        :flamegraph_mode, :flamegraph_ignore_gc, :flamegraph_profiler, :profile_parameter
 
       # ui accessors
       attr_accessor :collapse_results, :max_traces_to_show, :position,

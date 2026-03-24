@@ -283,7 +283,50 @@ module Rack
         env['HTTP_ACCEPT_ENCODING'] = 'identity' if config.suppress_encoding
 
         if matches_action?('flamegraph', env) || matches_action?('async-flamegraph', env) || env['HTTP_REFERER'] =~ /pp=async-flamegraph/
-          if defined?(StackProf) && StackProf.respond_to?(:run)
+          profiler_param = action_parameters(env)['flamegraph_profiler']
+          stackprof_available = defined?(StackProf) && StackProf.respond_to?(:run)
+          use_rperf = if profiler_param
+            profiler_param == 'rperf'
+          else
+            config.flamegraph_profiler == :rperf ||
+              (config.flamegraph_profiler == :auto &&
+               !stackprof_available &&
+               defined?(Rperf) && Rperf.respond_to?(:start))
+          end
+
+          if use_rperf
+            if defined?(Rperf) && Rperf.respond_to?(:start)
+              current.measure = false
+              match_data = action_parameters(env)['flamegraph_sample_rate']
+              frequency = if match_data && !match_data[1].to_f.zero?
+                match_data[1].to_f
+              else
+                config.flamegraph_sample_rate
+              end
+              frequency = frequency.to_i
+              frequency = 500 if frequency < 1
+
+              mode_match = action_parameters(env)['flamegraph_mode']
+              mode = if mode_match && [:cpu, :wall].include?(mode_match.to_sym)
+                mode_match.to_sym
+              else
+                config.flamegraph_mode == :object ? :wall : config.flamegraph_mode
+              end
+
+              Rperf.start(mode: mode, frequency: frequency)
+              status, headers, body = @app.call(env)
+              raw_data = Rperf.stop
+              flamegraph = rperf_to_speedscope(raw_data)
+            else
+              message = "Please install the rperf gem and require it: add gem 'rperf' to your Gemfile"
+              status, headers, body = @app.call(env)
+              body.close if body.respond_to? :close
+
+              return client_settings.handle_cookie(
+                text_result(message, status: status, headers: headers)
+              )
+            end
+          elsif stackprof_available
             # do not sully our profile with mini profiler timings
             current.measure = false
             match_data      = action_parameters(env)['flamegraph_sample_rate']
@@ -617,6 +660,40 @@ module Rack
 
     def cache_control_value
       86400
+    end
+
+    def rperf_to_speedscope(data)
+      frame_index = {}
+      frames      = []
+      samples     = []
+      weights     = []
+
+      (data[:samples] || []).each do |stack_frames, weight_ns, _thread|
+        sample_indices = stack_frames.map do |file, name|
+          key = "#{file}\0#{name}"
+          unless frame_index.key?(key)
+            frame_index[key] = frames.size
+            frames << { "name" => name.to_s, "file" => file.to_s }
+          end
+          frame_index[key]
+        end
+        samples << sample_indices
+        weights << weight_ns.to_i
+      end
+
+      {
+        "$schema"  => "https://www.speedscope.app/file-format-schema.json",
+        "profiles" => [{
+          "type"       => "sampled",
+          "name"       => "rperf #{data[:mode]}",
+          "unit"       => "nanoseconds",
+          "startValue" => 0,
+          "endValue"   => (data[:duration_ns] || 0).to_i,
+          "samples"    => samples,
+          "weights"    => weights,
+        }],
+        "shared" => { "frames" => frames },
+      }
     end
 
     private
