@@ -67,7 +67,7 @@ module Rack
       end
 
       def flush_tokens
-        @client.set("#{@prefix}-tokens", nil)
+        @client.delete("#{@prefix}-tokens")
       end
 
       def allowed_tokens

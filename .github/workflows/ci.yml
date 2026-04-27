@@ -19,14 +19,14 @@ jobs:
         ports:
           - 6379:6379
       memcached:
-        image: memcached:1.6.9
+        image: memcached:1.6
         ports:
           - 11211:11211
         options: --health-cmd "timeout 5 bash -c 'cat < /dev/null > /dev/udp/127.0.0.1/11211'" --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.4", "3.3", "3.2"]
+        ruby: ["4.0", "3.4", "3.3", "3.2"]
         rack: ["2.2.0", "3.1.0", "3.2.0"]
     env:
       RACK_VERSION: ${{ matrix.rack }}
