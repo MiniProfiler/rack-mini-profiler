@@ -34,7 +34,7 @@ module Rack::MiniProfilerRails
       c.skip_paths << wp_assets_path if wp_assets_path
     end
 
-    unless Rails.env.development? || Rails.env.test?
+    unless Rails.env.local?
       c.authorization_mode = :allow_authorized
     end
 
@@ -55,7 +55,7 @@ module Rack::MiniProfilerRails
     # Quiet the SQL stack traces
     c.backtrace_remove = Rails.root.to_s + "/"
     c.backtrace_includes =  [/^\/?(app|config|lib|test)/]
-    c.skip_schema_queries = (Rails.env.development? || Rails.env.test?)
+    c.skip_schema_queries = Rails.env.local?
 
     # Install the Middleware
     app.middleware.insert(0, Rack::MiniProfiler)
