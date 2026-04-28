@@ -19,7 +19,7 @@ jobs:
         ports:
           - 6379:6379
       memcached:
-        image: memcached:1.6.9
+        image: memcached:1.6.41
         ports:
           - 11211:11211
         options: --health-cmd "timeout 5 bash -c 'cat < /dev/null > /dev/udp/127.0.0.1/11211'" --health-interval 10s --health-timeout 5s --health-retries 5
@@ -31,7 +31,7 @@ jobs:
     env:
       RACK_VERSION: ${{ matrix.rack }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
