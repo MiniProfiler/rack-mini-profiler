@@ -96,8 +96,15 @@ module Rack
 
       def binds_to_params(binds)
         return if binds.nil? || config.max_sql_param_length == 0
-        # map ActiveRecord::Relation::QueryAttribute to [name, value]
-        params = binds.map { |c| c.kind_of?(Array) ? [c.first, c.last] : [c.name, c.value] }
+        params = binds.map do |c|
+          if c.kind_of?(Array)
+            [c.first, c.last]
+          elsif c.respond_to?(:name) # ActiveRecord::Relation::QueryAttribute
+            [c.name,  c.value]
+          else # Time, String, Integer
+            ["param", c]
+          end
+        end
         if (skip = config.skip_sql_param_names)
           params.map { |(n, v)| n =~ skip ? [n, nil] : [n, v] }
         else
