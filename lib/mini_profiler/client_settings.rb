@@ -39,13 +39,13 @@ module Rack
 
       end
 
-      def handle_cookie(result)
+      def handle_cookie(result, preserve_cookie: false)
         status, headers, _body = result
 
         if (MiniProfiler.config.authorization_mode == :allow_authorized && !MiniProfiler.request_authorized?)
           # this is non-obvious, don't kill the profiling cookie on errors or short requests
           # this ensures that stuff that never reaches the rails stack does not kill profiling
-          if status.to_i >= 200 && status.to_i < 300 && ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start) > 0.1)
+          if !preserve_cookie && status.to_i >= 200 && status.to_i < 300 && ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start) > 0.1)
             discard_cookie!(headers)
           end
         else
