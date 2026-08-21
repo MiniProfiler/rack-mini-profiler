@@ -99,8 +99,8 @@ module Rack
         params = binds.map do |c|
           if c.kind_of?(Array)
             [c.first, c.last]
-          elsif c.respond_to?(:name) # ActiveRecord::Relation::QueryAttribute
-            [c.name,  c.value]
+          elsif c.respond_to?(:name) && c.respond_to?(:value) # ActiveRecord::Relation::QueryAttribute
+            [c.name, c.value]
           else # Time, String, Integer
             ["param", c]
           end
