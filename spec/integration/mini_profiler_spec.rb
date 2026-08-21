@@ -445,6 +445,18 @@ describe Rack::MiniProfiler do
       get '/explicitly-allowed'
       expect(last_response.headers['X-MiniProfiler-Ids']).not_to be_nil
     end
+
+    it "does not discard the authorization cookie when skipping a slow request" do
+      Rack::MiniProfiler.config.skip_paths = ['/path2/']
+      get '/explicitly-allowed'
+      authorization_cookie = last_response.set_cookie_header
+
+      start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      allow(Process).to receive(:clock_gettime).and_return(start, start + 1)
+      get '/path2/a', nil, { cookie: authorization_cookie }
+
+      expect(last_response.set_cookie_header).to be_nil
+    end
   end
 
   describe 'gc profiler' do
