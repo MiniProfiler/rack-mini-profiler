@@ -1,10 +1,16 @@
 # CHANGELOG
 
-## Unreleased
+## 5.0.0 - 2026-08-21
 
-- [FIX] Add CSP nonce support to flamegraph rendering [#648](https://github.com/MiniProfiler/rack-mini-profiler/pull/648)
-- [BREAKING CHANGE] Ruby version 3.2.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/658)
-
+- [BREAKING CHANGE] Require Ruby 3.2.0 or later. [#658](https://github.com/MiniProfiler/rack-mini-profiler/pull/658)
+- [FEATURE] Record bind parameters for parameterized and prepared PostgreSQL queries. [#405](https://github.com/MiniProfiler/rack-mini-profiler/issues/405)
+- [FIX] Add CSP nonce support to flamegraph rendering. [#648](https://github.com/MiniProfiler/rack-mini-profiler/pull/648)
+- [FIX] Support simple Active Record bind parameters. [#657](https://github.com/MiniProfiler/rack-mini-profiler/pull/657)
+- [FIX] Prevent asset requests from clearing profiler authorization. [#641](https://github.com/MiniProfiler/rack-mini-profiler/pull/641)
+- [FIX] Preserve the full `Cache-Control` header when `disable_caching` is false. [#620](https://github.com/MiniProfiler/rack-mini-profiler/pull/620)
+- [FIX] Show the profiler badge after Turbo Drive page loads. [#631](https://github.com/MiniProfiler/rack-mini-profiler/pull/631)
+- [FIX] Disable advanced debugging tools by default in Rails development environments. [#645](https://github.com/MiniProfiler/rack-mini-profiler/pull/645)
+- [FIX] Prevent unhandled promise rejections when profiled fetch requests fail. [#490](https://github.com/MiniProfiler/rack-mini-profiler/issues/490)
 
 ## 4.0.1 - 2025-07-31
 
@@ -21,7 +27,6 @@
 - [FIX] Truncate long profiler name in profiler popup. [#634](https://github.com/MiniProfiler/rack-mini-profiler/pull/634)
 - [FIX] `flamegraph_mode` query param having no effect. [#635](https://github.com/MiniProfiler/rack-mini-profiler/pull/635)
 - [FIX] max_traces_to_show had chance to break the profiler frontend [#297](https://github.com/MiniProfiler/rack-mini-profiler/issues/297)
-- [FIX] missing badge for Turbo Drive page loads. [#631](https://github.com/MiniProfiler/rack-mini-profiler/pull/631)
 
 
 ## 3.3.1 - 2024-02-15
