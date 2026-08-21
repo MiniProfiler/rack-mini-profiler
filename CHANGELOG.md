@@ -1,6 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- [FIX] Add CSP nonce support to flamegraph rendering [#648](https://github.com/MiniProfiler/rack-mini-profiler/pull/648)
 - [BREAKING CHANGE] Ruby version 3.2.0 or later is required. [#632](https://github.com/MiniProfiler/rack-mini-profiler/pull/658)
+
 
 ## 4.0.1 - 2025-07-31
 
