@@ -425,13 +425,13 @@ module Rack
       # Rack::ETag has already inserted some nonesense in the chain
       content_type = headers[Rack::CONTENT_TYPE]
 
+      headers['x-miniprofiler-original-cache-control'] = headers[Rack::CACHE_CONTROL] unless headers[Rack::CACHE_CONTROL].nil?
+
       if config.disable_caching
         headers.delete(Rack::ETAG)
         headers.delete('date') || headers.delete('Date')
+        headers[Rack::CACHE_CONTROL] = "no-store, must-revalidate, private, max-age=0"
       end
-
-      headers['x-miniprofiler-original-cache-control'] = headers[Rack::CACHE_CONTROL] unless headers[Rack::CACHE_CONTROL].nil?
-      headers[Rack::CACHE_CONTROL] = "#{"no-store, " if config.disable_caching}must-revalidate, private, max-age=0"
 
       # inject header
       if headers.is_a? Hash

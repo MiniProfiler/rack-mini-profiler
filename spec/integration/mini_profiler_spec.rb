@@ -317,10 +317,10 @@ describe Rack::MiniProfiler do
         expect(last_response.status).to equal(304)
       end
 
-      it "should be able to re-enable caching" do
+      it "should leave cache-control unchanged" do
         get '/cached-resource'
         expect(last_response.headers['X-MiniProfiler-Original-Cache-Control']).to eq('original-cache-control')
-        expect(last_response.headers['Cache-Control']).not_to include('no-store')
+        expect(last_response.headers['Cache-Control']).to eq('original-cache-control')
       end
     end
 
