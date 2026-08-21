@@ -49,7 +49,9 @@ class PG::Connection
       start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result       = super
       elapsed_time = SqlPatches.elapsed_time(start)
-      record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      record       = ::Rack::MiniProfiler.record_sql(
+        args[0], elapsed_time, ::Rack::MiniProfiler.binds_to_params(args[1])
+      )
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
@@ -62,7 +64,9 @@ class PG::Connection
         start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         result       = super
         elapsed_time = SqlPatches.elapsed_time(start)
-        record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+        record       = ::Rack::MiniProfiler.record_sql(
+          args[0], elapsed_time, ::Rack::MiniProfiler.binds_to_params(args[1])
+        )
         result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
         result
@@ -77,7 +81,9 @@ class PG::Connection
       elapsed_time = SqlPatches.elapsed_time(start)
       mapped       = args[0]
       mapped       = @prepare_map[mapped] || args[0] if @prepare_map
-      record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+      record       = ::Rack::MiniProfiler.record_sql(
+        mapped, elapsed_time, ::Rack::MiniProfiler.binds_to_params(args[1])
+      )
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
@@ -91,7 +97,9 @@ class PG::Connection
       elapsed_time = SqlPatches.elapsed_time(start)
       mapped       = args[0]
       mapped       = @prepare_map[mapped] || args[0] if @prepare_map
-      record       = ::Rack::MiniProfiler.record_sql(mapped, elapsed_time)
+      record       = ::Rack::MiniProfiler.record_sql(
+        mapped, elapsed_time, ::Rack::MiniProfiler.binds_to_params(args[1])
+      )
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
@@ -103,7 +111,9 @@ class PG::Connection
       start        = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result       = super
       elapsed_time = SqlPatches.elapsed_time(start)
-      record       = ::Rack::MiniProfiler.record_sql(args[0], elapsed_time)
+      record       = ::Rack::MiniProfiler.record_sql(
+        args[0], elapsed_time, ::Rack::MiniProfiler.binds_to_params(args[1])
+      )
       result.instance_variable_set("@miniprofiler_sql_id", record) if result
 
       result
