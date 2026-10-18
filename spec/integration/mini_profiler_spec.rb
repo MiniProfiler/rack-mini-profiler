@@ -717,4 +717,18 @@ describe Rack::MiniProfiler do
       expect(last_response.body).to include('This is the help menu')
     end
   end
+
+  describe 'with a nested request on the same thread' do
+    it 'keeps the outer request profiled' do
+      inner = Rack::MiniProfiler.new(lambda { |env| [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<h1>inner</h1>'] })
+      outer = Rack::MiniProfiler.new(lambda { |env|
+        Rack::MockRequest.new(inner).get('/inner')
+        [200, { Rack::CONTENT_TYPE => 'text/html' }, +'<html><body><h1>outer</h1></body></html>']
+      })
+
+      response = Rack::MockRequest.new(outer).get('/outer')
+      expect(response.status).to eq(200)
+      expect(response.body).to include('mini-profiler')
+    end
+  end
 end

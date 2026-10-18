@@ -163,6 +163,7 @@ module Rack
 
     def call(env)
       start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      outer_context = current
       client_settings = ClientSettings.new(env, @storage, start)
       MiniProfiler.deauthorize_request if @config.authorization_mode == :allow_authorized
 
@@ -415,8 +416,8 @@ module Rack
 
       client_settings.handle_cookie([status, headers, body])
     ensure
-      # Make sure this always happens
-      self.current = nil
+      # Make sure this always happens, restoring the context of an outer request on the same thread
+      self.current = outer_context
     end
 
     def matches_action?(action, env)
