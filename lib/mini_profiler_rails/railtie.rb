@@ -93,10 +93,14 @@ module Rack::MiniProfilerRails
       end
 
       subscribe("render_partial.action_view") do |name, start, finish, id, payload|
+        next if !should_measure?
+
         render_notification_handler(shorten_identifier(payload[:identifier]), finish, start)
       end
 
       subscribe("render_template.action_view") do |name, start, finish, id, payload|
+        next if !should_measure?
+
         render_notification_handler(shorten_identifier(payload[:identifier]), finish, start)
       end
 
